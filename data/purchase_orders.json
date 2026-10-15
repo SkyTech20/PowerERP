@@ -1,0 +1,988 @@
+{
+ "po_details": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "288687",
+   "ttPOheader": {
+    "cSupplierCode": "RE3DIS",
+    "cSupplierName": "RE3 Distribution Inc.",
+    "cBuyerCode": "mathieud",
+    "cBuyerName": "Mathieu Denis",
+    "cApplicantCode": "mathieud",
+    "dOrderDate": "2025-09-10",
+    "dSubTotal": "471.51",
+    "dFreight": "0.00",
+    "dGST": "23.58",
+    "dPST": "47.03",
+    "dTotalAmount": "542.12"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "MFR#02-SSC-4727",
+     "cProductDesc": "Subscription license",
+     "dQuantity": "1",
+     "dUnitCost": "471.51",
+     "dSubTotal": "471.51",
+     "dTotalAmount": "471.51"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "PO2025-002",
+   "ttPOheader": {
+    "cSupplierCode": "S002",
+    "cSupplierName": "Construction Plus",
+    "cBuyerCode": "",
+    "cBuyerName": "",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "MAT-001",
+     "cProductDesc": "Ciment Portland 40kg",
+     "dQuantity": "100",
+     "dUnitCost": "12.50"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "248087",
+   "ttPOheader": {
+    "cSupplierCode": "TENAQUIP",
+    "cSupplierName": "TENAQUIP LIMITED",
+    "cBuyerCode": "yves",
+    "cBuyerName": "YVES LACHAPELLE (ext. 146)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": []
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "266009",
+   "ttPOheader": {
+    "cSupplierCode": "MANSCO",
+    "cSupplierName": "Manufacture Scorpion inc.",
+    "cBuyerCode": "mathieud",
+    "cBuyerName": "Mathieu Denis",
+    "cApplicantCode": "mathieud"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AIR00276",
+     "cProductDesc": "MRFCP.08.1/8: Régulateur de débit coude, Out, Tube 8mm, Filet 1/8",
+     "dQuantity": "10",
+     "dUnitCost": "8.82"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AIR00273",
+     "cProductDesc": "MRFCP.1/4.1/4: Régulateur de débit coude, Out, Tube 1/4, Filet 1/4",
+     "dQuantity": "10",
+     "dUnitCost": "8.82"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AIR00246",
+     "cProductDesc": "P1.08.3/8: Raccord droit mâle, Tube 8mm, Filet 3/8",
+     "dQuantity": "10",
+     "dUnitCost": "2.08"
+    },
+    {
+     "cUnique": "4",
+     "cProductcode": "AIR00063",
+     "cProductDesc": "P1.1/4.1/4: Raccord droit mâle, Tube 1/4, Filet 1/4",
+     "dQuantity": "10",
+     "dUnitCost": "1.5"
+    },
+    {
+     "cUnique": "5",
+     "cProductcode": "AIR00097",
+     "cProductDesc": "P1.1/4.10-32: Raccord droit mâle, Tube 1/4, Filet 10-32",
+     "dQuantity": "10",
+     "dUnitCost": "1.88"
+    },
+    {
+     "cUnique": "6",
+     "cProductcode": "AIR00065",
+     "cProductDesc": "P1.1/4.3/8: Raccord droit mâle, Tube 1/4, Filet 3/8",
+     "dQuantity": "10",
+     "dUnitCost": "2.04"
+    },
+    {
+     "cUnique": "7",
+     "cProductcode": "AIR00247",
+     "cProductDesc": "P1.12.3/8: Raccord droit mâle, Tube 12mm, Filet 3/8",
+     "dQuantity": "5",
+     "dUnitCost": "2.81"
+    },
+    {
+     "cUnique": "8",
+     "cProductcode": "AIR00256",
+     "cProductDesc": "P1.10.3/8: Raccord droit mâle, Tube 10mm, Filet 3/8",
+     "dQuantity": "10",
+     "dUnitCost": "2.23"
+    },
+    {
+     "cUnique": "9",
+     "cProductcode": "AIR00039",
+     "cProductDesc": "P1.3/8.3/8: Raccord droit mâle, Tube 3/8, Filet 3/8",
+     "dQuantity": "10",
+     "dUnitCost": "2.23"
+    },
+    {
+     "cUnique": "10",
+     "cProductcode": "AIR00051",
+     "cProductDesc": "P1.5/16.1/4: Raccord droit mâle, Tube 5/16, Filet 1/4",
+     "dQuantity": "10",
+     "dUnitCost": "1.69"
+    },
+    {
+     "cUnique": "11",
+     "cProductcode": "AIR00066",
+     "cProductDesc": "P1.5/16.1/8: Raccord droit mâle, Tube 5/16, Filet 1/8",
+     "dQuantity": "10",
+     "dUnitCost": "1.64"
+    },
+    {
+     "cUnique": "12",
+     "cProductcode": "AIR00061",
+     "cProductDesc": "P1.5/32.1/8: Raccord droit mâle, Tube 5/32, Filet 1/8",
+     "dQuantity": "10",
+     "dUnitCost": "1.45"
+    },
+    {
+     "cUnique": "13",
+     "cProductcode": "AIR00325",
+     "cProductDesc": "P15.3/8.3/8: Raccord banjo mâle, Tube 3/8, Filet 3/8",
+     "dQuantity": "10",
+     "dUnitCost": "5.13"
+    },
+    {
+     "cUnique": "14",
+     "cProductcode": "AIR00055",
+     "cProductDesc": "P23.1/4: Union Y, Tube 1/4",
+     "dQuantity": "10",
+     "dUnitCost": "2.13"
+    },
+    {
+     "cUnique": "15",
+     "cProductcode": "AIR00250",
+     "cProductDesc": "P3.3/16: Raccord union droit, Tube 3/16",
+     "dQuantity": "10",
+     "dUnitCost": "1.5"
+    },
+    {
+     "cUnique": "16",
+     "cProductcode": "AIR00028",
+     "cProductDesc": "P4.1/2.1/4: Raccord coude mâle, Tube 1/2, Filet 1/4",
+     "dQuantity": "10",
+     "dUnitCost": "3.33"
+    },
+    {
+     "cUnique": "17",
+     "cProductcode": "AIR00026",
+     "cProductDesc": "P4.3/8: Raccord coude, Tube 3/8",
+     "dQuantity": "10",
+     "dUnitCost": "2.28"
+    },
+    {
+     "cUnique": "18",
+     "cProductcode": "AIR00291",
+     "cProductDesc": "P4.3/8.1/4: Raccord coude mâle, Tube 3/8, Filet 1/4",
+     "dQuantity": "10",
+     "dUnitCost": "2.76"
+    },
+    {
+     "cUnique": "19",
+     "cProductcode": "AIR00112",
+     "cProductDesc": "P4.3/8.1/8: Raccord coude mâle, Tube 3/8, Filet 1/8",
+     "dQuantity": "10",
+     "dUnitCost": "3.33"
+    },
+    {
+     "cUnique": "20",
+     "cProductcode": "AIR00280",
+     "cProductDesc": "P4.08: Raccord coude, Tube 8mm (OU 5/16)",
+     "dQuantity": "10",
+     "dUnitCost": "1.6"
+    },
+    {
+     "cUnique": "21",
+     "cProductcode": "AIR00185",
+     "cProductDesc": "P4.5/16.3/8: Raccord coude mâle, Tube 5/16, Filet 3/8",
+     "dQuantity": "10",
+     "dUnitCost": "2.7"
+    },
+    {
+     "cUnique": "22",
+     "cProductcode": "AIR00090",
+     "cProductDesc": "P5.08.1/8: Raccord jonction \"T\", Tube 8mm, Filet 1/8",
+     "dQuantity": "10",
+     "dUnitCost": "3.39"
+    },
+    {
+     "cUnique": "23",
+     "cProductcode": "AIR00003",
+     "cProductDesc": "P5.1/2.1/2: Raccord jonction \"T\", Tube 1/2, Filet 1/2",
+     "dQuantity": "10",
+     "dUnitCost": "5.7"
+    },
+    {
+     "cUnique": "24",
+     "cProductcode": "AIR00054",
+     "cProductDesc": "P5.3/8: Raccord jonction \"T\", Tube 3/8",
+     "dQuantity": "10",
+     "dUnitCost": "2.42"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "266010",
+   "ttPOheader": {
+    "cSupplierCode": "MANSCO",
+    "cSupplierName": "Manufacture Scorpion inc.",
+    "cBuyerCode": "",
+    "cBuyerName": "",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AIR00276",
+     "cProductDesc": "Régulateur de débit coude",
+     "dQuantity": "10",
+     "dUnitCost": "8.82"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AIR00273",
+     "cProductDesc": "Régulateur de débit coude",
+     "dQuantity": "10",
+     "dUnitCost": "8.82"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AIR00246",
+     "cProductDesc": "Raccord droit mâle",
+     "dQuantity": "10",
+     "dUnitCost": "2.08"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "266011",
+   "ttPOheader": {
+    "cSupplierCode": "MANSCO",
+    "cSupplierName": "Manufacture Scorpion inc.",
+    "cBuyerCode": "",
+    "cBuyerName": "",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AIR00276",
+     "cProductDesc": "Régulateur de débit coude",
+     "dQuantity": "10",
+     "dUnitCost": "8.82"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AIR00273",
+     "cProductDesc": "Régulateur de débit coude",
+     "dQuantity": "10",
+     "dUnitCost": "8.82"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AIR00246",
+     "cProductDesc": "Raccord droit mâle",
+     "dQuantity": "10",
+     "dUnitCost": "2.08"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "295558-045",
+   "ttPOheader": {
+    "cSupplierCode": "MITLIN",
+    "cSupplierName": "MITCHEL-LINCOLN LTEE",
+    "cBuyerCode": "PACK",
+    "cBuyerName": "CHRISTINE BERNIER (ext : 118)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "295558-04500600001",
+     "cProductcode": "P1402003",
+     "cProductDesc": "MASTER HSC BRUN NON-IMP. A/FEUILLE D'ÉRABLE",
+     "dQuantity": "5100.0",
+     "dUnitCost": "0.78317"
+    },
+    {
+     "cUnique": "295558-04501142513002",
+     "cProductcode": "P1402003",
+     "cProductDesc": "MASTER HSC BRUN NON-IMP. A/FEUILLE D'ÉRABLE",
+     "dQuantity": "1800.0",
+     "dUnitCost": "0.78317"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "304155",
+   "ttPOheader": {
+    "cSupplierCode": "barent",
+    "cSupplierName": "Barentz",
+    "cBuyerCode": "INGR",
+    "cBuyerName": "CHRISTINE BERNIER (ext : 118)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "304155    34800001",
+     "cProductcode": "I4504001",
+     "cProductDesc": "SALTWELL REGULAR W/ANTI-CAKING (271801) 22.68 KG / BAG",
+     "dQuantity": "7256.0",
+     "dUnitCost": "2.55"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "306322",
+   "ttPOheader": {
+    "cSupplierCode": "AIRLIQ",
+    "cSupplierName": "AIR LIQUIDE CANADA INC.",
+    "cBuyerCode": "MAG",
+    "cBuyerName": "MAGASINIER (Ext.137)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "306322    06813028001",
+     "cProductcode": "MTSOU0017",
+     "cProductDesc": "COLLET POUR TUNGSTÈNE 1/16",
+     "dQuantity": "10.0",
+     "dUnitCost": "13.75"
+    },
+    {
+     "cUnique": "306322    06813039002",
+     "cProductcode": "MTSOU0043",
+     "cProductDesc": "TORCH BODY  A150F  WP17F",
+     "dQuantity": "1.0",
+     "dUnitCost": "273.99"
+    },
+    {
+     "cUnique": "306322    06840784003",
+     "cProductcode": "**NON-INVENTAIRE**",
+     "cProductDesc": "frais de transport",
+     "dQuantity": "1.0",
+     "dUnitCost": "36.03"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "36153186",
+   "ttPOheader": {
+    "cSupplierCode": "AIRLIQ",
+    "cSupplierName": "AIR LIQUIDE CANADA INC.",
+    "cBuyerCode": "MAG",
+    "cBuyerName": "MAGASINIER (Ext.137)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "306322    06813028001",
+     "cProductcode": "MTSOU0017",
+     "cProductDesc": "COLLET POUR TUNGSTÈNE 1/16",
+     "dQuantity": "10.0",
+     "dUnitCost": "13.75"
+    },
+    {
+     "cUnique": "306322    06813039002",
+     "cProductcode": "MTSOU0043",
+     "cProductDesc": "TORCH BODY  A150F  WP17F",
+     "dQuantity": "1.0",
+     "dUnitCost": "273.99"
+    },
+    {
+     "cUnique": "306322    06840784003",
+     "cProductcode": "**NON-INVENTAIRE**",
+     "cProductDesc": "frais de transport",
+     "dQuantity": "1.0",
+     "dUnitCost": "36.03"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "303913-002",
+   "ttPOheader": {
+    "cSupplierCode": "BUNGUS",
+    "cSupplierName": "BUNGE CANADA",
+    "cBuyerCode": "NADING",
+    "cBuyerName": "NADINE GIONET (ext. 188)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "303913-00236300001",
+     "cProductcode": "I2501001",
+     "cProductDesc": "CANOLA SALADE + AM",
+     "dQuantity": "18000.0",
+     "dUnitCost": "1.57"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "304159-021",
+   "ttPOheader": {
+    "cSupplierCode": "GRILAB",
+    "cSupplierName": "GRIFFITH FOODS",
+    "cBuyerCode": "INGR",
+    "cBuyerName": "CHRISTINE BERNIER (ext : 118)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "304159-02135000001",
+     "cProductcode": "I1529001",
+     "cProductDesc": "BATTER 3040 BA NAT US ONLY NSA (NO SOY)",
+     "dQuantity": "9000.0",
+     "dUnitCost": "2.1202"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "305038",
+   "ttPOheader": {
+    "cSupplierCode": "LUMEN",
+    "cSupplierName": "LUMEN INC.",
+    "cBuyerCode": "MAG",
+    "cBuyerName": "MAGASINIER (Ext.137)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "305038    02606837001",
+     "cProductcode": "MTA&B0410",
+     "cProductDesc": "SENSAGUARD SAFETY SWITCH 18MM-MIC-M12-DET 10MM",
+     "dQuantity": "3.0",
+     "dUnitCost": "316.43"
+    },
+    {
+     "cUnique": "305038    02606850002",
+     "cProductcode": "MTA&B0426",
+     "cProductDesc": "CABLE 10 METRES  FEMELLE CORDSET M12 8 PINS",
+     "dQuantity": "3.0",
+     "dUnitCost": "103.13"
+    },
+    {
+     "cUnique": "305038    02606859003",
+     "cProductcode": "MTA&B0453",
+     "cProductDesc": "DC MICRO M12 FEMALE STRAIGHT 8 PIN BLACK , 2  METRE",
+     "dQuantity": "2.0",
+     "dUnitCost": "91.69"
+    },
+    {
+     "cUnique": "305038    02606869004",
+     "cProductcode": "MTA&B0456",
+     "cProductDesc": "DC MICRO CABLE  M12 FEMALE STRAIGHT 8 PIN 3M 889D-F8NBDM3",
+     "dQuantity": "2.0",
+     "dUnitCost": "97.94"
+    },
+    {
+     "cUnique": "305038    02606882005",
+     "cProductcode": "MTAMP0304",
+     "cProductDesc": "LAMPE DEL 2W 24V CA / CC 855T-L24",
+     "dQuantity": "2.0",
+     "dUnitCost": "9.11"
+    },
+    {
+     "cUnique": "305038    02606895006",
+     "cProductcode": "MTPRI0019",
+     "cProductDesc": "PLUG 20A 3PH 250V 26W75 PRISE MALE",
+     "dQuantity": "3.0",
+     "dUnitCost": "65.109"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "305898",
+   "ttPOheader": {
+    "cSupplierCode": "LUMEN",
+    "cSupplierName": "LUMEN INC.",
+    "cBuyerCode": "MAG",
+    "cBuyerName": "MAGASINIER (Ext.137)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "305898    05367367001",
+     "cProductcode": "MTA&B0322",
+     "cProductDesc": "INTERR. FIN COURSE OIL TIGHT SPRING RETU",
+     "dQuantity": "1.0",
+     "dUnitCost": "368.87"
+    },
+    {
+     "cUnique": "305898    05367379002",
+     "cProductcode": "MTAMP0160",
+     "cProductDesc": "DOUILLE MEDIUM BI-PIN LÉVITON 13357N",
+     "dQuantity": "12.0",
+     "dUnitCost": "5.24"
+    },
+    {
+     "cUnique": "305898    05367393003",
+     "cProductcode": "MTBAT1215",
+     "cProductDesc": "AEROTHERME STELPRO 480V 3PH 10KW THERMOSTAT  INTEGRÉ",
+     "dQuantity": "1.0",
+     "dUnitCost": "3462.26"
+    },
+    {
+     "cUnique": "305898    05367455004",
+     "cProductcode": "MTPRI0054",
+     "cProductDesc": "PRISE 30A 3PH 120/208V  PRISE MALE",
+     "dQuantity": "1.0",
+     "dUnitCost": "146.75"
+    },
+    {
+     "cUnique": "305898    05367464005",
+     "cProductcode": "MTXRA0025",
+     "cProductDesc": "A&B  BASE ALARME 24V NOIR POUR LUM. 855E",
+     "dQuantity": "1.0",
+     "dUnitCost": "151.55"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "305941",
+   "ttPOheader": {
+    "cSupplierCode": "MCMACA",
+    "cSupplierName": "MCMASTER-CARR",
+    "cBuyerCode": "MAG",
+    "cBuyerName": "MAGASINIER (Ext.137)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "305941    05513500001",
+     "cProductcode": "MTISO0016",
+     "cProductDesc": "BALL JOINT ROD END 7/16''-20 THREAD SS303 RIGHT HAND",
+     "dQuantity": "4.0",
+     "dUnitCost": "37.71"
+    },
+    {
+     "cUnique": "305941    05513515002",
+     "cProductcode": "MTOUT0286",
+     "cProductDesc": "RATCHETING COMBINATION WRENCH 3/4'' 12'' OVERALL",
+     "dQuantity": "1.0",
+     "dUnitCost": "36.25"
+    },
+    {
+     "cUnique": "305941    05526026003",
+     "cProductcode": "**NON-INVENTORY**",
+     "cProductDesc": "1361A4 DOOR WINDOW FRAMES",
+     "dQuantity": "1.0",
+     "dUnitCost": "65.83"
+    },
+    {
+     "cUnique": "305941    05566857004",
+     "cProductcode": "MTMAN0012",
+     "cProductDesc": "VACUUM GAUGE SINGLE SCALE SS 2.5'' dia. 1/4''npt  -30 to 0",
+     "dQuantity": "1.0",
+     "dUnitCost": "109.67"
+    },
+    {
+     "cUnique": "305941    05566871005",
+     "cProductcode": "MTROU0007",
+     "cProductDesc": "CORROSION-RESISTANT CASTER 3'' 8359T23",
+     "dQuantity": "5.0",
+     "dUnitCost": "73.71"
+    },
+    {
+     "cUnique": "305941    05566885006",
+     "cProductcode": "MTSAB0060",
+     "cProductDesc": "WELDABLE LIFT-OFF HINGE 1-3/16'' 1071A51",
+     "dQuantity": "10.0",
+     "dUnitCost": "6.84"
+    },
+    {
+     "cUnique": "305941    05566897007",
+     "cProductcode": "MTSAB0092",
+     "cProductDesc": "WELDING LIFT-OFF  1-19/32'' # 1071A53",
+     "dQuantity": "2.0",
+     "dUnitCost": "9.18"
+    },
+    {
+     "cUnique": "305941    05605775008",
+     "cProductcode": "MTTAP0231",
+     "cProductDesc": "HANDWHEEL  8'' DIA. BLACK UNTHREADED 1/2'' HOLE",
+     "dQuantity": "1.0",
+     "dUnitCost": "105.8"
+    },
+    {
+     "cUnique": "305941    05627390009",
+     "cProductcode": "**NON-INVENTORY**",
+     "cProductDesc": "SHIPPING COST",
+     "dQuantity": "1.0",
+     "dUnitCost": "45.44"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "305936",
+   "ttPOheader": {
+    "cSupplierCode": "WIRBEL",
+    "cSupplierName": "WIRE BELT CO",
+    "cBuyerCode": "MAG",
+    "cBuyerName": "MAGASINIER (Ext.137)",
+    "cApplicantCode": "RemiG"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "305936    05661935001",
+     "cProductcode": "MTTAP0101",
+     "cProductDesc": "SS SPROCKET 2''od  20 t  9/16'' width 3/4''shaft 5/16''pitch",
+     "dQuantity": "8.0",
+     "dUnitCost": "27.78"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "303369-005",
+   "ttPOheader": {
+    "cSupplierCode": "CONNEC",
+    "cSupplierName": "CONNECT IT NETWORKS",
+    "cBuyerCode": "MD",
+    "cBuyerName": "MATHIEU DENIS (Ext.149)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "303369-00506700001",
+     "cProductcode": "ITCOMMUNICATIONS",
+     "cProductDesc": "COMMUNICATIONS",
+     "dQuantity": "1.0",
+     "dUnitCost": "2778.29"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "303369-004",
+   "ttPOheader": {
+    "cSupplierCode": "CONNEC",
+    "cSupplierName": "CONNECT IT NETWORKS",
+    "cBuyerCode": "MD",
+    "cBuyerName": "MATHIEU DENIS (Ext.149)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "303369-00403400001",
+     "cProductcode": "ITCOMMUNICATIONS",
+     "cProductDesc": "COMMUNICATIONS",
+     "dQuantity": "1.0",
+     "dUnitCost": "2780.6"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "286346-015",
+   "ttPOheader": {
+    "cSupplierCode": "FAXSOL",
+    "cSupplierName": "FAXINATING SOLUTIONS INC.",
+    "cBuyerCode": "CAROLE",
+    "cBuyerName": "CAROLE DAVID (EXT. 118)",
+    "cApplicantCode": ""
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "286346-01506100001",
+     "cProductcode": "ITEDITRANSACTIONS",
+     "cProductDesc": "TRANSACTIONS EDI",
+     "dQuantity": "1.0",
+     "dUnitCost": "183.07"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "310791",
+   "ttPOheader": {
+    "cSupplierCode": "WESROC",
+    "cSupplierName": "WESTROCK",
+    "cBuyerCode": "LOGI",
+    "cBuyerName": "LOGISTIQUE IMPORT (ext : 196)",
+    "cApplicantCode": "",
+    "dOrderDate": "2026-08-24",
+    "dSubTotal": "80.0",
+    "dFreight": "0.0",
+    "dGST": "0.0",
+    "dPST": "0.0",
+    "dTotalAmount": "80.0"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "310791    23553106001",
+     "cProductcode": "LOGEXPINSPECTIONS",
+     "cProductDesc": "EXPORT INSPECTIONS CHARGE SKIP",
+     "dQuantity": "1.0",
+     "dUnitCost": "80.0",
+     "dSubTotal": "80.0",
+     "dFreight": "0.0",
+     "dGST": "0.0",
+     "dPST": "0.0",
+     "dTotalAmount": "80.0"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "276569-018",
+   "ttPOheader": {
+    "cSupplierCode": "WESROC",
+    "cSupplierName": "WESTROCK",
+    "cBuyerCode": "PACK",
+    "cBuyerName": "CHRISTINE BERNIER (ext : 118)",
+    "cApplicantCode": "",
+    "dOrderDate": "2024-12-10",
+    "dSubTotal": "22463.20",
+    "dFreight": "0.0",
+    "dGST": "1123.16",
+    "dPST": "2240.70",
+    "dTotalAmount": "25827.06"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "276569-018 3537430001",
+     "cProductcode": "353743",
+     "cProductDesc": "22728 UV 24pt YUM DINO CHICK NUG 5 lbs M41-P1875",
+     "dQuantity": "49875.0",
+     "dUnitCost": "450.39",
+     "dSubTotal": "22463.20",
+     "dFreight": "0.0",
+     "dGST": "1123.16",
+     "dPST": "2240.70",
+     "dTotalAmount": "25827.06"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "310059",
+   "ttPOheader": {
+    "cSupplierCode": "iseco",
+    "cSupplierName": "WORK AUTHORITY",
+    "cBuyerCode": "INGR",
+    "cBuyerName": "ARLED MORALES (ext : 112)",
+    "cApplicantCode": "",
+    "dOrderDate": "2026-07-20",
+    "dSubTotal": "97.63",
+    "dFreight": "0.0",
+    "dGST": "4.88",
+    "dPST": "9.74",
+    "dTotalAmount": "112.25"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "310059    20031876001",
+     "cProductcode": "E1400001",
+     "cProductDesc": "CHAUSSURES DE SÉCURITÉ - PRODUCTION",
+     "dQuantity": "1.0",
+     "dUnitCost": "97.63",
+     "dSubTotal": "97.63",
+     "dFreight": "0.0",
+     "dGST": "4.88",
+     "dPST": "9.74",
+     "dTotalAmount": "112.25"
+    }
+   ]
+  }
+ ],
+ "unbilled_po": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "288687",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "RE3 Distribution Inc."
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "PO2025-003",
+   "dCreationDate": "2025-09-12",
+   "cSupplierName": "Industrial Equipment Ltd"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "PO2025-004",
+   "dCreationDate": "2025-09-14",
+   "cSupplierName": "Bureau Moderne Inc."
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "266010",
+   "dCreationDate": "2024-03-01",
+   "cSupplierName": "Manufacture Scorpion inc.",
+   "cSupplierCode": "MANSCO",
+   "lBlanketOrder": true
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "266011",
+   "dCreationDate": "2024-04-01",
+   "cSupplierName": "Manufacture Scorpion inc.",
+   "cSupplierCode": "MANSCO",
+   "lBlanketOrder": false
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "248087",
+   "dCreationDate": "2023-04-19",
+   "cSupplierName": "TENAQUIP LIMITED"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "295558-045",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "MITCHEL-LINCOLN LTEE"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "304155",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "Barentz"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "306322",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "AIR LIQUIDE CANADA INC."
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "36153186",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "AIR LIQUIDE CANADA INC."
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "303913-002",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "BUNGE CANADA"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "304159-021",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "GRIFFITH FOODS"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "305038",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "LUMEN INC."
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "305898",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "LUMEN INC."
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "305941",
+   "dCreationDate": "2025-09-10",
+   "cSupplierName": "MCMASTER-CARR"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "305936",
+   "dCreationDate": "2026-03-06",
+   "cSupplierName": "WIRE BELT CO"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "303369-005",
+   "dCreationDate": "2026-03-01",
+   "cSupplierName": "CONNECT IT NETWORKS"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "303369-004",
+   "dCreationDate": "2026-02-01",
+   "cSupplierName": "CONNECT IT NETWORKS"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "286346-015",
+   "dCreationDate": "2026-02-28",
+   "cSupplierName": "FAXINATING SOLUTIONS INC."
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "230096",
+   "dCreationDate": "2022-05-28",
+   "cSupplierName": "Adcut Knives",
+   "cSupplierCode": "ADCKNI",
+   "lBlanketOrder": false
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "310479",
+   "dCreationDate": "2026-08-11",
+   "cSupplierName": "Adcut Knives",
+   "cSupplierCode": "ADCKNI",
+   "lBlanketOrder": false
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "310791",
+   "dCreationDate": "2026-08-24",
+   "cSupplierName": "WESTROCK",
+   "cSupplierCode": "WESROC",
+   "lBlanketOrder": false
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "276569-018",
+   "dCreationDate": "2024-12-10",
+   "cSupplierName": "WESTROCK",
+   "cSupplierCode": "WESROC",
+   "lBlanketOrder": false
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400001",
+   "dCreationDate": "2026-01-15",
+   "cSupplierName": "Blanket Supplier Inc.",
+   "cSupplierCode": "BLNK01",
+   "lBlanketOrder": true
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "310059",
+   "dCreationDate": "2026-07-20",
+   "cSupplierName": "WORK AUTHORITY",
+   "cSupplierCode": "iseco",
+   "lBlanketOrder": false
+  }
+ ]
+}

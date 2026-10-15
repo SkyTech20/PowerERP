@@ -1,0 +1,138 @@
+{
+ "po_details": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "500101",
+   "ttPOheader": {
+    "cSupplierCode": "TECBUR",
+    "cSupplierName": "Techno Bureau Plus inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-15",
+    "dSubTotal": "5840.00",
+    "dFreight": "0.00",
+    "dGST": "292.00",
+    "dPST": "582.54",
+    "dTotalAmount": "6714.54"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "LAP-14I7",
+     "cProductDesc": "Portable 14 po Core i7, 16 Go / 512 Go SSD",
+     "dQuantity": "4",
+     "dUnitCost": "1250.00",
+     "dSubTotal": "5000.00",
+     "dTotalAmount": "5000.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "DOCK-USBC",
+     "cProductDesc": "Station d'accueil USB-C",
+     "dQuantity": "4",
+     "dUnitCost": "210.00",
+     "dSubTotal": "840.00",
+     "dTotalAmount": "840.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "500201",
+   "ttPOheader": {
+    "cSupplierCode": "LUMPRO",
+    "cSupplierName": "Lumière Pro Électrique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-18",
+    "dSubTotal": "1362.00",
+    "dFreight": "0.00",
+    "dGST": "68.10",
+    "dPST": "135.86",
+    "dTotalAmount": "1565.96"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "LED-2X4",
+     "cProductDesc": "Panneau DEL 2 x 4 pi, 40 W",
+     "dQuantity": "12",
+     "dUnitCost": "89.00",
+     "dSubTotal": "1068.00",
+     "dTotalAmount": "1068.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "DRV-DIM",
+     "cProductDesc": "Pilote DEL gradable",
+     "dQuantity": "12",
+     "dUnitCost": "24.50",
+     "dSubTotal": "294.00",
+     "dTotalAmount": "294.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "500301",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-25",
+    "dSubTotal": "1872.00",
+    "dFreight": "0.00",
+    "dGST": "93.60",
+    "dPST": "186.73",
+    "dTotalAmount": "2152.33"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-8511",
+     "cProductDesc": "Papier à photocopie 8,5 x 11 (caisse de 10 rames)",
+     "dQuantity": "20",
+     "dUnitCost": "54.90",
+     "dSubTotal": "1098.00",
+     "dTotalAmount": "1098.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "TON-26A",
+     "cProductDesc": "Cartouche de toner noir 26A",
+     "dQuantity": "6",
+     "dUnitCost": "129.00",
+     "dSubTotal": "774.00",
+     "dTotalAmount": "774.00"
+    }
+   ]
+  }
+ ],
+ "unbilled_po": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "500101",
+   "dCreationDate": "2026-09-15",
+   "cSupplierName": "Techno Bureau Plus inc.",
+   "cSupplierCode": "TECBUR"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "500201",
+   "dCreationDate": "2026-09-18",
+   "cSupplierName": "Lumière Pro Électrique inc.",
+   "cSupplierCode": "LUMPRO"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "500301",
+   "dCreationDate": "2026-09-25",
+   "cSupplierName": "Papeterie Centrale inc.",
+   "cSupplierCode": "PAPCEN"
+  }
+ ]
+}

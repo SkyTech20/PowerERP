@@ -1,0 +1,54 @@
+[
+ {
+  "cCode": "1100",
+  "cDesc": "Banque - compte d'exploitation"
+ },
+ {
+  "cCode": "1550",
+  "cDesc": "Matériel informatique"
+ },
+ {
+  "cCode": "2100",
+  "cDesc": "Comptes fournisseurs"
+ },
+ {
+  "cCode": "2310",
+  "cDesc": "TPS à recevoir"
+ },
+ {
+  "cCode": "2320",
+  "cDesc": "TVQ à recevoir"
+ },
+ {
+  "cCode": "5100",
+  "cDesc": "Fournitures de bureau"
+ },
+ {
+  "cCode": "5200",
+  "cDesc": "Honoraires professionnels"
+ },
+ {
+  "cCode": "5250",
+  "cDesc": "Services-conseils TI"
+ },
+ {
+  "cCode": "5300",
+  "cDesc": "Entretien de l'équipement"
+ },
+ {
+  "cCode": "5350",
+  "cDesc": "Entretien de l'immeuble"
+ },
+ {
+  "cCode": "5400",
+  "cDesc": "Abonnements logiciels"
+ },
+ {
+  "cCode": "5500",
+  "cDesc": "Télécommunications"
+ },
+ {
+  "cCode": "5600",
+  "cDesc": "Sécurité et surveillance"
+ }
+]

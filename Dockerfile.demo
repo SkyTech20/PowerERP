@@ -1,0 +1,17 @@
+# Public demo image: ships ONLY the fictitious data in data/demo (no real supplier/PO data from data/*.json).
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY app.py erp_api.py powerware_api.py ./
+COPY static/ ./static/
+COPY data/demo/ ./data/demo/
+
+ENV PORT=5050 \
+    ERP_DATASET=demo
+EXPOSE 5050
+
+CMD ["python", "app.py"]

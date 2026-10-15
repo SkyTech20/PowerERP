@@ -1,0 +1,32 @@
+[
+ {
+  "cCC1": "100",
+  "cCC2": "",
+  "cDesc": "Administration"
+ },
+ {
+  "cCC1": "100",
+  "cCC2": "210",
+  "cDesc": "Technologies de l'information"
+ },
+ {
+  "cCC1": "100",
+  "cCC2": "220",
+  "cDesc": "Finances"
+ },
+ {
+  "cCC1": "200",
+  "cCC2": "",
+  "cDesc": "Opérations"
+ },
+ {
+  "cCC1": "200",
+  "cCC2": "310",
+  "cDesc": "Entrepôt"
+ },
+ {
+  "cCC1": "300",
+  "cCC2": "",
+  "cDesc": "Ventes"
+ }
+]

@@ -1,0 +1,1038 @@
+{
+ "receiving_details": [
+  {
+   "NoReception": "335867",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "TechnoSupply Inc.",
+   "CodeFournisseur": "RE3DIS",
+   "NoBonCommande": "288687",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "MFR#02-SSC-4727",
+     "Description": "",
+     "QuantiteCommandee": "1",
+     "QuantiteRecue": "2",
+     "PrixUnitaire": "471.51",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "542.12",
+   "ResponsableReception": "Jean Dupont",
+   "Commentaires": "Réception partielle - 2 souris manquantes",
+   "SousTotal": "471.51",
+   "Transport": "0.00",
+   "TPS": "23.58",
+   "TVQ": "47.03"
+  },
+  {
+   "NoReception": "335868",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "TechnoSupply Inc.",
+   "CodeFournisseur": "RE3DIS",
+   "NoBonCommande": "288687",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "MFR#02-SSC-4727",
+     "Description": "",
+     "QuantiteCommandee": "1",
+     "QuantiteRecue": "1",
+     "PrixUnitaire": "471.51",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "542.12",
+   "ResponsableReception": "Jean Dupont",
+   "Commentaires": "Réception partielle - 2 souris manquantes",
+   "SousTotal": "471.51",
+   "Transport": "0.00",
+   "TPS": "23.58",
+   "TVQ": "47.03"
+  },
+  {
+   "NoReception": "335869",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-16",
+   "Fournisseur": "Construction Plus",
+   "CodeFournisseur": "S002",
+   "NoBonCommande": "PO2025-002",
+   "Statut": "En cours",
+   "Entrepot": "ENT-02",
+   "Articles": [
+    {
+     "CodeArticle": "MAT-001",
+     "Description": "Ciment Portland 40kg",
+     "QuantiteCommandee": "100",
+     "QuantiteRecue": "50",
+     "PrixUnitaire": "12.50",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "625.00",
+   "ResponsableReception": "Marie Tremblay",
+   "Commentaires": "Livraison partielle - reste à recevoir"
+  },
+  {
+   "NoReception": "335871",
+   "COMPANY": "MA2",
+   "DateReception": "2024-03-13",
+   "Fournisseur": "Manufacture Scorpion inc.",
+   "CodeFournisseur": "MANSCO",
+   "NoBonCommande": "266009",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AIR00276",
+     "Description": "MRFCP.08.1/8: Régulateur de débit coude, Out, Tube 8mm, Filet 1/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "8.82",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00273",
+     "Description": "MRFCP.1/4.1/4: Régulateur de débit coude, Out, Tube 1/4, Filet 1/4",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "8.82",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00246",
+     "Description": "P1.08.3/8: Raccord droit mâle, Tube 8mm, Filet 3/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.08",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00063",
+     "Description": "P1.1/4.1/4: Raccord droit mâle, Tube 1/4, Filet 1/4",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "1.5",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00097",
+     "Description": "P1.1/4.10-32: Raccord droit mâle, Tube 1/4, Filet 10-32",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "1.88",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00065",
+     "Description": "P1.1/4.3/8: Raccord droit mâle, Tube 1/4, Filet 3/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.04",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00247",
+     "Description": "P1.12.3/8: Raccord droit mâle, Tube 12mm, Filet 3/8",
+     "QuantiteCommandee": "5",
+     "QuantiteRecue": "5",
+     "PrixUnitaire": "2.81",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00256",
+     "Description": "P1.10.3/8: Raccord droit mâle, Tube 10mm, Filet 3/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.23",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00039",
+     "Description": "P1.3/8.3/8: Raccord droit mâle, Tube 3/8, Filet 3/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.23",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00051",
+     "Description": "P1.5/16.1/4: Raccord droit mâle, Tube 5/16, Filet 1/4",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "1.69",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00066",
+     "Description": "P1.5/16.1/8: Raccord droit mâle, Tube 5/16, Filet 1/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "1.64",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00061",
+     "Description": "P1.5/32.1/8: Raccord droit mâle, Tube 5/32, Filet 1/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "1.45",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00325",
+     "Description": "P15.3/8.3/8: Raccord banjo mâle, Tube 3/8, Filet 3/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "5.13",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00055",
+     "Description": "P23.1/4: Union Y, Tube 1/4",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.13",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00250",
+     "Description": "P3.3/16: Raccord union droit, Tube 3/16",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "1.5",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00028",
+     "Description": "P4.1/2.1/4: Raccord coude mâle, Tube 1/2, Filet 1/4",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "3.33",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00026",
+     "Description": "P4.3/8: Raccord coude, Tube 3/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.28",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00291",
+     "Description": "P4.3/8.1/4: Raccord coude mâle, Tube 3/8, Filet 1/4",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.76",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00112",
+     "Description": "P4.3/8.1/8: Raccord coude mâle, Tube 3/8, Filet 1/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "3.33",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00280",
+     "Description": "P4.08: Raccord coude, Tube 8mm (OU 5/16)",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "1.6",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00185",
+     "Description": "P4.5/16.3/8: Raccord coude mâle, Tube 5/16, Filet 3/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.7",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00090",
+     "Description": "P5.08.1/8: Raccord jonction \"T\", Tube 8mm, Filet 1/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "3.39",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00003",
+     "Description": "P5.1/2.1/2: Raccord jonction \"T\", Tube 1/2, Filet 1/2",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "5.7",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AIR00054",
+     "Description": "P5.3/8: Raccord jonction \"T\", Tube 3/8",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "2.42",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "720.55",
+   "ResponsableReception": "Acheteur Principal",
+   "Commentaires": "Réception conforme facture 00261055"
+  },
+  {
+   "NoReception": "342673",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "MITCHEL-LINCOLN LTEE",
+   "CodeFournisseur": "MITLIN",
+   "NoBonCommande": "295558-045",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "P1402003",
+     "Description": "MASTER HSC BRUN NON IMP. A/#ÉTA.",
+     "QuantiteCommandee": "5100",
+     "QuantiteRecue": "5100.0",
+     "PrixUnitaire": "0.78317",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "P1402003",
+     "Description": "MASTER HSC BRUN NON IMP. A/#ÉTA.",
+     "QuantiteCommandee": "0",
+     "QuantiteRecue": "0.0",
+     "PrixUnitaire": "0.0",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "3994.17",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "342401",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "Barentz",
+   "CodeFournisseur": "barent",
+   "NoBonCommande": "304155",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "I4504001",
+     "Description": "SALTWELL RÉGULIER A/ANTI-AGGLOMÉRANT",
+     "QuantiteCommandee": "7257.6",
+     "QuantiteRecue": "7257.6",
+     "PrixUnitaire": "2.55",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "18506.88",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "344850",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "BUNGE CANADA",
+   "CodeFournisseur": "BUNGUS",
+   "NoBonCommande": "303913-002",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "I2501001",
+     "Description": "HUILE CANOLA RAFFINÉE BLANCHIE DÉSODORISÉE ANTIMOUSSE",
+     "QuantiteCommandee": "27276",
+     "QuantiteRecue": "27276.0",
+     "PrixUnitaire": "1.57",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "42823.32",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "344664",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "GRIFFITH FOODS",
+   "CodeFournisseur": "GRILAB",
+   "NoBonCommande": "304159-021",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "I1529001",
+     "Description": "Pâte à frire Naturel",
+     "QuantiteRecue": "360.0",
+     "PrixUnitaire": "2.1202",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "19081.8",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "343251",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "LUMEN INC.",
+   "CodeFournisseur": "LUMEN",
+   "NoBonCommande": "305038",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "MTA&B0410",
+     "Description": "SENSAGUARD CAPTEUR 18MM-MIC-M12-DET 10MM DR7 440N-Z21S17H",
+     "QuantiteRecue": "3.0",
+     "PrixUnitaire": "316.43",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTA&B0426",
+     "Description": "CABLE 10 METRES  FEMELLE CORDSET M12 8 PINS 889DF8AB10",
+     "QuantiteRecue": "3.0",
+     "PrixUnitaire": "103.13",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTA&B0453",
+     "Description": "DC MICRO M12 FEMALE STRAIGHT 8 PIN BLACK , 2  METRE",
+     "QuantiteRecue": "2.0",
+     "PrixUnitaire": "91.69",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTA&B0456",
+     "Description": "DC MICRO CABLE  M12 FEMALE STRAIGHT 8 PIN 3M 889D-F8NBDM3",
+     "QuantiteRecue": "0.0",
+     "PrixUnitaire": "97.94",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTAMP0304",
+     "Description": "AMPOULE STEADY  INCONDESCENT 24V 6.5W 855T-L24",
+     "QuantiteRecue": "2.0",
+     "PrixUnitaire": "9.11",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTPRI0019",
+     "Description": "FICHE 20A 3PH 250V 26W75",
+     "QuantiteRecue": "3.0",
+     "PrixUnitaire": "65.11",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "1655.61",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "344400",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "LUMEN INC.",
+   "CodeFournisseur": "LUMEN",
+   "NoBonCommande": "305898",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "MTA&B0322",
+     "Description": "INTERR. FIN COURSE GALET OIL TIGHT SPRING RETURN 802TH",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "368.87",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTAMP0160",
+     "Description": "DOUILLE MEDIUM BI-PIN LÉVITON 13357N",
+     "QuantiteRecue": "12.0",
+     "PrixUnitaire": "5.24",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTBAT1215",
+     "Description": "AEROTHERME STELPRO 480V 3PH 10KW THERMOSTAT  INTEGRÉ",
+     "QuantiteRecue": "0.0",
+     "PrixUnitaire": "3462.26",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTPRI0054",
+     "Description": "PRISE 30A 3PH 120/208V  PRISE MALE 28W81 (DANIEL WOODHEAD)",
+     "QuantiteRecue": "0.0",
+     "PrixUnitaire": "146.75",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTXRA0025",
+     "Description": "A&B  855E-B24SA3 BASE ALARME 24V NOIR POUR LUMIERE 855E",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "151.55",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "583.3",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "344506",
+   "COMPANY": "MA2",
+   "DateReception": "2025-09-15",
+   "Fournisseur": "MCMASTER-CARR",
+   "CodeFournisseur": "MCMACA",
+   "NoBonCommande": "305941",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "**NON-INVENTORY**",
+     "Description": "1361A4 DOOR WINDOW FRAMES",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "65.83",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "**NON-INVENTORY**",
+     "Description": "SHIPPING COST",
+     "QuantiteRecue": "0.0",
+     "PrixUnitaire": "45.44",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTISO0016",
+     "Description": "BALL JOINT ROD END 7/16''-20 THREAD SS303 RIGHT HAND",
+     "QuantiteRecue": "4.0",
+     "PrixUnitaire": "37.71",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTMAN0012",
+     "Description": "MANOMÊTRE GLYCÉRINE -30-0 VAC 2 1/2''DIA 1/4'' NPTBAS GAUGE",
+     "QuantiteRecue": "0.0",
+     "PrixUnitaire": "109.67",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTOUT0286",
+     "Description": "CLÉ COMBINEE RATCHET 3/4''",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "36.25",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTROU0007",
+     "Description": "ROUE POUR CHARIOT PLAT BRUN",
+     "QuantiteRecue": "0.0",
+     "PrixUnitaire": "73.71",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTSAB0060",
+     "Description": "PENTURE A SOUDER  1-3/16'' 1071A51",
+     "QuantiteRecue": "10.0",
+     "PrixUnitaire": "6.84",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTSAB0092",
+     "Description": "PENTURE A SOUDER  1-19/32''",
+     "QuantiteRecue": "2.0",
+     "PrixUnitaire": "9.18",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "MTTAP0231",
+     "Description": "HANDWHEEL  8'' DIA. BLACK UNTHREADED 1/2'' HOLE",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "105.8",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "445.48",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "344929",
+   "COMPANY": "MA2",
+   "DateReception": "2026-03-06",
+   "Fournisseur": "WIRE BELT CO",
+   "CodeFournisseur": "WIRBEL",
+   "NoBonCommande": "305936",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "MTTAP0101",
+     "Description": "SS SPROCKET 2''od  20 t  9/16'' width 3/4''shaft 5/16''pitch",
+     "QuantiteCommandee": "8.0",
+     "QuantiteRecue": "8.0",
+     "PrixUnitaire": "27.78",
+     "Devise": "USD"
+    }
+   ],
+   "MontantTotal": "222.24",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "344930",
+   "COMPANY": "MA2",
+   "DateReception": "2026-03-01",
+   "Fournisseur": "CONNECT IT NETWORKS",
+   "CodeFournisseur": "CONNEC",
+   "NoBonCommande": "303369-005",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ITCOMMUNICATIONS",
+     "Description": "COMMUNICATIONS",
+     "QuantiteCommandee": "1.0",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "2778.29",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2778.29",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "343522",
+   "COMPANY": "MA2",
+   "DateReception": "2026-02-01",
+   "Fournisseur": "CONNECT IT NETWORKS",
+   "CodeFournisseur": "CONNEC",
+   "NoBonCommande": "303369-004",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ITCOMMUNICATIONS",
+     "Description": "COMMUNICATIONS",
+     "QuantiteCommandee": "1.0",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "2780.6",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2780.6",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "344628",
+   "COMPANY": "MA2",
+   "DateReception": "2026-02-28",
+   "Fournisseur": "FAXINATING SOLUTIONS INC.",
+   "CodeFournisseur": "FAXSOL",
+   "NoBonCommande": "286346-015",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ITEDITRANSACTIONS",
+     "Description": "TRANSACTIONS EDI",
+     "QuantiteCommandee": "1.0",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "183.07",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "183.07",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "345001",
+   "COMPANY": "MA2",
+   "DateReception": "2026-08-25",
+   "Fournisseur": "WESTROCK",
+   "CodeFournisseur": "WESROC",
+   "NoBonCommande": "310791",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "LOGEXPINSPECTIONS",
+     "Description": "EXPORT INSPECTIONS CHARGE SKIP",
+     "QuantiteCommandee": "1.0",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "80.0",
+     "Devise": "CAD",
+     "dTotalAmount": "80.0"
+    }
+   ],
+   "MontantTotal": "80.0",
+   "ResponsableReception": "",
+   "Commentaires": ""
+  },
+  {
+   "NoReception": "400942",
+   "COMPANY": "MA2",
+   "DateReception": "2024-12-19",
+   "Fournisseur": "WESTROCK",
+   "CodeFournisseur": "WESROC",
+   "NoBonCommande": "276569-018",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "353743",
+     "Description": "22728 UV 24pt YUM DINO CHICK NUG 5 lbs M41-P1875",
+     "QuantiteCommandee": "49875.0",
+     "QuantiteRecue": "49875.0",
+     "PrixUnitaire": "450.39",
+     "Devise": "USD",
+     "dTotalAmount": "22463.20"
+    }
+   ],
+   "MontantTotal": "22463.20",
+   "ResponsableReception": "",
+   "Commentaires": "Bon de chargement 400942"
+  },
+  {
+   "NoReception": "351564",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-01",
+   "Fournisseur": "WORK AUTHORITY",
+   "CodeFournisseur": "ISECO",
+   "NoBonCommande": "310059",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "E1400001",
+     "Description": "CHAUSSURES DE SÉCURITÉ - PRODUCTION",
+     "QuantiteCommandee": "1.0",
+     "QuantiteRecue": "1.0",
+     "PrixUnitaire": "97.63",
+     "Devise": "CAD",
+     "dUnitCost": "97.63",
+     "dSubTotal": "97.63",
+     "dFreight": "0.0",
+     "dGST": "4.88",
+     "dPST": "9.74",
+     "dTotalAmount": "112.25",
+     "cGL": "5700",
+     "cCC1": "170",
+     "cCC2": "751"
+    }
+   ],
+   "MontantTotal": "112.25",
+   "SousTotal": "97.63",
+   "Transport": "0.00",
+   "TPS": "4.88",
+   "TVQ": "9.74",
+   "ResponsableReception": "",
+   "Commentaires": "Invoice 1033911 / Work Authority"
+  }
+ ],
+ "unbilled_receiving": [
+  {
+   "COMPANY": "MA2",
+   "NoReception": "335867",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "288687",
+   "Fournisseur": "TechnoSupply Inc.",
+   "CodeFournisseur": "RE3DIS",
+   "MontantRecu": "542.12",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "335868",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "288687",
+   "Fournisseur": "TechnoSupply Inc.",
+   "CodeFournisseur": "RE3DIS",
+   "MontantRecu": "542.12",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "335869",
+   "DateReception": "2025-09-16",
+   "NoBonCommande": "PO2025-002",
+   "Fournisseur": "Construction Plus",
+   "CodeFournisseur": "S002",
+   "MontantRecu": "625.00",
+   "StatutFacturation": "Facture partielle reçue",
+   "JoursEnAttente": "3",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Haute",
+   "Devise": "CAD",
+   "Entrepot": "ENT-02",
+   "TypeReception": "Partielle"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "335870",
+   "DateReception": "2025-09-17",
+   "NoBonCommande": "PO2025-005",
+   "Fournisseur": "Equipements Industriels QC",
+   "CodeFournisseur": "S005",
+   "MontantRecu": "8750.00",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "2",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-03",
+   "TypeReception": "Complète"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "342673",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "295558-045",
+   "Fournisseur": "MITCHEL-LINCOLN LTEE",
+   "CodeFournisseur": "MITLIN",
+   "MontantRecu": "3994.17",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "342401",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "304155",
+   "Fournisseur": "Barentz",
+   "CodeFournisseur": "barent",
+   "MontantRecu": "18506.88",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "344850",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "303913-002",
+   "Fournisseur": "BUNGE CANADA",
+   "CodeFournisseur": "BUNGUS",
+   "MontantRecu": "42823.32",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "344664",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "304159-021",
+   "Fournisseur": "GRIFFITH FOODS",
+   "CodeFournisseur": "GRILAB",
+   "MontantRecu": "19081.8",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "343251",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "305038",
+   "Fournisseur": "LUMEN INC.",
+   "CodeFournisseur": "LUMEN",
+   "MontantRecu": "1655.61",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "344400",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "305898",
+   "Fournisseur": "LUMEN INC.",
+   "CodeFournisseur": "LUMEN",
+   "MontantRecu": "583.3",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "344506",
+   "DateReception": "2025-09-15",
+   "NoBonCommande": "305941",
+   "Fournisseur": "MCMASTER-CARR",
+   "CodeFournisseur": "MCMACA",
+   "MontantRecu": "445.48",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "344929",
+   "DateReception": "2026-03-06",
+   "NoBonCommande": "305936",
+   "Fournisseur": "WIRE BELT CO",
+   "CodeFournisseur": "WIRBEL",
+   "MontantRecu": "222.24",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "USD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "344930",
+   "DateReception": "2026-03-01",
+   "NoBonCommande": "303369-005",
+   "Fournisseur": "CONNECT IT NETWORKS",
+   "CodeFournisseur": "CONNEC",
+   "MontantRecu": "2778.29",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "343522",
+   "DateReception": "2026-02-01",
+   "NoBonCommande": "303369-004",
+   "Fournisseur": "CONNECT IT NETWORKS",
+   "CodeFournisseur": "CONNEC",
+   "MontantRecu": "2780.6",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "344628",
+   "DateReception": "2026-02-28",
+   "NoBonCommande": "286346-015",
+   "Fournisseur": "FAXINATING SOLUTIONS INC.",
+   "CodeFournisseur": "FAXSOL",
+   "MontantRecu": "183.07",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "4",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "345001",
+   "DateReception": "2026-08-25",
+   "NoBonCommande": "310791",
+   "Fournisseur": "WESTROCK",
+   "CodeFournisseur": "WESROC",
+   "MontantRecu": "80.0",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "1",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "400942",
+   "DateReception": "2024-12-19",
+   "NoBonCommande": "276569-018",
+   "Fournisseur": "WESTROCK",
+   "CodeFournisseur": "WESROC",
+   "MontantRecu": "22463.20",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "1",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "USD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "351564",
+   "DateReception": "2026-09-01",
+   "NoBonCommande": "310059",
+   "Fournisseur": "WORK AUTHORITY",
+   "CodeFournisseur": "ISECO",
+   "MontantRecu": "112.25",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "1",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  }
+ ]
+}

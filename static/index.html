@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PowerERP Demo</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    <a class="brand" href="#/">
+      <span class="brand-logo">P</span>
+      <span class="brand-text"><strong data-i18n="app.name"></strong><small data-i18n="app.tagline"></small></span>
+    </a>
+    <div class="topbar-spacer"></div>
+    <label class="company">
+      <span data-i18n="app.company"></span>
+      <select id="companySelect" disabled><option>MA2</option></select>
+    </label>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="fr">FR</button>
+    </div>
+    <div class="user"><span class="avatar">DU</span><span class="user-name" data-i18n="app.user"></span></div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="content">
+      <div class="demo-banner" data-i18n="app.demoBanner"></div>
+      <div id="view"></div>
+    </main>
+  </div>
+
+  <div class="toast-host" id="toasts"></div>
+
+  <script src="assets/i18n.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

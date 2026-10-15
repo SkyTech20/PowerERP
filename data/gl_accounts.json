@@ -1,0 +1,1406 @@
+[
+ {
+  "cCode": "1000",
+  "cDesc": "Petty Cash"
+ },
+ {
+  "cCode": "1001",
+  "cDesc": "PETTY CASH U.S."
+ },
+ {
+  "cCode": "1010",
+  "cDesc": "Bank Notice of Intention Canadian"
+ },
+ {
+  "cCode": "1011",
+  "cDesc": "Bank Notice of iIntention U.S."
+ },
+ {
+  "cCode": "1110",
+  "cDesc": "Bank Canadian"
+ },
+ {
+  "cCode": "1111",
+  "cDesc": "Bank Canadian Maxi"
+ },
+ {
+  "cCode": "1112",
+  "cDesc": "Bank Richter Canadian"
+ },
+ {
+  "cCode": "1113",
+  "cDesc": "Bank Richter u.s."
+ },
+ {
+  "cCode": "1114",
+  "cDesc": "Bank Richter u.s."
+ },
+ {
+  "cCode": "1115",
+  "cDesc": "Bank Payroll"
+ },
+ {
+  "cCode": "1116",
+  "cDesc": "Bank-Couvoir des Laurentides"
+ },
+ {
+  "cCode": "1120",
+  "cDesc": "Cash US"
+ },
+ {
+  "cCode": "1125",
+  "cDesc": "Banker's Acceptances"
+ },
+ {
+  "cCode": "1130",
+  "cDesc": "Bank - u.s."
+ },
+ {
+  "cCode": "1131",
+  "cDesc": "Bank u.s. Bank of America"
+ },
+ {
+  "cCode": "1132",
+  "cDesc": "U.S. Bank N.A."
+ },
+ {
+  "cCode": "1133",
+  "cDesc": "Bank US Bank of America"
+ },
+ {
+  "cCode": "1134",
+  "cDesc": "PNC BANK"
+ },
+ {
+  "cCode": "1135",
+  "cDesc": "Conversion Differential on u.s. bank"
+ },
+ {
+  "cCode": "1136",
+  "cDesc": "Sub-Total - Bank"
+ },
+ {
+  "cCode": "1200",
+  "cDesc": "Accounts Receivable"
+ },
+ {
+  "cCode": "1201",
+  "cDesc": "Accounts Receivable u.s."
+ },
+ {
+  "cCode": "1202",
+  "cDesc": "Accounts Receivable Other"
+ },
+ {
+  "cCode": "1203",
+  "cDesc": "conversion Differential on c/r u.s."
+ },
+ {
+  "cCode": "1204",
+  "cDesc": "Autres Courus à recevoir"
+ },
+ {
+  "cCode": "1205",
+  "cDesc": "Allowance for Doubtful Accts."
+ },
+ {
+  "cCode": "1206",
+  "cDesc": "Acct. Receivable Investissement Québec"
+ },
+ {
+  "cCode": "1207",
+  "cDesc": "Acc Receivable from Parent Company"
+ },
+ {
+  "cCode": "1208",
+  "cDesc": "Due from Perdue US"
+ },
+ {
+  "cCode": "1209",
+  "cDesc": "Receivable from Perdue Canadian $$ (HB)"
+ },
+ {
+  "cCode": "1210",
+  "cDesc": "Acct Receivable Doubtful Accts"
+ },
+ {
+  "cCode": "1300",
+  "cDesc": "Inventory - Regular"
+ },
+ {
+  "cCode": "130000",
+  "cDesc": "Inventory - Finished Goods"
+ },
+ {
+  "cCode": "130030",
+  "cDesc": "Inventory - Ready to pack"
+ },
+ {
+  "cCode": "130035",
+  "cDesc": "Inventory - Premix"
+ },
+ {
+  "cCode": "130036",
+  "cDesc": "Wip Prod.ext"
+ },
+ {
+  "cCode": "130037",
+  "cDesc": "Packaging Prod Ext."
+ },
+ {
+  "cCode": "130038",
+  "cDesc": "Ingredients Prod Ext"
+ },
+ {
+  "cCode": "130039",
+  "cDesc": "Viandes Prod ext."
+ },
+ {
+  "cCode": "130040",
+  "cDesc": "Inventory - Meats"
+ },
+ {
+  "cCode": "130041",
+  "cDesc": "Inventory - Coaters"
+ },
+ {
+  "cCode": "130042",
+  "cDesc": "Inventory - General ingredients"
+ },
+ {
+  "cCode": "130043",
+  "cDesc": "Inventory - Vegetable / Grain"
+ },
+ {
+  "cCode": "130044",
+  "cDesc": "Inventory - Dairy product"
+ },
+ {
+  "cCode": "130045",
+  "cDesc": "Inventory - Fats & Oils"
+ },
+ {
+  "cCode": "130060",
+  "cDesc": "Inventory - Industrial gasses"
+ },
+ {
+  "cCode": "130062",
+  "cDesc": "Inventory - General operation"
+ },
+ {
+  "cCode": "130064",
+  "cDesc": "Inventory - Sanitation"
+ },
+ {
+  "cCode": "130070",
+  "cDesc": "Inventory - Labo / Quality Assurance"
+ },
+ {
+  "cCode": "130071",
+  "cDesc": "Inventory - Test kitchen / R&D"
+ },
+ {
+  "cCode": "1301",
+  "cDesc": "Reserve for obsolete Inventory"
+ },
+ {
+  "cCode": "1305",
+  "cDesc": "Inventory - Packaging"
+ },
+ {
+  "cCode": "130550",
+  "cDesc": "Inventory - Rigid packaging"
+ },
+ {
+  "cCode": "130551",
+  "cDesc": "Inventory - Flexible packaging"
+ },
+ {
+  "cCode": "130552",
+  "cDesc": "Inventory - Other packaging"
+ },
+ {
+  "cCode": "1306",
+  "cDesc": "Reserve for obsolete Inventory packaging"
+ },
+ {
+  "cCode": "1310",
+  "cDesc": "INVENTORY MAINTENANCE"
+ },
+ {
+  "cCode": "1316",
+  "cDesc": "Reserve for absolescence spare parts"
+ },
+ {
+  "cCode": "1400",
+  "cDesc": "Prepaid Expenses"
+ },
+ {
+  "cCode": "1405",
+  "cDesc": "Prepaid Insurance"
+ },
+ {
+  "cCode": "1410",
+  "cDesc": "Prepaid Municipal taxes"
+ },
+ {
+  "cCode": "1415",
+  "cDesc": "Prepaid Rebates & CSST"
+ },
+ {
+  "cCode": "1420",
+  "cDesc": "Prepaid Selling Expenses"
+ },
+ {
+  "cCode": "1430",
+  "cDesc": "Prepaid Capital Taxes"
+ },
+ {
+  "cCode": "1500",
+  "cDesc": "Sundry Receivables"
+ },
+ {
+  "cCode": "1501",
+  "cDesc": "G.S.T Receivables"
+ },
+ {
+  "cCode": "1502",
+  "cDesc": "T.V.Q Receivables"
+ },
+ {
+  "cCode": "1503",
+  "cDesc": "G.S.T. RECEIVABLE"
+ },
+ {
+  "cCode": "1504",
+  "cDesc": "T.V.Q. RECEIVABLE"
+ },
+ {
+  "cCode": "1505",
+  "cDesc": "DU TO 9122-2844 QUEBEC INC"
+ },
+ {
+  "cCode": "1506",
+  "cDesc": "C.A.RECEIVABLES"
+ },
+ {
+  "cCode": "1507",
+  "cDesc": "C.A.RECEIVABLES"
+ },
+ {
+  "cCode": "1510",
+  "cDesc": "Advances"
+ },
+ {
+  "cCode": "1520",
+  "cDesc": "Unrealized gain on forward contract"
+ },
+ {
+  "cCode": "1530",
+  "cDesc": "Fire Claim"
+ },
+ {
+  "cCode": "1550",
+  "cDesc": "Income Taxes Recoverable"
+ },
+ {
+  "cCode": "1600",
+  "cDesc": "Investments"
+ },
+ {
+  "cCode": "1605",
+  "cDesc": "Advances"
+ },
+ {
+  "cCode": "1700",
+  "cDesc": "Land"
+ },
+ {
+  "cCode": "1705",
+  "cDesc": "Building"
+ },
+ {
+  "cCode": "1709",
+  "cDesc": "Building ancien"
+ },
+ {
+  "cCode": "1710",
+  "cDesc": "Equipment"
+ },
+ {
+  "cCode": "1711",
+  "cDesc": "Equipment in progress"
+ },
+ {
+  "cCode": "1712",
+  "cDesc": "Office Equipment"
+ },
+ {
+  "cCode": "1713",
+  "cDesc": "Equipment project 9"
+ },
+ {
+  "cCode": "1714",
+  "cDesc": "Building project 9"
+ },
+ {
+  "cCode": "1715",
+  "cDesc": "Computer Equipment"
+ },
+ {
+  "cCode": "1716",
+  "cDesc": "Trucks & vehicules"
+ },
+ {
+  "cCode": "1720",
+  "cDesc": "Rolling Stock"
+ },
+ {
+  "cCode": "1730",
+  "cDesc": "New Project Costs"
+ },
+ {
+  "cCode": "1731",
+  "cDesc": "Construction/Building in progress"
+ },
+ {
+  "cCode": "1732",
+  "cDesc": "STARTING COST"
+ },
+ {
+  "cCode": "1740",
+  "cDesc": "Moulds"
+ },
+ {
+  "cCode": "1745",
+  "cDesc": "Subvention Equipment"
+ },
+ {
+  "cCode": "1746",
+  "cDesc": "Crédit d'impôt sur investissement"
+ },
+ {
+  "cCode": "1750",
+  "cDesc": "Accum. Depreciation - Building"
+ },
+ {
+  "cCode": "1752",
+  "cDesc": "accm.Depreciation Starting Cost"
+ },
+ {
+  "cCode": "1753",
+  "cDesc": "Accu. Depreciation -Equipment project 9"
+ },
+ {
+  "cCode": "1754",
+  "cDesc": "Acc.Depreciation-builing project 9"
+ },
+ {
+  "cCode": "1755",
+  "cDesc": "Accum. Deprec. - Equipment"
+ },
+ {
+  "cCode": "1756",
+  "cDesc": "Acc.Depreciation Office Equipment"
+ },
+ {
+  "cCode": "1757",
+  "cDesc": "Acc.Depreciation-Computer Equipment"
+ },
+ {
+  "cCode": "1758",
+  "cDesc": "Acc.Depreciation-Trucks & vehicules"
+ },
+ {
+  "cCode": "1760",
+  "cDesc": "Accum. Deprec. Rolling Stock"
+ },
+ {
+  "cCode": "1765",
+  "cDesc": "Accum. Deprec. Moulds"
+ },
+ {
+  "cCode": "1766",
+  "cDesc": "Accum. Deprec. New Project Cost"
+ },
+ {
+  "cCode": "1767",
+  "cDesc": "Acc.Depreciation Government Grants"
+ },
+ {
+  "cCode": "1768",
+  "cDesc": "Acc.Amort. customer relation"
+ },
+ {
+  "cCode": "1769",
+  "cDesc": "Intangible Amortization"
+ },
+ {
+  "cCode": "1770",
+  "cDesc": "Government Grants"
+ },
+ {
+  "cCode": "1800",
+  "cDesc": "Product Developement Costs"
+ },
+ {
+  "cCode": "1810",
+  "cDesc": "Deferred Financial fees"
+ },
+ {
+  "cCode": "1820",
+  "cDesc": "Deal costs"
+ },
+ {
+  "cCode": "1850",
+  "cDesc": "Goodwill"
+ },
+ {
+  "cCode": "1860",
+  "cDesc": "Intangible Trademarks"
+ },
+ {
+  "cCode": "1870",
+  "cDesc": "Intangible Customers"
+ },
+ {
+  "cCode": "1999",
+  "cDesc": "Total of Assets"
+ },
+ {
+  "cCode": "2100",
+  "cDesc": "Bank Loan - CDN"
+ },
+ {
+  "cCode": "2110",
+  "cDesc": "Bank Loan - U.S."
+ },
+ {
+  "cCode": "2111",
+  "cDesc": "DUE TO 9122/2844 QUEBEC INC"
+ },
+ {
+  "cCode": "2112",
+  "cDesc": "DUE TO MAXI HOLDINGS"
+ },
+ {
+  "cCode": "2115",
+  "cDesc": "Exchange differential on u.s. bank loan"
+ },
+ {
+  "cCode": "2120",
+  "cDesc": "Accounts Payable u.s."
+ },
+ {
+  "cCode": "2125",
+  "cDesc": "Exchange Differential on Payables"
+ },
+ {
+  "cCode": "2130",
+  "cDesc": "Accruals Canadian (system)"
+ },
+ {
+  "cCode": "2131",
+  "cDesc": "Vacation to pay"
+ },
+ {
+  "cCode": "2132",
+  "cDesc": "Bonus to pay"
+ },
+ {
+  "cCode": "2133",
+  "cDesc": "Accruals Canadian"
+ },
+ {
+  "cCode": "2134",
+  "cDesc": "Accruals can:demos Costco"
+ },
+ {
+  "cCode": "2135",
+  "cDesc": "Payroll to pay"
+ },
+ {
+  "cCode": "2136",
+  "cDesc": "Mobile days to pay"
+ },
+ {
+  "cCode": "2137",
+  "cDesc": "Accruals Delivery"
+ },
+ {
+  "cCode": "2138",
+  "cDesc": "Accruals Duty"
+ },
+ {
+  "cCode": "2139",
+  "cDesc": "Accruals Brokerage"
+ },
+ {
+  "cCode": "2140",
+  "cDesc": "Accruals u.s."
+ },
+ {
+  "cCode": "2141",
+  "cDesc": "Accruals-Couvoir"
+ },
+ {
+  "cCode": "2144",
+  "cDesc": "Accruals Can  Demos Sam's"
+ },
+ {
+  "cCode": "2145",
+  "cDesc": "Accruals Can BJ'S"
+ },
+ {
+  "cCode": "2146",
+  "cDesc": "Accruals Interco"
+ },
+ {
+  "cCode": "2147",
+  "cDesc": "Accruals Interco US$"
+ },
+ {
+  "cCode": "2148",
+  "cDesc": "Accruals US"
+ },
+ {
+  "cCode": "2150",
+  "cDesc": "Exchange Differential on Accruals u.s."
+ },
+ {
+  "cCode": "2200",
+  "cDesc": "Accounts Payable canadian"
+ },
+ {
+  "cCode": "2205",
+  "cDesc": "Outstanding cheques"
+ },
+ {
+  "cCode": "2206",
+  "cDesc": "Outstanding deposit"
+ },
+ {
+  "cCode": "2210",
+  "cDesc": "G.S.T. Payable"
+ },
+ {
+  "cCode": "2211",
+  "cDesc": "Q.S.T. PAYABLE"
+ },
+ {
+  "cCode": "2215",
+  "cDesc": "Provincial Income Tax (P.I.T.)"
+ },
+ {
+  "cCode": "2220",
+  "cDesc": "Federal Income Tax ( F.I.T.)"
+ },
+ {
+  "cCode": "2225",
+  "cDesc": "REER Collectif"
+ },
+ {
+  "cCode": "2230",
+  "cDesc": "Management Fees Payable U.S."
+ },
+ {
+  "cCode": "2250",
+  "cDesc": "Income Taxes Payable"
+ },
+ {
+  "cCode": "2251",
+  "cDesc": "Future Taxes Payable"
+ },
+ {
+  "cCode": "2252",
+  "cDesc": "Future Income Tax"
+ },
+ {
+  "cCode": "2253",
+  "cDesc": "Income taxe payable US"
+ },
+ {
+  "cCode": "2255",
+  "cDesc": "Union Dues"
+ },
+ {
+  "cCode": "2260",
+  "cDesc": "Salary Seizure"
+ },
+ {
+  "cCode": "2265",
+  "cDesc": "Fond F.T.Q. Dues"
+ },
+ {
+  "cCode": "2270",
+  "cDesc": "Club Social Dues"
+ },
+ {
+  "cCode": "2275",
+  "cDesc": "Pension Alimentaire Dues"
+ },
+ {
+  "cCode": "2280",
+  "cDesc": "Fond CSN Dues"
+ },
+ {
+  "cCode": "2285",
+  "cDesc": "Centraide Dues"
+ },
+ {
+  "cCode": "2300",
+  "cDesc": "Deferred Income Taxes"
+ },
+ {
+  "cCode": "2400",
+  "cDesc": "Long Term Loan"
+ },
+ {
+  "cCode": "2410",
+  "cDesc": "Loans Payable -"
+ },
+ {
+  "cCode": "2411",
+  "cDesc": "LOAN PAYABLE"
+ },
+ {
+  "cCode": "2412",
+  "cDesc": "U.S.Loan Payable /LPP"
+ },
+ {
+  "cCode": "2413",
+  "cDesc": "Current portion of long term debt"
+ },
+ {
+  "cCode": "2414",
+  "cDesc": "CAPITAL  LEASING"
+ },
+ {
+  "cCode": "2415",
+  "cDesc": "Long Term Debt-other"
+ },
+ {
+  "cCode": "2420",
+  "cDesc": "Bank loan Canadian long term"
+ },
+ {
+  "cCode": "2430",
+  "cDesc": "Bank Loan US"
+ },
+ {
+  "cCode": "2431",
+  "cDesc": "Exchange Différential on Loan US"
+ },
+ {
+  "cCode": "2450",
+  "cDesc": "LOAN SPECIAL"
+ },
+ {
+  "cCode": "2460",
+  "cDesc": "LOAN INVESTMENTS"
+ },
+ {
+  "cCode": "2500",
+  "cDesc": "Accrued Interest Payable"
+ },
+ {
+  "cCode": "2999",
+  "cDesc": "Total of liabilities"
+ },
+ {
+  "cCode": "3100",
+  "cDesc": "Capital Stock"
+ },
+ {
+  "cCode": "3200",
+  "cDesc": "Excess of Appr. Value"
+ },
+ {
+  "cCode": "3205",
+  "cDesc": "DIVIDENDS"
+ },
+ {
+  "cCode": "3300",
+  "cDesc": "Retained Earnings"
+ },
+ {
+  "cCode": "3400",
+  "cDesc": "Preferred Shares"
+ },
+ {
+  "cCode": "3405",
+  "cDesc": "STOCK OPTIONS"
+ },
+ {
+  "cCode": "3410",
+  "cDesc": "Cash from transaction"
+ },
+ {
+  "cCode": "3500",
+  "cDesc": "Contribution Surplus"
+ },
+ {
+  "cCode": "3999",
+  "cDesc": "Shareholders Equity"
+ },
+ {
+  "cCode": "4100",
+  "cDesc": "Sales"
+ },
+ {
+  "cCode": "4101",
+  "cDesc": "Exchange differential on u.s. sales"
+ },
+ {
+  "cCode": "4102",
+  "cDesc": "Sales CAN Misc"
+ },
+ {
+  "cCode": "4103",
+  "cDesc": "Quota"
+ },
+ {
+  "cCode": "4105",
+  "cDesc": "Sales u.s."
+ },
+ {
+  "cCode": "4106",
+  "cDesc": "Sales Mexico"
+ },
+ {
+  "cCode": "4107",
+  "cDesc": "Royalty"
+ },
+ {
+  "cCode": "4200",
+  "cDesc": "Interest Earned"
+ },
+ {
+  "cCode": "4300",
+  "cDesc": "Income Re Futures"
+ },
+ {
+  "cCode": "4400",
+  "cDesc": "Misc.Income"
+ },
+ {
+  "cCode": "4450",
+  "cDesc": "Transport Income"
+ },
+ {
+  "cCode": "4500",
+  "cDesc": "Special Income Notice of Intention"
+ },
+ {
+  "cCode": "4501",
+  "cDesc": "Spec.Income Shares Subs.Agreement"
+ },
+ {
+  "cCode": "4650",
+  "cDesc": "Palettes Income"
+ },
+ {
+  "cCode": "4999",
+  "cDesc": "Total Income"
+ },
+ {
+  "cCode": "5100",
+  "cDesc": "Purchases"
+ },
+ {
+  "cCode": "510000",
+  "cDesc": "COGS - Finished goods / Wip"
+ },
+ {
+  "cCode": "510001",
+  "cDesc": "COGS - Wip Inventory Ingredients"
+ },
+ {
+  "cCode": "510002",
+  "cDesc": "COGS: Décompte d'inventaire"
+ },
+ {
+  "cCode": "510003",
+  "cDesc": "COGS"
+ },
+ {
+  "cCode": "510030",
+  "cDesc": "COGS - Ready to pack"
+ },
+ {
+  "cCode": "510035",
+  "cDesc": "COGS - Premix"
+ },
+ {
+  "cCode": "510036",
+  "cDesc": "COGS-Premix no2"
+ },
+ {
+  "cCode": "510040",
+  "cDesc": "COGS - Meats"
+ },
+ {
+  "cCode": "510041",
+  "cDesc": "COGS - Coaters"
+ },
+ {
+  "cCode": "510042",
+  "cDesc": "COGS - General ingredients"
+ },
+ {
+  "cCode": "510043",
+  "cDesc": "COGS - Vegetable / Grain"
+ },
+ {
+  "cCode": "510044",
+  "cDesc": "COGS - Dairy product"
+ },
+ {
+  "cCode": "510045",
+  "cDesc": "COGS - Fats & Oils"
+ },
+ {
+  "cCode": "510060",
+  "cDesc": "COGS - Industral gasses"
+ },
+ {
+  "cCode": "5105",
+  "cDesc": "Damaged / Obsolete Inventory"
+ },
+ {
+  "cCode": "5110",
+  "cDesc": "Discount on Purchases"
+ },
+ {
+  "cCode": "5115",
+  "cDesc": "Duty Expenses"
+ },
+ {
+  "cCode": "5125",
+  "cDesc": "Transport Expenses - Incoming"
+ },
+ {
+  "cCode": "5150",
+  "cDesc": "Packaging & Shipping"
+ },
+ {
+  "cCode": "515000",
+  "cDesc": "Wip / Inventory packaging"
+ },
+ {
+  "cCode": "515050",
+  "cDesc": "COGS - Rigid packaging"
+ },
+ {
+  "cCode": "515051",
+  "cDesc": "COGS - Flexible packaging"
+ },
+ {
+  "cCode": "515052",
+  "cDesc": "COGS - Other packaging"
+ },
+ {
+  "cCode": "5200",
+  "cDesc": "Gross Wages"
+ },
+ {
+  "cCode": "5201",
+  "cDesc": "R.D.TAX CREDIT WAGES"
+ },
+ {
+  "cCode": "5202",
+  "cDesc": "Gross wages overtime (1/2)"
+ },
+ {
+  "cCode": "5203",
+  "cDesc": "Gross wages overtime (Double)"
+ },
+ {
+  "cCode": "5209",
+  "cDesc": "Employee Benefits project 9"
+ },
+ {
+  "cCode": "5210",
+  "cDesc": "Unemployment Insurance ( UIC)"
+ },
+ {
+  "cCode": "5211",
+  "cDesc": "Employee Benefits"
+ },
+ {
+  "cCode": "5212",
+  "cDesc": "R.Q.A.P. (QPIP) (Quebec Parental Ins)"
+ },
+ {
+  "cCode": "5215",
+  "cDesc": "Quebec Pension Plan ( QPP)"
+ },
+ {
+  "cCode": "5220",
+  "cDesc": "Canada Pension Plan ( CPP)"
+ },
+ {
+  "cCode": "5222",
+  "cDesc": "RPDB (regime participation différee ben)"
+ },
+ {
+  "cCode": "5225",
+  "cDesc": "Quebec Healt Insurance ( QHI)"
+ },
+ {
+  "cCode": "5226",
+  "cDesc": "Labour Standards (C.N.T.)"
+ },
+ {
+  "cCode": "5230",
+  "cDesc": "Ontario Health Insurance"
+ },
+ {
+  "cCode": "5235",
+  "cDesc": "Union Dues"
+ },
+ {
+  "cCode": "5240",
+  "cDesc": "Salary Seizure"
+ },
+ {
+  "cCode": "5245",
+  "cDesc": "Minimum Wage"
+ },
+ {
+  "cCode": "5250",
+  "cDesc": "Fond F.T Q."
+ },
+ {
+  "cCode": "5255",
+  "cDesc": "Group Insurance"
+ },
+ {
+  "cCode": "5260",
+  "cDesc": "Club Social"
+ },
+ {
+  "cCode": "5265",
+  "cDesc": "Comm. Acc. Travail ( C.S.S.T.)"
+ },
+ {
+  "cCode": "5270",
+  "cDesc": "Net Payroll"
+ },
+ {
+  "cCode": "5275",
+  "cDesc": "Child Support"
+ },
+ {
+  "cCode": "5280",
+  "cDesc": "Administration Salary"
+ },
+ {
+  "cCode": "5281",
+  "cDesc": "Bonus"
+ },
+ {
+  "cCode": "5282",
+  "cDesc": "Vacations"
+ },
+ {
+  "cCode": "5285",
+  "cDesc": "Fond CSN"
+ },
+ {
+  "cCode": "5290",
+  "cDesc": "Office Salaries"
+ },
+ {
+  "cCode": "5291",
+  "cDesc": "Salaires Préavis"
+ },
+ {
+  "cCode": "5295",
+  "cDesc": "Centraide"
+ },
+ {
+  "cCode": "5300",
+  "cDesc": "Commission"
+ },
+ {
+  "cCode": "5305",
+  "cDesc": "Meals & Entertainment"
+ },
+ {
+  "cCode": "5320",
+  "cDesc": "Advertising"
+ },
+ {
+  "cCode": "5324",
+  "cDesc": "Selling Expenses;Allocation de prix"
+ },
+ {
+  "cCode": "5325",
+  "cDesc": "Selling Expenses: Demos"
+ },
+ {
+  "cCode": "5326",
+  "cDesc": "selling Expenses : Coupons"
+ },
+ {
+  "cCode": "5327",
+  "cDesc": "Selling Expenses : Slotting"
+ },
+ {
+  "cCode": "5328",
+  "cDesc": "Selling Expenses: Promo"
+ },
+ {
+  "cCode": "5329",
+  "cDesc": "Selling Expenses: Other"
+ },
+ {
+  "cCode": "5330",
+  "cDesc": "Salesman Expenses"
+ },
+ {
+  "cCode": "5331",
+  "cDesc": "Sales Salaries"
+ },
+ {
+  "cCode": "5335",
+  "cDesc": "Marketing"
+ },
+ {
+  "cCode": "5336",
+  "cDesc": "S&M Salary Interco"
+ },
+ {
+  "cCode": "5337",
+  "cDesc": "S&M Fringe Interco"
+ },
+ {
+  "cCode": "5338",
+  "cDesc": "S&M Travel Interco"
+ },
+ {
+  "cCode": "5339",
+  "cDesc": "S&M Car & Trucks Expenses Interco"
+ },
+ {
+  "cCode": "5340",
+  "cDesc": "S&M Office Expenses Inteco"
+ },
+ {
+  "cCode": "5341",
+  "cDesc": "S&M Other Interco"
+ },
+ {
+  "cCode": "5342",
+  "cDesc": "S&M Management Fees Interco"
+ },
+ {
+  "cCode": "5343",
+  "cDesc": "Interco Mark-Up"
+ },
+ {
+  "cCode": "5370",
+  "cDesc": "Rebate"
+ },
+ {
+  "cCode": "5375",
+  "cDesc": "Cash discount/Escompte paiement"
+ },
+ {
+  "cCode": "5380",
+  "cDesc": "Spoilage Allowance"
+ },
+ {
+  "cCode": "5385",
+  "cDesc": "Transport Allowance"
+ },
+ {
+  "cCode": "5400",
+  "cDesc": "Consulting Fees"
+ },
+ {
+  "cCode": "5401",
+  "cDesc": "LPP MONITORING"
+ },
+ {
+  "cCode": "5410",
+  "cDesc": "Legal"
+ },
+ {
+  "cCode": "5420",
+  "cDesc": "Audit"
+ },
+ {
+  "cCode": "5450",
+  "cDesc": "Travel Expenses"
+ },
+ {
+  "cCode": "5500",
+  "cDesc": "Delivery Expenses (Direct)"
+ },
+ {
+  "cCode": "5501",
+  "cDesc": "Delivery Expenses Costco"
+ },
+ {
+  "cCode": "5502",
+  "cDesc": "Delivery Expenses (Indirect)"
+ },
+ {
+  "cCode": "5503",
+  "cDesc": "Delivery Exp. Late delivery"
+ },
+ {
+  "cCode": "5510",
+  "cDesc": "Car & Truck Expenses"
+ },
+ {
+  "cCode": "5511",
+  "cDesc": "Inspection Expenses"
+ },
+ {
+  "cCode": "5550",
+  "cDesc": "Municipal Taxes"
+ },
+ {
+  "cCode": "5555",
+  "cDesc": "Rental (leasing)"
+ },
+ {
+  "cCode": "5560",
+  "cDesc": "Rent"
+ },
+ {
+  "cCode": "5565",
+  "cDesc": "Insurance"
+ },
+ {
+  "cCode": "5570",
+  "cDesc": "U.S. Non Income Tax"
+ },
+ {
+  "cCode": "5600",
+  "cDesc": "Storage"
+ },
+ {
+  "cCode": "5601",
+  "cDesc": "Storage- Costco"
+ },
+ {
+  "cCode": "5650",
+  "cDesc": "Telephone"
+ },
+ {
+  "cCode": "5660",
+  "cDesc": "Heating"
+ },
+ {
+  "cCode": "5670",
+  "cDesc": "Electricity"
+ },
+ {
+  "cCode": "5700",
+  "cDesc": "Plant Supplies"
+ },
+ {
+  "cCode": "570062",
+  "cDesc": "Supplies - General operation"
+ },
+ {
+  "cCode": "570064",
+  "cDesc": "Supplies - Sanitation"
+ },
+ {
+  "cCode": "570070",
+  "cDesc": "Supplies - Labo / Assurance Quality"
+ },
+ {
+  "cCode": "570071",
+  "cDesc": "Supplies - Test kitchen / R&D"
+ },
+ {
+  "cCode": "570072",
+  "cDesc": "Lab.Analysis"
+ },
+ {
+  "cCode": "570073",
+  "cDesc": "Water Treatment"
+ },
+ {
+  "cCode": "5709",
+  "cDesc": "Wip spare parts inventory"
+ },
+ {
+  "cCode": "5710",
+  "cDesc": "Repairs & Maintenance"
+ },
+ {
+  "cCode": "5711",
+  "cDesc": "Obsolescence spare parts"
+ },
+ {
+  "cCode": "5712",
+  "cDesc": "Gain/loss on asset disposal"
+ },
+ {
+  "cCode": "5720",
+  "cDesc": "TRAINING/FORMATION"
+ },
+ {
+  "cCode": "5745",
+  "cDesc": "Consumer Care Support"
+ },
+ {
+  "cCode": "5750",
+  "cDesc": "General Expenses"
+ },
+ {
+  "cCode": "5755",
+  "cDesc": "Recall"
+ },
+ {
+  "cCode": "5760",
+  "cDesc": "Office Expenses"
+ },
+ {
+  "cCode": "5765",
+  "cDesc": "Computer  Expenses"
+ },
+ {
+  "cCode": "5800",
+  "cDesc": "Bad Debt"
+ },
+ {
+  "cCode": "5810",
+  "cDesc": "Donation/Sponsorships"
+ },
+ {
+  "cCode": "5820",
+  "cDesc": "Security Expense"
+ },
+ {
+  "cCode": "5830",
+  "cDesc": "Foreign Exchange"
+ },
+ {
+  "cCode": "5831",
+  "cDesc": "FX COGS"
+ },
+ {
+  "cCode": "5832",
+  "cDesc": "FX Long Term Debt"
+ },
+ {
+  "cCode": "5840",
+  "cDesc": "Depreciation Expense"
+ },
+ {
+  "cCode": "5841",
+  "cDesc": "Intangible Amortization"
+ },
+ {
+  "cCode": "5850",
+  "cDesc": "Suspense"
+ },
+ {
+  "cCode": "5860",
+  "cDesc": "FOREIGN MARKET DEVELOPMENT"
+ },
+ {
+  "cCode": "5900",
+  "cDesc": "Interest & Bank Charges TR. B/C"
+ },
+ {
+  "cCode": "5901",
+  "cDesc": "interets line of credit"
+ },
+ {
+  "cCode": "5905",
+  "cDesc": "Int. on Long Term Debt Sub/Bankers fees"
+ },
+ {
+  "cCode": "5910",
+  "cDesc": "Deferred Financials Fees w.Interest"
+ },
+ {
+  "cCode": "5915",
+  "cDesc": "Subordinated Debt/ LPP"
+ },
+ {
+  "cCode": "5920",
+  "cDesc": "Interest Income"
+ },
+ {
+  "cCode": "5925",
+  "cDesc": "Account Receivable Discount"
+ },
+ {
+  "cCode": "5930",
+  "cDesc": "INSURANCE CLAIM"
+ },
+ {
+  "cCode": "5935",
+  "cDesc": "Prof.fee (Financing)"
+ },
+ {
+  "cCode": "5936",
+  "cDesc": "Professional Fees Head Hunter"
+ },
+ {
+  "cCode": "5940",
+  "cDesc": "Board Fees"
+ },
+ {
+  "cCode": "5941",
+  "cDesc": "Fees:Tall Tree"
+ },
+ {
+  "cCode": "5942",
+  "cDesc": "Fees:Altamont"
+ },
+ {
+  "cCode": "5943",
+  "cDesc": "Deal Expenses"
+ },
+ {
+  "cCode": "5944",
+  "cDesc": "Other"
+ },
+ {
+  "cCode": "5945",
+  "cDesc": "GAIN ON SALE"
+ },
+ {
+  "cCode": "5950",
+  "cDesc": "Income Tax"
+ },
+ {
+  "cCode": "5951",
+  "cDesc": "Income Tax US"
+ },
+ {
+  "cCode": "5952",
+  "cDesc": "Futur Income taxes variation"
+ },
+ {
+  "cCode": "5960",
+  "cDesc": "Testing cost"
+ },
+ {
+  "cCode": "5990",
+  "cDesc": "Stock Options - Remuneration"
+ },
+ {
+  "cCode": "5999",
+  "cDesc": "Total Expenses"
+ },
+ {
+  "cCode": "9999",
+  "cDesc": "AJUSTEMENT"
+ },
+ {
+  "cCode": "ZZZZZZ",
+  "cDesc": "COMPTE BIDON"
+ }
+]

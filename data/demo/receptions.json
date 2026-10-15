@@ -1,0 +1,143 @@
+{
+ "receiving_details": [
+  {
+   "NoReception": "700101",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-22",
+   "Fournisseur": "Techno Bureau Plus inc.",
+   "CodeFournisseur": "TECBUR",
+   "NoBonCommande": "500101",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "LAP-14I7",
+     "Description": "Portable 14 po Core i7, 16 Go / 512 Go SSD",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "1250.00",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "5748.75",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "5000.00",
+   "Transport": "0.00",
+   "TPS": "250.00",
+   "TVQ": "498.75"
+  },
+  {
+   "NoReception": "700102",
+   "COMPANY": "MA2",
+   "DateReception": "2026-10-01",
+   "Fournisseur": "Techno Bureau Plus inc.",
+   "CodeFournisseur": "TECBUR",
+   "NoBonCommande": "500101",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "DOCK-USBC",
+     "Description": "Station d'accueil USB-C",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "210.00",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "965.79",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "840.00",
+   "Transport": "0.00",
+   "TPS": "42.00",
+   "TVQ": "83.79"
+  },
+  {
+   "NoReception": "700201",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-29",
+   "Fournisseur": "Lumière Pro Électrique inc.",
+   "CodeFournisseur": "LUMPRO",
+   "NoBonCommande": "500201",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "LED-2X4",
+     "Description": "Panneau DEL 2 x 4 pi, 40 W",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "89.00",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "DRV-DIM",
+     "Description": "Pilote DEL gradable",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "24.50",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "1565.96",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "1362.00",
+   "Transport": "0.00",
+   "TPS": "68.10",
+   "TVQ": "135.86"
+  }
+ ],
+ "unbilled_receiving": [
+  {
+   "COMPANY": "MA2",
+   "NoReception": "700101",
+   "DateReception": "2026-09-22",
+   "NoBonCommande": "500101",
+   "Fournisseur": "Techno Bureau Plus inc.",
+   "CodeFournisseur": "TECBUR",
+   "MontantRecu": "5748.75",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "0",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "700102",
+   "DateReception": "2026-10-01",
+   "NoBonCommande": "500101",
+   "Fournisseur": "Techno Bureau Plus inc.",
+   "CodeFournisseur": "TECBUR",
+   "MontantRecu": "965.79",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "0",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "700201",
+   "DateReception": "2026-09-29",
+   "NoBonCommande": "500201",
+   "Fournisseur": "Lumière Pro Électrique inc.",
+   "CodeFournisseur": "LUMPRO",
+   "MontantRecu": "1565.96",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "0",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  }
+ ]
+}
