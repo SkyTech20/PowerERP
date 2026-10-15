@@ -6,7 +6,7 @@
   <title>PowerERP Demo</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
-<body>
+<body class="logged-out">
   <header class="topbar">
     <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
     <a class="brand" href="#/">
@@ -22,7 +22,10 @@
       <button type="button" data-lang="en">EN</button>
       <button type="button" data-lang="fr">FR</button>
     </div>
-    <div class="user"><span class="avatar">DU</span><span class="user-name" data-i18n="app.user"></span></div>
+    <div class="user">
+      <a class="user-link" href="#/account" id="userLink"><span class="avatar" id="userAvatar"></span><span class="user-name" id="userName"></span></a>
+      <button type="button" class="btn small logout-btn" id="logoutBtn" data-i18n="auth.logout"></button>
+    </div>
   </header>
 
   <div class="layout">
@@ -31,6 +34,21 @@
       <div class="demo-banner" data-i18n="app.demoBanner"></div>
       <div id="view"></div>
     </main>
+  </div>
+
+  <div class="login-screen" id="login" hidden>
+    <form class="login-card card" id="loginForm" novalidate>
+      <div class="login-brand"><span class="brand-logo">P</span><span><strong data-i18n="app.name"></strong><small data-i18n="app.tagline"></small></span></div>
+      <h1 data-i18n="auth.title"></h1>
+      <div class="field"><label for="loginUser" data-i18n="auth.username"></label><input type="text" id="loginUser" autocomplete="username" autofocus></div>
+      <div class="field"><label for="loginPass" data-i18n="auth.password"></label><input type="password" id="loginPass" autocomplete="current-password"></div>
+      <div class="login-error" id="loginError" hidden></div>
+      <button type="submit" class="btn primary login-submit" data-i18n="auth.signIn"></button>
+      <div class="lang-switch login-lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="fr">FR</button>
+      </div>
+    </form>
   </div>
 
   <div class="toast-host" id="toasts"></div>

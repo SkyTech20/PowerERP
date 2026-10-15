@@ -4,8 +4,9 @@ PowerERP (demo ERP) — JSON API and static UI.
 UI:  http://localhost:5050/
 API: http://localhost:5050/api/<resource>
 
-Data is loaded from data/*.json at startup and kept in memory: restarting the
-app, or POST /api/reset, restores the original demo data.
+Data is seeded from data/*.json and kept in memory; app.py saves it to the
+SQLite database (db.py) after every change and loads it back at startup.
+POST /api/reset restores the original demo data.
 """
 import copy
 from datetime import datetime
@@ -249,14 +250,25 @@ def register_erp(app, ns):
             rows = [r for r in rows if q in r["code"].lower() or q in (r["label"] or "").lower()]
         return jsonify(rows[:limit])
 
+    def _tables():
+        return ((gl, "gl"), (cc, "cc"), (suppliers, "suppliers"), (po_details, "po_details"),
+                (unbilled_po, "unbilled_po"), (receiving_details, "receiving_details"),
+                (unbilled_receiving, "unbilled_receiving"), (invoices, "invoices"))
+
+    def dump():
+        """Every ERP table, for the database."""
+        return {key: target for target, key in _tables()}
+
+    def load(data):
+        """Replace the ERP tables (in place: powerware_api shares these lists)."""
+        for target, key in _tables():
+            if key in data:
+                target[:] = data[key]
+        state["next_invoice_id"] = max((i["id"] for i in invoices), default=0) + 1
+
     @bp.route("/api/reset", methods=["POST"])
     def erp_reset():
-        data = copy.deepcopy(snapshot)
-        for target, key in ((gl, "gl"), (cc, "cc"), (suppliers, "suppliers"), (po_details, "po_details"),
-                            (unbilled_po, "unbilled_po"), (receiving_details, "receiving_details"),
-                            (unbilled_receiving, "unbilled_receiving"), (invoices, "invoices")):
-            target[:] = data[key]
-        state["next_invoice_id"] = data["next_invoice_id"]
+        load(copy.deepcopy(snapshot))
         return jsonify({"ok": True})
 
     @bp.route("/api/clear", methods=["POST"])
@@ -741,4 +753,4 @@ def register_erp(app, ns):
             unbilled_receiving[:] = [r for r in unbilled_receiving if r["NoReception"] not in billed]
         return inv
 
-    return {"invoice_exists": invoice_exists, "record_invoice": record_invoice}
+    return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load}

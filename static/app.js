@@ -44,6 +44,7 @@
     });
     let data = null;
     try { data = await res.json(); } catch (e) { /* empty body */ }
+    if (res.status === 401 && !opts.noAuthRedirect) showLogin();
     if (!res.ok) {
       const err = new Error((data && data.error) || "generic");
       err.code = (data && data.error) || "generic";
@@ -79,9 +80,13 @@
     { k: "proj", icon: "📁", items: ["proj.projects", "proj.jobcost"] },
     { k: "crm", icon: "🤝", items: ["crm.contacts", "crm.opportunities"] },
     { k: "rep", icon: "📊", items: ["rep.designer", "rep.bi"] },
-    { k: "admin", icon: "⚙️", items: ["admin.companies", "admin.users", "admin.taxes", "admin.currencies", "admin.settings"] },
+    { k: "admin", icon: "⚙️", items: ["admin.companies", { k: "admin.users", route: "/admin/users", admin: true }, "admin.taxes", "admin.currencies", "admin.settings"] },
   ];
   const openGroups = new Set(["gl", "ap", "pur"]);
+  let user = null; // logged-in user (GET api/auth/me)
+  const isAdmin = () => !!user && user.role === "admin";
+  // Menu items flagged admin: true are links for administrators only.
+  const usable = (i) => typeof i === "object" && (!i.admin || isAdmin());
 
   function renderSidebar() {
     const path = currentPath();
@@ -91,12 +96,13 @@
       if (m.route) {
         return `<a class="nav-link ${isActive(m.route) ? "active" : ""}" href="#${m.route}"><span class="nav-icon">${m.icon}</span>${esc(t("menu." + m.k))}</a>`;
       }
-      const enabled = m.items.some((i) => typeof i === "object");
+      const enabled = m.items.some(usable);
       const sub = m.items.map((i) => {
-        if (typeof i === "object") {
+        if (usable(i)) {
           return `<a class="nav-link ${isActive(i.route) ? "active" : ""}" href="#${i.route}">${esc(t("menu." + i.k))}</a>`;
         }
-        return `<span class="nav-link disabled" aria-disabled="true" title="${esc(t("app.menuUnavailable"))}">${esc(t("menu." + i))}<span class="lock">🔒</span></span>`;
+        const k = typeof i === "object" ? i.k : i;
+        return `<span class="nav-link disabled" aria-disabled="true" title="${esc(t("app.menuUnavailable"))}">${esc(t("menu." + k))}<span class="lock">🔒</span></span>`;
       }).join("");
       return `<details class="nav-group ${enabled ? "" : "dimmed"}" data-group="${m.k}" ${openGroups.has(m.k) ? "open" : ""}>
         <summary><span class="nav-icon">${m.icon}</span>${esc(t("menu." + m.k))}<span class="chev">▶</span></summary>
@@ -287,6 +293,43 @@
     },
   };
 
+  RES.users = {
+    api: "users", route: "/admin/users", title: "usr.title", sub: "usr.subtitle", one: "usr.one", newTitle: "usr.new",
+    id: (r) => r.id, label: (r) => `${r.username} — ${r.name}`, sort: "username",
+    filters: [
+      { f: "role", l: "f.role", options: [["admin", "role.admin"], ["user", "role.user"]] },
+      { f: "active", l: "f.active", options: [["true", "opt.active"], ["false", "opt.inactive"]] },
+    ],
+    columns: [
+      { f: "username", l: "f.username" }, { f: "name", l: "f.userName", wrap: true }, { f: "email", l: "f.email" },
+      { f: "role", l: "f.role", fmt: (v) => esc(t("role." + v)) },
+      { f: "lang", l: "f.lang", fmt: (v) => esc(String(v || "").toUpperCase()) },
+      { f: "active", l: "f.active", fmt: (v) => `<span class="badge ${v ? "yes" : "no"}">${esc(t(v ? "opt.active" : "opt.inactive"))}</span>` },
+      { f: "last_login", l: "f.lastLogin", fmt: (v) => esc(fmtDateTime(v)) },
+    ],
+    defaults: () => ({ role: "user", lang, active: true }),
+    sections: [
+      { t: "common.general", fields: [
+        { f: "username", l: "f.username", req: true, key: true, autocomplete: "off" },
+        { f: "name", l: "f.userName", req: true, span: 2 },
+        { f: "email", l: "f.email", type: "email" },
+        { f: "role", l: "f.role", type: "select", options: [["user", "role.user"], ["admin", "role.admin"]] },
+        { f: "lang", l: "f.lang", type: "select", options: [["en", "English"], ["fr", "Français"]], raw: true },
+        { f: "active", l: "opt.active", type: "check" },
+      ] },
+      { t: "usr.passwordSection", fields: [
+        { f: "password", l: "f.password", type: "password", reqNew: true, help: "usr.passwordHelp" },
+      ] },
+    ],
+  };
+
+  function fmtDateTime(v) {
+    if (!v) return "—";
+    const d = new Date(v);
+    if (isNaN(d)) return v;
+    return d.toLocaleString(lang === "fr" ? "fr-CA" : "en-CA", { dateStyle: "short", timeStyle: "short" });
+  }
+
   // ------------------------------------------------------------------ Lookups
   const lookupCache = {};
   let uid = 0;
@@ -463,7 +506,8 @@
     function fieldHtml(fd) {
       const v = model[fd.f];
       const ro = fd.readonly || (fd.key && !isNew);
-      const label = `<label for="f-${fd.f}">${esc(t(fd.l))}${fd.req ? '<span class="req">*</span>' : ""}</label>`;
+      const required = fd.req || (fd.reqNew && isNew);
+      const label = `<label for="f-${fd.f}">${esc(t(fd.l))}${required ? '<span class="req">*</span>' : ""}</label>`;
       const err = errors[fd.f] ? `<span class="err">${esc(t("err." + errors[fd.f]))}</span>` : "";
       const help = fd.help ? `<span class="help">${esc(t(fd.help))}</span>` : "";
       const cls = `field ${fd.span === 4 ? "span-4" : fd.span >= 2 ? "span-2" : ""} ${errors[fd.f] ? "invalid" : ""}`;
@@ -478,7 +522,9 @@
       } else {
         const list = fd.suggestions ? `list="sg-${fd.f}"` : "";
         const sg = fd.suggestions ? `<datalist id="sg-${fd.f}">${fd.suggestions.map((s) => `<option value="${esc(s)}">`).join("")}</datalist>` : "";
-        input = `<input type="${fd.type === "date" ? "date" : "text"}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${list} ${fd.inputmode ? `inputmode="${fd.inputmode}"` : ""}>${sg}`;
+        const type = ["date", "password", "email"].includes(fd.type) ? fd.type : "text";
+        const auto = fd.type === "password" ? 'autocomplete="new-password"' : fd.autocomplete ? `autocomplete="${fd.autocomplete}"` : "";
+        input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${list} ${auto} ${fd.inputmode ? `inputmode="${fd.inputmode}"` : ""}>${sg}`;
       }
       return `<div class="${cls}">${label}${input}${help}${err}</div>`;
     }
@@ -612,7 +658,7 @@
     async function save() {
       errors = {};
       R.sections.flatMap((s) => s.fields).forEach((fd) => {
-        if (fd.req && !String(model[fd.f] == null ? "" : model[fd.f]).trim()) errors[fd.f] = "required";
+        if ((fd.req || (fd.reqNew && isNew)) && !String(model[fd.f] == null ? "" : model[fd.f]).trim()) errors[fd.f] = "required";
       });
       if (Object.keys(errors).length) { render(); toast(t("err.form"), "error"); return; }
       try {
@@ -636,7 +682,7 @@
         await api(apiPath(), { method: "DELETE" });
         toast(t("common.deleted"), "success");
         location.hash = "#" + R.route;
-      } catch (e) { toast(t("err.generic"), "error"); }
+      } catch (e) { toast(t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic"), "error"); }
     }
 
     return {
@@ -648,6 +694,33 @@
         try { model = await api(apiPath()); } catch (e) { if (e.status === 404) missing = true; else throw e; }
       },
       render,
+    };
+  }
+
+  // ---------- My account (change own password)
+  function accountView() {
+    return {
+      async load() {},
+      render() {
+        const f = (id, l, auto) => `<div class="field"><label for="${id}">${esc(t(l))}<span class="req">*</span></label><input type="password" id="${id}" autocomplete="${auto}"></div>`;
+        $("#view").innerHTML = pageHead(t("acc.title"), `${user.name} (${user.username}) · ${t("role." + user.role)}`) + `
+          <form class="card" id="pwForm" novalidate><div class="card-head"><h2>${esc(t("acc.changePassword"))}</h2></div>
+            <div class="card-body"><div class="form-grid">
+              ${f("pwCurrent", "acc.current", "current-password")}${f("pwNew", "f.password", "new-password")}${f("pwConfirm", "acc.confirm", "new-password")}
+            </div><p class="help">${esc(t("usr.passwordHelp"))}</p>
+            <button type="submit" class="btn primary">${esc(t("common.save"))}</button></div></form>`;
+        $("#pwForm").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const current = $("#pwCurrent").value, password = $("#pwNew").value;
+          if (!current || !password) { toast(t("err.form"), "error"); return; }
+          if (password !== $("#pwConfirm").value) { toast(t("err.password_mismatch"), "error"); return; }
+          try {
+            await api("auth/password", { method: "POST", body: { current, password } });
+            toast(t("acc.passwordChanged"), "success");
+            this.render();
+          } catch (err) { toast(t("err." + err.code) !== "err." + err.code ? t("err." + err.code) : t("err.generic"), "error"); }
+        });
+      },
     };
   }
 
@@ -668,6 +741,12 @@
       if (!sub.length) return listView(key);
       if (sub[0] === "new") return formView(key, null);
       return formView(key, sub.join("/"));
+    }
+    if (head === "account") return accountView();
+    if (head === "admin" && rest[0] === "users" && isAdmin()) {
+      if (!rest[1]) return listView("users");
+      if (rest[1] === "new") return formView("users", null);
+      return formView("users", rest[1]);
     }
     const map = { suppliers: "suppliers", invoices: "invoices", po: "po", receptions: "receptions" };
     const key = map[head];
@@ -694,16 +773,76 @@
     }
   }
 
-  // ------------------------------------------------------------------ Boot
-  $$(".lang-switch button").forEach((b) => b.addEventListener("click", () => {
-    lang = b.dataset.lang;
+  // ------------------------------------------------------------------ Login
+  function setLang(l, remember) {
+    if (!I18N[l]) return;
+    lang = l;
     try { localStorage.setItem("erp.lang", lang); } catch (e) { /* ignore */ }
     applyStaticI18n();
-    renderSidebar();
-    if (view) view.render();
+    if (user) {
+      renderSidebar();
+      if (view) view.render();
+      if (remember) api("auth/lang", { method: "POST", body: { lang } }).catch(() => {});
+    }
+  }
+
+  function showUser() {
+    const initials = (user.name || user.username).split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+    $("#userAvatar").textContent = initials;
+    $("#userName").textContent = user.name || user.username;
+    $("#userLink").title = t("acc.title");
+  }
+
+  function showLogin() {
+    user = null;
+    view = null;
+    document.body.classList.add("logged-out");
+    $("#login").hidden = false;
+    $("#loginError").hidden = true;
+    $("#loginPass").value = "";
+    setTimeout(() => $("#loginUser").focus(), 0);
+  }
+
+  let langPicked = false; // language chosen on the login screen: saved to the user instead of the stored one
+  function enterApp(u) {
+    user = u;
+    if (langPicked) api("auth/lang", { method: "POST", body: { lang } }).catch(() => {});
+    else if (u.lang && I18N[u.lang]) setLang(u.lang);
+    langPicked = false;
+    document.body.classList.remove("logged-out");
+    $("#login").hidden = true;
+    showUser();
+    route();
+  }
+
+  $("#loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = $("#loginError");
+    err.hidden = true;
+    const username = $("#loginUser").value.trim(), password = $("#loginPass").value;
+    if (!username || !password) { err.textContent = t("auth.missing"); err.hidden = false; return; }
+    try {
+      enterApp(await api("auth/login", { method: "POST", body: { username, password }, noAuthRedirect: true }));
+    } catch (ex) {
+      err.textContent = t(ex.code === "bad_login" ? "auth.bad" : "err.generic");
+      err.hidden = false;
+      $("#loginPass").select();
+    }
+  });
+
+  $("#logoutBtn").addEventListener("click", async () => {
+    try { await api("auth/logout", { method: "POST", noAuthRedirect: true }); } catch (e) { /* ignore */ }
+    showLogin();
+    history.replaceState(null, "", "#/");
+  });
+
+  // ------------------------------------------------------------------ Boot
+  $$(".lang-switch button").forEach((b) => b.addEventListener("click", () => {
+    if (!user) langPicked = true;
+    setLang(b.dataset.lang, true);
   }));
   $("#menuToggle").addEventListener("click", () => document.body.classList.toggle("nav-open"));
-  window.addEventListener("hashchange", route);
+  window.addEventListener("hashchange", () => { if (user) route(); });
   applyStaticI18n();
-  route();
+  api("auth/me", { noAuthRedirect: true }).then(enterApp).catch(showLogin);
 })();

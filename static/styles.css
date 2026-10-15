@@ -51,7 +51,27 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .lang-switch { display: flex; border: 1px solid #2c4058; border-radius: 4px; overflow: hidden; }
 .lang-switch button { background: transparent; border: 0; color: #8ea3b9; padding: 4px 10px; cursor: pointer; font-weight: 600; font-size: 12px; }
 .lang-switch button.active { background: var(--nav-active); color: #fff; }
-.user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #c9d4e1; }
+.user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #c9d4e1; }
+.user-link { display: flex; align-items: center; gap: 8px; color: #c9d4e1; }
+.user-link:hover { text-decoration: none; color: #fff; }
+.topbar .logout-btn { background: transparent; border-color: #2c4058; color: #c9d4e1; }
+.topbar .logout-btn:hover { background: #1b2d41; }
+
+/* ---------- Login ---------- */
+body.logged-out .topbar, body.logged-out .layout { display: none; }
+.login-screen { min-height: 100vh; display: grid; place-items: center; padding: 16px; background: linear-gradient(160deg, #0f1d2c 0%, #17283b 55%, #1f5fa8 140%); }
+.login-screen[hidden] { display: none; }
+.login-card { width: 100%; max-width: 360px; padding: 28px 28px 22px; display: flex; flex-direction: column; gap: 14px; }
+.login-card h1 { margin: 4px 0 0; font-size: 18px; }
+.login-brand { display: flex; align-items: center; gap: 10px; color: var(--text); }
+.login-brand .brand-logo { color: #fff; }
+.login-brand > span:last-child { display: flex; flex-direction: column; line-height: 1.1; }
+.login-brand small { color: var(--muted); font-size: 11px; }
+.login-card input { width: 100%; }
+.login-submit { justify-content: center; padding: 9px 14px; }
+.login-error { color: var(--danger); font-size: 13px; }
+.login-lang { align-self: center; border-color: var(--border); }
+.login-lang button { color: var(--muted); }
 .avatar { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #2c4058; font-size: 11px; font-weight: 700; }
 .icon-btn { background: transparent; border: 0; color: inherit; cursor: pointer; font-size: 18px; padding: 4px 6px; }
 .menu-toggle { display: none; }
@@ -159,7 +179,7 @@ table.grid td.wrap { white-space: normal; min-width: 220px; }
 .field .help { font-size: 11px; color: var(--muted); }
 .field .hint { font-size: 11px; color: var(--primary); min-height: 0; }
 .field .err { font-size: 11px; color: var(--danger); }
-input[type=text], input[type=search], input[type=number], input[type=date], select, textarea {
+input[type=text], input[type=password], input[type=email], input[type=search], input[type=number], input[type=date], select, textarea {
   width: 100%; padding: 7px 9px; border: 1px solid var(--border); border-radius: 5px; background: #fff;
 }
 textarea { min-height: 64px; resize: vertical; }

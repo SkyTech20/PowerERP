@@ -9,9 +9,10 @@ A small PowerERP-like ERP for demos and tests.
   - **Purchase orders** (with lines)
   - **Receptions** (with lines; picking a PO pre-fills the supplier and the lines)
 - Each working module has a maintenance screen: list, search, sort, filter, create, edit, delete.
-- **English / French** toggle in the top bar (remembered in the browser).
+- **English / French** toggle in the top bar (remembered in the browser and per user).
+- **Login and users:** every screen needs a login. **Administration → Users** (administrators only) creates, edits, deactivates and deletes users (username, name, email, role *Administrator* / *User*, language, password). Each user changes their own password by clicking their name in the top bar.
 - **SkyAI integration:** the ERP also answers the PowerWARE web services that SkyAI calls (same paths, parameters and XML as the SkyAI mock API). SkyAI reads suppliers, GL accounts, POs and receptions from the ERP, and the invoice it creates at the end of its process shows up in **Invoices** (source "SkyAI").
-- No database: data is loaded from `data/*.json` at startup and kept in memory. Restarting the app, or **Dashboard → Reset demo data**, restores the original data. **Dashboard → Clear all data** (`POST /api/clear`) empties everything, to start a demo from a blank ERP.
+- **SQLite database** (`db/powererp.db`, or `ERP_DB_PATH`): users and all ERP data are saved there after every change and survive a restart. An empty database is seeded from `data/*.json` (or `data/demo/`). **Dashboard → Reset demo data** restores the original data; **Dashboard → Clear all data** (`POST /api/clear`) empties everything, to start a demo from a blank ERP. Delete the database file to start over completely (users included).
 - Taxes: on purchase orders and receptions, TPS (5%) and TVQ (9.975%) are calculated on subtotal + freight when the supplier has a TPS / TVQ number (supplier form, Terms & taxes). Existing records keep their stored taxes until a line, the freight or the supplier is changed.
 - Demo dataset: with `ERP_DATASET=demo` (set by `docker\rebuild.ps1 -DemoData` / `rebuild.sh --demo-data`) the ERP loads the fictitious French data in `data/demo/` instead of `data/*.json`: GL accounts, cost centers, 5 suppliers and no invoices. It covers the 5 demo scenarios, and the matching invoice PDFs (in French) are in `demo-invoices/`:
 
@@ -36,12 +37,32 @@ python app.py
 
 Open http://localhost:5050/ (change the port with the `PORT` environment variable).
 
+The first start creates the administrator `admin` with the password in `ERP_ADMIN_PASSWORD`; without it a random password is printed in the console. Then create the other users in **Administration → Users**.
+
 ### Docker
 
 ```bash
 docker build -t erp-sample .
-docker run -d -p 5050:5050 --name erp-sample erp-sample
+docker run -d -p 5050:5050 -v "$PWD/powererp-data:/app/db" -e ERP_ADMIN_PASSWORD=change-me --name erp-sample erp-sample
 ```
+
+The database is `/app/db/powererp.db` inside the container; mount `/app/db` (a folder or a named volume) to keep it when the container is recreated. SQLite needs no server: it is a file written by the ERP itself. Run a single ERP container per database file.
+
+### Settings (environment variables)
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `ERP_DB_PATH` | `db/powererp.db` (`/app/db/powererp.db` in Docker) | SQLite file |
+| `ERP_ADMIN_USER` / `ERP_ADMIN_PASSWORD` | `admin` / random (printed in the log) | Administrator created when the database has no user |
+| `ERP_SECRET_KEY` | random, saved in the database | Signs the login cookie |
+| `ERP_COOKIE_SECURE` | off | `1` sends the login cookie over HTTPS only (set it behind HTTPS) |
+| `ERP_API_KEY` | none | Lets scripts call `/api/...` without a login, and, when set, is required by the PowerWARE web services (header `X-API-Key`) |
+| `ERP_DATASET` | full data | `demo` seeds from `data/demo/` |
+
+## Security and SkyAI
+
+- The screens and `/api/...` need a login (session cookie `powererp_session`, 12 hours), or the header `X-API-Key: <ERP_API_KEY>`. `/api/users` is for administrators. `GET /api/health` is open (Docker healthcheck).
+- The PowerWARE web services (`/cgi-bin/...`, used by SkyAI) do not use the login. They stay open while `ERP_API_KEY` is empty, so SkyAI keeps working without any change. To protect them, set `ERP_API_KEY` and, in SkyAI **Configuration → APIs**, set each PowerERP API's authentication to *API Key*, in the header `X-API-Key`.
 
 ## Connect SkyAI to PowerERP
 
@@ -86,11 +107,13 @@ What happens when SkyAI creates an invoice:
 ## Project structure
 
 ```
-app.py          # Flask entry point, loads data/*.json
+app.py          # Flask entry point: database, login, ERP and PowerWARE services
+db.py           # SQLite storage (users, settings, ERP data)
+auth.py         # Login, users API (/api/auth/..., /api/users) and access control
 erp_api.py      # JSON API (/api/...) and static file serving
 powerware_api.py # PowerWARE-compatible web services used by SkyAI
 static/         # UI: index.html, app.js, i18n.js (EN/FR), styles.css — no build step
-data/           # Demo data (JSON)
+data/           # Seed data (JSON) for an empty database
 ```
 
 ## API
@@ -105,6 +128,8 @@ All endpoints return JSON. Lists accept `q` (search), `page`, `size`, `sort`, `d
 | Purchase orders | `GET/POST /api/purchase-orders`, `GET/PUT/DELETE /api/purchase-orders/<po>` |
 | Receptions | `GET/POST /api/receptions`, `GET/PUT/DELETE /api/receptions/<no>` |
 | Invoices | `GET/POST /api/invoices`, `GET/PUT/DELETE /api/invoices/<id>` |
-| Other | `GET /api/summary`, `GET /api/lookups/<suppliers\|gl\|cc\|po\|terms\|buyers>?q=`, `POST /api/reset`, `POST /api/clear` |
+| Login | `POST /api/auth/login` `{username, password}`, `POST /api/auth/logout`, `GET /api/auth/me`, `POST /api/auth/password` `{current, password}` |
+| Users (admin) | `GET/POST /api/users`, `GET/PUT/DELETE /api/users/<id>` |
+| Other | `GET /api/health`, `GET /api/summary`, `GET /api/lookups/<suppliers\|gl\|cc\|po\|terms\|buyers>?q=`, `POST /api/reset`, `POST /api/clear` |
 
 Errors come back as `{"error": "required" | "duplicate" | "numeric" | "not_found", "field": "..."}`.
