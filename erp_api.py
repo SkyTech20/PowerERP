@@ -414,6 +414,7 @@ def register_erp(app, ns):
             "cSupplierName": _s(h.get("cSupplierName")) or _s((unb or {}).get("cSupplierName")),
             "cBuyerCode": _s(h.get("cBuyerCode")), "cBuyerName": _s(h.get("cBuyerName")),
             "cApplicantCode": _s(h.get("cApplicantCode")),
+            "dDueDate": _s(h.get("dDueDate")), "cReference": _s(h.get("cReference")), "cSource": _s(h.get("cSource")),
             "lBlanketOrder": _bool((unb or {}).get("lBlanketOrder")),
             "lUnbilled": unb is not None,
             "dSubTotal": sub, "dFreight": _s(h.get("dFreight")), "dGST": _s(h.get("dGST")),
@@ -753,4 +754,8 @@ def register_erp(app, ns):
             unbilled_receiving[:] = [r for r in unbilled_receiving if r["NoReception"] not in billed]
         return inv
 
-    return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load}
+    def po_exists(cpo):
+        return _po_view(cpo) is not None
+
+    return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load,
+            "save_po": _po_save, "po_exists": po_exists, "all_pos": _all_pos}

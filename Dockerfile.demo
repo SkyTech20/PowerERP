@@ -6,7 +6,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py erp_api.py powerware_api.py db.py auth.py ./
+COPY app.py erp_api.py powerware_api.py purchasing_api.py supplier_selection.py db.py auth.py ./
 COPY static/ ./static/
 COPY data/demo/ ./data/demo/
 
