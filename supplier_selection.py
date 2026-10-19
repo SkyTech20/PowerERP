@@ -280,6 +280,11 @@ def rule_reason(m, score, metrics, months, lang):
     return ", ".join(parts) + "."
 
 
+def rule_reasons(m, score, metrics, months):
+    """The rule reason in every language ({"fr": ..., "en": ...}), so SkyAI shows the user's language."""
+    return {lg: rule_reason(m, score, metrics, months, lg) for lg in _TXT}
+
+
 # ---------------------------------------------------------------- AI (Gemini)
 
 class AIError(Exception):
@@ -328,19 +333,18 @@ def ai_match(unmatched, catalog):
     return out
 
 
-def ai_rank(items, settings, lang):
-    """{line: [{cCode, score, reason}]} — the AI ranks the candidates of each item and explains why."""
-    language = "French" if lang == "fr" else "English"
+def ai_rank(items, settings):
+    """{line: [{cCode, score, reason: {fr, en}}]} — the AI ranks the candidates of each item and explains why."""
     prompt = (
         "You are the purchasing assistant of an ERP. For each requisition item, rank the candidate "
         "suppliers to choose the best one, using the metrics (computed from the purchase history), the "
         "criteria weights (percent) and the company instructions. Scores are 0-100. Keep the facts exact: "
         "quote only numbers present in the metrics. Write each reason in "
-        f"{language}, one or two short sentences, saying why this supplier is (or is not) the best choice "
-        "compared to the others.\n"
+        "French (fr) and in English (en), the same meaning in both, one or two short sentences, saying why "
+        "this supplier is (or is not) the best choice compared to the others.\n"
         f"Weights: {json.dumps(settings['weights'])}\n"
         f"Company instructions: {settings['instructions'] or '(none)'}\n"
-        'Answer JSON: {"items": [{"line": <line>, "ranking": [{"cCode": <code>, "score": <0-100>, "reason": <text>}]}]}\n\n'
+        'Answer JSON: {"items": [{"line": <line>, "ranking": [{"cCode": <code>, "score": <0-100>, "reason": {"fr": <text>, "en": <text>}}]}]}\n\n'
         f"Items:\n{json.dumps(items, ensure_ascii=False)}"
     )
     res = call_ai(prompt)
@@ -403,9 +407,10 @@ def best_suppliers(ns, req, settings=None, today=None):
                        if m["orders"] >= s["minOrders"] and sup in known}
             scores = rule_scores(metrics, s["weights"])
             for sup, m in metrics.items():
+                reasons = rule_reasons(m, scores[sup], metrics, months)
                 entry["candidates"].append({
                     "cCode": sup, "cName": known[sup].get("cName") or m["name"], "score": scores[sup],
-                    "reason": rule_reason(m, scores[sup], metrics, months, lang),
+                    "reason": reasons[lang], "reasons": reasons,
                     "metrics": {k: v for k, v in m.items() if k != "name"}})
             if entry["candidates"]:
                 ai_input.append({"line": line, "product": history[code]["desc"], "quantity": it.get("quantity"),
@@ -416,7 +421,7 @@ def best_suppliers(ns, req, settings=None, today=None):
     # 4. AI ranking and reasons
     if use_ai and ai_input:
         try:
-            ranking = ai_rank(ai_input, s, lang)
+            ranking = ai_rank(ai_input, s)
             for entry in result_items:
                 by_code = {c["cCode"]: c for c in entry["candidates"]}
                 ranked = ranking.get(str(entry["line"])) or []
@@ -425,7 +430,12 @@ def best_suppliers(ns, req, settings=None, today=None):
                 for r in ranked:
                     c = by_code[r["cCode"]]
                     c["score"] = _int(r.get("score"), c["score"], 0, 100)
-                    c["reason"] = str(r.get("reason") or c["reason"])
+                    reason = r.get("reason")
+                    if isinstance(reason, dict):  # {"fr": ..., "en": ...}; a missing language keeps the rule reason
+                        c["reasons"] = {lg: str(reason.get(lg) or c["reasons"][lg]) for lg in _TXT}
+                    elif reason:
+                        c["reasons"] = {lg: str(reason) for lg in _TXT}
+                    c["reason"] = c["reasons"][lang]
                     c["source"] = "gemini"
             engine = "gemini"
         except AIError as e:
@@ -442,9 +452,10 @@ def best_suppliers(ns, req, settings=None, today=None):
             c.setdefault("source", "rules")
         entry["candidates"] = cands
         if not cands:
-            T = _TXT[lang]
             entry["decision"] = "none"
-            entry["reason"] = (T["none"] if entry["matchedProduct"] else T["nomatch"]).format(m=months)
+            key = "none" if entry["matchedProduct"] else "nomatch"
+            entry["reasons"] = {lg: T[key].format(m=months) for lg, T in _TXT.items()}
+            entry["reason"] = entry["reasons"][lang]
         else:
             tied = [c for c in cands if c["score"] >= cands[0]["score"] - s["tieMargin"]]
             entry["decision"] = "multiple" if len(tied) > 1 else "single"
