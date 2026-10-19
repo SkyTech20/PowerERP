@@ -135,6 +135,8 @@ def selection_settings():
     p = _json()
     if p is None:
         return jsonify({"error": "invalid_body"}), 400
+    if isinstance(p.get("ai"), dict):
+        sel.save_ai_config(p["ai"])
     return jsonify({"settings": sel.save_settings(p), "ai": sel.ai_status()})
 
 

@@ -779,6 +779,12 @@
               ${numField("s-tie", "sel.tie", s.tieMargin, "sel.tieHelp")}${numField("s-max", "sel.max", s.maxCandidates)}
               <div class="field span-4"><label class="check"><input type="checkbox" id="s-ai" ${s.useAI ? "checked" : ""} ${isAdmin() ? "" : "disabled"}> ${esc(t("sel.useAI"))}</label><span class="help">${esc(aiLine)}</span></div>
               <div class="field span-4"><label for="s-instr">${esc(t("sel.instructions"))}</label><textarea id="s-instr" ${isAdmin() ? "" : "readonly"}>${esc(s.instructions)}</textarea><span class="help">${esc(t("sel.instructionsHelp"))}</span></div>
+            </div></div>
+            <div class="card-head"><h2>${esc(t("sel.ai"))}</h2></div>
+            <div class="card-body"><div class="form-grid">
+              <div class="field"><label for="ai-model">${esc(t("sel.aiModel"))}</label><input type="text" id="ai-model" value="${esc(ai.model)}" ${isAdmin() ? "" : "readonly"}></div>
+              ${isAdmin() ? `<div class="field span-2"><label for="ai-key">${esc(t("sel.aiKey"))}</label><input type="password" id="ai-key" autocomplete="new-password" placeholder="${esc(ai.configured ? t("sel.aiKeyKept", { hint: ai.keyHint }) : t("sel.aiKeyNone"))}"><span class="help">${esc(t("sel.aiKeyHelp"))}</span></div>
+              ${ai.configured ? `<div class="field"><label class="check"><input type="checkbox" id="ai-clear"> ${esc(t("sel.aiClear"))}</label></div>` : ""}` : ""}
             </div>${isAdmin() ? `<button type="submit" class="btn primary">${esc(t("common.save"))}</button>` : `<p class="help">${esc(t("sel.adminOnly"))}</p>`}</div></form>
           <form class="card" id="selTest" novalidate><div class="card-head"><h2>${esc(t("sel.test"))}</h2></div>
             <div class="card-body"><div class="field span-4"><label for="s-items">${esc(t("sel.items"))}</label><textarea id="s-items" rows="5" placeholder="AL6061-F125-48 ; Feuille aluminium 6061 1/8 ; 10&#10; ; Écrous inox 1/4-20 boîte de 100 ; 12">${esc(testText)}</textarea><span class="help">${esc(t("sel.itemsHelp"))}</span></div>
@@ -787,7 +793,8 @@
         $("#selForm").addEventListener("submit", async (e) => {
           e.preventDefault();
           try {
-            data = await api("supplier-selection/settings", { method: "PUT", body: read() });
+            const aiBody = { model: $("#ai-model").value.trim(), apiKey: $("#ai-key").value.trim(), clearKey: !!($("#ai-clear") && $("#ai-clear").checked) };
+            data = await api("supplier-selection/settings", { method: "PUT", body: { ...read(), ai: aiBody } });
             toast(t("common.saved"), "success");
             this.render();
           } catch (err) { toast(t("err.generic"), "error"); }

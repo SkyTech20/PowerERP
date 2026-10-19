@@ -13,12 +13,11 @@ For each item the ERP:
      the reason shown in SkyAI. Without an AI key, or when the AI fails, the rule score and a
      standard reason are used ("engine": "rules"), so the demo never stops.
 
-Settings live in the settings table (key "supplier_selection"); the AI key and model in the
-environment (GEMINI_API_KEY, GEMINI_MODEL).
+Settings live in the settings table: key "supplier_selection" for the criteria, key "ai" for the
+AI key and model (Purchasing > Supplier selection, administrators only; the key is never sent back).
 """
 import json
 import logging
-import os
 import re
 import unicodedata
 import urllib.error
@@ -84,9 +83,34 @@ def save_settings(p):
     return s
 
 
+AI_KEY = "ai"
+DEFAULT_MODEL = "gemini-2.5-flash"
+
+
+def _ai_config():
+    try:
+        raw = json.loads(db.get_setting(AI_KEY) or "{}")
+    except (ValueError, TypeError):
+        raw = {}
+    return {"apiKey": str(raw.get("apiKey") or ""), "model": str(raw.get("model") or DEFAULT_MODEL)}
+
+
+def save_ai_config(p):
+    """{"model": ..., "apiKey": ...}: a missing or empty apiKey keeps the current key, "clearKey" removes it."""
+    cur = _ai_config()
+    model = re.sub(r"[^A-Za-z0-9.\-_]", "", str(p.get("model") or cur["model"]))[:80] or DEFAULT_MODEL
+    key = cur["apiKey"]
+    if p.get("clearKey"):
+        key = ""
+    elif str(p.get("apiKey") or "").strip():
+        key = str(p["apiKey"]).strip()
+    db.set_setting(AI_KEY, json.dumps({"apiKey": key, "model": model}))
+
+
 def ai_status():
-    return {"configured": bool(os.environ.get("GEMINI_API_KEY")), "provider": "gemini",
-            "model": os.environ.get("GEMINI_MODEL") or "gemini-2.5-flash"}
+    c = _ai_config()
+    return {"configured": bool(c["apiKey"]), "provider": "gemini", "model": c["model"],
+            "keyHint": ("…" + c["apiKey"][-4:]) if len(c["apiKey"]) >= 8 else ""}
 
 
 # ---------------------------------------------------------------- text matching
@@ -264,10 +288,10 @@ class AIError(Exception):
 
 def call_ai(prompt, timeout=40):
     """One JSON-mode call to the configured AI (Gemini). Returns the parsed JSON."""
-    key = os.environ.get("GEMINI_API_KEY", "")
+    c = _ai_config()
+    key, model = c["apiKey"], c["model"]
     if not key:
         raise AIError("not configured")
-    model = os.environ.get("GEMINI_MODEL") or "gemini-2.5-flash"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     body = json.dumps({
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
