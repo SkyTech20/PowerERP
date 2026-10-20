@@ -88,6 +88,146 @@
    "Transport": "0.00",
    "TPS": "68.10",
    "TVQ": "135.86"
+  },
+  {
+   "NoReception": "750101",
+   "COMPANY": "MA2",
+   "DateReception": "2026-10-07",
+   "Fournisseur": "Techno Bureau Plus inc.",
+   "CodeFournisseur": "TECBUR",
+   "NoBonCommande": "450101",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "MON-27Q",
+     "Description": "Moniteur 27 po QHD",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "329.00",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "CLAV-SF",
+     "Description": "Ensemble clavier et souris sans fil",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "59.00",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2676.62",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "2328.00",
+   "Transport": "0.00",
+   "TPS": "116.40",
+   "TVQ": "232.22"
+  },
+  {
+   "NoReception": "750201",
+   "COMPANY": "MA2",
+   "DateReception": "2026-10-08",
+   "Fournisseur": "Lumière Pro Électrique inc.",
+   "CodeFournisseur": "LUMPRO",
+   "NoBonCommande": "450201",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "TUBE-T8",
+     "Description": "Tube DEL T8 4 pi, 18 W",
+     "QuantiteCommandee": "48",
+     "QuantiteRecue": "48",
+     "PrixUnitaire": "12.50",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "DET-MOUV",
+     "Description": "Détecteur de mouvement plafonnier",
+     "QuantiteCommandee": "8",
+     "QuantiteRecue": "8",
+     "PrixUnitaire": "64.00",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "1278.52",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "1112.00",
+   "Transport": "0.00",
+   "TPS": "55.60",
+   "TVQ": "110.92"
+  },
+  {
+   "NoReception": "750301",
+   "COMPANY": "MA2",
+   "DateReception": "2026-10-09",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "450301",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ENV-10",
+     "Description": "Enveloppes no 10 (boîte de 500)",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "32.75",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "CRAY-HB",
+     "Description": "Crayons HB (boîte de 12)",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "15",
+     "PrixUnitaire": "6.40",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "486.92",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "423.50",
+   "Transport": "0.00",
+   "TPS": "21.18",
+   "TVQ": "42.24"
+  },
+  {
+   "NoReception": "750401",
+   "COMPANY": "MA2",
+   "DateReception": "2026-10-10",
+   "Fournisseur": "Sécurité Nordique inc.",
+   "CodeFournisseur": "SECNOR",
+   "NoBonCommande": "450401",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "EXT-5LB",
+     "Description": "Extincteur ABC 5 lb",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "74.00",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "INSP-EXT",
+     "Description": "Inspection annuelle des extincteurs",
+     "QuantiteCommandee": "1",
+     "QuantiteRecue": "1",
+     "PrixUnitaire": "250.00",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "1138.25",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "990.00",
+   "Transport": "0.00",
+   "TPS": "49.50",
+   "TVQ": "98.75"
   }
  ],
  "unbilled_receiving": [
@@ -131,6 +271,70 @@
    "Fournisseur": "Lumière Pro Électrique inc.",
    "CodeFournisseur": "LUMPRO",
    "MontantRecu": "1565.96",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "0",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "750101",
+   "DateReception": "2026-10-07",
+   "NoBonCommande": "450101",
+   "Fournisseur": "Techno Bureau Plus inc.",
+   "CodeFournisseur": "TECBUR",
+   "MontantRecu": "2676.62",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "0",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "750201",
+   "DateReception": "2026-10-08",
+   "NoBonCommande": "450201",
+   "Fournisseur": "Lumière Pro Électrique inc.",
+   "CodeFournisseur": "LUMPRO",
+   "MontantRecu": "1278.52",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "0",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "750301",
+   "DateReception": "2026-10-09",
+   "NoBonCommande": "450301",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "MontantRecu": "486.92",
+   "StatutFacturation": "En attente de facture",
+   "JoursEnAttente": "0",
+   "ResponsableFacturation": "Comptabilité",
+   "PrioriteFacturation": "Normale",
+   "Devise": "CAD",
+   "Entrepot": "ENT-01",
+   "TypeReception": "Standard"
+  },
+  {
+   "COMPANY": "MA2",
+   "NoReception": "750401",
+   "DateReception": "2026-10-10",
+   "NoBonCommande": "450401",
+   "Fournisseur": "Sécurité Nordique inc.",
+   "CodeFournisseur": "SECNOR",
+   "MontantRecu": "1138.25",
    "StatutFacturation": "En attente de facture",
    "JoursEnAttente": "0",
    "ResponsableFacturation": "Comptabilité",

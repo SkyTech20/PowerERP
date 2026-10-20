@@ -110,6 +110,154 @@
      "dTotalAmount": "774.00"
     }
    ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "450101",
+   "ttPOheader": {
+    "cSupplierCode": "TECBUR",
+    "cSupplierName": "Techno Bureau Plus inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-10-01",
+    "dSubTotal": "2328.00",
+    "dFreight": "0.00",
+    "dGST": "116.40",
+    "dPST": "232.22",
+    "dTotalAmount": "2676.62"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "MON-27Q",
+     "cProductDesc": "Moniteur 27 po QHD",
+     "dQuantity": "6",
+     "dUnitCost": "329.00",
+     "dSubTotal": "1974.00",
+     "dTotalAmount": "1974.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "CLAV-SF",
+     "cProductDesc": "Ensemble clavier et souris sans fil",
+     "dQuantity": "6",
+     "dUnitCost": "59.00",
+     "dSubTotal": "354.00",
+     "dTotalAmount": "354.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "450201",
+   "ttPOheader": {
+    "cSupplierCode": "LUMPRO",
+    "cSupplierName": "Lumière Pro Électrique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-10-02",
+    "dSubTotal": "1112.00",
+    "dFreight": "0.00",
+    "dGST": "55.60",
+    "dPST": "110.92",
+    "dTotalAmount": "1278.52"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "TUBE-T8",
+     "cProductDesc": "Tube DEL T8 4 pi, 18 W",
+     "dQuantity": "48",
+     "dUnitCost": "12.50",
+     "dSubTotal": "600.00",
+     "dTotalAmount": "600.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "DET-MOUV",
+     "cProductDesc": "Détecteur de mouvement plafonnier",
+     "dQuantity": "8",
+     "dUnitCost": "64.00",
+     "dSubTotal": "512.00",
+     "dTotalAmount": "512.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "450301",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-10-05",
+    "dSubTotal": "423.50",
+    "dFreight": "0.00",
+    "dGST": "21.18",
+    "dPST": "42.24",
+    "dTotalAmount": "486.92"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ENV-10",
+     "cProductDesc": "Enveloppes no 10 (boîte de 500)",
+     "dQuantity": "10",
+     "dUnitCost": "32.75",
+     "dSubTotal": "327.50",
+     "dTotalAmount": "327.50"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "CRAY-HB",
+     "cProductDesc": "Crayons HB (boîte de 12)",
+     "dQuantity": "15",
+     "dUnitCost": "6.40",
+     "dSubTotal": "96.00",
+     "dTotalAmount": "96.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "450401",
+   "ttPOheader": {
+    "cSupplierCode": "SECNOR",
+    "cSupplierName": "Sécurité Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-10-06",
+    "dSubTotal": "990.00",
+    "dFreight": "0.00",
+    "dGST": "49.50",
+    "dPST": "98.75",
+    "dTotalAmount": "1138.25"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "EXT-5LB",
+     "cProductDesc": "Extincteur ABC 5 lb",
+     "dQuantity": "10",
+     "dUnitCost": "74.00",
+     "dSubTotal": "740.00",
+     "dTotalAmount": "740.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "INSP-EXT",
+     "cProductDesc": "Inspection annuelle des extincteurs",
+     "dQuantity": "1",
+     "dUnitCost": "250.00",
+     "dSubTotal": "250.00",
+     "dTotalAmount": "250.00"
+    }
+   ]
   }
  ],
  "unbilled_po": [
@@ -133,6 +281,34 @@
    "dCreationDate": "2026-09-25",
    "cSupplierName": "Papeterie Centrale inc.",
    "cSupplierCode": "PAPCEN"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "450101",
+   "dCreationDate": "2026-10-01",
+   "cSupplierName": "Techno Bureau Plus inc.",
+   "cSupplierCode": "TECBUR"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "450201",
+   "dCreationDate": "2026-10-02",
+   "cSupplierName": "Lumière Pro Électrique inc.",
+   "cSupplierCode": "LUMPRO"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "450301",
+   "dCreationDate": "2026-10-05",
+   "cSupplierName": "Papeterie Centrale inc.",
+   "cSupplierCode": "PAPCEN"
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "450401",
+   "dCreationDate": "2026-10-06",
+   "cSupplierName": "Sécurité Nordique inc.",
+   "cSupplierCode": "SECNOR"
   }
  ]
 }
