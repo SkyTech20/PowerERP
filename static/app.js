@@ -70,7 +70,7 @@
     { sep: true },
     { k: "gl", icon: "📒", items: [{ k: "gl.accounts", route: "/gl" }, "gl.journal", "gl.periods", "gl.statements", "gl.budgets", "gl.bankrec"] },
     { k: "ap", icon: "💳", items: [{ k: "ap.suppliers", route: "/suppliers" }, { k: "ap.invoices", route: "/invoices" }, "ap.payments", "ap.chequeRun", "ap.recurring", "ap.aging"] },
-    { k: "pur", icon: "🛒", items: [{ k: "pur.po", route: "/po" }, { k: "pur.receptions", route: "/receptions" }, { k: "pur.selection", route: "/selection" }, "pur.requisitions", "pur.returns", "pur.pricelists"] },
+    { k: "pur", icon: "🛒", items: [{ k: "pur.po", route: "/po" }, { k: "pur.receptions", route: "/receptions" }, "pur.requisitions", "pur.returns", "pur.pricelists"] },
     { k: "ar", icon: "💰", items: ["ar.customers", "ar.invoices", "ar.receipts", "ar.credits", "ar.collections"] },
     { k: "sales", icon: "📈", items: ["sales.quotes", "sales.orders", "sales.shipping", "sales.pricing", "sales.commissions"] },
     { k: "inv", icon: "📦", items: ["inv.items", "inv.warehouses", "inv.movements", "inv.count", "inv.lots"] },
@@ -724,98 +724,6 @@
     };
   }
 
-  // ------------------------------------------------------------------ Supplier selection (SkyAI requisitions)
-  // Criteria used by getBestSupplier.p: weights, history window, tie margin, AI instructions,
-  // plus a test box that runs the selection on typed items.
-  function selectionView() {
-    let data = null, result = null, testText = "";
-    const CRIT = ["price", "leadTime", "onTime", "quality"];
-    const pct = (v) => (v == null ? "—" : Math.round(v * 100) + " %");
-    function numField(id, label, value, help) {
-      return `<div class="field"><label for="${id}">${esc(t(label))}</label><input type="text" inputmode="numeric" id="${id}" value="${esc(value)}" ${isAdmin() ? "" : "readonly"}>${help ? `<span class="help">${esc(t(help))}</span>` : ""}</div>`;
-    }
-    function read() {
-      const v = (id) => $("#" + id).value;
-      return {
-        weights: Object.fromEntries(CRIT.map((k) => [k, num(v("w-" + k))])),
-        historyMonths: num(v("s-months")), minOrders: num(v("s-min")), tieMargin: num(v("s-tie")),
-        maxCandidates: num(v("s-max")), useAI: $("#s-ai").checked, instructions: v("s-instr"),
-      };
-    }
-    function parseItems(text) {
-      // one item per line: "code ; description ; quantity" (code may be empty)
-      return text.split("\n").map((l) => l.trim()).filter(Boolean).map((l, i) => {
-        const [code, desc, qty] = l.split(";").map((x) => (x || "").trim());
-        return { line: i + 1, productCode: code, description: desc || code, quantity: num(qty) || 1 };
-      });
-    }
-    function resultHtml() {
-      if (!result) return "";
-      const rows = result.items.map((it) => {
-        const prod = it.matchedProduct ? `${esc(it.matchedProduct.code)} — ${esc(it.matchedProduct.desc)}` : `<span class="muted">${esc(t("sel.noMatch"))}</span>`;
-        const cands = it.candidates.length ? it.candidates.map((c) => `<div class="sel-cand ${c.recommended ? "best" : ""}">
-            <b>${esc(c.cCode)}</b> ${esc(c.cName)} · <b>${esc(c.score)}</b>/100 ${c.recommended ? `<span class="badge yes">${esc(t("sel.recommended"))}</span>` : ""}${c.tied ? ` <span class="badge Approved">${esc(t("sel.tied"))}</span>` : ""}
-            <div class="help">${esc(c.reason)}</div>
-            ${c.source === "rules" ? "" : `<div class="help">${esc(t("sel.m.price"))} ${money(c.metrics.avgUnitPrice)} · ${esc(t("sel.m.lead"))} ${esc(c.metrics.avgLeadDays == null ? "—" : String(c.metrics.avgLeadDays).replace(".", lang === "fr" ? "," : ".") + " " + t("sel.days"))} · ${esc(t("sel.m.onTime"))} ${pct(c.metrics.onTimeRate)} · ${esc(t("sel.m.quality"))} ${pct(c.metrics.conformityRate)} · ${esc(t("sel.m.orders"))} ${esc(c.metrics.orders)}</div>`}</div>`).join("")
-          : `<div class="help">${esc(it.reason || "")}</div>`;
-        return `<tr><td>${esc(it.line)}</td><td>${esc(it.description)}<div class="help">${prod}</div></td><td>${esc(t("sel.decision." + it.decision))}</td><td class="sel-cands">${cands}</td></tr>`;
-      }).join("");
-      return `<div class="card"><div class="card-head"><h2>${esc(t("sel.result"))}</h2><span class="badge SkyAI" style="margin-left:auto">${esc(t("sel.engine." + result.engine))}</span></div>
-        <div class="table-wrap"><table class="grid sel-table"><thead><tr><th>#</th><th>${esc(t("sel.item"))}</th><th>${esc(t("sel.decision"))}</th><th>${esc(t("sel.candidates"))}</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
-    }
-    return {
-      async load() { data = await api("supplier-selection/settings"); },
-      render() {
-        const s = data.settings, ai = data.ai;
-        const aiLine = ai.configured ? t("sel.aiOn", { model: ai.model }) : t("sel.aiOff");
-        $("#view").innerHTML = pageHead(t("sel.title"), t("sel.subtitle")) + `
-          <form class="card" id="selForm" novalidate><div class="card-head"><h2>${esc(t("sel.weights"))}</h2></div>
-            <div class="card-body"><div class="form-grid">
-              ${CRIT.map((k) => numField("w-" + k, "sel.w." + k, s.weights[k])).join("")}
-            </div><p class="help">${esc(t("sel.weightsHelp"))}</p></div>
-            <div class="card-head"><h2>${esc(t("sel.rules"))}</h2></div>
-            <div class="card-body"><div class="form-grid">
-              ${numField("s-months", "sel.months", s.historyMonths)}${numField("s-min", "sel.minOrders", s.minOrders)}
-              ${numField("s-tie", "sel.tie", s.tieMargin, "sel.tieHelp")}${numField("s-max", "sel.max", s.maxCandidates)}
-              <div class="field span-4"><label class="check"><input type="checkbox" id="s-ai" ${s.useAI ? "checked" : ""} ${isAdmin() ? "" : "disabled"}> ${esc(t("sel.useAI"))}</label><span class="help">${esc(aiLine)}</span></div>
-              <div class="field span-4"><label for="s-instr">${esc(t("sel.instructions"))}</label><textarea id="s-instr" ${isAdmin() ? "" : "readonly"}>${esc(s.instructions)}</textarea><span class="help">${esc(t("sel.instructionsHelp"))}</span></div>
-            </div></div>
-            <div class="card-head"><h2>${esc(t("sel.ai"))}</h2></div>
-            <div class="card-body"><div class="form-grid">
-              <div class="field"><label for="ai-model">${esc(t("sel.aiModel"))}</label><input type="text" id="ai-model" value="${esc(ai.model)}" ${isAdmin() ? "" : "readonly"}></div>
-              ${isAdmin() ? `<div class="field span-2"><label for="ai-key">${esc(t("sel.aiKey"))}</label><input type="password" id="ai-key" autocomplete="new-password" placeholder="${esc(ai.configured ? t("sel.aiKeyKept", { hint: ai.keyHint }) : t("sel.aiKeyNone"))}"><span class="help">${esc(t("sel.aiKeyHelp"))}</span></div>
-              ${ai.configured ? `<div class="field"><label class="check"><input type="checkbox" id="ai-clear"> ${esc(t("sel.aiClear"))}</label></div>` : ""}` : ""}
-            </div>${isAdmin() ? `<button type="submit" class="btn primary">${esc(t("common.save"))}</button>` : `<p class="help">${esc(t("sel.adminOnly"))}</p>`}</div></form>
-          <form class="card" id="selTest" novalidate><div class="card-head"><h2>${esc(t("sel.test"))}</h2></div>
-            <div class="card-body"><div class="field span-4"><label for="s-items">${esc(t("sel.items"))}</label><textarea id="s-items" rows="5" placeholder="AL6061-F125-48 ; Feuille aluminium 6061 1/8 ; 10&#10; ; Écrous inox 1/4-20 boîte de 100 ; 12">${esc(testText)}</textarea><span class="help">${esc(t("sel.itemsHelp"))}</span></div>
-            <button type="submit" class="btn">${esc(t("sel.run"))}</button></div></form>
-          <div id="selResult">${resultHtml()}</div>`;
-        $("#selForm").addEventListener("submit", async (e) => {
-          e.preventDefault();
-          try {
-            const aiBody = { model: $("#ai-model").value.trim(), apiKey: $("#ai-key").value.trim(), clearKey: !!($("#ai-clear") && $("#ai-clear").checked) };
-            data = await api("supplier-selection/settings", { method: "PUT", body: { ...read(), ai: aiBody } });
-            toast(t("common.saved"), "success");
-            this.render();
-          } catch (err) { toast(t("err.generic"), "error"); }
-        });
-        $("#selTest").addEventListener("submit", async (e) => {
-          e.preventDefault();
-          testText = $("#s-items").value;
-          const items = parseItems(testText);
-          if (!items.length) { toast(t("err.form"), "error"); return; }
-          const btn = $("#selTest button");
-          btn.disabled = true;
-          try {
-            result = await api("supplier-selection/test", { method: "POST", body: { items, lang, settings: read() } });
-            $("#selResult").innerHTML = resultHtml();
-          } catch (err) { toast(t("err.generic"), "error"); }
-          btn.disabled = false;
-        });
-      },
-    };
-  }
-
   // ------------------------------------------------------------------ Router
   function currentPath() {
     const h = location.hash.replace(/^#/, "");
@@ -835,7 +743,6 @@
       return formView(key, sub.join("/"));
     }
     if (head === "account") return accountView();
-    if (head === "selection") return selectionView();
     if (head === "admin" && rest[0] === "users" && isAdmin()) {
       if (!rest[1]) return listView("users");
       if (rest[1] === "new") return formView("users", null);

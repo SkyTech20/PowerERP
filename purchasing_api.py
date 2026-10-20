@@ -1,15 +1,11 @@
 """
 PowerERP — purchasing services used by the SkyAI requisition ("Offer") workflow.
 
-  POST <PW_PREFIX>/getBestSupplier.p   best supplier (and the other candidates) for each item,
-                                       with the reason (supplier_selection.py)
   POST <PW_PREFIX>/apCreatePO.p        one purchase order for one supplier (SkyAI calls it once
                                        per supplier after the approval). Calling it again for the
                                        same requisition and supplier returns the existing PO.
 
-  GET  /api/supplier-selection/settings   criteria (weights, history window, tie margin, ...)
-  PUT  /api/supplier-selection/settings   administrators only
-  POST /api/supplier-selection/test       run the selection on typed items (settings screen)
+SkyAI chooses the supplier of each item itself, from its own purchase history: the ERP is not asked.
 
 JSON in and out. Same protection as the other PowerWARE services (X-API-Key when ERP_API_KEY is set).
 """
@@ -18,8 +14,6 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, request
 
-import supplier_selection as sel
-from auth import current_user, _api_key_ok
 from powerware_api import PW_PREFIX
 
 logger = logging.getLogger(__name__)
@@ -39,18 +33,6 @@ def _num(v):
         return float(str(v).replace(",", "."))
     except (TypeError, ValueError):
         return 0.0
-
-
-@bp.route(PW_PREFIX + "/getBestSupplier.p", methods=["POST"])
-def get_best_supplier():
-    p = _json()
-    if p is None or not isinstance(p.get("items"), list) or not p["items"]:
-        return jsonify({"status": "error", "error": "items required"}), 400
-    try:
-        return jsonify(sel.best_suppliers(_ns, p))
-    except Exception as e:  # never a 500 page for SkyAI: it shows the error on the task
-        logger.exception("getBestSupplier.p failed")
-        return jsonify({"status": "error", "error": str(e)}), 500
 
 
 def _last_price(supplier, code):
@@ -115,38 +97,6 @@ def ap_create_po():
     logger.info("apCreatePO.p: PO %s for %s (requisition %s)", cpo, supplier_code, reference)
     return jsonify({"status": "ok", "cPO": cpo, "supplierCode": supplier_code,
                     "dTotalAmount": view["dTotalAmount"], "alreadyExisted": False}), 201
-
-
-# ---------------------------------------------------------------- settings screen
-
-def _is_admin():
-    if _api_key_ok():
-        return True
-    u = current_user()
-    return u is not None and u["role"] == "admin"
-
-
-@bp.route("/api/supplier-selection/settings", methods=["GET", "PUT"])
-def selection_settings():
-    if request.method == "GET":
-        return jsonify({"settings": sel.get_settings(), "ai": sel.ai_status()})
-    if not _is_admin():
-        return jsonify({"error": "forbidden"}), 403
-    p = _json()
-    if p is None:
-        return jsonify({"error": "invalid_body"}), 400
-    if isinstance(p.get("ai"), dict):
-        sel.save_ai_config(p["ai"])
-    return jsonify({"settings": sel.save_settings(p), "ai": sel.ai_status()})
-
-
-@bp.route("/api/supplier-selection/test", methods=["POST"])
-def selection_test():
-    p = _json()
-    if p is None or not isinstance(p.get("items"), list) or not p["items"]:
-        return jsonify({"error": "required", "field": "items"}), 400
-    settings = sel.clean_settings(p["settings"]) if isinstance(p.get("settings"), dict) else None
-    return jsonify(sel.best_suppliers(_ns, p, settings))
 
 
 def register_purchasing(app, ns, hooks):

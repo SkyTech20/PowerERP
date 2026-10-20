@@ -1,8 +1,8 @@
 """Purchase history for the supplier-selection demo (SkyAI Offer / internal requisitions).
 
 Writes data/demo/history.json: extra suppliers plus 12 months of closed purchase orders,
-their receptions and their invoices, so the ERP can compare suppliers selling the same items
-(aluminium, fasteners, office paper). Everything is already received and invoiced, so it
+their receptions and their invoices, with suppliers selling the same items
+(aluminium, fasteners, office paper). SkyAI builds its demo purchase history from this file. Everything is already received and invoiced, so it
 never shows up in the unbilled lists used by the invoice scenarios.
 
 Usage: python tools/make_history_data.py   (deterministic: same output every run)

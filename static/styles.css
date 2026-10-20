@@ -250,11 +250,4 @@ input[readonly] { background: var(--surface-2); color: var(--muted); }
 .totals { flex-wrap: wrap; }
 .totals .tax-note { flex-basis: 100%; text-align: right; margin: 6px 10px 0; font-size: 11px; color: var(--muted); }
 
-/* Supplier selection test results */
-.sel-cand { padding: 6px 0; border-bottom: 1px dashed #e2e8f0; }
-.sel-cand:last-child { border-bottom: 0; }
-.sel-cand.best b:first-child { color: var(--success); }
 .muted { color: #94a3b8; }
-.grid.sel-table td { white-space: normal; }
-.grid td.sel-cands { min-width: 340px; width: 50%; }
-.grid td.sel-cands .help { white-space: normal; }
