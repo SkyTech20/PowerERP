@@ -662,6 +662,23 @@ def register_erp(app, ns):
         inv["cStatut"] = inv.get("cStatut") or "Draft"
         return _compute_invoice(inv)
 
+    def _mark_billed(inv):
+        """An invoice bills the receptions on its lines (iNoReception); an invoice with a PO and
+        no reception numbers bills every open reception of that PO. Billed receptions leave
+        getUnbilledReceiving.p, and a PO whose receptions are all billed leaves getUnbilledPO.p."""
+        recs = {_s(ln.get("iNoReception")) for ln in inv.get("lines") or []} - {"", "0"}
+        po = _s(inv.get("cNoCommAch"))
+        if po and not recs:
+            recs = {r["NoReception"] for r in unbilled_receiving if _s(r.get("NoBonCommande")) == po}
+        if not recs:
+            return
+        pos = {po} if po else set()
+        pos |= {_s(r.get("NoBonCommande")) for r in list(receiving_details) + list(unbilled_receiving)
+                if r["NoReception"] in recs}
+        unbilled_receiving[:] = [r for r in unbilled_receiving if r["NoReception"] not in recs]
+        still_open = {_s(r.get("NoBonCommande")) for r in unbilled_receiving}
+        unbilled_po[:] = [p for p in unbilled_po if p["cPO"] not in pos - {""} or p["cPO"] in still_open]
+
     def _inv_duplicate(supplier, number, exclude_id=None):
         return any(i["cNoFourn"].upper() == supplier.upper() and i["cNoFacture"].upper() == number.upper()
                    and i["id"] != exclude_id for i in invoices)
@@ -679,6 +696,7 @@ def register_erp(app, ns):
         inv["id"] = state["next_invoice_id"]
         state["next_invoice_id"] += 1
         invoices.append(inv)
+        _mark_billed(inv)
         return jsonify(inv), 201
 
     @bp.route("/api/invoices/<int:inv_id>", methods=["GET", "PUT", "DELETE"])
@@ -695,7 +713,9 @@ def register_erp(app, ns):
         _require(p, "cNoFourn", "cNoFacture", "dDateFacture")
         if _inv_duplicate(_s(p["cNoFourn"]), _s(p["cNoFacture"]), inv_id):
             raise ApiError("duplicate", "cNoFacture", 409)
-        return jsonify(_inv_from_payload(p, inv))
+        _inv_from_payload(p, inv)
+        _mark_billed(inv)
+        return jsonify(inv)
 
     # The demo dataset starts without invoices (app.py passes seed_invoices=[]).
     for seed in ns.get("seed_invoices", _SEED_INVOICES):
@@ -726,14 +746,12 @@ def register_erp(app, ns):
             "cSource": "SkyAI", "dTransport": header.get("dTransport", "0"),
             "dTotalTPS": header.get("dTotalTPS", "0"), "dTotalTVP": header.get("dTotalTVP", "0"), "lines": [],
         }
-        billed = set()
         for d in lines:
             rec_no = d.get("iNoReception", "")
             rec_no = "" if rec_no in ("", "0") else rec_no
             code = d.get("cCodeProduit", "")
             desc = ""
             if rec_no:
-                billed.add(rec_no)
                 rec = next((r for r in receiving_details if r["NoReception"] == rec_no), None)
                 art = next((a for a in (rec or {}).get("Articles", []) if a.get("CodeArticle") == code), None)
                 desc = (art or {}).get("Description", "")
@@ -749,9 +767,8 @@ def register_erp(app, ns):
             inv["dTotalFacture"] = _money(header["dTotalFacture"])
             inv["_keepTotal"] = True
         _add_invoice(inv)
-        # Invoiced receptions are no longer "unbilled" (getUnbilledReceiving.p)
-        if billed:
-            unbilled_receiving[:] = [r for r in unbilled_receiving if r["NoReception"] not in billed]
+        # Invoiced receptions (and fully invoiced POs) are no longer "unbilled"
+        _mark_billed(inv)
         return inv
 
     def po_exists(cpo):
