@@ -24,6 +24,7 @@ import db
 from auth import PW_PREFIX, register_auth
 from erp_api import register_erp
 from powerware_api import register_powerware
+from purchasing_api import register_purchasing
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 # ERP_DATASET=demo loads the fictitious demo data in data/demo/ (rebuild.ps1 -DemoData).
@@ -37,11 +38,16 @@ def _read(name):
         return json.load(f)
 
 
+# Purchase history for the supplier selection of SkyAI requisitions (tools/make_history_data.py):
+# extra suppliers and closed POs / receptions / invoices, already received and invoiced.
+HISTORY = DATA_DIR / "history.json"
+
+
 def load_data():
     """Load the demo data (same shapes as the PowerWARE / SkyAI feeds)."""
     po = _read("purchase_orders.json")
     rec = _read("receptions.json")
-    return {
+    data = {
         "gl_ttGL_data": _read("gl_accounts.json"),
         "gl_ttCC_data": _read("cost_centers.json"),
         "supplier_terms_data": _read("suppliers.json"),
@@ -51,6 +57,14 @@ def load_data():
         "unbilled_receiving": rec["unbilled_receiving"],
         **({"seed_invoices": []} if DEMO else {}),
     }
+    if HISTORY.exists():
+        hist = _read(HISTORY.name)
+        codes = {s["cCode"] for s in data["supplier_terms_data"]}
+        data["supplier_terms_data"] += [s for s in hist["suppliers"] if s["cCode"] not in codes]
+        data["po_details"] = hist["po_details"] + data["po_details"]
+        data["receiving_details"] = hist["receiving_details"] + data["receiving_details"]
+        data["seed_invoices"] = hist["invoices"] + data.get("seed_invoices", [])
+    return data
 
 
 app = Flask(__name__)
@@ -60,9 +74,12 @@ data = load_data()
 hooks = register_erp(app, data)
 # PowerWARE-compatible web services, so SkyAI can read from and write to this ERP
 register_powerware(app, data, hooks["invoice_exists"], hooks["record_invoice"])
+# Best supplier per item and PO creation for SkyAI requisitions (Offer workflow)
+register_purchasing(app, data, hooks)
 
 # ERP data: load what the database has; an empty database (or another dataset) is seeded from data/*.json.
-DATASET = DATA_DIR.name
+# The name changes when the history is added, so an existing database is re-seeded once with it.
+DATASET = DATA_DIR.name + ("+history" if HISTORY.exists() else "")
 _stored = db.load_datasets()
 if _stored and db.get_setting("dataset") == DATASET:
     hooks["load"](_stored)

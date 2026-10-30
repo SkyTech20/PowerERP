@@ -9,6 +9,7 @@ SQLite database (db.py) after every change and loads it back at startup.
 POST /api/reset restores the original demo data.
 """
 import copy
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -30,9 +31,26 @@ def _s(value):
     return str(value).strip()
 
 
+def _dec(value, default="0"):
+    """Keep only the number of a typed amount ("$12.50", "12,50 $", "1 234.5") as "12.50"."""
+    s = re.sub(r"[^\d,.\-]", "", _s(value))
+    neg = s.startswith("-")
+    s = s.replace("-", "")
+    if "," in s and "." in s:
+        s = s.replace(".", "").replace(",", ".") if s.rfind(",") > s.rfind(".") else s.replace(",", "")
+    elif "," in s:
+        s = s.replace(",", ".") if s.count(",") == 1 else s.replace(",", "")
+    if s.count(".") > 1:
+        cut = s.rfind(".")
+        s = s[:cut].replace(".", "") + s[cut:]
+    if not re.search(r"\d", s):
+        return default
+    return ("-" if neg else "") + s
+
+
 def _num(value, default=0.0):
     try:
-        return float(str(value).replace(",", ".").strip())
+        return float(_dec(value, ""))
     except (TypeError, ValueError, AttributeError):
         return default
 
@@ -414,6 +432,7 @@ def register_erp(app, ns):
             "cSupplierName": _s(h.get("cSupplierName")) or _s((unb or {}).get("cSupplierName")),
             "cBuyerCode": _s(h.get("cBuyerCode")), "cBuyerName": _s(h.get("cBuyerName")),
             "cApplicantCode": _s(h.get("cApplicantCode")),
+            "dDueDate": _s(h.get("dDueDate")), "cReference": _s(h.get("cReference")), "cSource": _s(h.get("cSource")),
             "lBlanketOrder": _bool((unb or {}).get("lBlanketOrder")),
             "lUnbilled": unb is not None,
             "dSubTotal": sub, "dFreight": _s(h.get("dFreight")), "dGST": _s(h.get("dGST")),
@@ -444,7 +463,7 @@ def register_erp(app, ns):
             lines.append({
                 "cUnique": _s(ln.get("cUnique")) or str(i), "cProductcode": _s(ln.get("cProductcode")),
                 "cProductDesc": _s(ln.get("cProductDesc")), "dQuantity": _qty(ln.get("dQuantity")),
-                "dUnitCost": _s(ln.get("dUnitCost")) or "0", "dTotalAmount": _money(total),
+                "dUnitCost": _dec(ln.get("dUnitCost")), "dTotalAmount": _money(total),
             })
         sub = sum(_num(l["dTotalAmount"]) for l in lines)
         freight, gst, pst = _num(p.get("dFreight")), _num(p.get("dGST")), _num(p.get("dPST"))
@@ -560,7 +579,7 @@ def register_erp(app, ns):
             articles.append({
                 "CodeArticle": _s(ln.get("CodeArticle")), "Description": _s(ln.get("Description")),
                 "QuantiteCommandee": _qty(ln.get("QuantiteCommandee")), "QuantiteRecue": _qty(ln.get("QuantiteRecue")),
-                "PrixUnitaire": _s(ln.get("PrixUnitaire")) or "0", "Devise": devise,
+                "PrixUnitaire": _dec(ln.get("PrixUnitaire")), "Devise": devise,
                 "dTotalAmount": _money(amount),
                 "cGL": _s(ln.get("cGL")), "cCC1": _s(ln.get("cCC1")), "cCC2": _s(ln.get("cCC2")),
             })
@@ -661,6 +680,23 @@ def register_erp(app, ns):
         inv["cStatut"] = inv.get("cStatut") or "Draft"
         return _compute_invoice(inv)
 
+    def _mark_billed(inv):
+        """An invoice bills the receptions on its lines (iNoReception); an invoice with a PO and
+        no reception numbers bills every open reception of that PO. Billed receptions leave
+        getUnbilledReceiving.p, and a PO whose receptions are all billed leaves getUnbilledPO.p."""
+        recs = {_s(ln.get("iNoReception")) for ln in inv.get("lines") or []} - {"", "0"}
+        po = _s(inv.get("cNoCommAch"))
+        if po and not recs:
+            recs = {r["NoReception"] for r in unbilled_receiving if _s(r.get("NoBonCommande")) == po}
+        if not recs:
+            return
+        pos = {po} if po else set()
+        pos |= {_s(r.get("NoBonCommande")) for r in list(receiving_details) + list(unbilled_receiving)
+                if r["NoReception"] in recs}
+        unbilled_receiving[:] = [r for r in unbilled_receiving if r["NoReception"] not in recs]
+        still_open = {_s(r.get("NoBonCommande")) for r in unbilled_receiving}
+        unbilled_po[:] = [p for p in unbilled_po if p["cPO"] not in pos - {""} or p["cPO"] in still_open]
+
     def _inv_duplicate(supplier, number, exclude_id=None):
         return any(i["cNoFourn"].upper() == supplier.upper() and i["cNoFacture"].upper() == number.upper()
                    and i["id"] != exclude_id for i in invoices)
@@ -678,6 +714,7 @@ def register_erp(app, ns):
         inv["id"] = state["next_invoice_id"]
         state["next_invoice_id"] += 1
         invoices.append(inv)
+        _mark_billed(inv)
         return jsonify(inv), 201
 
     @bp.route("/api/invoices/<int:inv_id>", methods=["GET", "PUT", "DELETE"])
@@ -694,7 +731,9 @@ def register_erp(app, ns):
         _require(p, "cNoFourn", "cNoFacture", "dDateFacture")
         if _inv_duplicate(_s(p["cNoFourn"]), _s(p["cNoFacture"]), inv_id):
             raise ApiError("duplicate", "cNoFacture", 409)
-        return jsonify(_inv_from_payload(p, inv))
+        _inv_from_payload(p, inv)
+        _mark_billed(inv)
+        return jsonify(inv)
 
     # The demo dataset starts without invoices (app.py passes seed_invoices=[]).
     for seed in ns.get("seed_invoices", _SEED_INVOICES):
@@ -725,14 +764,12 @@ def register_erp(app, ns):
             "cSource": "SkyAI", "dTransport": header.get("dTransport", "0"),
             "dTotalTPS": header.get("dTotalTPS", "0"), "dTotalTVP": header.get("dTotalTVP", "0"), "lines": [],
         }
-        billed = set()
         for d in lines:
             rec_no = d.get("iNoReception", "")
             rec_no = "" if rec_no in ("", "0") else rec_no
             code = d.get("cCodeProduit", "")
             desc = ""
             if rec_no:
-                billed.add(rec_no)
                 rec = next((r for r in receiving_details if r["NoReception"] == rec_no), None)
                 art = next((a for a in (rec or {}).get("Articles", []) if a.get("CodeArticle") == code), None)
                 desc = (art or {}).get("Description", "")
@@ -748,9 +785,12 @@ def register_erp(app, ns):
             inv["dTotalFacture"] = _money(header["dTotalFacture"])
             inv["_keepTotal"] = True
         _add_invoice(inv)
-        # Invoiced receptions are no longer "unbilled" (getUnbilledReceiving.p)
-        if billed:
-            unbilled_receiving[:] = [r for r in unbilled_receiving if r["NoReception"] not in billed]
+        # Invoiced receptions (and fully invoiced POs) are no longer "unbilled"
+        _mark_billed(inv)
         return inv
 
-    return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load}
+    def po_exists(cpo):
+        return _po_view(cpo) is not None
+
+    return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load,
+            "save_po": _po_save, "po_exists": po_exists, "all_pos": _all_pos}

@@ -1,0 +1,5926 @@
+{
+ "suppliers": [
+  {
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cAddress2": "",
+   "cCountry": "CA",
+   "cProvince": "qc",
+   "cDeptSauv": "",
+   "iStatutAch": 1,
+   "cCodeAch": "Cassiano",
+   "cDescAch": "Cassiano",
+   "iTypePO": 1,
+   "cCode": "ALUQC",
+   "cName": "Aluminium Québec inc.",
+   "cAddress1": "3500 boul. Industriel",
+   "cCity": "Laval",
+   "cZipCode": "H7L 4S3",
+   "cNoTPS": "811223344RT0001",
+   "cNoTVQ": "1221122334TQ0001"
+  },
+  {
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cAddress2": "",
+   "cCountry": "CA",
+   "cProvince": "qc",
+   "cDeptSauv": "",
+   "iStatutAch": 1,
+   "cCodeAch": "Cassiano",
+   "cDescAch": "Cassiano",
+   "iTypePO": 1,
+   "cCode": "METALX",
+   "cName": "Métal Express inc.",
+   "cAddress1": "780 rue Bergar",
+   "cCity": "Laval",
+   "cZipCode": "H7L 5A1",
+   "cNoTPS": "822334455RT0001",
+   "cNoTVQ": "1222233445TQ0001"
+  },
+  {
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cAddress2": "",
+   "cCountry": "CA",
+   "cProvince": "qc",
+   "cDeptSauv": "",
+   "iStatutAch": 1,
+   "cCodeAch": "Cassiano",
+   "cDescAch": "Cassiano",
+   "iTypePO": 1,
+   "cCode": "ALCOR",
+   "cName": "Alu-Cor Distribution inc.",
+   "cAddress1": "12 rue du Parc-Industriel",
+   "cCity": "Saint-Hyacinthe",
+   "cZipCode": "J2R 1C7",
+   "cNoTPS": "833445566RT0001",
+   "cNoTVQ": "1223344556TQ0001"
+  },
+  {
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cAddress2": "",
+   "cCountry": "CA",
+   "cProvince": "qc",
+   "cDeptSauv": "",
+   "iStatutAch": 1,
+   "cCodeAch": "Cassiano",
+   "cDescAch": "Cassiano",
+   "iTypePO": 1,
+   "cCode": "VISNOR",
+   "cName": "Visserie Nordique inc.",
+   "cAddress1": "1450 boul. Saint-Elzéar Ouest",
+   "cCity": "Laval",
+   "cZipCode": "H7L 3N7",
+   "cNoTPS": "844556677RT0001",
+   "cNoTVQ": "1224455667TQ0001"
+  },
+  {
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cAddress2": "",
+   "cCountry": "CA",
+   "cProvince": "qc",
+   "cDeptSauv": "",
+   "iStatutAch": 1,
+   "cCodeAch": "Cassiano",
+   "cDescAch": "Cassiano",
+   "iTypePO": 1,
+   "cCode": "FIXPRO",
+   "cName": "Fixations Pro inc.",
+   "cAddress1": "2200 rue Michelin",
+   "cCity": "Laval",
+   "cZipCode": "H7L 5B7",
+   "cNoTPS": "855667788RT0001",
+   "cNoTVQ": "1225566778TQ0001"
+  },
+  {
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cAddress2": "",
+   "cCountry": "CA",
+   "cProvince": "qc",
+   "cDeptSauv": "",
+   "iStatutAch": 1,
+   "cCodeAch": "Cassiano",
+   "cDescAch": "Cassiano",
+   "iTypePO": 1,
+   "cCode": "BUREXP",
+   "cName": "Bureau Express inc.",
+   "cAddress1": "9100 boul. Pie-IX",
+   "cCity": "Montréal",
+   "cZipCode": "H1Z 3T8",
+   "cNoTPS": "866778899RT0001",
+   "cNoTVQ": "1226677889TQ0001"
+  }
+ ],
+ "po_details": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "400001",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-10-04",
+    "dDueDate": "2025-10-11",
+    "dSubTotal": "7065.75",
+    "dFreight": "0.00",
+    "dGST": "353.29",
+    "dPST": "704.81",
+    "dTotalAmount": "8123.85"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "15",
+     "dUnitCost": "97.55",
+     "dSubTotal": "1463.25",
+     "dTotalAmount": "1463.25"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "25",
+     "dUnitCost": "182.47",
+     "dSubTotal": "4561.75",
+     "dTotalAmount": "4561.75"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "25",
+     "dUnitCost": "41.63",
+     "dSubTotal": "1040.75",
+     "dTotalAmount": "1040.75"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400002",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-11-19",
+    "dDueDate": "2025-11-26",
+    "dSubTotal": "781.92",
+    "dFreight": "0.00",
+    "dGST": "39.10",
+    "dPST": "78.00",
+    "dTotalAmount": "899.02"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "12",
+     "dUnitCost": "65.16",
+     "dSubTotal": "781.92",
+     "dTotalAmount": "781.92"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400003",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-12-19",
+    "dDueDate": "2025-12-26",
+    "dSubTotal": "2025.80",
+    "dFreight": "0.00",
+    "dGST": "101.29",
+    "dPST": "202.07",
+    "dTotalAmount": "2329.16"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL5052-F063-48",
+     "cProductDesc": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantity": "10",
+     "dUnitCost": "117.84",
+     "dSubTotal": "1178.40",
+     "dTotalAmount": "1178.40"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "20",
+     "dUnitCost": "42.37",
+     "dSubTotal": "847.40",
+     "dTotalAmount": "847.40"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400004",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-01-16",
+    "dDueDate": "2026-01-23",
+    "dSubTotal": "3115.32",
+    "dFreight": "0.00",
+    "dGST": "155.77",
+    "dPST": "310.75",
+    "dTotalAmount": "3581.84"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL5052-F063-48",
+     "cProductDesc": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantity": "20",
+     "dUnitCost": "117.12",
+     "dSubTotal": "2342.40",
+     "dTotalAmount": "2342.40"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "12",
+     "dUnitCost": "64.41",
+     "dSubTotal": "772.92",
+     "dTotalAmount": "772.92"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400005",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-02-25",
+    "dDueDate": "2026-03-04",
+    "dSubTotal": "5138.23",
+    "dFreight": "0.00",
+    "dGST": "256.91",
+    "dPST": "512.54",
+    "dTotalAmount": "5907.68"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "25",
+     "dUnitCost": "184.99",
+     "dSubTotal": "4624.75",
+     "dTotalAmount": "4624.75"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "12",
+     "dUnitCost": "42.79",
+     "dSubTotal": "513.48",
+     "dTotalAmount": "513.48"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400006",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-04-10",
+    "dDueDate": "2026-04-17",
+    "dSubTotal": "5847.04",
+    "dFreight": "0.00",
+    "dGST": "292.35",
+    "dPST": "583.24",
+    "dTotalAmount": "6722.63"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "8",
+     "dUnitCost": "96.93",
+     "dSubTotal": "775.44",
+     "dTotalAmount": "775.44"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "20",
+     "dUnitCost": "188.18",
+     "dSubTotal": "3763.60",
+     "dTotalAmount": "3763.60"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "20",
+     "dUnitCost": "65.40",
+     "dSubTotal": "1308.00",
+     "dTotalAmount": "1308.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400007",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-04-30",
+    "dDueDate": "2026-05-07",
+    "dSubTotal": "2245.92",
+    "dFreight": "0.00",
+    "dGST": "112.30",
+    "dPST": "224.03",
+    "dTotalAmount": "2582.25"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "12",
+     "dUnitCost": "187.16",
+     "dSubTotal": "2245.92",
+     "dTotalAmount": "2245.92"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400008",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-06-15",
+    "dDueDate": "2026-06-22",
+    "dSubTotal": "1848.80",
+    "dFreight": "0.00",
+    "dGST": "92.44",
+    "dPST": "184.42",
+    "dTotalAmount": "2125.66"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "10",
+     "dUnitCost": "99.38",
+     "dSubTotal": "993.80",
+     "dTotalAmount": "993.80"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "20",
+     "dUnitCost": "42.75",
+     "dSubTotal": "855.00",
+     "dTotalAmount": "855.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400009",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-07-16",
+    "dDueDate": "2026-07-23",
+    "dSubTotal": "1912.55",
+    "dFreight": "0.00",
+    "dGST": "95.63",
+    "dPST": "190.78",
+    "dTotalAmount": "2198.96"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL5052-F063-48",
+     "cProductDesc": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantity": "5",
+     "dUnitCost": "123.35",
+     "dSubTotal": "616.75",
+     "dTotalAmount": "616.75"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "20",
+     "dUnitCost": "64.79",
+     "dSubTotal": "1295.80",
+     "dTotalAmount": "1295.80"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400010",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-08-04",
+    "dDueDate": "2026-08-11",
+    "dSubTotal": "800.04",
+    "dFreight": "0.00",
+    "dGST": "40.00",
+    "dPST": "79.80",
+    "dTotalAmount": "919.84"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "12",
+     "dUnitCost": "66.67",
+     "dSubTotal": "800.04",
+     "dTotalAmount": "800.04"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400011",
+   "ttPOheader": {
+    "cSupplierCode": "ALUQC",
+    "cSupplierName": "Aluminium Québec inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-18",
+    "dDueDate": "2026-09-25",
+    "dSubTotal": "5728.40",
+    "dFreight": "0.00",
+    "dGST": "286.42",
+    "dPST": "571.41",
+    "dTotalAmount": "6586.23"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "10",
+     "dUnitCost": "101.04",
+     "dSubTotal": "1010.40",
+     "dTotalAmount": "1010.40"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "25",
+     "dUnitCost": "188.72",
+     "dSubTotal": "4718.00",
+     "dTotalAmount": "4718.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400012",
+   "ttPOheader": {
+    "cSupplierCode": "METALX",
+    "cSupplierName": "Métal Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-10-17",
+    "dDueDate": "2025-10-22",
+    "dSubTotal": "1310.16",
+    "dFreight": "0.00",
+    "dGST": "65.51",
+    "dPST": "130.69",
+    "dTotalAmount": "1506.36"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "12",
+     "dUnitCost": "109.18",
+     "dSubTotal": "1310.16",
+     "dTotalAmount": "1310.16"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400013",
+   "ttPOheader": {
+    "cSupplierCode": "METALX",
+    "cSupplierName": "Métal Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-12-09",
+    "dDueDate": "2025-12-14",
+    "dSubTotal": "4239.42",
+    "dFreight": "0.00",
+    "dGST": "211.97",
+    "dPST": "422.88",
+    "dTotalAmount": "4874.27"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "25",
+     "dUnitCost": "71.34",
+     "dSubTotal": "1783.50",
+     "dTotalAmount": "1783.50"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "12",
+     "dUnitCost": "204.66",
+     "dSubTotal": "2455.92",
+     "dTotalAmount": "2455.92"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400014",
+   "ttPOheader": {
+    "cSupplierCode": "METALX",
+    "cSupplierName": "Métal Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-01-30",
+    "dDueDate": "2026-02-04",
+    "dSubTotal": "6895.95",
+    "dFreight": "0.00",
+    "dGST": "344.80",
+    "dPST": "687.87",
+    "dTotalAmount": "7928.62"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL5052-F063-48",
+     "cProductDesc": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantity": "25",
+     "dUnitCost": "134.57",
+     "dSubTotal": "3364.25",
+     "dTotalAmount": "3364.25"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "10",
+     "dUnitCost": "206.93",
+     "dSubTotal": "2069.30",
+     "dTotalAmount": "2069.30"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "20",
+     "dUnitCost": "73.12",
+     "dSubTotal": "1462.40",
+     "dTotalAmount": "1462.40"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400015",
+   "ttPOheader": {
+    "cSupplierCode": "METALX",
+    "cSupplierName": "Métal Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-03-20",
+    "dDueDate": "2026-03-25",
+    "dSubTotal": "3076.20",
+    "dFreight": "0.00",
+    "dGST": "153.81",
+    "dPST": "306.85",
+    "dTotalAmount": "3536.86"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL5052-F063-48",
+     "cProductDesc": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantity": "15",
+     "dUnitCost": "133.14",
+     "dSubTotal": "1997.10",
+     "dTotalAmount": "1997.10"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "15",
+     "dUnitCost": "71.94",
+     "dSubTotal": "1079.10",
+     "dTotalAmount": "1079.10"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400016",
+   "ttPOheader": {
+    "cSupplierCode": "METALX",
+    "cSupplierName": "Métal Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-05-05",
+    "dDueDate": "2026-05-10",
+    "dSubTotal": "2138.91",
+    "dFreight": "0.00",
+    "dGST": "106.95",
+    "dPST": "213.36",
+    "dTotalAmount": "2459.22"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "8",
+     "dUnitCost": "73.06",
+     "dSubTotal": "584.48",
+     "dTotalAmount": "584.48"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "8",
+     "dUnitCost": "110.16",
+     "dSubTotal": "881.28",
+     "dTotalAmount": "881.28"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AL5052-F063-48",
+     "cProductDesc": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantity": "5",
+     "dUnitCost": "134.63",
+     "dSubTotal": "673.15",
+     "dTotalAmount": "673.15"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400017",
+   "ttPOheader": {
+    "cSupplierCode": "METALX",
+    "cSupplierName": "Métal Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-06-09",
+    "dDueDate": "2026-06-14",
+    "dSubTotal": "2095.50",
+    "dFreight": "0.00",
+    "dGST": "104.78",
+    "dPST": "209.03",
+    "dTotalAmount": "2409.31"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "10",
+     "dUnitCost": "209.55",
+     "dSubTotal": "2095.50",
+     "dTotalAmount": "2095.50"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400018",
+   "ttPOheader": {
+    "cSupplierCode": "METALX",
+    "cSupplierName": "Métal Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-07-19",
+    "dDueDate": "2026-07-24",
+    "dSubTotal": "3193.04",
+    "dFreight": "0.00",
+    "dGST": "159.65",
+    "dPST": "318.51",
+    "dTotalAmount": "3671.20"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL5052-F063-48",
+     "cProductDesc": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantity": "8",
+     "dUnitCost": "136.88",
+     "dSubTotal": "1095.04",
+     "dTotalAmount": "1095.04"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "10",
+     "dUnitCost": "209.80",
+     "dSubTotal": "2098.00",
+     "dTotalAmount": "2098.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400019",
+   "ttPOheader": {
+    "cSupplierCode": "METALX",
+    "cSupplierName": "Métal Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-10",
+    "dDueDate": "2026-09-15",
+    "dSubTotal": "4391.77",
+    "dFreight": "0.00",
+    "dGST": "219.59",
+    "dPST": "438.08",
+    "dTotalAmount": "5049.44"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "8",
+     "dUnitCost": "112.24",
+     "dSubTotal": "897.92",
+     "dTotalAmount": "897.92"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "15",
+     "dUnitCost": "207.70",
+     "dSubTotal": "3115.50",
+     "dTotalAmount": "3115.50"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AL6061-B100-12",
+     "cProductDesc": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantity": "5",
+     "dUnitCost": "75.67",
+     "dSubTotal": "378.35",
+     "dTotalAmount": "378.35"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400020",
+   "ttPOheader": {
+    "cSupplierCode": "ALCOR",
+    "cSupplierName": "Alu-Cor Distribution inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-10-06",
+    "dDueDate": "2025-10-13",
+    "dSubTotal": "3470.58",
+    "dFreight": "0.00",
+    "dGST": "173.53",
+    "dPST": "346.19",
+    "dTotalAmount": "3990.30"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "8",
+     "dUnitCost": "174.11",
+     "dSubTotal": "1392.88",
+     "dTotalAmount": "1392.88"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "12",
+     "dUnitCost": "90.85",
+     "dSubTotal": "1090.20",
+     "dTotalAmount": "1090.20"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "25",
+     "dUnitCost": "39.50",
+     "dSubTotal": "987.50",
+     "dTotalAmount": "987.50"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400021",
+   "ttPOheader": {
+    "cSupplierCode": "ALCOR",
+    "cSupplierName": "Alu-Cor Distribution inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-12-24",
+    "dDueDate": "2025-12-31",
+    "dSubTotal": "1048.95",
+    "dFreight": "0.00",
+    "dGST": "52.45",
+    "dPST": "104.63",
+    "dTotalAmount": "1206.03"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "15",
+     "dUnitCost": "39.27",
+     "dSubTotal": "589.05",
+     "dTotalAmount": "589.05"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "5",
+     "dUnitCost": "91.98",
+     "dSubTotal": "459.90",
+     "dTotalAmount": "459.90"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400022",
+   "ttPOheader": {
+    "cSupplierCode": "ALCOR",
+    "cSupplierName": "Alu-Cor Distribution inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-01-16",
+    "dDueDate": "2026-01-23",
+    "dSubTotal": "3308.75",
+    "dFreight": "0.00",
+    "dGST": "165.44",
+    "dPST": "330.05",
+    "dTotalAmount": "3804.24"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "25",
+     "dUnitCost": "91.93",
+     "dSubTotal": "2298.25",
+     "dTotalAmount": "2298.25"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "25",
+     "dUnitCost": "40.42",
+     "dSubTotal": "1010.50",
+     "dTotalAmount": "1010.50"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400023",
+   "ttPOheader": {
+    "cSupplierCode": "ALCOR",
+    "cSupplierName": "Alu-Cor Distribution inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-03-20",
+    "dDueDate": "2026-03-27",
+    "dSubTotal": "603.90",
+    "dFreight": "0.00",
+    "dGST": "30.20",
+    "dPST": "60.24",
+    "dTotalAmount": "694.34"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "15",
+     "dUnitCost": "40.26",
+     "dSubTotal": "603.90",
+     "dTotalAmount": "603.90"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400024",
+   "ttPOheader": {
+    "cSupplierCode": "ALCOR",
+    "cSupplierName": "Alu-Cor Distribution inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-05-08",
+    "dDueDate": "2026-05-15",
+    "dSubTotal": "2964.05",
+    "dFreight": "0.00",
+    "dGST": "148.20",
+    "dPST": "295.66",
+    "dTotalAmount": "3407.91"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "20",
+     "dUnitCost": "93.63",
+     "dSubTotal": "1872.60",
+     "dTotalAmount": "1872.60"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "5",
+     "dUnitCost": "177.46",
+     "dSubTotal": "887.30",
+     "dTotalAmount": "887.30"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "AL6063-C1515-20",
+     "cProductDesc": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantity": "5",
+     "dUnitCost": "40.83",
+     "dSubTotal": "204.15",
+     "dTotalAmount": "204.15"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400025",
+   "ttPOheader": {
+    "cSupplierCode": "ALCOR",
+    "cSupplierName": "Alu-Cor Distribution inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-07-18",
+    "dDueDate": "2026-07-25",
+    "dSubTotal": "1419.00",
+    "dFreight": "0.00",
+    "dGST": "70.95",
+    "dPST": "141.55",
+    "dTotalAmount": "1631.50"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "15",
+     "dUnitCost": "94.60",
+     "dSubTotal": "1419.00",
+     "dTotalAmount": "1419.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400026",
+   "ttPOheader": {
+    "cSupplierCode": "ALCOR",
+    "cSupplierName": "Alu-Cor Distribution inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-08-15",
+    "dDueDate": "2026-08-22",
+    "dSubTotal": "4925.10",
+    "dFreight": "0.00",
+    "dGST": "246.26",
+    "dPST": "491.28",
+    "dTotalAmount": "5662.64"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "AL6061-F125-48",
+     "cProductDesc": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantity": "25",
+     "dUnitCost": "178.31",
+     "dSubTotal": "4457.75",
+     "dTotalAmount": "4457.75"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "AL6061-T200-20",
+     "cProductDesc": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantity": "5",
+     "dUnitCost": "93.47",
+     "dSubTotal": "467.35",
+     "dTotalAmount": "467.35"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400027",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-10-19",
+    "dDueDate": "2025-10-24",
+    "dSubTotal": "608.64",
+    "dFreight": "0.00",
+    "dGST": "30.43",
+    "dPST": "60.71",
+    "dTotalAmount": "699.78"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "20",
+     "dUnitCost": "17.01",
+     "dSubTotal": "340.20",
+     "dTotalAmount": "340.20"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "12",
+     "dUnitCost": "22.37",
+     "dSubTotal": "268.44",
+     "dTotalAmount": "268.44"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400028",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-12-08",
+    "dDueDate": "2025-12-13",
+    "dSubTotal": "729.42",
+    "dFreight": "0.00",
+    "dGST": "36.47",
+    "dPST": "72.76",
+    "dTotalAmount": "838.65"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "10",
+     "dUnitCost": "16.88",
+     "dSubTotal": "168.80",
+     "dTotalAmount": "168.80"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "12",
+     "dUnitCost": "22.51",
+     "dSubTotal": "270.12",
+     "dTotalAmount": "270.12"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "10",
+     "dUnitCost": "29.05",
+     "dSubTotal": "290.50",
+     "dTotalAmount": "290.50"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400029",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-01-15",
+    "dDueDate": "2026-01-20",
+    "dSubTotal": "172.80",
+    "dFreight": "0.00",
+    "dGST": "8.64",
+    "dPST": "17.24",
+    "dTotalAmount": "198.68"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "10",
+     "dUnitCost": "17.28",
+     "dSubTotal": "172.80",
+     "dTotalAmount": "172.80"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400030",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-02-05",
+    "dDueDate": "2026-02-10",
+    "dSubTotal": "141.18",
+    "dFreight": "0.00",
+    "dGST": "7.06",
+    "dPST": "14.08",
+    "dTotalAmount": "162.32"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "6",
+     "dUnitCost": "23.53",
+     "dSubTotal": "141.18",
+     "dTotalAmount": "141.18"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400031",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-03-15",
+    "dDueDate": "2026-03-20",
+    "dSubTotal": "230.30",
+    "dFreight": "0.00",
+    "dGST": "11.52",
+    "dPST": "22.97",
+    "dTotalAmount": "264.79"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "10",
+     "dUnitCost": "23.03",
+     "dSubTotal": "230.30",
+     "dTotalAmount": "230.30"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400032",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-05-03",
+    "dDueDate": "2026-05-08",
+    "dSubTotal": "104.46",
+    "dFreight": "0.00",
+    "dGST": "5.22",
+    "dPST": "10.42",
+    "dTotalAmount": "120.10"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "6",
+     "dUnitCost": "17.41",
+     "dSubTotal": "104.46",
+     "dTotalAmount": "104.46"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400033",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-06-01",
+    "dDueDate": "2026-06-06",
+    "dSubTotal": "662.50",
+    "dFreight": "0.00",
+    "dGST": "33.13",
+    "dPST": "66.08",
+    "dTotalAmount": "761.71"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "6",
+     "dUnitCost": "23.63",
+     "dSubTotal": "141.78",
+     "dTotalAmount": "141.78"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "10",
+     "dUnitCost": "17.02",
+     "dSubTotal": "170.20",
+     "dTotalAmount": "170.20"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "12",
+     "dUnitCost": "29.21",
+     "dSubTotal": "350.52",
+     "dTotalAmount": "350.52"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400034",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-07-29",
+    "dDueDate": "2026-08-03",
+    "dSubTotal": "481.84",
+    "dFreight": "0.00",
+    "dGST": "24.09",
+    "dPST": "48.06",
+    "dTotalAmount": "553.99"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "10",
+     "dUnitCost": "23.63",
+     "dSubTotal": "236.30",
+     "dTotalAmount": "236.30"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "4",
+     "dUnitCost": "17.15",
+     "dSubTotal": "68.60",
+     "dTotalAmount": "68.60"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "6",
+     "dUnitCost": "29.49",
+     "dSubTotal": "176.94",
+     "dTotalAmount": "176.94"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400035",
+   "ttPOheader": {
+    "cSupplierCode": "VISNOR",
+    "cSupplierName": "Visserie Nordique inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-17",
+    "dDueDate": "2026-09-22",
+    "dSubTotal": "669.08",
+    "dFreight": "0.00",
+    "dGST": "33.45",
+    "dPST": "66.74",
+    "dTotalAmount": "769.27"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "10",
+     "dUnitCost": "17.60",
+     "dSubTotal": "176.00",
+     "dTotalAmount": "176.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "6",
+     "dUnitCost": "23.48",
+     "dSubTotal": "140.88",
+     "dTotalAmount": "140.88"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "12",
+     "dUnitCost": "29.35",
+     "dSubTotal": "352.20",
+     "dTotalAmount": "352.20"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400036",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-10-07",
+    "dDueDate": "2025-10-12",
+    "dSubTotal": "813.84",
+    "dFreight": "0.00",
+    "dGST": "40.69",
+    "dPST": "81.18",
+    "dTotalAmount": "935.71"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "10",
+     "dUnitCost": "16.66",
+     "dSubTotal": "166.60",
+     "dTotalAmount": "166.60"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "20",
+     "dUnitCost": "27.91",
+     "dSubTotal": "558.20",
+     "dTotalAmount": "558.20"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "4",
+     "dUnitCost": "22.26",
+     "dSubTotal": "89.04",
+     "dTotalAmount": "89.04"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400037",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-12-04",
+    "dDueDate": "2025-12-09",
+    "dSubTotal": "89.76",
+    "dFreight": "0.00",
+    "dGST": "4.49",
+    "dPST": "8.95",
+    "dTotalAmount": "103.20"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "4",
+     "dUnitCost": "22.44",
+     "dSubTotal": "89.76",
+     "dTotalAmount": "89.76"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400038",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-12-30",
+    "dDueDate": "2026-01-04",
+    "dSubTotal": "329.60",
+    "dFreight": "0.00",
+    "dGST": "16.48",
+    "dPST": "32.88",
+    "dTotalAmount": "378.96"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "20",
+     "dUnitCost": "16.48",
+     "dSubTotal": "329.60",
+     "dTotalAmount": "329.60"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400039",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-02-20",
+    "dDueDate": "2026-02-25",
+    "dSubTotal": "833.70",
+    "dFreight": "0.00",
+    "dGST": "41.69",
+    "dPST": "83.16",
+    "dTotalAmount": "958.55"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "10",
+     "dUnitCost": "28.24",
+     "dSubTotal": "282.40",
+     "dTotalAmount": "282.40"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "10",
+     "dUnitCost": "22.45",
+     "dSubTotal": "224.50",
+     "dTotalAmount": "224.50"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "20",
+     "dUnitCost": "16.34",
+     "dSubTotal": "326.80",
+     "dTotalAmount": "326.80"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400040",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-03-16",
+    "dDueDate": "2026-03-21",
+    "dSubTotal": "569.88",
+    "dFreight": "0.00",
+    "dGST": "28.49",
+    "dPST": "56.85",
+    "dTotalAmount": "655.22"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "12",
+     "dUnitCost": "28.44",
+     "dSubTotal": "341.28",
+     "dTotalAmount": "341.28"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "10",
+     "dUnitCost": "22.86",
+     "dSubTotal": "228.60",
+     "dTotalAmount": "228.60"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400041",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-05-22",
+    "dDueDate": "2026-05-27",
+    "dSubTotal": "324.84",
+    "dFreight": "0.00",
+    "dGST": "16.24",
+    "dPST": "32.40",
+    "dTotalAmount": "373.48"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "6",
+     "dUnitCost": "28.04",
+     "dSubTotal": "168.24",
+     "dTotalAmount": "168.24"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "4",
+     "dUnitCost": "22.33",
+     "dSubTotal": "89.32",
+     "dTotalAmount": "89.32"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "4",
+     "dUnitCost": "16.82",
+     "dSubTotal": "67.28",
+     "dTotalAmount": "67.28"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400042",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-06-08",
+    "dDueDate": "2026-06-13",
+    "dSubTotal": "67.32",
+    "dFreight": "0.00",
+    "dGST": "3.37",
+    "dPST": "6.72",
+    "dTotalAmount": "77.41"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "4",
+     "dUnitCost": "16.83",
+     "dSubTotal": "67.32",
+     "dTotalAmount": "67.32"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400043",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-07-31",
+    "dDueDate": "2026-08-05",
+    "dSubTotal": "494.80",
+    "dFreight": "0.00",
+    "dGST": "24.74",
+    "dPST": "49.36",
+    "dTotalAmount": "568.90"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "4",
+     "dUnitCost": "28.93",
+     "dSubTotal": "115.72",
+     "dTotalAmount": "115.72"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "6",
+     "dUnitCost": "16.98",
+     "dSubTotal": "101.88",
+     "dTotalAmount": "101.88"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "12",
+     "dUnitCost": "23.10",
+     "dSubTotal": "277.20",
+     "dTotalAmount": "277.20"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400044",
+   "ttPOheader": {
+    "cSupplierCode": "FIXPRO",
+    "cSupplierName": "Fixations Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-08-29",
+    "dDueDate": "2026-09-03",
+    "dSubTotal": "943.82",
+    "dFreight": "0.00",
+    "dGST": "47.19",
+    "dPST": "94.15",
+    "dTotalAmount": "1085.16"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "VIS-INOX-1420",
+     "cProductDesc": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantity": "20",
+     "dUnitCost": "28.48",
+     "dSubTotal": "569.60",
+     "dTotalAmount": "569.60"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "RIV-ALU-316",
+     "cProductDesc": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantity": "12",
+     "dUnitCost": "22.72",
+     "dSubTotal": "272.64",
+     "dTotalAmount": "272.64"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "ECR-INOX-14",
+     "cProductDesc": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantity": "6",
+     "dUnitCost": "16.93",
+     "dSubTotal": "101.58",
+     "dTotalAmount": "101.58"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400045",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-11-03",
+    "dDueDate": "2025-11-06",
+    "dSubTotal": "1057.60",
+    "dFreight": "0.00",
+    "dGST": "52.88",
+    "dPST": "105.50",
+    "dTotalAmount": "1215.98"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "20",
+     "dUnitCost": "52.88",
+     "dSubTotal": "1057.60",
+     "dTotalAmount": "1057.60"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400046",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-12-09",
+    "dDueDate": "2025-12-12",
+    "dSubTotal": "207.64",
+    "dFreight": "0.00",
+    "dGST": "10.38",
+    "dPST": "20.71",
+    "dTotalAmount": "238.73"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "4",
+     "dUnitCost": "51.91",
+     "dSubTotal": "207.64",
+     "dTotalAmount": "207.64"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400047",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-01-30",
+    "dDueDate": "2026-02-02",
+    "dSubTotal": "519.40",
+    "dFreight": "0.00",
+    "dGST": "25.97",
+    "dPST": "51.81",
+    "dTotalAmount": "597.18"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "10",
+     "dUnitCost": "51.94",
+     "dSubTotal": "519.40",
+     "dTotalAmount": "519.40"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400048",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-02-18",
+    "dDueDate": "2026-02-21",
+    "dSubTotal": "636.96",
+    "dFreight": "0.00",
+    "dGST": "31.85",
+    "dPST": "63.54",
+    "dTotalAmount": "732.35"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "12",
+     "dUnitCost": "53.08",
+     "dSubTotal": "636.96",
+     "dTotalAmount": "636.96"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400049",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-04-27",
+    "dDueDate": "2026-04-30",
+    "dSubTotal": "634.08",
+    "dFreight": "0.00",
+    "dGST": "31.70",
+    "dPST": "63.25",
+    "dTotalAmount": "729.03"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "12",
+     "dUnitCost": "52.84",
+     "dSubTotal": "634.08",
+     "dTotalAmount": "634.08"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400050",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-06-09",
+    "dDueDate": "2026-06-12",
+    "dSubTotal": "532.70",
+    "dFreight": "0.00",
+    "dGST": "26.64",
+    "dPST": "53.14",
+    "dTotalAmount": "612.48"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "10",
+     "dUnitCost": "53.27",
+     "dSubTotal": "532.70",
+     "dTotalAmount": "532.70"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400051",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-07-15",
+    "dDueDate": "2026-07-18",
+    "dSubTotal": "531.40",
+    "dFreight": "0.00",
+    "dGST": "26.57",
+    "dPST": "53.01",
+    "dTotalAmount": "610.98"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "10",
+     "dUnitCost": "53.14",
+     "dSubTotal": "531.40",
+     "dTotalAmount": "531.40"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400052",
+   "ttPOheader": {
+    "cSupplierCode": "PAPCEN",
+    "cSupplierName": "Papeterie Centrale inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-14",
+    "dDueDate": "2026-09-17",
+    "dSubTotal": "214.56",
+    "dFreight": "0.00",
+    "dGST": "10.73",
+    "dPST": "21.40",
+    "dTotalAmount": "246.69"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "4",
+     "dUnitCost": "53.64",
+     "dSubTotal": "214.56",
+     "dTotalAmount": "214.56"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400053",
+   "ttPOheader": {
+    "cSupplierCode": "BUREXP",
+    "cSupplierName": "Bureau Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2025-11-07",
+    "dDueDate": "2025-11-10",
+    "dSubTotal": "329.76",
+    "dFreight": "0.00",
+    "dGST": "16.49",
+    "dPST": "32.89",
+    "dTotalAmount": "379.14"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "6",
+     "dUnitCost": "54.96",
+     "dSubTotal": "329.76",
+     "dTotalAmount": "329.76"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400054",
+   "ttPOheader": {
+    "cSupplierCode": "BUREXP",
+    "cSupplierName": "Bureau Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-01-03",
+    "dDueDate": "2026-01-06",
+    "dSubTotal": "223.12",
+    "dFreight": "0.00",
+    "dGST": "11.16",
+    "dPST": "22.26",
+    "dTotalAmount": "256.54"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "4",
+     "dUnitCost": "55.78",
+     "dSubTotal": "223.12",
+     "dTotalAmount": "223.12"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400055",
+   "ttPOheader": {
+    "cSupplierCode": "BUREXP",
+    "cSupplierName": "Bureau Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-03-04",
+    "dDueDate": "2026-03-07",
+    "dSubTotal": "332.34",
+    "dFreight": "0.00",
+    "dGST": "16.62",
+    "dPST": "33.15",
+    "dTotalAmount": "382.11"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "6",
+     "dUnitCost": "55.39",
+     "dSubTotal": "332.34",
+     "dTotalAmount": "332.34"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400056",
+   "ttPOheader": {
+    "cSupplierCode": "BUREXP",
+    "cSupplierName": "Bureau Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-06-06",
+    "dDueDate": "2026-06-09",
+    "dSubTotal": "557.30",
+    "dFreight": "0.00",
+    "dGST": "27.87",
+    "dPST": "55.59",
+    "dTotalAmount": "640.76"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "10",
+     "dUnitCost": "55.73",
+     "dSubTotal": "557.30",
+     "dTotalAmount": "557.30"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "400057",
+   "ttPOheader": {
+    "cSupplierCode": "BUREXP",
+    "cSupplierName": "Bureau Express inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-07-21",
+    "dDueDate": "2026-07-24",
+    "dSubTotal": "696.12",
+    "dFreight": "0.00",
+    "dGST": "34.81",
+    "dPST": "69.44",
+    "dTotalAmount": "800.37"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAP-LET-500",
+     "cProductDesc": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantity": "12",
+     "dUnitCost": "58.01",
+     "dSubTotal": "696.12",
+     "dTotalAmount": "696.12"
+    }
+   ]
+  }
+ ],
+ "receiving_details": [
+  {
+   "NoReception": "600001",
+   "COMPANY": "MA2",
+   "DateReception": "2025-10-09",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400001",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "15",
+     "PrixUnitaire": "97.55",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "182.47",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "41.63",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "8123.85",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "7065.75",
+   "Transport": "0.00",
+   "TPS": "353.29",
+   "TVQ": "704.81"
+  },
+  {
+   "NoReception": "600002",
+   "COMPANY": "MA2",
+   "DateReception": "2025-11-22",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400002",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "65.16",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "749.18",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "Livraison partielle",
+   "SousTotal": "651.60",
+   "Transport": "0.00",
+   "TPS": "32.58",
+   "TVQ": "65.00"
+  },
+  {
+   "NoReception": "600003",
+   "COMPANY": "MA2",
+   "DateReception": "2025-12-24",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400003",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL5052-F063-48",
+     "Description": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "117.84",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "42.37",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2329.16",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "2025.80",
+   "Transport": "0.00",
+   "TPS": "101.29",
+   "TVQ": "202.07"
+  },
+  {
+   "NoReception": "600004",
+   "COMPANY": "MA2",
+   "DateReception": "2026-01-21",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400004",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL5052-F063-48",
+     "Description": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "117.12",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "64.41",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "3581.84",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "3115.32",
+   "Transport": "0.00",
+   "TPS": "155.77",
+   "TVQ": "310.75"
+  },
+  {
+   "NoReception": "600005",
+   "COMPANY": "MA2",
+   "DateReception": "2026-03-01",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400005",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "184.99",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "42.79",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "5907.68",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "5138.23",
+   "Transport": "0.00",
+   "TPS": "256.91",
+   "TVQ": "512.54"
+  },
+  {
+   "NoReception": "600006",
+   "COMPANY": "MA2",
+   "DateReception": "2026-04-16",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400006",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "8",
+     "QuantiteRecue": "8",
+     "PrixUnitaire": "96.93",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "188.18",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "65.40",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "6722.63",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "5847.04",
+   "Transport": "0.00",
+   "TPS": "292.35",
+   "TVQ": "583.24"
+  },
+  {
+   "NoReception": "600007",
+   "COMPANY": "MA2",
+   "DateReception": "2026-05-04",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400007",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "187.16",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2582.25",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "2245.92",
+   "Transport": "0.00",
+   "TPS": "112.30",
+   "TVQ": "224.03"
+  },
+  {
+   "NoReception": "600008",
+   "COMPANY": "MA2",
+   "DateReception": "2026-06-19",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400008",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "99.38",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "42.75",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2125.66",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "1848.80",
+   "Transport": "0.00",
+   "TPS": "92.44",
+   "TVQ": "184.42"
+  },
+  {
+   "NoReception": "600009",
+   "COMPANY": "MA2",
+   "DateReception": "2026-07-23",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400009",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL5052-F063-48",
+     "Description": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "QuantiteCommandee": "5",
+     "QuantiteRecue": "5",
+     "PrixUnitaire": "123.35",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "64.79",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2198.96",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "1912.55",
+   "Transport": "0.00",
+   "TPS": "95.63",
+   "TVQ": "190.78"
+  },
+  {
+   "NoReception": "600010",
+   "COMPANY": "MA2",
+   "DateReception": "2026-08-07",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400010",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "66.67",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "919.84",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "800.04",
+   "Transport": "0.00",
+   "TPS": "40.00",
+   "TVQ": "79.80"
+  },
+  {
+   "NoReception": "600011",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-24",
+   "Fournisseur": "Aluminium Québec inc.",
+   "CodeFournisseur": "ALUQC",
+   "NoBonCommande": "400011",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "101.04",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "188.72",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "6586.23",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "5728.40",
+   "Transport": "0.00",
+   "TPS": "286.42",
+   "TVQ": "571.41"
+  },
+  {
+   "NoReception": "600012",
+   "COMPANY": "MA2",
+   "DateReception": "2025-10-21",
+   "Fournisseur": "Métal Express inc.",
+   "CodeFournisseur": "METALX",
+   "NoBonCommande": "400012",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "109.18",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "1506.36",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "1310.16",
+   "Transport": "0.00",
+   "TPS": "65.51",
+   "TVQ": "130.69"
+  },
+  {
+   "NoReception": "600013",
+   "COMPANY": "MA2",
+   "DateReception": "2025-12-12",
+   "Fournisseur": "Métal Express inc.",
+   "CodeFournisseur": "METALX",
+   "NoBonCommande": "400013",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "71.34",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "204.66",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "4874.27",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "4239.42",
+   "Transport": "0.00",
+   "TPS": "211.97",
+   "TVQ": "422.88"
+  },
+  {
+   "NoReception": "600014",
+   "COMPANY": "MA2",
+   "DateReception": "2026-02-02",
+   "Fournisseur": "Métal Express inc.",
+   "CodeFournisseur": "METALX",
+   "NoBonCommande": "400014",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL5052-F063-48",
+     "Description": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "134.57",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "7",
+     "PrixUnitaire": "206.93",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "73.12",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "7214.87",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "Livraison partielle",
+   "SousTotal": "6275.16",
+   "Transport": "0.00",
+   "TPS": "313.76",
+   "TVQ": "625.95"
+  },
+  {
+   "NoReception": "600015",
+   "COMPANY": "MA2",
+   "DateReception": "2026-03-24",
+   "Fournisseur": "Métal Express inc.",
+   "CodeFournisseur": "METALX",
+   "NoBonCommande": "400015",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL5052-F063-48",
+     "Description": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "15",
+     "PrixUnitaire": "133.14",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "15",
+     "PrixUnitaire": "71.94",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "3536.86",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "3076.20",
+   "Transport": "0.00",
+   "TPS": "153.81",
+   "TVQ": "306.85"
+  },
+  {
+   "NoReception": "600016",
+   "COMPANY": "MA2",
+   "DateReception": "2026-05-07",
+   "Fournisseur": "Métal Express inc.",
+   "CodeFournisseur": "METALX",
+   "NoBonCommande": "400016",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "8",
+     "QuantiteRecue": "8",
+     "PrixUnitaire": "73.06",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "8",
+     "QuantiteRecue": "8",
+     "PrixUnitaire": "110.16",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL5052-F063-48",
+     "Description": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "QuantiteCommandee": "5",
+     "QuantiteRecue": "5",
+     "PrixUnitaire": "134.63",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2459.22",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "2138.91",
+   "Transport": "0.00",
+   "TPS": "106.95",
+   "TVQ": "213.36"
+  },
+  {
+   "NoReception": "600017",
+   "COMPANY": "MA2",
+   "DateReception": "2026-06-12",
+   "Fournisseur": "Métal Express inc.",
+   "CodeFournisseur": "METALX",
+   "NoBonCommande": "400017",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "209.55",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2409.31",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "2095.50",
+   "Transport": "0.00",
+   "TPS": "104.78",
+   "TVQ": "209.03"
+  },
+  {
+   "NoReception": "600018",
+   "COMPANY": "MA2",
+   "DateReception": "2026-07-21",
+   "Fournisseur": "Métal Express inc.",
+   "CodeFournisseur": "METALX",
+   "NoBonCommande": "400018",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL5052-F063-48",
+     "Description": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "QuantiteCommandee": "8",
+     "QuantiteRecue": "8",
+     "PrixUnitaire": "136.88",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "209.80",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "3671.20",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "3193.04",
+   "Transport": "0.00",
+   "TPS": "159.65",
+   "TVQ": "318.51"
+  },
+  {
+   "NoReception": "600019",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-11",
+   "Fournisseur": "Métal Express inc.",
+   "CodeFournisseur": "METALX",
+   "NoBonCommande": "400019",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "8",
+     "QuantiteRecue": "8",
+     "PrixUnitaire": "112.24",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "15",
+     "PrixUnitaire": "207.70",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-B100-12",
+     "Description": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "QuantiteCommandee": "5",
+     "QuantiteRecue": "5",
+     "PrixUnitaire": "75.67",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "5049.44",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "4391.77",
+   "Transport": "0.00",
+   "TPS": "219.59",
+   "TVQ": "438.08"
+  },
+  {
+   "NoReception": "600020",
+   "COMPANY": "MA2",
+   "DateReception": "2025-10-20",
+   "Fournisseur": "Alu-Cor Distribution inc.",
+   "CodeFournisseur": "ALCOR",
+   "NoBonCommande": "400020",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "8",
+     "QuantiteRecue": "5",
+     "PrixUnitaire": "174.11",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "8",
+     "PrixUnitaire": "90.85",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "39.50",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "2971.93",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "Livraison partielle",
+   "SousTotal": "2584.85",
+   "Transport": "0.00",
+   "TPS": "129.24",
+   "TVQ": "257.84"
+  },
+  {
+   "NoReception": "600021",
+   "COMPANY": "MA2",
+   "DateReception": "2025-12-31",
+   "Fournisseur": "Alu-Cor Distribution inc.",
+   "CodeFournisseur": "ALCOR",
+   "NoBonCommande": "400021",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "9",
+     "PrixUnitaire": "39.27",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "5",
+     "QuantiteRecue": "3",
+     "PrixUnitaire": "91.98",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "723.62",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "Livraison partielle",
+   "SousTotal": "629.37",
+   "Transport": "0.00",
+   "TPS": "31.47",
+   "TVQ": "62.78"
+  },
+  {
+   "NoReception": "600022",
+   "COMPANY": "MA2",
+   "DateReception": "2026-01-27",
+   "Fournisseur": "Alu-Cor Distribution inc.",
+   "CodeFournisseur": "ALCOR",
+   "NoBonCommande": "400022",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "91.93",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "25",
+     "PrixUnitaire": "40.42",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "3804.24",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "3308.75",
+   "Transport": "0.00",
+   "TPS": "165.44",
+   "TVQ": "330.05"
+  },
+  {
+   "NoReception": "600023",
+   "COMPANY": "MA2",
+   "DateReception": "2026-04-02",
+   "Fournisseur": "Alu-Cor Distribution inc.",
+   "CodeFournisseur": "ALCOR",
+   "NoBonCommande": "400023",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "15",
+     "PrixUnitaire": "40.26",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "694.34",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "603.90",
+   "Transport": "0.00",
+   "TPS": "30.20",
+   "TVQ": "60.24"
+  },
+  {
+   "NoReception": "600024",
+   "COMPANY": "MA2",
+   "DateReception": "2026-05-17",
+   "Fournisseur": "Alu-Cor Distribution inc.",
+   "CodeFournisseur": "ALCOR",
+   "NoBonCommande": "400024",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "93.63",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "5",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "177.46",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6063-C1515-20",
+     "Description": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "5",
+     "QuantiteRecue": "5",
+     "PrixUnitaire": "40.83",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "3203.88",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "Livraison partielle",
+   "SousTotal": "2786.59",
+   "Transport": "0.00",
+   "TPS": "139.33",
+   "TVQ": "277.96"
+  },
+  {
+   "NoReception": "600025",
+   "COMPANY": "MA2",
+   "DateReception": "2026-07-28",
+   "Fournisseur": "Alu-Cor Distribution inc.",
+   "CodeFournisseur": "ALCOR",
+   "NoBonCommande": "400025",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "13",
+     "PrixUnitaire": "94.60",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "1413.96",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "Livraison partielle",
+   "SousTotal": "1229.80",
+   "Transport": "0.00",
+   "TPS": "61.49",
+   "TVQ": "122.67"
+  },
+  {
+   "NoReception": "600026",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-01",
+   "Fournisseur": "Alu-Cor Distribution inc.",
+   "CodeFournisseur": "ALCOR",
+   "NoBonCommande": "400026",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "AL6061-F125-48",
+     "Description": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "QuantiteCommandee": "25",
+     "QuantiteRecue": "16",
+     "PrixUnitaire": "178.31",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "AL6061-T200-20",
+     "Description": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "QuantiteCommandee": "5",
+     "QuantiteRecue": "3",
+     "PrixUnitaire": "93.47",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "3602.59",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "Livraison partielle",
+   "SousTotal": "3133.37",
+   "Transport": "0.00",
+   "TPS": "156.67",
+   "TVQ": "312.55"
+  },
+  {
+   "NoReception": "600027",
+   "COMPANY": "MA2",
+   "DateReception": "2025-10-23",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400027",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "17.01",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "22.37",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "699.78",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "608.64",
+   "Transport": "0.00",
+   "TPS": "30.43",
+   "TVQ": "60.71"
+  },
+  {
+   "NoReception": "600028",
+   "COMPANY": "MA2",
+   "DateReception": "2025-12-13",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400028",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "16.88",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "22.51",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "29.05",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "838.65",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "729.42",
+   "Transport": "0.00",
+   "TPS": "36.47",
+   "TVQ": "72.76"
+  },
+  {
+   "NoReception": "600029",
+   "COMPANY": "MA2",
+   "DateReception": "2026-01-19",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400029",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "17.28",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "198.68",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "172.80",
+   "Transport": "0.00",
+   "TPS": "8.64",
+   "TVQ": "17.24"
+  },
+  {
+   "NoReception": "600030",
+   "COMPANY": "MA2",
+   "DateReception": "2026-02-09",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400030",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "23.53",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "162.32",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "141.18",
+   "Transport": "0.00",
+   "TPS": "7.06",
+   "TVQ": "14.08"
+  },
+  {
+   "NoReception": "600031",
+   "COMPANY": "MA2",
+   "DateReception": "2026-03-20",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400031",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "23.03",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "264.79",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "230.30",
+   "Transport": "0.00",
+   "TPS": "11.52",
+   "TVQ": "22.97"
+  },
+  {
+   "NoReception": "600032",
+   "COMPANY": "MA2",
+   "DateReception": "2026-05-07",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400032",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "17.41",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "120.10",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "104.46",
+   "Transport": "0.00",
+   "TPS": "5.22",
+   "TVQ": "10.42"
+  },
+  {
+   "NoReception": "600033",
+   "COMPANY": "MA2",
+   "DateReception": "2026-06-05",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400033",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "23.63",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "17.02",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "29.21",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "761.71",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "662.50",
+   "Transport": "0.00",
+   "TPS": "33.13",
+   "TVQ": "66.08"
+  },
+  {
+   "NoReception": "600034",
+   "COMPANY": "MA2",
+   "DateReception": "2026-08-03",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400034",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "23.63",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "17.15",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "29.49",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "553.99",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "481.84",
+   "Transport": "0.00",
+   "TPS": "24.09",
+   "TVQ": "48.06"
+  },
+  {
+   "NoReception": "600035",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-20",
+   "Fournisseur": "Visserie Nordique inc.",
+   "CodeFournisseur": "VISNOR",
+   "NoBonCommande": "400035",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "17.60",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "23.48",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "29.35",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "769.27",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "669.08",
+   "Transport": "0.00",
+   "TPS": "33.45",
+   "TVQ": "66.74"
+  },
+  {
+   "NoReception": "600036",
+   "COMPANY": "MA2",
+   "DateReception": "2025-10-11",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400036",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "16.66",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "27.91",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "22.26",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "935.71",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "813.84",
+   "Transport": "0.00",
+   "TPS": "40.69",
+   "TVQ": "81.18"
+  },
+  {
+   "NoReception": "600037",
+   "COMPANY": "MA2",
+   "DateReception": "2025-12-07",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400037",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "22.44",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "103.20",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "89.76",
+   "Transport": "0.00",
+   "TPS": "4.49",
+   "TVQ": "8.95"
+  },
+  {
+   "NoReception": "600038",
+   "COMPANY": "MA2",
+   "DateReception": "2026-01-04",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400038",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "16.48",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "378.96",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "329.60",
+   "Transport": "0.00",
+   "TPS": "16.48",
+   "TVQ": "32.88"
+  },
+  {
+   "NoReception": "600039",
+   "COMPANY": "MA2",
+   "DateReception": "2026-02-25",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400039",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "28.24",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "22.45",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "16.34",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "958.55",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "833.70",
+   "Transport": "0.00",
+   "TPS": "41.69",
+   "TVQ": "83.16"
+  },
+  {
+   "NoReception": "600040",
+   "COMPANY": "MA2",
+   "DateReception": "2026-03-20",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400040",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "28.44",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "22.86",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "655.22",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "569.88",
+   "Transport": "0.00",
+   "TPS": "28.49",
+   "TVQ": "56.85"
+  },
+  {
+   "NoReception": "600041",
+   "COMPANY": "MA2",
+   "DateReception": "2026-05-27",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400041",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "28.04",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "22.33",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "16.82",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "373.48",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "324.84",
+   "Transport": "0.00",
+   "TPS": "16.24",
+   "TVQ": "32.40"
+  },
+  {
+   "NoReception": "600042",
+   "COMPANY": "MA2",
+   "DateReception": "2026-06-13",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400042",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "16.83",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "77.41",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "67.32",
+   "Transport": "0.00",
+   "TPS": "3.37",
+   "TVQ": "6.72"
+  },
+  {
+   "NoReception": "600043",
+   "COMPANY": "MA2",
+   "DateReception": "2026-08-06",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400043",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "3",
+     "PrixUnitaire": "28.93",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "16.98",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "23.10",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "535.63",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "Livraison partielle",
+   "SousTotal": "465.87",
+   "Transport": "0.00",
+   "TPS": "23.29",
+   "TVQ": "46.47"
+  },
+  {
+   "NoReception": "600044",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-03",
+   "Fournisseur": "Fixations Pro inc.",
+   "CodeFournisseur": "FIXPRO",
+   "NoBonCommande": "400044",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "VIS-INOX-1420",
+     "Description": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "28.48",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "RIV-ALU-316",
+     "Description": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "22.72",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "ECR-INOX-14",
+     "Description": "Écrous inox 1/4-20, boîte de 100",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "16.93",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "1085.16",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "943.82",
+   "Transport": "0.00",
+   "TPS": "47.19",
+   "TVQ": "94.15"
+  },
+  {
+   "NoReception": "600045",
+   "COMPANY": "MA2",
+   "DateReception": "2025-11-05",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "400045",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "52.88",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "1215.98",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "1057.60",
+   "Transport": "0.00",
+   "TPS": "52.88",
+   "TVQ": "105.50"
+  },
+  {
+   "NoReception": "600046",
+   "COMPANY": "MA2",
+   "DateReception": "2025-12-11",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "400046",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "51.91",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "238.73",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "207.64",
+   "Transport": "0.00",
+   "TPS": "10.38",
+   "TVQ": "20.71"
+  },
+  {
+   "NoReception": "600047",
+   "COMPANY": "MA2",
+   "DateReception": "2026-02-01",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "400047",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "51.94",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "597.18",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "519.40",
+   "Transport": "0.00",
+   "TPS": "25.97",
+   "TVQ": "51.81"
+  },
+  {
+   "NoReception": "600048",
+   "COMPANY": "MA2",
+   "DateReception": "2026-02-23",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "400048",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "53.08",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "732.35",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "636.96",
+   "Transport": "0.00",
+   "TPS": "31.85",
+   "TVQ": "63.54"
+  },
+  {
+   "NoReception": "600049",
+   "COMPANY": "MA2",
+   "DateReception": "2026-05-01",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "400049",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "52.84",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "729.03",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "634.08",
+   "Transport": "0.00",
+   "TPS": "31.70",
+   "TVQ": "63.25"
+  },
+  {
+   "NoReception": "600050",
+   "COMPANY": "MA2",
+   "DateReception": "2026-06-10",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "400050",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "53.27",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "612.48",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "532.70",
+   "Transport": "0.00",
+   "TPS": "26.64",
+   "TVQ": "53.14"
+  },
+  {
+   "NoReception": "600051",
+   "COMPANY": "MA2",
+   "DateReception": "2026-07-18",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "400051",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "53.14",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "610.98",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "531.40",
+   "Transport": "0.00",
+   "TPS": "26.57",
+   "TVQ": "53.01"
+  },
+  {
+   "NoReception": "600052",
+   "COMPANY": "MA2",
+   "DateReception": "2026-09-17",
+   "Fournisseur": "Papeterie Centrale inc.",
+   "CodeFournisseur": "PAPCEN",
+   "NoBonCommande": "400052",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "53.64",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "246.69",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "214.56",
+   "Transport": "0.00",
+   "TPS": "10.73",
+   "TVQ": "21.40"
+  },
+  {
+   "NoReception": "600053",
+   "COMPANY": "MA2",
+   "DateReception": "2025-11-12",
+   "Fournisseur": "Bureau Express inc.",
+   "CodeFournisseur": "BUREXP",
+   "NoBonCommande": "400053",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "54.96",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "379.14",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "329.76",
+   "Transport": "0.00",
+   "TPS": "16.49",
+   "TVQ": "32.89"
+  },
+  {
+   "NoReception": "600054",
+   "COMPANY": "MA2",
+   "DateReception": "2026-01-05",
+   "Fournisseur": "Bureau Express inc.",
+   "CodeFournisseur": "BUREXP",
+   "NoBonCommande": "400054",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "4",
+     "QuantiteRecue": "4",
+     "PrixUnitaire": "55.78",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "256.54",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "223.12",
+   "Transport": "0.00",
+   "TPS": "11.16",
+   "TVQ": "22.26"
+  },
+  {
+   "NoReception": "600055",
+   "COMPANY": "MA2",
+   "DateReception": "2026-03-08",
+   "Fournisseur": "Bureau Express inc.",
+   "CodeFournisseur": "BUREXP",
+   "NoBonCommande": "400055",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "6",
+     "QuantiteRecue": "6",
+     "PrixUnitaire": "55.39",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "382.11",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "332.34",
+   "Transport": "0.00",
+   "TPS": "16.62",
+   "TVQ": "33.15"
+  },
+  {
+   "NoReception": "600056",
+   "COMPANY": "MA2",
+   "DateReception": "2026-06-09",
+   "Fournisseur": "Bureau Express inc.",
+   "CodeFournisseur": "BUREXP",
+   "NoBonCommande": "400056",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "55.73",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "640.76",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "557.30",
+   "Transport": "0.00",
+   "TPS": "27.87",
+   "TVQ": "55.59"
+  },
+  {
+   "NoReception": "600057",
+   "COMPANY": "MA2",
+   "DateReception": "2026-07-24",
+   "Fournisseur": "Bureau Express inc.",
+   "CodeFournisseur": "BUREXP",
+   "NoBonCommande": "400057",
+   "Statut": "Reçu",
+   "Entrepot": "ENT-01",
+   "Articles": [
+    {
+     "CodeArticle": "PAP-LET-500",
+     "Description": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "QuantiteCommandee": "12",
+     "QuantiteRecue": "12",
+     "PrixUnitaire": "58.01",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "800.37",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "696.12",
+   "Transport": "0.00",
+   "TPS": "34.81",
+   "TVQ": "69.44"
+  }
+ ],
+ "invoices": [
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10001",
+   "dDateFacture": "2025-10-10",
+   "cNoCommAch": "400001",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "353.29",
+   "dTotalTVP": "704.81",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "15",
+     "dCoutUnitaire": "97.55",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600001"
+    },
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "182.47",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600001"
+    },
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "41.63",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600001"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10002",
+   "dDateFacture": "2025-11-23",
+   "cNoCommAch": "400002",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "32.58",
+   "dTotalTVP": "65.00",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "10",
+     "dCoutUnitaire": "65.16",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600002"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10003",
+   "dDateFacture": "2025-12-25",
+   "cNoCommAch": "400003",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "101.29",
+   "dTotalTVP": "202.07",
+   "lines": [
+    {
+     "cCodeProduit": "AL5052-F063-48",
+     "cDescription": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantite": "10",
+     "dCoutUnitaire": "117.84",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600003"
+    },
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "20",
+     "dCoutUnitaire": "42.37",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600003"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10004",
+   "dDateFacture": "2026-01-22",
+   "cNoCommAch": "400004",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "155.77",
+   "dTotalTVP": "310.75",
+   "lines": [
+    {
+     "cCodeProduit": "AL5052-F063-48",
+     "cDescription": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantite": "20",
+     "dCoutUnitaire": "117.12",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600004"
+    },
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "12",
+     "dCoutUnitaire": "64.41",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600004"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10005",
+   "dDateFacture": "2026-03-02",
+   "cNoCommAch": "400005",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "256.91",
+   "dTotalTVP": "512.54",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "184.99",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600005"
+    },
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "12",
+     "dCoutUnitaire": "42.79",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600005"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10006",
+   "dDateFacture": "2026-04-17",
+   "cNoCommAch": "400006",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "292.35",
+   "dTotalTVP": "583.24",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "8",
+     "dCoutUnitaire": "96.93",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600006"
+    },
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "20",
+     "dCoutUnitaire": "188.18",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600006"
+    },
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "20",
+     "dCoutUnitaire": "65.40",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600006"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10007",
+   "dDateFacture": "2026-05-05",
+   "cNoCommAch": "400007",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "112.30",
+   "dTotalTVP": "224.03",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "12",
+     "dCoutUnitaire": "187.16",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600007"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10008",
+   "dDateFacture": "2026-06-20",
+   "cNoCommAch": "400008",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "92.44",
+   "dTotalTVP": "184.42",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "10",
+     "dCoutUnitaire": "99.38",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600008"
+    },
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "20",
+     "dCoutUnitaire": "42.75",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600008"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10009",
+   "dDateFacture": "2026-07-24",
+   "cNoCommAch": "400009",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "95.63",
+   "dTotalTVP": "190.78",
+   "lines": [
+    {
+     "cCodeProduit": "AL5052-F063-48",
+     "cDescription": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantite": "5",
+     "dCoutUnitaire": "123.35",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600009"
+    },
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "20",
+     "dCoutUnitaire": "64.79",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600009"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10010",
+   "dDateFacture": "2026-08-08",
+   "cNoCommAch": "400010",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "40.00",
+   "dTotalTVP": "79.80",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "12",
+     "dCoutUnitaire": "66.67",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600010"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALUQC",
+   "cNoFacture": "AQ-10011",
+   "dDateFacture": "2026-09-25",
+   "cNoCommAch": "400011",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "286.42",
+   "dTotalTVP": "571.41",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "10",
+     "dCoutUnitaire": "101.04",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600011"
+    },
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "188.72",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600011"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "METALX",
+   "cNoFacture": "MX-10012",
+   "dDateFacture": "2025-10-22",
+   "cNoCommAch": "400012",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "65.51",
+   "dTotalTVP": "130.69",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "12",
+     "dCoutUnitaire": "109.18",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600012"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "METALX",
+   "cNoFacture": "MX-10013",
+   "dDateFacture": "2025-12-13",
+   "cNoCommAch": "400013",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "211.97",
+   "dTotalTVP": "422.88",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "71.34",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600013"
+    },
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "12",
+     "dCoutUnitaire": "204.66",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600013"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "METALX",
+   "cNoFacture": "MX-10014",
+   "dDateFacture": "2026-02-03",
+   "cNoCommAch": "400014",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "313.76",
+   "dTotalTVP": "625.95",
+   "lines": [
+    {
+     "cCodeProduit": "AL5052-F063-48",
+     "cDescription": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "134.57",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600014"
+    },
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "7",
+     "dCoutUnitaire": "206.93",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600014"
+    },
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "20",
+     "dCoutUnitaire": "73.12",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600014"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "METALX",
+   "cNoFacture": "MX-10015",
+   "dDateFacture": "2026-03-25",
+   "cNoCommAch": "400015",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "153.81",
+   "dTotalTVP": "306.85",
+   "lines": [
+    {
+     "cCodeProduit": "AL5052-F063-48",
+     "cDescription": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantite": "15",
+     "dCoutUnitaire": "133.14",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600015"
+    },
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "15",
+     "dCoutUnitaire": "71.94",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600015"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "METALX",
+   "cNoFacture": "MX-10016",
+   "dDateFacture": "2026-05-08",
+   "cNoCommAch": "400016",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "106.95",
+   "dTotalTVP": "213.36",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "8",
+     "dCoutUnitaire": "73.06",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600016"
+    },
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "8",
+     "dCoutUnitaire": "110.16",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600016"
+    },
+    {
+     "cCodeProduit": "AL5052-F063-48",
+     "cDescription": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantite": "5",
+     "dCoutUnitaire": "134.63",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600016"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "METALX",
+   "cNoFacture": "MX-10017",
+   "dDateFacture": "2026-06-13",
+   "cNoCommAch": "400017",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "104.78",
+   "dTotalTVP": "209.03",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "10",
+     "dCoutUnitaire": "209.55",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600017"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "METALX",
+   "cNoFacture": "MX-10018",
+   "dDateFacture": "2026-07-22",
+   "cNoCommAch": "400018",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "159.65",
+   "dTotalTVP": "318.51",
+   "lines": [
+    {
+     "cCodeProduit": "AL5052-F063-48",
+     "cDescription": "Feuille aluminium 5052-H32 0,063 po x 4 x 8 pi",
+     "dQuantite": "8",
+     "dCoutUnitaire": "136.88",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600018"
+    },
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "10",
+     "dCoutUnitaire": "209.80",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600018"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "METALX",
+   "cNoFacture": "MX-10019",
+   "dDateFacture": "2026-09-12",
+   "cNoCommAch": "400019",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "219.59",
+   "dTotalTVP": "438.08",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "8",
+     "dCoutUnitaire": "112.24",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600019"
+    },
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "15",
+     "dCoutUnitaire": "207.70",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600019"
+    },
+    {
+     "cCodeProduit": "AL6061-B100-12",
+     "cDescription": "Barre ronde aluminium 6061 1 po x 12 pi",
+     "dQuantite": "5",
+     "dCoutUnitaire": "75.67",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600019"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALCOR",
+   "cNoFacture": "AC-10020",
+   "dDateFacture": "2025-10-21",
+   "cNoCommAch": "400020",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "129.24",
+   "dTotalTVP": "257.84",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "5",
+     "dCoutUnitaire": "174.11",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600020"
+    },
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "8",
+     "dCoutUnitaire": "90.85",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600020"
+    },
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "39.50",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600020"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALCOR",
+   "cNoFacture": "AC-10021",
+   "dDateFacture": "2026-01-01",
+   "cNoCommAch": "400021",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "31.47",
+   "dTotalTVP": "62.78",
+   "lines": [
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "9",
+     "dCoutUnitaire": "39.27",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600021"
+    },
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "3",
+     "dCoutUnitaire": "91.98",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600021"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALCOR",
+   "cNoFacture": "AC-10022",
+   "dDateFacture": "2026-01-28",
+   "cNoCommAch": "400022",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "165.44",
+   "dTotalTVP": "330.05",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "91.93",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600022"
+    },
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "25",
+     "dCoutUnitaire": "40.42",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600022"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALCOR",
+   "cNoFacture": "AC-10023",
+   "dDateFacture": "2026-04-03",
+   "cNoCommAch": "400023",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "30.20",
+   "dTotalTVP": "60.24",
+   "lines": [
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "15",
+     "dCoutUnitaire": "40.26",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600023"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALCOR",
+   "cNoFacture": "AC-10024",
+   "dDateFacture": "2026-05-18",
+   "cNoCommAch": "400024",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "139.33",
+   "dTotalTVP": "277.96",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "20",
+     "dCoutUnitaire": "93.63",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600024"
+    },
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "4",
+     "dCoutUnitaire": "177.46",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600024"
+    },
+    {
+     "cCodeProduit": "AL6063-C1515-20",
+     "cDescription": "Cornière aluminium 6063 1-1/2 x 1-1/2 x 1/8 po, 20 pi",
+     "dQuantite": "5",
+     "dCoutUnitaire": "40.83",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600024"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALCOR",
+   "cNoFacture": "AC-10025",
+   "dDateFacture": "2026-07-29",
+   "cNoCommAch": "400025",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "61.49",
+   "dTotalTVP": "122.67",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "13",
+     "dCoutUnitaire": "94.60",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600025"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "ALCOR",
+   "cNoFacture": "AC-10026",
+   "dDateFacture": "2026-09-02",
+   "cNoCommAch": "400026",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "156.67",
+   "dTotalTVP": "312.55",
+   "lines": [
+    {
+     "cCodeProduit": "AL6061-F125-48",
+     "cDescription": "Feuille aluminium 6061-T6 1/8 po x 4 x 8 pi",
+     "dQuantite": "16",
+     "dCoutUnitaire": "178.31",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600026"
+    },
+    {
+     "cCodeProduit": "AL6061-T200-20",
+     "cDescription": "Tube carré aluminium 6061 2 x 2 x 1/8 po, 20 pi",
+     "dQuantite": "3",
+     "dCoutUnitaire": "93.47",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600026"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10027",
+   "dDateFacture": "2025-10-24",
+   "cNoCommAch": "400027",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "30.43",
+   "dTotalTVP": "60.71",
+   "lines": [
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "20",
+     "dCoutUnitaire": "17.01",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600027"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "12",
+     "dCoutUnitaire": "22.37",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600027"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10028",
+   "dDateFacture": "2025-12-14",
+   "cNoCommAch": "400028",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "36.47",
+   "dTotalTVP": "72.76",
+   "lines": [
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "10",
+     "dCoutUnitaire": "16.88",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600028"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "12",
+     "dCoutUnitaire": "22.51",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600028"
+    },
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "10",
+     "dCoutUnitaire": "29.05",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600028"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10029",
+   "dDateFacture": "2026-01-20",
+   "cNoCommAch": "400029",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "8.64",
+   "dTotalTVP": "17.24",
+   "lines": [
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "10",
+     "dCoutUnitaire": "17.28",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600029"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10030",
+   "dDateFacture": "2026-02-10",
+   "cNoCommAch": "400030",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "7.06",
+   "dTotalTVP": "14.08",
+   "lines": [
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "6",
+     "dCoutUnitaire": "23.53",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600030"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10031",
+   "dDateFacture": "2026-03-21",
+   "cNoCommAch": "400031",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "11.52",
+   "dTotalTVP": "22.97",
+   "lines": [
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "10",
+     "dCoutUnitaire": "23.03",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600031"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10032",
+   "dDateFacture": "2026-05-08",
+   "cNoCommAch": "400032",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "5.22",
+   "dTotalTVP": "10.42",
+   "lines": [
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "6",
+     "dCoutUnitaire": "17.41",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600032"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10033",
+   "dDateFacture": "2026-06-06",
+   "cNoCommAch": "400033",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "33.13",
+   "dTotalTVP": "66.08",
+   "lines": [
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "6",
+     "dCoutUnitaire": "23.63",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600033"
+    },
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "10",
+     "dCoutUnitaire": "17.02",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600033"
+    },
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "12",
+     "dCoutUnitaire": "29.21",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600033"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10034",
+   "dDateFacture": "2026-08-04",
+   "cNoCommAch": "400034",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "24.09",
+   "dTotalTVP": "48.06",
+   "lines": [
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "10",
+     "dCoutUnitaire": "23.63",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600034"
+    },
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "4",
+     "dCoutUnitaire": "17.15",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600034"
+    },
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "6",
+     "dCoutUnitaire": "29.49",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600034"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "VISNOR",
+   "cNoFacture": "VN-10035",
+   "dDateFacture": "2026-09-21",
+   "cNoCommAch": "400035",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "33.45",
+   "dTotalTVP": "66.74",
+   "lines": [
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "10",
+     "dCoutUnitaire": "17.60",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600035"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "6",
+     "dCoutUnitaire": "23.48",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600035"
+    },
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "12",
+     "dCoutUnitaire": "29.35",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600035"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10036",
+   "dDateFacture": "2025-10-12",
+   "cNoCommAch": "400036",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "40.69",
+   "dTotalTVP": "81.18",
+   "lines": [
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "10",
+     "dCoutUnitaire": "16.66",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600036"
+    },
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "20",
+     "dCoutUnitaire": "27.91",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600036"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "4",
+     "dCoutUnitaire": "22.26",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600036"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10037",
+   "dDateFacture": "2025-12-08",
+   "cNoCommAch": "400037",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "4.49",
+   "dTotalTVP": "8.95",
+   "lines": [
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "4",
+     "dCoutUnitaire": "22.44",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600037"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10038",
+   "dDateFacture": "2026-01-05",
+   "cNoCommAch": "400038",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "16.48",
+   "dTotalTVP": "32.88",
+   "lines": [
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "20",
+     "dCoutUnitaire": "16.48",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600038"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10039",
+   "dDateFacture": "2026-02-26",
+   "cNoCommAch": "400039",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "41.69",
+   "dTotalTVP": "83.16",
+   "lines": [
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "10",
+     "dCoutUnitaire": "28.24",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600039"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "10",
+     "dCoutUnitaire": "22.45",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600039"
+    },
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "20",
+     "dCoutUnitaire": "16.34",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600039"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10040",
+   "dDateFacture": "2026-03-21",
+   "cNoCommAch": "400040",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "28.49",
+   "dTotalTVP": "56.85",
+   "lines": [
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "12",
+     "dCoutUnitaire": "28.44",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600040"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "10",
+     "dCoutUnitaire": "22.86",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600040"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10041",
+   "dDateFacture": "2026-05-28",
+   "cNoCommAch": "400041",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "16.24",
+   "dTotalTVP": "32.40",
+   "lines": [
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "6",
+     "dCoutUnitaire": "28.04",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600041"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "4",
+     "dCoutUnitaire": "22.33",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600041"
+    },
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "4",
+     "dCoutUnitaire": "16.82",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600041"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10042",
+   "dDateFacture": "2026-06-14",
+   "cNoCommAch": "400042",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "3.37",
+   "dTotalTVP": "6.72",
+   "lines": [
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "4",
+     "dCoutUnitaire": "16.83",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600042"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10043",
+   "dDateFacture": "2026-08-07",
+   "cNoCommAch": "400043",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "23.29",
+   "dTotalTVP": "46.47",
+   "lines": [
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "3",
+     "dCoutUnitaire": "28.93",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600043"
+    },
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "6",
+     "dCoutUnitaire": "16.98",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600043"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "12",
+     "dCoutUnitaire": "23.10",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600043"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "FIXPRO",
+   "cNoFacture": "FP-10044",
+   "dDateFacture": "2026-09-04",
+   "cNoCommAch": "400044",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "47.19",
+   "dTotalTVP": "94.15",
+   "lines": [
+    {
+     "cCodeProduit": "VIS-INOX-1420",
+     "cDescription": "Vis inox 1/4-20 x 1 po, boîte de 100",
+     "dQuantite": "20",
+     "dCoutUnitaire": "28.48",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600044"
+    },
+    {
+     "cCodeProduit": "RIV-ALU-316",
+     "cDescription": "Rivets aveugles aluminium 3/16 po, boîte de 250",
+     "dQuantite": "12",
+     "dCoutUnitaire": "22.72",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600044"
+    },
+    {
+     "cCodeProduit": "ECR-INOX-14",
+     "cDescription": "Écrous inox 1/4-20, boîte de 100",
+     "dQuantite": "6",
+     "dCoutUnitaire": "16.93",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600044"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "PAPCEN",
+   "cNoFacture": "PC-10045",
+   "dDateFacture": "2025-11-06",
+   "cNoCommAch": "400045",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "52.88",
+   "dTotalTVP": "105.50",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "20",
+     "dCoutUnitaire": "52.88",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600045"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "PAPCEN",
+   "cNoFacture": "PC-10046",
+   "dDateFacture": "2025-12-12",
+   "cNoCommAch": "400046",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "10.38",
+   "dTotalTVP": "20.71",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "4",
+     "dCoutUnitaire": "51.91",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600046"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "PAPCEN",
+   "cNoFacture": "PC-10047",
+   "dDateFacture": "2026-02-02",
+   "cNoCommAch": "400047",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "25.97",
+   "dTotalTVP": "51.81",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "10",
+     "dCoutUnitaire": "51.94",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600047"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "PAPCEN",
+   "cNoFacture": "PC-10048",
+   "dDateFacture": "2026-02-24",
+   "cNoCommAch": "400048",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "31.85",
+   "dTotalTVP": "63.54",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "12",
+     "dCoutUnitaire": "53.08",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600048"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "PAPCEN",
+   "cNoFacture": "PC-10049",
+   "dDateFacture": "2026-05-02",
+   "cNoCommAch": "400049",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "31.70",
+   "dTotalTVP": "63.25",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "12",
+     "dCoutUnitaire": "52.84",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600049"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "PAPCEN",
+   "cNoFacture": "PC-10050",
+   "dDateFacture": "2026-06-11",
+   "cNoCommAch": "400050",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "26.64",
+   "dTotalTVP": "53.14",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "10",
+     "dCoutUnitaire": "53.27",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600050"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "PAPCEN",
+   "cNoFacture": "PC-10051",
+   "dDateFacture": "2026-07-19",
+   "cNoCommAch": "400051",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "26.57",
+   "dTotalTVP": "53.01",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "10",
+     "dCoutUnitaire": "53.14",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600051"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "PAPCEN",
+   "cNoFacture": "PC-10052",
+   "dDateFacture": "2026-09-18",
+   "cNoCommAch": "400052",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "10.73",
+   "dTotalTVP": "21.40",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "4",
+     "dCoutUnitaire": "53.64",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600052"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "BUREXP",
+   "cNoFacture": "BE-10053",
+   "dDateFacture": "2025-11-13",
+   "cNoCommAch": "400053",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "16.49",
+   "dTotalTVP": "32.89",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "6",
+     "dCoutUnitaire": "54.96",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600053"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "BUREXP",
+   "cNoFacture": "BE-10054",
+   "dDateFacture": "2026-01-06",
+   "cNoCommAch": "400054",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "11.16",
+   "dTotalTVP": "22.26",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "4",
+     "dCoutUnitaire": "55.78",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600054"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "BUREXP",
+   "cNoFacture": "BE-10055",
+   "dDateFacture": "2026-03-09",
+   "cNoCommAch": "400055",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "16.62",
+   "dTotalTVP": "33.15",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "6",
+     "dCoutUnitaire": "55.39",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600055"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "BUREXP",
+   "cNoFacture": "BE-10056",
+   "dDateFacture": "2026-06-10",
+   "cNoCommAch": "400056",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "27.87",
+   "dTotalTVP": "55.59",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "10",
+     "dCoutUnitaire": "55.73",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600056"
+    }
+   ]
+  },
+  {
+   "cNoFourn": "BUREXP",
+   "cNoFacture": "BE-10057",
+   "dDateFacture": "2026-07-25",
+   "cNoCommAch": "400057",
+   "cDevise": "CAD",
+   "cStatut": "Posted",
+   "cSource": "ERP",
+   "dTransport": "0.00",
+   "dTotalTPS": "34.81",
+   "dTotalTVP": "69.44",
+   "lines": [
+    {
+     "cCodeProduit": "PAP-LET-500",
+     "cDescription": "Papier lettre 8,5 x 11 po, 20 lb, caisse de 10 rames",
+     "dQuantite": "12",
+     "dCoutUnitaire": "58.01",
+     "cGL": "",
+     "cCC1": "",
+     "cCC2": "",
+     "iNoReception": "600057"
+    }
+   ]
+  }
+ ]
+}

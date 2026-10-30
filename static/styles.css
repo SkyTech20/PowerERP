@@ -249,3 +249,5 @@ input[readonly] { background: var(--surface-2); color: var(--muted); }
 }
 .totals { flex-wrap: wrap; }
 .totals .tax-note { flex-basis: 100%; text-align: right; margin: 6px 10px 0; font-size: 11px; color: var(--muted); }
+
+.muted { color: #94a3b8; }
