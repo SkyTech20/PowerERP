@@ -7,3 +7,4 @@ venv/
 Videos
 db/
 *.db
+.pytest_cache/

@@ -69,6 +69,15 @@ The database is `/app/db/powererp.db` inside the container; mount `/app/db` (a f
 | `ERP_API_KEY` | none | Lets scripts call `/api/...` without a login, and, when set, is required by the PowerWARE web services (header `X-API-Key`) |
 | `ERP_DATASET` | full data | `demo` seeds from `data/demo/` |
 
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest
+```
+
+The tests (`tests/`) start the ERP on a temporary SQLite file with the demo dataset and reset the data before each test. They cover the value helpers (amounts typed with `$`, spaces or a comma), login and users, GL accounts / cost centers / suppliers, purchase orders, receptions, invoices, the PowerWARE XML services read by SkyAI, `apCreatePO.p` and the database save. Run them before every change to the ERP.
+
 ## Security and SkyAI
 
 - The screens and `/api/...` need a login (session cookie `powererp_session`, 12 hours), or the header `X-API-Key: <ERP_API_KEY>`. `/api/users` is for administrators. `GET /api/health` is open (Docker healthcheck).
