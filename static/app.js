@@ -24,6 +24,16 @@
     return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
   const num = (v) => { const n = parseFloat(String(v == null ? "" : v).replace(",", ".")); return isNaN(n) ? 0 : n; };
+  // Amount/quantity inputs: drop anything that is not a digit, separator or minus ("$", spaces, letters).
+  const numOnly = (el) => {
+    const v = el.value, c = v.replace(/[^\d.,-]/g, "");
+    if (c !== v) {
+      const pos = Math.max(0, (el.selectionStart || 0) - (v.length - c.length));
+      el.value = c;
+      try { el.setSelectionRange(pos, pos); } catch (e) { /* ignore */ }
+    }
+    return c;
+  };
   function money(v, cur) {
     try {
       return new Intl.NumberFormat(lang === "fr" ? "fr-CA" : "en-CA", { style: "currency", currency: cur || "CAD" }).format(num(v));
@@ -533,7 +543,7 @@
       const L = R.lines;
       const head = L.cols.map((c) => `<th class="${c.n ? "num" : ""}">${esc(c.raw ? c.l : t(c.l))}</th>`).join("") + `<th class="num">${esc(t(L.amountLabel))}</th><th></th>`;
       const body = (model.lines || []).map((ln, i) => `<tr data-line="${i}">${L.cols.map((c) =>
-        `<td class="${c.w}"><input type="text" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" style="text-align:right"' : ""} ${c.lookup ? `data-lookup="${c.lookup}"` : ""} aria-label="${esc(c.raw ? c.l : t(c.l))}"></td>`).join("")}
+        `<td class="${c.w}"><input type="text" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${c.lookup ? `data-lookup="${c.lookup}"` : ""} aria-label="${esc(c.raw ? c.l : t(c.l))}"></td>`).join("")}
         <td class="num" data-amount>${esc(money(L.amount(ln), cur()))}</td>
         <td><button type="button" class="link-btn" data-remove="${i}" title="${esc(t("common.removeLine"))}">✕</button></td></tr>`).join("");
       return `<div class="card"><div class="card-head"><h2>${esc(t("common.lines"))}</h2><button type="button" class="btn small" id="addLine" style="margin-left:auto">＋ ${esc(t("common.addLine"))}</button></div>
@@ -568,7 +578,7 @@
     }
 
     function bindTotals() {
-      $$("#totals input[data-f]").forEach((el) => el.addEventListener("input", () => { model[el.dataset.f] = el.value; taxLive = true; refreshAmounts(); }));
+      $$("#totals input[data-f]").forEach((el) => el.addEventListener("input", () => { model[el.dataset.f] = numOnly(el); taxLive = true; refreshAmounts(); }));
     }
 
     async function fillFromPo(po) {
@@ -631,7 +641,7 @@
         $$("tr[data-line]").forEach((tr) => {
           const ln = model.lines[+tr.dataset.line];
           $$("input[data-lf]", tr).forEach((el) => {
-            el.addEventListener("input", () => { ln[el.dataset.lf] = el.value; taxLive = true; refreshAmounts(); });
+            el.addEventListener("input", () => { ln[el.dataset.lf] = el.dataset.num ? numOnly(el) : el.value; taxLive = true; refreshAmounts(); });
             if (el.dataset.lookup) bindLookup(el, el.dataset.lookup, (code) => { ln[el.dataset.lf] = code; });
           });
         });

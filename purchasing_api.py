@@ -14,6 +14,7 @@ from datetime import datetime
 
 from flask import Blueprint, jsonify, request
 
+from erp_api import _num  # accepts "$12.50" / "12,50 $" like the ERP screens
 from powerware_api import PW_PREFIX
 
 logger = logging.getLogger(__name__)
@@ -28,11 +29,6 @@ def _json():
     return data if isinstance(data, dict) else None
 
 
-def _num(v):
-    try:
-        return float(str(v).replace(",", "."))
-    except (TypeError, ValueError):
-        return 0.0
 
 
 def _last_price(supplier, code):

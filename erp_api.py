@@ -9,6 +9,7 @@ SQLite database (db.py) after every change and loads it back at startup.
 POST /api/reset restores the original demo data.
 """
 import copy
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -30,9 +31,26 @@ def _s(value):
     return str(value).strip()
 
 
+def _dec(value, default="0"):
+    """Keep only the number of a typed amount ("$12.50", "12,50 $", "1 234.5") as "12.50"."""
+    s = re.sub(r"[^\d,.\-]", "", _s(value))
+    neg = s.startswith("-")
+    s = s.replace("-", "")
+    if "," in s and "." in s:
+        s = s.replace(".", "").replace(",", ".") if s.rfind(",") > s.rfind(".") else s.replace(",", "")
+    elif "," in s:
+        s = s.replace(",", ".") if s.count(",") == 1 else s.replace(",", "")
+    if s.count(".") > 1:
+        cut = s.rfind(".")
+        s = s[:cut].replace(".", "") + s[cut:]
+    if not re.search(r"\d", s):
+        return default
+    return ("-" if neg else "") + s
+
+
 def _num(value, default=0.0):
     try:
-        return float(str(value).replace(",", ".").strip())
+        return float(_dec(value, ""))
     except (TypeError, ValueError, AttributeError):
         return default
 
@@ -445,7 +463,7 @@ def register_erp(app, ns):
             lines.append({
                 "cUnique": _s(ln.get("cUnique")) or str(i), "cProductcode": _s(ln.get("cProductcode")),
                 "cProductDesc": _s(ln.get("cProductDesc")), "dQuantity": _qty(ln.get("dQuantity")),
-                "dUnitCost": _s(ln.get("dUnitCost")) or "0", "dTotalAmount": _money(total),
+                "dUnitCost": _dec(ln.get("dUnitCost")), "dTotalAmount": _money(total),
             })
         sub = sum(_num(l["dTotalAmount"]) for l in lines)
         freight, gst, pst = _num(p.get("dFreight")), _num(p.get("dGST")), _num(p.get("dPST"))
@@ -561,7 +579,7 @@ def register_erp(app, ns):
             articles.append({
                 "CodeArticle": _s(ln.get("CodeArticle")), "Description": _s(ln.get("Description")),
                 "QuantiteCommandee": _qty(ln.get("QuantiteCommandee")), "QuantiteRecue": _qty(ln.get("QuantiteRecue")),
-                "PrixUnitaire": _s(ln.get("PrixUnitaire")) or "0", "Devise": devise,
+                "PrixUnitaire": _dec(ln.get("PrixUnitaire")), "Devise": devise,
                 "dTotalAmount": _money(amount),
                 "cGL": _s(ln.get("cGL")), "cCC1": _s(ln.get("cCC1")), "cCC2": _s(ln.get("cCC2")),
             })
