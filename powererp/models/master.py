@@ -10,8 +10,9 @@ Every table has id (primary key) and company_id; codes are unique per company, i
 import re
 from dataclasses import dataclass, field
 
-from sqlalchemy import (BigInteger, Boolean, CheckConstraint, Column, Date, ForeignKey, Index, Integer, Numeric,
-                        String, Table, Text, text)
+from sqlalchemy import (BigInteger, Boolean, CheckConstraint, Column, Date, DateTime, ForeignKey, Index, Integer,
+                        Numeric, String, Table, Text, text)
+from sqlalchemy.dialects.postgresql import JSONB
 
 from .. import schemas as S
 from ..database import Base
@@ -43,7 +44,17 @@ def _column(api_name, kind, table):
         return Column(col, Boolean, nullable=False, server_default="false")
     if kind == "date":
         return Column(col, Date, nullable=True)
+    if kind == "ts":
+        return Column(col, DateTime, nullable=True)
+    if kind == "json":
+        return Column(col, JSONB, nullable=True)
     return Column(col, Text, nullable=False, server_default="")
+
+
+def _key_expr(api_name, kind):
+    """Text keys are unique ignoring case; other keys (numbers) as they are."""
+    col = column_name(api_name)
+    return f"lower({col})" if kind == "s" else col
 
 
 @dataclass
@@ -54,6 +65,7 @@ class TableSpec:
     order: tuple = ()               # default order of lists (API fields); () = insertion order
     extra: dict = field(default_factory=dict)   # stored fields outside the input schema (read-only in the API)
     line_schema: dict | None = None
+    sparse: tuple = ()              # fields left out of a record while they are empty (NULL)
     table: Table | None = None
     lines: Table | None = None
 
@@ -65,13 +77,13 @@ class TableSpec:
 def _build(spec):
     cols = [_column(f, k, spec.name) for f, k in spec.fields.items()]
     checks = [c.info.pop("check") for c in cols if "check" in c.info]
-    key_expr = ", ".join(f"lower({column_name(k)})" for k in spec.keys)
+    key_expr = ", ".join(_key_expr(k, spec.fields[k]) for k in spec.keys)
     spec.table = Table(
         spec.name, Base.metadata,
         Column("id", BigInteger, primary_key=True, autoincrement=True),
         Column("company_id", BigInteger, ForeignKey("companies.id"), nullable=False, index=True),
         *cols, *checks,
-        Index(f"uq_{spec.name}_key", text("company_id"), *[text(f"lower({column_name(k)})") for k in spec.keys],
+        Index(f"uq_{spec.name}_key", text("company_id"), *[text(_key_expr(k, spec.fields[k])) for k in spec.keys],
               unique=True),
         comment=f"business key: {key_expr}",
     )
@@ -101,4 +113,14 @@ SPECS = {s.name: _build(s) for s in (
               line_schema=S.PRODUCT_SUPPLIER),
     TableSpec("warehouses", S.WAREHOUSE, order=("cCode",)),
     TableSpec("locations", S.LOCATION, keys=("cWarehouse", "cCode"), order=("cWarehouse", "iPickSeq", "cCode")),
+    # ---- stock (R3)
+    TableSpec("stock_params", S.STOCK_PARAM, keys=("cProduct", "cWarehouse")),
+    # The movement ledger: rows are only ever inserted (a movement is corrected by another movement)
+    TableSpec("stock_movements", S.MOVEMENT, keys=("iNo",), order=("iNo",),
+              extra={"iNo": "i", "dValue": "d", "dAvgCostAfter": "d", "cUser": "s", "dCreated": "ts"}),
+    TableSpec("stock_counts", S.COUNT, keys=("iNo",), order=("iNo",),
+              extra={"iNo": "i", "cStatus": S.COUNT_STATUS, "cUser": "s", "dPosted": "ts", "dValueDiff": "d",
+                     "movements": "json"},
+              line_schema={**S.COUNT_LINE, "cDescFR": "s", "dDiff": "d"},
+              sparse=("dPosted", "dValueDiff", "movements")),
 )}

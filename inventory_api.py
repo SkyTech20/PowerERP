@@ -25,8 +25,10 @@ Inventory management:
 WMS later: locations already have a type, capacity (weight / volume / pallets), mixing rules, a blocked flag and a
 picking sequence, and every balance and movement is by location; a WMS only adds tasks (put-away, picking) on top.
 
-Taxes, units, categories, products, warehouses and locations are relational tables (powererp.store). The stock
-parameters, movements and counts are still kept in memory and saved to PostgreSQL by app.py (add_tables) until R3.
+Every table is relational (powererp.store): taxes, units, categories, products, warehouses, locations, stock
+parameters, movements (the ledger, insert only) and counts. The balances are a table too (powererp.stock), updated
+in the same transaction as each movement, with a lock per product so two simultaneous movements cannot both use
+the same stock.
 """
 import copy
 import json
@@ -43,13 +45,15 @@ from erp_api import ApiError, _bool, _dec, _num, _s
 from powererp.schemas import *  # noqa: F401,F403  (choices, schemas and DEFAULTS)
 from powererp.schemas import DEFAULTS, PRODUCT, PRODUCT_SUPPLIER  # noqa: F401
 from powererp import purchasing as purch
+from powererp import stock as stockdb
 from powererp.store import store
 
 SEED_FILE = Path(__file__).resolve().parent / "data" / "inventory.json"
 
 # Master files in relational tables: API name -> table
 MASTER = {"tax_codes": "tax_codes", "tax_groups": "tax_groups", "uom": "uoms", "categories": "product_categories",
-          "warehouses": "warehouses", "locations": "locations", "products": "products"}
+          "warehouses": "warehouses", "locations": "locations", "products": "products",
+          "stock_params": "stock_params"}
 
 
 def _clean(kind, value):
@@ -136,9 +140,10 @@ def _today():
 # --------------------------------------------------------------------------- module
 
 def register_inventory(app, ns, hooks):
-    # Still in memory (R3): stock parameters, movements, counts
-    T = {name: ns.setdefault("inv_" + name, []) for name in ("stock_params", "movements", "counts")}
     DB = {name: store(table) for name, table in MASTER.items()}
+    MOV, CNT = store("stock_movements"), store("stock_counts")
+    # The opening movements of the seed, posted in memory at start-up (see "seed" at the end)
+    T = {"movements": []}
     # While the seed is prepared (start-up, no database session), the master files are these lists.
     seeding = {"rows": None}
 
@@ -421,17 +426,35 @@ def register_inventory(app, ns, hooks):
         return []
 
     def balances(extra=()):
-        """{(product, warehouse, location, lot, serial): {"qty", "reserved", "expiry"}}.
-        Without `extra`, cached for the request (lists call it once per row)."""
-        if not extra:
+        """{(product, warehouse, location, lot, serial): {"qty", "reserved", "expiry"}}: the balances table plus the
+        effects of the `extra` movements (staged, not posted yet). Without `extra`, cached for the request (lists
+        call it once per row) until the next movement."""
+        if seeding["rows"] is not None:
+            return replay(T["movements"], extra)
+        try:
+            cached = g.get("inv_bal")
+        except RuntimeError:
+            cached = None
+        if cached is None:
+            cached = stockdb.read()
             try:
-                cached = g.get("inv_bal")
-                if cached is not None and cached[0] == len(T["movements"]):
-                    return cached[1]
+                g.inv_bal = cached
             except RuntimeError:
-                cached = None
-        out = {}
-        for m in list(T["movements"]) + list(extra):
+                pass
+        if not extra:
+            return cached
+        return replay(extra, (), copy.deepcopy(cached))
+
+    def forget_balances():
+        try:
+            g.pop("inv_bal", None)
+        except RuntimeError:
+            pass
+
+    def replay(movements, extra=(), out=None):
+        """Balances obtained by adding the effects of movements to `out`."""
+        out = {} if out is None else out
+        for m in list(movements) + list(extra):
             for wh, loc, dq, dr in _effects(m):
                 key = (m["cProduct"].upper(), wh.upper(), loc.upper(), m.get("cLot", "").upper(), m.get("cSerial", "").upper())
                 b = out.setdefault(key, {"cProduct": m["cProduct"], "cWarehouse": wh, "cLocation": loc,
@@ -441,11 +464,6 @@ def register_inventory(app, ns, hooks):
                 b["reserved"] = round(b["reserved"] + dr, 6)
                 if m.get("dExpiry") and dq > 0:
                     b["dExpiry"] = m["dExpiry"]
-        if not extra:
-            try:
-                g.inv_bal = (len(T["movements"]), out)
-            except RuntimeError:
-                pass
         return out
 
     def product_totals(code, wh=None, bal=None):
@@ -497,8 +515,7 @@ def register_inventory(app, ns, hooks):
         stock = []
         for s in rows.values():
             wh = _find("warehouses", s["cWarehouse"])
-            par = next((x for x in T["stock_params"] if x["cProduct"].upper() == r["cCode"].upper()
-                        and x["cWarehouse"].upper() == s["cWarehouse"].upper()), None)
+            par = DB["stock_params"].get(r["cCode"], s["cWarehouse"])
             stock.append({"cWarehouse": s["cWarehouse"], "cWarehouseName": (wh or {}).get("cNameFR", ""),
                           "dQtyOnHand": _q(s["qty"]), "dQtyReserved": _q(s["reserved"]),
                           "dQtyAvailable": _q(s["qty"] - s["reserved"]), "dValue": _m(s["qty"] * cost),
@@ -539,8 +556,8 @@ def register_inventory(app, ns, hooks):
 
     def product_delete(r):
         cu = r["cCode"].upper()
-        in_use(any(m["cProduct"].upper() == cu for m in T["movements"]))
-        T["stock_params"][:] = [x for x in T["stock_params"] if x["cProduct"].upper() != cu]
+        in_use(MOV.exists(lambda c: [func.upper(c["cProduct"]) == cu]))
+        DB["stock_params"].delete_where(lambda c: [func.upper(c["cProduct"]) == cu])
 
     crud("products", "products", PRODUCT,
          ("cCode", "cDescFR", "cDescEN", "cCategory", "cBrand", "cUPC", "cMfrPartNo", "cManufacturer"),
@@ -559,9 +576,9 @@ def register_inventory(app, ns, hooks):
 
     def wh_delete(r):
         cu = r["cCode"].upper()
-        in_use(any(m["cWarehouse"].upper() == cu or _s(m.get("cWhTo")).upper() == cu for m in T["movements"]))
+        in_use(MOV.exists(lambda c: [(func.upper(c["cWarehouse"]) == cu) | (func.upper(c["cWhTo"]) == cu)]))
         DB["locations"].delete_where(lambda c: [func.upper(c["cWarehouse"]) == cu])
-        T["stock_params"][:] = [x for x in T["stock_params"] if x["cWarehouse"].upper() != cu]
+        DB["stock_params"].delete_where(lambda c: [func.upper(c["cWarehouse"]) == cu])
 
     crud("warehouses", "warehouses", WAREHOUSE, ("cCode", "cNameFR", "cNameEN", "cCity", "cManager"),
          validate=wh_validate, on_delete=wh_delete, sort=lambda r: r["cCode"])
@@ -593,9 +610,9 @@ def register_inventory(app, ns, hooks):
         return {**r, "dQtyOnHand": _q(q)} if request.endpoint and request.endpoint.endswith("_item") else r
 
     def loc_delete(r):
-        in_use(any((m["cWarehouse"].upper() == r["cWarehouse"].upper() and _s(m.get("cLocation")).upper() == r["cCode"].upper())
-                   or (_s(m.get("cWhTo")).upper() == r["cWarehouse"].upper() and _s(m.get("cLocTo")).upper() == r["cCode"].upper())
-                   for m in T["movements"]))
+        wh, code = r["cWarehouse"].upper(), r["cCode"].upper()
+        in_use(MOV.exists(lambda c: [((func.upper(c["cWarehouse"]) == wh) & (func.upper(c["cLocation"]) == code))
+                                     | ((func.upper(c["cWhTo"]) == wh) & (func.upper(c["cLocTo"]) == code))]))
 
     crud("locations", "locations", LOCATION, ("cWarehouse", "cCode", "cZone", "cDescription", "cType"),
          keys=("cWarehouse", "cCode"), validate=loc_validate, view=loc_view, on_delete=loc_delete,
@@ -640,6 +657,11 @@ def register_inventory(app, ns, hooks):
         if prod is None:
             raise ApiError("required" if not m["cProduct"] else "unknown_ref", "cProduct")
         m["cProduct"] = prod["cCode"]
+        if seeding["rows"] is None:
+            # One movement of this product at a time; then read the stock again (another request may have changed it)
+            stockdb.lock_product(prod["cCode"])
+            forget_balances()
+            prod = _find("products", m["cProduct"])
         if not prod.get("lStocked"):
             raise ApiError("not_stocked", "cProduct")
         q = _f(m["dQty"])
@@ -736,10 +758,16 @@ def register_inventory(app, ns, hooks):
             m["dUnitCost"] = _c(avg)
             m["dValue"] = "0.00"
         m["dAvgCostAfter"] = prod.get("dAvgCost", "")
-        m["iNo"] = max((x["iNo"] for x in T["movements"]), default=0) + 1
         m["cUser"] = m.get("cUser") or _user()
         m["dCreated"] = datetime.now().isoformat(timespec="seconds")
-        T["movements"].append(m)
+        if seeding["rows"] is not None:
+            m["iNo"] = len(T["movements"]) + 1
+            T["movements"].append(m)
+            return m
+        m["iNo"] = purch.next_number("STOCK_MOVE")
+        MOV.insert(m)
+        stockdb.apply(m, _effects(m))
+        forget_balances()
         return m
 
     def movement_from(p):
@@ -760,7 +788,7 @@ def register_inventory(app, ns, hooks):
     @bp.route("/api/stock-movements", methods=["GET", "POST"])
     def movements_collection():
         if request.method == "GET":
-            return jsonify(paginate([movement_view(m) for m in T["movements"]],
+            return jsonify(paginate([movement_view(m) for m in MOV.all()],
                                     ("cProduct", "cDescFR", "cDescEN", "cDocNo", "cLot", "cSerial", "cReason", "cWarehouse")))
         m = movement_from(_payload())
         prod = check_movement(m)
@@ -768,7 +796,7 @@ def register_inventory(app, ns, hooks):
 
     @bp.route("/api/stock-movements/<int:no>", methods=["GET", "PUT", "DELETE"])
     def movements_item(no):
-        m = next((x for x in T["movements"] if x["iNo"] == no), None)
+        m = MOV.get(no)
         if m is None:
             raise ApiError("not_found", status=404)
         if request.method != "GET":
@@ -842,7 +870,8 @@ def register_inventory(app, ns, hooks):
     def replenishment_rows():
         rows = []
         bal = balances()
-        for par in T["stock_params"]:
+        params = M("stock_params")
+        for par in params:
             if not par.get("lActive", True):
                 continue
             prod = _find("products", par["cProduct"])
@@ -851,7 +880,7 @@ def register_inventory(app, ns, hooks):
             qty, res = product_totals(prod["cCode"], par["cWarehouse"], bal)
             avail = qty - res
             # Open POs are not by warehouse: they count for the product's default warehouse (or its only one)
-            params_of_prod = [x for x in T["stock_params"] if x["cProduct"].upper() == prod["cCode"].upper()]
+            params_of_prod = [x for x in params if x["cProduct"].upper() == prod["cCode"].upper()]
             home = prod.get("cDefaultWarehouse") or (params_of_prod[0]["cWarehouse"] if len(params_of_prod) == 1 else "")
             ordered = on_order(prod["cCode"]) if home.upper() == par["cWarehouse"].upper() else 0.0
             projected = avail + ordered
@@ -955,7 +984,7 @@ def register_inventory(app, ns, hooks):
     # ------------------------------------------------------------------ physical counts
 
     def count_find(no):
-        return next((c for c in T["counts"] if c["iNo"] == no), None)
+        return CNT.get(no)
 
     def count_generate(c):
         """Fill the sheet with the current balances of the warehouse (optionally only some locations / products)."""
@@ -1019,16 +1048,16 @@ def register_inventory(app, ns, hooks):
     @bp.route("/api/stock-counts", methods=["GET", "POST"])
     def counts_collection():
         if request.method == "GET":
-            return jsonify(paginate([{k: v for k, v in count_view(c).items() if k != "lines"} for c in T["counts"]],
+            return jsonify(paginate([{k: v for k, v in count_view(c).items() if k != "lines"} for c in CNT.all()],
                                     ("cWarehouse", "cDescription", "cStatus")))
         p = _payload()
         c = {**_blank(COUNT), "cStatus": "Draft", "lines": []}
         count_save(c, p, True)
         if not c["lines"]:
             count_generate(c)
-        c["iNo"] = max((x["iNo"] for x in T["counts"]), default=0) + 1
+        c["iNo"] = purch.next_number("STOCK_COUNT")
         c["cUser"] = _user()
-        T["counts"].append(c)
+        CNT.insert(c)
         return jsonify(count_view(c)), 201
 
     @bp.route("/api/stock-counts/<int:no>", methods=["GET", "PUT", "DELETE"])
@@ -1041,13 +1070,12 @@ def register_inventory(app, ns, hooks):
         if c["cStatus"] != "Draft":
             raise ApiError("posted", status=409)
         if request.method == "DELETE":
-            T["counts"].remove(c)
+            CNT.delete(c)
             return jsonify({"ok": True})
         work = copy.deepcopy(c)
         count_save(work, _payload(), False)
-        c.clear()
-        c.update(work)
-        return jsonify(count_view(c))
+        CNT.update(work)
+        return jsonify(count_view(work))
 
     @bp.route("/api/stock-counts/<int:no>/generate", methods=["POST"])
     def counts_generate(no):
@@ -1057,6 +1085,7 @@ def register_inventory(app, ns, hooks):
         if c["cStatus"] != "Draft":
             raise ApiError("posted", status=409)
         count_generate(c)
+        CNT.update(c)
         return jsonify(count_view(c))
 
     @bp.route("/api/stock-counts/<int:no>/post", methods=["POST"])
@@ -1091,12 +1120,15 @@ def register_inventory(app, ns, hooks):
                 raise ApiError(e.code, "lines", e.status, detail=f"line {i}: {l['cProduct']} {l['cLocation']}".strip())
             staged.append(m)
             m["_prod"] = prod
-        posted = []
+        posted, value = [], 0.0
         for m in staged:
             prod = m.pop("_prod")
-            posted.append(post_movement(m, prod)["iNo"])
+            done = post_movement(m, prod)
+            posted.append(done["iNo"])
+            value += _f(done["dValue"])
         c.update({"cStatus": "Posted", "dPosted": datetime.now().isoformat(timespec="seconds"), "movements": posted,
-                  "dValueDiff": _m(sum(_f(x["dValue"]) for x in T["movements"] if x["iNo"] in posted))})
+                  "dValueDiff": _m(value)})
+        CNT.update(c)
         return jsonify(count_view(c))
 
     # ------------------------------------------------------------------ lookups and dashboard
@@ -1146,7 +1178,6 @@ def register_inventory(app, ns, hooks):
     # which loads it into the tables when the database is empty and on /api/reset.
     seed = json.loads(SEED_FILE.read_text(encoding="utf-8")) if SEED_FILE.exists() else {}
     seeding["rows"] = {name: copy.deepcopy(seed.get(name, [])) for name in MASTER}
-    T["stock_params"][:] = copy.deepcopy(seed.get("stock_params", []))
     for p in seeding["rows"]["products"]:
         p.setdefault("lines", [])
         p.setdefault("dAvgCost", "")
@@ -1160,8 +1191,21 @@ def register_inventory(app, ns, hooks):
     seeding["rows"] = None
     # Parents before children (cleared in the reverse order)
     hooks["add_stores"]([(DB[name], "inv_" + name, master_seed[name]) for name in
-                         ("tax_codes", "tax_groups", "uom", "categories", "warehouses", "locations", "products")])
-    hooks["add_tables"]([(T[name], "inv_" + name) for name in T])
+                         ("tax_codes", "tax_groups", "uom", "categories", "warehouses", "locations", "products",
+                          "stock_params")]
+                        + [(MOV, "inv_movements", T["movements"]), (CNT, "inv_counts", [])])
+
+    def after_load(data):
+        """Balances and numbering follow the movements and counts that were loaded."""
+        if "inv_movements" in data:
+            stockdb.rebuild(MOV.all(), _effects)
+            purch.set_next_number("STOCK_MOVE", max((int(x["iNo"]) for x in data["inv_movements"]), default=0) + 1)
+        if "inv_counts" in data:
+            purch.set_next_number("STOCK_COUNT", max((int(x["iNo"]) for x in data["inv_counts"]), default=0) + 1)
+        forget_balances()
+
+    hooks["after_load"].append(after_load)
+    hooks["on_clear"].append(stockdb.clear)
 
     def add_movement(p):
         """Post a movement from another module (e.g. a reception), validated like the screen's."""

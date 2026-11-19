@@ -14,7 +14,7 @@ A small PowerERP-like ERP for demos and tests.
 - **English / French** toggle in the top bar (remembered in the browser and per user).
 - **Login and users:** every screen needs a login. **Administration → Users** (administrators only) creates, edits, deactivates and deletes users (username, name, email, role *Administrator* / *User*, language, password). Each user changes their own password by clicking their name in the top bar.
 - **SkyAI integration:** the ERP also answers the PowerWARE web services that SkyAI calls (same paths, parameters and XML as the SkyAI mock API). SkyAI reads suppliers, GL accounts, POs and receptions from the ERP, and the invoice it creates at the end of its process shows up in **Invoices** (source "SkyAI").
-- **PostgreSQL database** (`DATABASE_URL`): users, settings and all ERP data are saved there and survive a restart. The schema is created and migrated by Alembic (`migrations/`) when the ERP starts. An empty database is seeded from `data/*.json` (or `data/demo/`). The ERP is being moved to relational tables area by area (see `Docs/PowerERP-Reestruturacao.md` in the Workflow folder); until then, the tables not yet moved are kept as JSON documents in `legacy_datasets`. **Dashboard → Reset demo data** restores the original data; **Dashboard → Clear all data** (`POST /api/clear`) empties everything, to start a demo from a blank ERP. Drop and re-create the database to start over completely (users included).
+- **PostgreSQL database** (`DATABASE_URL`): users, settings and all ERP data are saved there and survive a restart. The schema is created and migrated by Alembic (`migrations/`) when the ERP starts. An empty database is seeded from `data/*.json` (or `data/demo/`). Every area is in relational tables (company_id on each, codes unique per company, one transaction per request); the stock balances are updated with each movement, one movement per product at a time. `legacy_datasets` only receives the JSON of older databases, which is moved into the tables once at start-up. **Dashboard → Reset demo data** restores the original data; **Dashboard → Clear all data** (`POST /api/clear`) empties everything, to start a demo from a blank ERP. Drop and re-create the database to start over completely (users included).
 - Taxes: on purchase orders and receptions, TPS (5%) and TVQ (9.975%) are calculated on subtotal + freight when the supplier has a TPS / TVQ number (supplier form, Terms & taxes). Existing records keep their stored taxes until a line, the freight or the supplier is changed.
 - Demo dataset: with `ERP_DATASET=demo` (set by `docker\rebuild.ps1 -DemoData` / `rebuild.sh --demo-data`) the ERP loads the fictitious French data in `data/demo/` instead of `data/*.json`: GL accounts, cost centers, 5 suppliers and no invoices. It covers the 5 demo scenarios, and the matching invoice PDFs (in French) are in `demo-invoices/`:
 
@@ -83,7 +83,7 @@ docker build -t erp-sample .
 docker run -d -p 5050:5050 -e DATABASE_URL=postgresql://user:password@dbhost:5432/powererp -e ERP_ADMIN_PASSWORD=change-me --name erp-sample erp-sample
 ```
 
-The data lives in PostgreSQL (volume `pgdata` with docker compose). Until all areas are moved to relational tables, run a single ERP process per database: the tables still in `legacy_datasets` are kept in memory.
+The data lives in PostgreSQL (volume `pgdata` with docker compose). Several ERP processes (or containers) can use the same database: nothing is kept in memory between requests.
 
 ### Settings (environment variables)
 

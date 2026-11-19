@@ -11,7 +11,7 @@ def _sql(query, **params):
 
 
 def test_schema_is_migrated(app):
-    assert _sql("SELECT version_num FROM alembic_version")[0][0] == "0003"
+    assert _sql("SELECT version_num FROM alembic_version")[0][0] == "0004"
     assert _sql("SELECT code FROM companies")[0][0] == "MAIN"
 
 
@@ -28,7 +28,7 @@ def test_master_data_is_in_tables(client):
     stored = db.load_datasets()
     assert "gl" not in stored and "suppliers" not in stored and "inv_products" not in stored
     assert "po_details" not in stored and "invoices" not in stored
-    assert "inv_movements" in stored  # until R3
+    assert stored == {}  # every table is relational since R3
 
 
 def test_purchasing_is_in_tables(client):

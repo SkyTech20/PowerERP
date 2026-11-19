@@ -5,8 +5,9 @@ UI:  http://localhost:5050/
 API: http://localhost:5050/api/<resource>
 
 GL accounts, cost centers and suppliers (powererp.store), purchase orders, receptions and
-invoices (powererp.purchasing) are relational tables, seeded from data/*.json. Tables of other
-modules still kept in memory (add_tables) are saved by app.py to legacy_datasets.
+invoices (powererp.purchasing) are relational tables, seeded from data/*.json (the inventory
+module adds its own with add_stores). add_tables still accepts in-memory lists, saved by app.py
+to legacy_datasets, for a module that has not moved yet; none uses it today.
 POST /api/reset restores the original demo data.
 """
 import copy
@@ -177,7 +178,7 @@ def register_erp(app, ns):
                   "receiving_details": ns["receiving_details"], "unbilled_receiving": ns["unbilled_receiving"]}
     seed_invoices = []
     # Tables, lookups and dashboard figures added by other modules (inventory_api.py)
-    extra = {"tables": [], "stores": [], "lookups": {}, "summary": []}
+    extra = {"tables": [], "stores": [], "lookups": {}, "summary": [], "after_load": [], "on_clear": []}
 
     def _add_invoice(inv):
         if seeding["on"]:
@@ -326,6 +327,8 @@ def register_erp(app, ns):
             purch.rec_replace_all(data.get("receiving_details", []), data.get("unbilled_receiving", []))
         if "invoices" in data:
             purch.inv_replace_all(data["invoices"])
+        for fn in extra["after_load"]:  # e.g. the stock balances, recalculated from the movements
+            fn(data)
 
     def store_keys():
         return [key for _st, key in _all_stores()] + list(PURCHASING_KEYS)
@@ -344,6 +347,8 @@ def register_erp(app, ns):
         """Empty every table (for demos that start from a blank ERP). /api/reset brings the demo data back."""
         for target, _key in _tables():
             target[:] = []
+        for fn in extra["on_clear"]:
+            fn()
         purch.inv_clear()
         purch.rec_clear()
         purch.po_clear()
@@ -846,6 +851,7 @@ def register_erp(app, ns):
 
     return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load,
             "seed": seed, "add_stores": add_stores, "store_keys": store_keys,
+            "after_load": extra["after_load"], "on_clear": extra["on_clear"],
             "suppliers": sup_db, "gl_accounts": gl_db, "cost_centers": cc_db,
             "save_po": _po_save, "po_exists": po_exists, "all_pos": _all_pos,
             "update_po_header": _po_update_header, "next_po_number": next_po_number,

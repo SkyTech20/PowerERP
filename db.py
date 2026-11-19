@@ -6,9 +6,8 @@ Tables (migrations/versions):
   settings         key/value (session secret, dataset the data was seeded from)
   companies        companies; documents and master data get a company_id as they move to tables
   doc_sequences    document numbering per company
-  legacy_datasets  transition: the ERP tables still kept as in-memory lists (GL accounts, suppliers,
-                   POs, receptions, invoices, inventory...), one JSON document per table, rewritten
-                   after each change. They move to relational tables in phases R1 to R3.
+  legacy_datasets  JSON documents of older databases (before the relational tables); moved into the
+                   tables once at start-up (app.py), then removed.
 """
 from datetime import datetime, timezone
 

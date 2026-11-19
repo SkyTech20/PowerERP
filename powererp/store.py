@@ -4,7 +4,7 @@ A Store reads and writes one table of powererp.models.master as the dicts the AP
 (cCode, dPrice1 "1649.00", lActive True, "lines": [...]), so the routes keep their contract while the data
 lives in relational tables. Every call uses the session of the current request (powererp.database.current()).
 """
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
 from sqlalchemy import delete, func, insert, select, update
@@ -37,6 +37,11 @@ def _to_db(kind, value):
     if kind == "date":
         v = str(value or "").strip()[:10]
         return date.fromisoformat(v) if v else None
+    if kind == "ts":
+        v = str(value or "").strip()
+        return datetime.fromisoformat(v) if v else None
+    if kind == "json":
+        return value
     if kind == "b":
         return bool(value)
     if kind == "i":
@@ -49,6 +54,10 @@ def _from_db(kind, value):
         return "" if value is None else format(value, "f")
     if kind == "date":
         return value.isoformat() if value else ""
+    if kind == "ts":
+        return value.isoformat(timespec="seconds") if value else ""
+    if kind == "json":
+        return value
     if kind == "b":
         return bool(value)
     if kind == "i":
@@ -68,7 +77,9 @@ class Store:
     # ------------------------------------------------------------ conversion
 
     def _row_out(self, r):
-        return {f: _from_db(k, r._mapping[self.cols[f]]) for f, k in self.fields.items()}
+        m = r._mapping
+        return {f: _from_db(k, m[self.cols[f]]) for f, k in self.fields.items()
+                if not (f in self.spec.sparse and m[self.cols[f]] is None)}
 
     @staticmethod
     def _default(kind):
@@ -89,7 +100,10 @@ class Store:
         conds = [self.t.c.company_id == company_id()]
         for f, v in zip(self.spec.keys, key_values):
             c = self.cols[f]
-            conds.append(func.lower(c) == str(v or "").lower() if ci else c == str(v or ""))
+            if self.fields[f] != "s":
+                conds.append(c == _to_db(self.fields[f], v))
+            else:
+                conds.append(func.lower(c) == str(v or "").lower() if ci else c == str(v or ""))
         return conds
 
     def _order(self):
