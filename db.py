@@ -65,6 +65,13 @@ def save_datasets(datasets):
         s.execute(stmt)
 
 
+def drop_datasets(names):
+    """Remove the JSON documents of tables that moved to relational tables."""
+    if names:
+        with session() as s:
+            s.execute(delete(LegacyDataset).where(LegacyDataset.name.in_(list(names))))
+
+
 def clear_datasets():
     with session() as s:
         s.execute(delete(LegacyDataset))

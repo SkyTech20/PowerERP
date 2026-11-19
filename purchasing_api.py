@@ -17,6 +17,8 @@ from flask import Blueprint, jsonify, request
 from erp_api import _num  # accepts "$12.50" / "12,50 $" like the ERP screens
 from powerware_api import PW_PREFIX
 
+from powererp.store import store
+
 logger = logging.getLogger(__name__)
 bp = Blueprint("purchasing", __name__)
 _ns = {}
@@ -55,7 +57,7 @@ def ap_create_po():
         return jsonify({"status": "error", "error": "JSON body required"}), 400
     supplier_code = str(p.get("supplierCode") or "").strip()
     reference = str(p.get("requisitionNumber") or "").strip()
-    supplier = next((s for s in _ns["supplier_terms_data"] if s.get("cCode") == supplier_code), None)
+    supplier = store("suppliers").get(supplier_code, ci=False) if supplier_code else None
     if supplier is None:
         return jsonify({"status": "error", "error": f"unknown supplier {supplier_code}"}), 400
     lines_in = [ln for ln in (p.get("lines") or []) if isinstance(ln, dict)]

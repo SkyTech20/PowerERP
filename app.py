@@ -22,6 +22,7 @@ from pathlib import Path
 from flask import Flask, jsonify, request
 
 import db
+from powererp import database
 from auth import PW_PREFIX, register_auth
 from erp_api import register_erp
 from inventory_api import register_inventory
@@ -84,12 +85,19 @@ register_inventory(app, data, hooks)
 # ERP data: load what the database has; an empty database (or another dataset) is seeded from data/*.json.
 # The name changes when the history is added, so an existing database is re-seeded once with it.
 DATASET = DATA_DIR.name + ("+history" if HISTORY.exists() else "")
+database.init_app(app)  # one transaction per request for the relational tables
 _stored = db.load_datasets()
-if _stored and db.get_setting("dataset") == DATASET:
-    hooks["load"](_stored)
-else:
-    db.save_datasets(hooks["dump"]())
-    db.set_setting("dataset", DATASET)
+with database.unit_of_work():
+    if _stored and db.get_setting("dataset") == DATASET:
+        # Tables already moved to relational tables but still in an older JSON dataset are loaded into them once.
+        hooks["load"](_stored)
+        _moved = [k for k in hooks["store_keys"]() if k in _stored]
+    else:
+        hooks["seed"]()
+        _moved = hooks["store_keys"]()
+db.drop_datasets(_moved)
+db.save_datasets(hooks["dump"]())
+db.set_setting("dataset", DATASET)
 
 
 @app.after_request

@@ -4,8 +4,9 @@ PowerERP (demo ERP) — JSON API and static UI.
 UI:  http://localhost:5050/
 API: http://localhost:5050/api/<resource>
 
-Data is seeded from data/*.json and kept in memory; app.py saves it to the
-PostgreSQL database (db.py) after every change and loads it back at startup.
+GL accounts, cost centers and suppliers are relational tables (powererp.store); the other
+tables are seeded from data/*.json and kept in memory, and app.py saves them to the
+PostgreSQL database (db.py) after every change and loads them back at startup.
 POST /api/reset restores the original demo data.
 """
 import copy
@@ -14,6 +15,8 @@ from datetime import datetime
 from pathlib import Path
 
 from flask import Blueprint, jsonify, request, send_from_directory
+
+from powererp.store import store
 
 ERP_STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -164,9 +167,10 @@ def register_erp(app, ns):
     Mount the ERP on `app`.
     `ns` is a dict holding the data lists (see app.py: load_data()).
     """
-    gl = ns["gl_ttGL_data"]
-    cc = ns["gl_ttCC_data"]
-    suppliers = ns["supplier_terms_data"]
+    # Relational tables (seeded from these lists, which are not used afterwards)
+    gl_db, cc_db, sup_db = store("gl_accounts"), store("cost_centers"), store("suppliers")
+    stores = [(gl_db, "gl", ns["gl_ttGL_data"]), (cc_db, "cc", ns["gl_ttCC_data"]),
+              (sup_db, "suppliers", ns["supplier_terms_data"])]
     po_details = ns["po_details"]
     unbilled_po = ns["unbilled_po"]
     receiving_details = ns["receiving_details"]
@@ -175,7 +179,7 @@ def register_erp(app, ns):
 
     state = {"next_invoice_id": 1}
     # Tables, lookups and dashboard figures added by other modules (inventory_api.py)
-    extra = {"tables": [], "lookups": {}, "summary": []}
+    extra = {"tables": [], "stores": [], "lookups": {}, "summary": []}
 
     def _add_invoice(inv):
         inv["id"] = state["next_invoice_id"]
@@ -201,9 +205,15 @@ def register_erp(app, ns):
             raise ApiError("invalid_body")
         return data
 
+    seeding = {"on": False}  # the seed invoices are prepared at start-up, from the seed suppliers
+
     def _supplier_name(code):
-        code_u = _s(code).upper()
-        s = next((x for x in suppliers if x["cCode"].upper() == code_u), None)
+        if not _s(code):
+            return ""
+        if seeding["on"]:
+            s = next((x for x in ns["supplier_terms_data"] if x["cCode"].upper() == _s(code).upper()), None)
+        else:
+            s = sup_db.get(_s(code))
         return s["cName"] if s else ""
 
     # ---------------- Static UI ----------------
@@ -224,10 +234,10 @@ def register_erp(app, ns):
         rec_keys = {r["NoReception"] for r in receiving_details} | {r["NoReception"] for r in unbilled_receiving}
         open_inv = [i for i in invoices if i.get("cStatut") in ("Draft", "Approved")]
         return jsonify({
-            "glAccounts": len(gl),
-            "costCenters": len(cc),
-            "suppliers": len(suppliers),
-            "activeSuppliers": len([s for s in suppliers if s.get("iStatutAch") == 1]),
+            "glAccounts": gl_db.count(),
+            "costCenters": cc_db.count(),
+            "suppliers": sup_db.count(),
+            "activeSuppliers": sup_db.count(lambda c: [c["iStatutAch"] == 1]),
             "purchaseOrders": len(po_keys),
             "unbilledPOs": len(unbilled_po),
             "receptions": len(rec_keys),
@@ -244,23 +254,24 @@ def register_erp(app, ns):
         q = (request.args.get("q") or "").strip().lower()
         limit = 20
         if kind == "suppliers":
-            rows = [{"code": s["cCode"], "label": s["cName"]} for s in suppliers]
+            rows = [{"code": s["cCode"], "label": s["cName"]} for s in sup_db.all()]
         elif kind == "gl":
-            rows = [{"code": g["cCode"], "label": g["cDesc"]} for g in gl]
+            rows = [{"code": g["cCode"], "label": g["cDesc"]} for g in gl_db.all()]
         elif kind == "cc":
-            rows = [{"code": f'{c["cCC1"]}-{c["cCC2"]}' if c["cCC2"] else c["cCC1"], "label": c["cDesc"]} for c in cc]
+            rows = [{"code": f'{c["cCC1"]}-{c["cCC2"]}' if c["cCC2"] else c["cCC1"], "label": c["cDesc"]}
+                    for c in cc_db.all()]
         elif kind == "po":
             rows = [{"code": p["cPO"], "label": p["cSupplierName"]} for p in _all_pos()]
         elif kind == "terms":
             seen = {}
-            for s in suppliers:
+            for s in sup_db.all():
                 if s["cTermCode"] and s["cTermCode"] not in seen:
                     seen[s["cTermCode"]] = s["cTermDesc"]
             rows = [{"code": k, "label": v} for k, v in sorted(seen.items())]
             limit = 200
         elif kind == "buyers":
             seen = {}
-            for s in suppliers:
+            for s in sup_db.all():
                 if s["cCodeAch"] and s["cCodeAch"] not in seen:
                     seen[s["cCodeAch"]] = s["cDescAch"]
             rows = [{"code": k, "label": v} for k, v in sorted(seen.items())]
@@ -274,7 +285,8 @@ def register_erp(app, ns):
         return jsonify(rows if request.args.get("all") else rows[:limit])
 
     def _tables():
-        return ((gl, "gl"), (cc, "cc"), (suppliers, "suppliers"), (po_details, "po_details"),
+        """The tables still kept as in-memory lists (saved as JSON in legacy_datasets)."""
+        return ((po_details, "po_details"),
                 (unbilled_po, "unbilled_po"), (receiving_details, "receiving_details"),
                 (unbilled_receiving, "unbilled_receiving"), (invoices, "invoices"),
                 *extra["tables"])
@@ -285,20 +297,40 @@ def register_erp(app, ns):
         for target, key in pairs:
             snapshot[key] = copy.deepcopy(target)
 
+    def add_stores(triples):
+        """Other modules' relational tables ((store, key, seed rows), ...): seeded, reset and cleared with the ERP's."""
+        extra["stores"].extend(triples)
+        for _st, key, rows in triples:
+            snapshot[key] = copy.deepcopy(rows)
+
+    def _all_stores():
+        return [(st, key) for st, key, _rows in stores + extra["stores"]]
+
     def dump():
-        """Every ERP table, for the database."""
+        """The in-memory ERP tables, for legacy_datasets."""
         return {key: target for target, key in _tables()}
 
     def load(data):
-        """Replace the ERP tables (in place: powerware_api shares these lists)."""
+        """Replace the ERP tables (lists in place: powerware_api shares them). Keys of relational tables
+        (old JSON datasets, or the reset snapshot) are loaded into those tables. Needs a database session."""
         for target, key in _tables():
             if key in data:
                 target[:] = data[key]
+        for st, key in _all_stores():
+            if key in data:
+                st.replace_all(data[key])
         state["next_invoice_id"] = max((i["id"] for i in invoices), default=0) + 1
+
+    def store_keys():
+        return [key for _st, key in _all_stores()]
+
+    def seed():
+        """Load the original data (empty database or other dataset)."""
+        load(copy.deepcopy(snapshot))
 
     @bp.route("/api/reset", methods=["POST"])
     def erp_reset():
-        load(copy.deepcopy(snapshot))
+        seed()
         return jsonify({"ok": True})
 
     @bp.route("/api/clear", methods=["POST"])
@@ -306,6 +338,8 @@ def register_erp(app, ns):
         """Empty every table (for demos that start from a blank ERP). /api/reset brings the demo data back."""
         for target, _key in _tables():
             target[:] = []
+        for st, _key in reversed(_all_stores()):
+            st.clear()
         state["next_invoice_id"] = 1
         return jsonify({"ok": True})
 
@@ -314,49 +348,50 @@ def register_erp(app, ns):
     @bp.route("/api/gl-accounts", methods=["GET", "POST"])
     def gl_collection():
         if request.method == "GET":
-            return jsonify(_paginate(gl, ("cCode", "cDesc")))
+            return jsonify(_paginate(gl_db.all(), ("cCode", "cDesc")))
         p = _payload()
         _require(p, "cCode", "cDesc")
         code = _s(p["cCode"])
-        if any(g["cCode"].upper() == code.upper() for g in gl):
+        if gl_db.get(code):
             raise ApiError("duplicate", "cCode", 409)
         row = {"cCode": code, "cDesc": _s(p["cDesc"])}
-        gl.append(row)
-        gl.sort(key=lambda g: g["cCode"])
+        gl_db.insert(row)
         return jsonify(row), 201
 
     @bp.route("/api/gl-accounts/<code>", methods=["GET", "PUT", "DELETE"])
     def gl_item(code):
-        row = next((g for g in gl if g["cCode"] == code), None)
+        row = gl_db.get(code, ci=False)
         if row is None:
             raise ApiError("not_found", status=404)
         if request.method == "GET":
             return jsonify(row)
         if request.method == "DELETE":
-            gl.remove(row)
+            gl_db.delete(row)
             return jsonify({"ok": True})
         p = _payload()
         _require(p, "cDesc")
         row["cDesc"] = _s(p["cDesc"])
+        gl_db.update(row)
         return jsonify(row)
 
     # ---------------- Cost centers (key: cCC1 + cCC2) ----------------
 
     def _cc_find(cc1, cc2):
-        return next((c for c in cc if c["cCC1"] == cc1 and (c.get("cCC2") or "") == cc2), None)
+        return cc_db.get(cc1, cc2 or "", ci=False)
 
     @bp.route("/api/cost-centers", methods=["GET", "POST"])
     def cc_collection():
         if request.method == "GET":
-            return jsonify(_paginate(cc, ("cCC1", "cCC2", "cDesc")))
+            return jsonify(_paginate(cc_db.all(), ("cCC1", "cCC2", "cDesc")))
         p = _payload()
         _require(p, "cCC1", "cDesc")
         cc1, cc2 = _s(p["cCC1"]), _s(p.get("cCC2"))
         if _cc_find(cc1, cc2):
             raise ApiError("duplicate", "cCC2" if cc2 else "cCC1", 409)
+        if cc_db.get(cc1, cc2):
+            raise ApiError("duplicate", "cCC2" if cc2 else "cCC1", 409)
         row = {"cCC1": cc1, "cCC2": cc2, "cDesc": _s(p["cDesc"])}
-        cc.append(row)
-        cc.sort(key=lambda c: (c["cCC1"], c.get("cCC2") or ""))
+        cc_db.insert(row)
         return jsonify(row), 201
 
     @bp.route("/api/cost-centers/<cc1>", defaults={"cc2": ""}, methods=["GET", "PUT", "DELETE"])
@@ -368,11 +403,12 @@ def register_erp(app, ns):
         if request.method == "GET":
             return jsonify(row)
         if request.method == "DELETE":
-            cc.remove(row)
+            cc_db.delete(row)
             return jsonify({"ok": True})
         p = _payload()
         _require(p, "cDesc")
         row["cDesc"] = _s(p["cDesc"])
+        cc_db.update(row)
         return jsonify(row)
 
     # ---------------- Suppliers (getSupplierTerm.p) ----------------
@@ -391,30 +427,31 @@ def register_erp(app, ns):
     @bp.route("/api/suppliers", methods=["GET", "POST"])
     def supplier_collection():
         if request.method == "GET":
-            return jsonify(_paginate(suppliers, ("cCode", "cName", "cCity", "cTermCode", "cDescAch")))
+            return jsonify(_paginate(sup_db.all(), ("cCode", "cName", "cCity", "cTermCode", "cDescAch")))
         p = _payload()
         _require(p, "cCode", "cName")
         code = _s(p["cCode"])
-        if any(s["cCode"].upper() == code.upper() for s in suppliers):
+        if sup_db.get(code):
             raise ApiError("duplicate", "cCode", 409)
         row = {"cCode": code, **{f: "" for f in _SUPPLIER_STR}, "iTypePO": 1, "iStatutAch": 1}
         _supplier_apply(row, p)
-        suppliers.append(row)
+        sup_db.insert(row)
         return jsonify(row), 201
 
     @bp.route("/api/suppliers/<code>", methods=["GET", "PUT", "DELETE"])
     def supplier_item(code):
-        row = next((s for s in suppliers if s["cCode"] == code), None)
+        row = sup_db.get(code, ci=False)
         if row is None:
             raise ApiError("not_found", status=404)
         if request.method == "GET":
             return jsonify(row)
         if request.method == "DELETE":
-            suppliers.remove(row)
+            sup_db.delete(row)
             return jsonify({"ok": True})
         p = _payload()
         _require(p, "cName")
         _supplier_apply(row, p)
+        sup_db.update(row)
         return jsonify(row)
 
     # ---------------- Purchase orders (getPODetails.p + getUnbilledPO.p) ----------------
@@ -748,11 +785,13 @@ def register_erp(app, ns):
         return jsonify(inv)
 
     # The demo dataset starts without invoices (app.py passes seed_invoices=[]).
-    for seed in ns.get("seed_invoices", _SEED_INVOICES):
-        _add_invoice(copy.deepcopy(seed))
+    seeding["on"] = True
+    for seed_inv in ns.get("seed_invoices", _SEED_INVOICES):
+        _add_invoice(copy.deepcopy(seed_inv))
+    seeding["on"] = False
 
     snapshot = copy.deepcopy({
-        "gl": gl, "cc": cc, "suppliers": suppliers, "po_details": po_details,
+        **{key: rows for _st, key, rows in stores}, "po_details": po_details,
         "unbilled_po": unbilled_po, "receiving_details": receiving_details,
         "unbilled_receiving": unbilled_receiving, "invoices": invoices,
         "next_invoice_id": state["next_invoice_id"],
@@ -805,6 +844,8 @@ def register_erp(app, ns):
         return _po_view(cpo) is not None
 
     return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load,
+            "seed": seed, "add_stores": add_stores, "store_keys": store_keys,
+            "suppliers": sup_db, "gl_accounts": gl_db, "cost_centers": cc_db,
             "save_po": _po_save, "po_exists": po_exists, "all_pos": _all_pos,
             "add_tables": add_tables, "lookups": extra["lookups"], "summary": extra["summary"],
             "api_error": ApiError, "paginate": _paginate}

@@ -25,7 +25,8 @@ Inventory management:
 WMS later: locations already have a type, capacity (weight / volume / pallets), mixing rules, a blocked flag and a
 picking sequence, and every balance and movement is by location; a WMS only adds tasks (put-away, picking) on top.
 
-Data is kept in memory like the rest of the ERP and saved to PostgreSQL by app.py (tables registered with add_tables).
+Taxes, units, categories, products, warehouses and locations are relational tables (powererp.store). The stock
+parameters, movements and counts are still kept in memory and saved to PostgreSQL by app.py (add_tables) until R3.
 """
 import copy
 import json
@@ -34,88 +35,20 @@ from datetime import date, datetime
 from pathlib import Path
 
 from flask import Blueprint, g, jsonify, request
+from sqlalchemy import func
 
 from auth import current_user
 from erp_api import ApiError, _bool, _dec, _num, _s
 
+from powererp.schemas import *  # noqa: F401,F403  (choices, schemas and DEFAULTS)
+from powererp.schemas import DEFAULTS, PRODUCT, PRODUCT_SUPPLIER  # noqa: F401
+from powererp.store import store
+
 SEED_FILE = Path(__file__).resolve().parent / "data" / "inventory.json"
 
-# --------------------------------------------------------------------------- choices
-
-PRODUCT_TYPES = ("stock", "nonstock", "service", "kit", "raw")
-STOCKED_TYPES = ("stock", "kit", "raw")
-PRODUCT_STATUS = ("active", "inactive", "discontinued")
-COST_METHODS = ("avg", "std")
-TAX_KINDS = ("gst", "pst", "hst", "other")
-TAX_TREATMENTS = ("taxable", "zero", "exempt")
-UOM_TYPES = ("count", "weight", "length", "area", "volume", "time")
-WAREHOUSE_TYPES = ("main", "transit", "consignment", "quarantine", "virtual")
-LOCATION_TYPES = ("picking", "reserve", "receiving", "shipping", "quarantine", "staging")
-MOVE_TYPES = ("IN", "OUT", "TRF", "ADJ", "CNT", "RSV")
-DOC_TYPES = ("MAN", "PO", "REC", "INV", "SO", "CNT", "PROD")
-COUNT_STATUS = ("Draft", "Posted")
-
-# --------------------------------------------------------------------------- schemas
-# kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
-
-TAX_CODE = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "cKind": TAX_KINDS, "cJurisdiction": "s",
-            "cRegistrationNo": "s", "cGLCollected": "s", "cGLRecoverable": "s", "dRecoverablePct": "d", "lActive": "b"}
-TAX_RATE = {"dStartDate": "date", "dEndDate": "date", "dRate": "d"}
-TAX_GROUP = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "cProvince": "s", "cTreatment": TAX_TREATMENTS, "lActive": "b"}
-TAX_GROUP_LINE = {"iSeq": "i", "cTaxCode": "s", "lCompound": "b"}
-UOM = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "cType": UOM_TYPES, "lActive": "b"}
-CATEGORY = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "cParent": "s", "lActive": "b"}
-PRODUCT = {
-    # identification
-    "cCode": "s", "cStatus": PRODUCT_STATUS, "cType": PRODUCT_TYPES, "cDescFR": "s", "cDescEN": "s",
-    "cLongDescFR": "s", "cLongDescEN": "s", "cCategory": "s", "cBrand": "s", "cModel": "s", "cUPC": "s",
-    "cManufacturer": "s", "cMfrPartNo": "s", "cImageUrl": "s", "cSpecUrl": "s", "cSdsUrl": "s",
-    # units and dimensions
-    "cStockUOM": "s", "cPurchaseUOM": "s", "dPurchaseFactor": "d", "cSalesUOM": "s", "dSalesFactor": "d",
-    "dWeight": "d", "cWeightUOM": "s", "dLength": "d", "dWidth": "d", "dHeight": "d", "cDimUOM": "s", "dVolume": "d",
-    # costs and prices
-    "cCostMethod": COST_METHODS, "dStdCost": "d", "cCurrency": "s", "dPrice1": "d", "dPrice2": "d", "dPrice3": "d",
-    "dPrice4": "d", "dPrice5": "d", "dMinPrice": "d",
-    # taxes
-    "cSalesTaxGroup": "s", "cPurchaseTaxGroup": "s", "dEcoFee": "d", "cEcoFeeCode": "s",
-    # accounting
-    "cGLSales": "s", "cGLPurchase": "s", "cGLInventory": "s", "cGLCOGS": "s", "cCostCenter": "s", "cProject": "s",
-    # inventory
-    "lStocked": "b", "lLotControl": "b", "lSerialControl": "b", "lExpiryControl": "b", "iShelfLifeDays": "i",
-    "cDefaultWarehouse": "s", "cABCClass": ("", "A", "B", "C"),
-    # sales and logistics
-    "lSellable": "b", "lPurchasable": "b", "lPORequired": "b", "iWarrantyMonths": "i", "cCountryOrigin": "s",
-    "cHSCode": "s", "cFreightClass": "s", "lHazardous": "b", "cNotes": "s",
-}
-PRODUCT_SUPPLIER = {"cSupplierCode": "s", "cSupplierItem": "s", "dPurchasePrice": "d", "cCurrency": "s",
-                    "iLeadTimeDays": "i", "dMinOrderQty": "d", "lPreferred": "b"}
-WAREHOUSE = {"cCode": "s", "cNameFR": "s", "cNameEN": "s", "cType": WAREHOUSE_TYPES, "cAddress1": "s", "cCity": "s",
-             "cProvince": "s", "cZipCode": "s", "cCountry": "s", "cManager": "s", "cPhone": "s", "cEmail": "s",
-             "lUseLocations": "b", "lAllowNegative": "b", "cReceivingLoc": "s", "cShippingLoc": "s", "lActive": "b"}
-LOCATION = {"cWarehouse": "s", "cCode": "s", "cZone": "s", "cAisle": "s", "cRack": "s", "cLevel": "s", "cBin": "s",
-            "cDescription": "s", "cType": LOCATION_TYPES, "dMaxWeight": "d", "dMaxVolume": "d", "iMaxPallets": "i",
-            "lMixProducts": "b", "lMixLots": "b", "lBlocked": "b", "iPickSeq": "i", "lActive": "b"}
-STOCK_PARAM = {"cProduct": "s", "cWarehouse": "s", "dReorderPoint": "d", "dMinQty": "d", "dMaxQty": "d",
-               "dOrderQty": "d", "cDefaultLocation": "s", "iLeadTimeDays": "i", "lActive": "b"}
-MOVEMENT = {"dDate": "date", "cType": MOVE_TYPES, "cProduct": "s", "dQty": "d", "dUnitCost": "d",
-            "cWarehouse": "s", "cLocation": "s", "cWhTo": "s", "cLocTo": "s", "cLot": "s", "cSerial": "s",
-            "dExpiry": "date", "cDocType": DOC_TYPES, "cDocNo": "s", "cReason": "s", "cComment": "s"}
-COUNT = {"cWarehouse": "s", "dDate": "date", "cDescription": "s", "cLocationPrefix": "s", "cProductPrefix": "s"}
-COUNT_LINE = {"cProduct": "s", "cLocation": "s", "cLot": "s", "cSerial": "s", "dQtyExpected": "d", "dQtyCounted": "d"}
-
-DEFAULTS = {
-    "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
-    "tax_groups": {"cTreatment": "taxable", "lActive": True},
-    "uom": {"cType": "count", "lActive": True},
-    "categories": {"lActive": True},
-    "products": {"cStatus": "active", "cType": "stock", "cCostMethod": "avg", "cCurrency": "CAD", "cStockUOM": "UN",
-                 "cPurchaseUOM": "UN", "dPurchaseFactor": "1", "cSalesUOM": "UN", "dSalesFactor": "1",
-                 "lStocked": True, "lSellable": True,
-                 "lPurchasable": True, "cWeightUOM": "kg", "cDimUOM": "cm", "cCountryOrigin": "CA"},
-    "warehouses": {"cType": "main", "cProvince": "QC", "cCountry": "CA", "lUseLocations": True, "lActive": True},
-    "locations": {"cType": "picking", "lMixProducts": True, "lMixLots": True, "lActive": True},
-    "stock_params": {"lActive": True},
-}
+# Master files in relational tables: API name -> table
+MASTER = {"tax_codes": "tax_codes", "tax_groups": "tax_groups", "uom": "uoms", "categories": "product_categories",
+          "warehouses": "warehouses", "locations": "locations", "products": "products"}
 
 
 def _clean(kind, value):
@@ -202,9 +135,22 @@ def _today():
 # --------------------------------------------------------------------------- module
 
 def register_inventory(app, ns, hooks):
-    T = {name: ns.setdefault("inv_" + name, []) for name in (
-        "tax_codes", "tax_groups", "uom", "categories", "products", "warehouses", "locations",
-        "stock_params", "movements", "counts")}
+    # Still in memory (R3): stock parameters, movements, counts
+    T = {name: ns.setdefault("inv_" + name, []) for name in ("stock_params", "movements", "counts")}
+    DB = {name: store(table) for name, table in MASTER.items()}
+    # While the seed is prepared (start-up, no database session), the master files are these lists.
+    seeding = {"rows": None}
+
+    def M(name):
+        """Every row of a master file."""
+        if seeding["rows"] is not None:
+            return seeding["rows"][name]
+        return DB[name].all()
+
+    def save_master(name, row):
+        """Write back a master row changed outside its screen (e.g. the average cost of a product)."""
+        if seeding["rows"] is None:
+            DB[name].update(row)
     suppliers = ns["supplier_terms_data"]
     paginate = hooks["paginate"]
 
@@ -227,7 +173,12 @@ def register_inventory(app, ns, hooks):
 
     def _find(name, code, field="cCode"):
         cu = _s(code).upper()
-        return next((r for r in T[name] if _s(r.get(field)).upper() == cu), None) if cu else None
+        if not cu:
+            return None
+        if name in MASTER and seeding["rows"] is None and field == "cCode" and DB[name].spec.keys == ("cCode",):
+            return DB[name].get(cu)
+        rows = M(name) if name in MASTER else T[name]
+        return next((r for r in rows if _s(r.get(field)).upper() == cu), None)
 
     def _must(name, p, field, target=None, required=False):
         """A reference to another master file must exist (empty is fine unless required)."""
@@ -250,11 +201,39 @@ def register_inventory(app, ns, hooks):
 
     def crud(name, url, schema, search, validate=None, view=None, on_delete=None, keys=("cCode",),
              line_schema=None, keep_line=None, sort=None, readonly=()):
-        rows = T[name]
+        """List / create / read / update / delete routes of a master file (relational table, or in-memory list)."""
         view = view or (lambda r: r)
+        db = DB.get(name)
+
+        def all_rows(lines=True):
+            return db.all(lines=lines) if db else T[name]
 
         def find(parts):
-            return next((r for r in rows if all(_s(r.get(k)).upper() == _s(v).upper() for k, v in zip(keys, parts))), None)
+            if db:
+                return db.get(*parts)
+            return next((r for r in T[name] if all(_s(r.get(k)).upper() == _s(v).upper() for k, v in zip(keys, parts))), None)
+
+        def add(row):
+            if db:
+                db.insert(row)
+                return
+            T[name].append(row)
+            if sort:
+                T[name].sort(key=sort)
+
+        def remove(row):
+            if db:
+                db.delete(row)
+            else:
+                T[name].remove(row)
+
+        def replace(row, work):
+            if db:
+                db.update(work, [row[k] for k in keys])
+            else:
+                row.clear()
+                row.update(work)
+            return work
 
         def save(row, p, is_new):
             _apply(row, p, schema, skip=(keys if not is_new else ()) + tuple(readonly))
@@ -266,7 +245,8 @@ def register_inventory(app, ns, hooks):
 
         def collection():
             if request.method == "GET":
-                return jsonify(paginate([{k: v for k, v in view(r).items() if k != "lines"} for r in rows], search))
+                return jsonify(paginate([{k: v for k, v in view(r).items() if k != "lines"}
+                                         for r in all_rows()], search))
             p = _payload()
             row = _blank(schema, DEFAULTS.get(name))
             if line_schema is not None:
@@ -277,9 +257,7 @@ def register_inventory(app, ns, hooks):
                     raise ApiError("required", k)
             if find([row[k] for k in keys]):
                 raise ApiError("duplicate", keys[-1], 409)
-            rows.append(row)
-            if sort:
-                rows.sort(key=sort)
+            add(row)
             return jsonify(view(row)), 201
 
         def item(key):
@@ -294,14 +272,12 @@ def register_inventory(app, ns, hooks):
             if request.method == "DELETE":
                 if on_delete:
                     on_delete(row)
-                rows.remove(row)
+                remove(row)
                 return jsonify({"ok": True})
             p = _payload()
             work = copy.deepcopy(row)
             save(work, p, False)
-            row.clear()
-            row.update(work)
-            return jsonify(view(row))
+            return jsonify(view(replace(row, work)))
 
         bp.add_url_rule(f"/api/{url}", f"{name}_collection", collection, methods=["GET", "POST"])
         bp.add_url_rule(f"/api/{url}/<path:key>", f"{name}_item", item, methods=["GET", "PUT", "DELETE"])
@@ -339,7 +315,7 @@ def register_inventory(app, ns, hooks):
          validate=tax_code_validate, view=tax_code_view, line_schema=TAX_RATE,
          keep_line=lambda r: r["dRate"] != "" or r["dStartDate"],
          on_delete=lambda r: in_use(any(_s(l["cTaxCode"]).upper() == r["cCode"].upper()
-                                        for g in T["tax_groups"] for l in g.get("lines", []))),
+                                        for g in M("tax_groups") for l in g.get("lines", []))),
          sort=lambda r: r["cCode"])
 
     def tax_group_view(r):
@@ -359,8 +335,8 @@ def register_inventory(app, ns, hooks):
 
     def group_used(code):
         cu = code.upper()
-        return any(_s(p.get("cSalesTaxGroup")).upper() == cu or _s(p.get("cPurchaseTaxGroup")).upper() == cu
-                   for p in T["products"])
+        return DB["products"].exists(lambda c: [(func.upper(c["cSalesTaxGroup"]) == cu)
+                                                | (func.upper(c["cPurchaseTaxGroup"]) == cu)])
 
     crud("tax_groups", "tax-groups", TAX_GROUP, ("cCode", "cDescFR", "cDescEN", "cProvince"),
          validate=tax_group_validate, view=tax_group_view, line_schema=TAX_GROUP_LINE,
@@ -401,8 +377,8 @@ def register_inventory(app, ns, hooks):
 
     def uom_used(code):
         cu = code.upper()
-        return any(cu in (_s(p.get("cStockUOM")).upper(), _s(p.get("cPurchaseUOM")).upper(), _s(p.get("cSalesUOM")).upper())
-                   for p in T["products"])
+        return DB["products"].exists(lambda c: [(func.upper(c["cStockUOM"]) == cu) | (func.upper(c["cPurchaseUOM"]) == cu)
+                                                | (func.upper(c["cSalesUOM"]) == cu)])
 
     def simple_validate(row, is_new):
         _require(row, "cDescFR")
@@ -419,8 +395,9 @@ def register_inventory(app, ns, hooks):
 
     crud("categories", "categories", CATEGORY, ("cCode", "cDescFR", "cDescEN", "cParent"),
          validate=category_validate,
-         on_delete=lambda r: in_use(any(_s(p.get("cCategory")).upper() == r["cCode"].upper() for p in T["products"])
-                                    or any(_s(c.get("cParent")).upper() == r["cCode"].upper() for c in T["categories"])),
+         on_delete=lambda r: in_use(
+             DB["products"].exists(lambda c: [func.upper(c["cCategory"]) == r["cCode"].upper()])
+             or DB["categories"].exists(lambda c: [func.upper(c["cParent"]) == r["cCode"].upper()])),
          sort=lambda r: r["cCode"])
 
     # ------------------------------------------------------------------ balances (calculated from the movements)
@@ -581,15 +558,22 @@ def register_inventory(app, ns, hooks):
     def wh_delete(r):
         cu = r["cCode"].upper()
         in_use(any(m["cWarehouse"].upper() == cu or _s(m.get("cWhTo")).upper() == cu for m in T["movements"]))
-        T["locations"][:] = [x for x in T["locations"] if x["cWarehouse"].upper() != cu]
+        DB["locations"].delete_where(lambda c: [func.upper(c["cWarehouse"]) == cu])
         T["stock_params"][:] = [x for x in T["stock_params"] if x["cWarehouse"].upper() != cu]
 
     crud("warehouses", "warehouses", WAREHOUSE, ("cCode", "cNameFR", "cNameEN", "cCity", "cManager"),
          validate=wh_validate, on_delete=wh_delete, sort=lambda r: r["cCode"])
 
     def find_location(wh, code):
-        return next((l for l in T["locations"] if l["cWarehouse"].upper() == _s(wh).upper()
+        if seeding["rows"] is None:
+            return DB["locations"].get(_s(wh), _s(code)) if _s(code) else None
+        return next((l for l in M("locations") if l["cWarehouse"].upper() == _s(wh).upper()
                      and l["cCode"].upper() == _s(code).upper()), None)
+
+    def has_locations(wh):
+        if seeding["rows"] is None:
+            return DB["locations"].exists(lambda c: [func.upper(c["cWarehouse"]) == wh.upper()])
+        return any(l["cWarehouse"].upper() == wh.upper() for l in M("locations"))
 
     def loc_validate(row, is_new):
         if is_new:
@@ -667,7 +651,7 @@ def register_inventory(app, ns, hooks):
             if wh is None:
                 raise ApiError("required" if not m.get(wf) else "unknown_ref", wf)
             m[wf] = wh["cCode"]
-            has_locs = wh.get("lUseLocations") and any(l["cWarehouse"].upper() == wh["cCode"].upper() for l in T["locations"])
+            has_locs = wh.get("lUseLocations") and has_locations(wh["cCode"])
             if has_locs and not m.get(lf):
                 raise ApiError("required", lf)
             if m.get(lf):
@@ -740,6 +724,7 @@ def register_inventory(app, ns, hooks):
             prod["dAvgCost"] = _c(new_avg)
             if m["cType"] == "IN":
                 prod["dLastCost"] = _c(cost)
+            save_master("products", prod)
             m["dUnitCost"] = _c(cost)
             m["dValue"] = _m(q * cost)
         elif m["cType"] in ("OUT", "ADJ", "CNT"):
@@ -792,7 +777,7 @@ def register_inventory(app, ns, hooks):
 
     def stock_rows(include_zero=False):
         rows = []
-        products = {p["cCode"].upper(): p for p in T["products"]}
+        products = {p["cCode"].upper(): p for p in M("products")}
         for b in balances().values():
             if not include_zero and abs(b["qty"]) < 1e-9 and abs(b["reserved"]) < 1e-9:
                 continue
@@ -1120,7 +1105,7 @@ def register_inventory(app, ns, hooks):
         def fn():
             lang_fr = (request.args.get("lang") or "fr") != "en"
             rows = []
-            for r in T[name]:
+            for r in DB[name].all(lines=False):
                 if extra and not extra(r):
                     continue
                 label = " · ".join(_s(r.get(f)) for f in label_fields(lang_fr) if _s(r.get(f)))
@@ -1142,14 +1127,14 @@ def register_inventory(app, ns, hooks):
     def locations_lookup():
         wh = _s(request.args.get("wh")).upper()
         rows = [{"code": l["cCode"], "label": " · ".join(x for x in (l["cWarehouse"], l.get("cDescription") or l.get("cType", "")) if x)}
-                for l in T["locations"] if not wh or l["cWarehouse"].upper() == wh]
+                for l in M("locations") if not wh or l["cWarehouse"].upper() == wh]
         return rows, 200
 
     hooks["lookups"]["locations"] = locations_lookup
 
     def summary():
         total = sum(_f(r["dValue"]) for r in valuation_rows())
-        return {"products": len(T["products"]), "warehouses": len(T["warehouses"]),
+        return {"products": DB["products"].count(), "warehouses": DB["warehouses"].count(),
                 "stockValue": round(total, 2), "reorderItems": len(replenishment_rows())}
 
     hooks["summary"].append(summary)
@@ -1157,10 +1142,12 @@ def register_inventory(app, ns, hooks):
     app.register_blueprint(bp)
 
     # ------------------------------------------------------------------ seed
+    # Prepared in memory (the opening movements give the products their average cost), then handed to the ERP,
+    # which loads it into the tables when the database is empty and on /api/reset.
     seed = json.loads(SEED_FILE.read_text(encoding="utf-8")) if SEED_FILE.exists() else {}
-    for name in ("tax_codes", "tax_groups", "uom", "categories", "warehouses", "locations", "products", "stock_params"):
-        T[name][:] = copy.deepcopy(seed.get(name, []))
-    for p in T["products"]:
+    seeding["rows"] = {name: copy.deepcopy(seed.get(name, [])) for name in MASTER}
+    T["stock_params"][:] = copy.deepcopy(seed.get("stock_params", []))
+    for p in seeding["rows"]["products"]:
         p.setdefault("lines", [])
         p.setdefault("dAvgCost", "")
         p.setdefault("dLastCost", "")
@@ -1169,6 +1156,11 @@ def register_inventory(app, ns, hooks):
         prod = check_movement(m)
         m["cUser"] = "system"
         post_movement(m, prod)
+    master_seed = seeding["rows"]
+    seeding["rows"] = None
+    # Parents before children (cleared in the reverse order)
+    hooks["add_stores"]([(DB[name], "inv_" + name, master_seed[name]) for name in
+                         ("tax_codes", "tax_groups", "uom", "categories", "warehouses", "locations", "products")])
     hooks["add_tables"]([(T[name], "inv_" + name) for name in T])
 
     def add_movement(p):
