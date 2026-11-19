@@ -66,6 +66,9 @@ def test_bad_page_values_fall_back(client):
 def test_lookups(client):
     assert {"code": "LUMPRO", "label": client.get("/api/suppliers/LUMPRO").get_json()["cName"]} in client.get("/api/lookups/suppliers?q=lum").get_json()
     assert any(p["code"] == "500101" for p in client.get("/api/lookups/po?q=500101").get_json())
+    # the forms show lookups as plain selects with the whole list (all=1), not the first 20
+    n = len(client.get("/api/suppliers?size=500").get_json()["items"])
+    assert len(client.get("/api/lookups/suppliers?all=1").get_json()) == n
     assert client.get("/api/lookups/unknown").status_code == 404
 
 

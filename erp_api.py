@@ -271,7 +271,7 @@ def register_erp(app, ns):
             raise ApiError("not_found", status=404)
         if q:
             rows = [r for r in rows if q in r["code"].lower() or q in (r["label"] or "").lower()]
-        return jsonify(rows[:limit])
+        return jsonify(rows if request.args.get("all") else rows[:limit])
 
     def _tables():
         return ((gl, "gl"), (cc, "cc"), (suppliers, "suppliers"), (po_details, "po_details"),

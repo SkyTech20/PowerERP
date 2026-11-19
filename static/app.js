@@ -288,7 +288,7 @@
         { f: "Statut", l: "f.Statut", suggestions: ["Reçu", "En cours", "Partiellement reçu"] },
         { f: "CodeFournisseur", l: "f.CodeFournisseur", lookup: "suppliers", fill: "Fournisseur" },
         { f: "Fournisseur", l: "f.Fournisseur" },
-        { f: "Entrepot", l: "f.Entrepot", suggestions: ["ENT-01", "ENT-02"] },
+        { f: "Entrepot", l: "f.Entrepot", lookup: "warehouses" },
         { f: "ResponsableReception", l: "f.ResponsableReception" },
         { f: "Devise", l: "f.Devise", type: "select", options: CURRENCIES.map((c) => [c, c]), raw: true },
         { f: "lUnbilled", l: "f.lUnbilled", type: "check", help: "f.lUnbilled.help" },
@@ -833,31 +833,42 @@
   }
 
   // ------------------------------------------------------------------ Lookups
-  const lookupCache = {};
-  let uid = 0;
-  function bindLookup(input, kind, onPick, params) {
-    const listId = "dl-" + (++uid);
-    const dl = document.createElement("datalist");
-    dl.id = listId;
-    input.setAttribute("list", listId);
-    input.setAttribute("autocomplete", "off");
-    input.after(dl);
-    let timer = null;
-    const load = () => {
-      const q = input.value.trim();
-      const extra = params ? Object.entries(params()).map(([k, v]) => "&" + k + "=" + enc(v == null ? "" : v)).join("") : "";
-      api("lookups/" + kind + "?q=" + enc(q) + "&lang=" + lang + extra).then((rows) => {
-        lookupCache[kind] = lookupCache[kind] || {};
-        rows.forEach((r) => { lookupCache[kind][r.code.toUpperCase()] = r.label; });
-        dl.innerHTML = rows.map((r) => `<option value="${esc(r.code)}">${esc(r.label)}</option>`).join("");
-      }).catch(() => {});
+  // Lookup fields are plain <select>s filled with the whole list (code — label); the list is fetched
+  // once per open form. A value missing from the list (old data) is kept as its own option.
+  let lookupCache = {};
+  function lookupRows(kind, params) {
+    const extra = params ? Object.entries(params).map(([k, v]) => "&" + k + "=" + enc(v == null ? "" : v)).join("") : "";
+    const key = kind + extra;
+    if (!lookupCache[key]) lookupCache[key] = api("lookups/" + kind + "?all=1&lang=" + lang + extra).catch(() => { delete lookupCache[key]; return []; });
+    return lookupCache[key];
+  }
+  function lookupOptions(rows, value) {
+    const v = value == null ? "" : String(value);
+    const known = !v || rows.some((r) => r.code === v);
+    return `<option value=""></option>${known ? "" : `<option value="${esc(v)}" selected>${esc(v)}</option>`}`
+      + rows.map((r) => `<option value="${esc(r.code)}" ${r.code === v ? "selected" : ""}>${esc(r.code)}${r.label ? " — " + esc(r.label) : ""}</option>`).join("");
+  }
+  // Fills the select and calls onPick(code, label) on change. Returns a refresh function that reloads the
+  // list when the params (e.g. the warehouse of a location) have changed.
+  function bindLookup(sel, kind, onPick, params) {
+    let rows = [];
+    let lastKey = null;
+    const fill = async () => {
+      const p = params ? params() : null;
+      const key = JSON.stringify(p);
+      if (key === lastKey) return;
+      lastKey = key;
+      rows = await lookupRows(kind, p);
+      const v = sel.value;
+      sel.innerHTML = lookupOptions(rows, v);
+      sel.value = v;
     };
-    input.addEventListener("focus", load, { once: !params });
-    input.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(load, 180); });
-    input.addEventListener("change", () => {
-      const label = (lookupCache[kind] || {})[input.value.trim().toUpperCase()];
-      if (onPick) onPick(input.value.trim(), label);
+    fill();
+    sel.addEventListener("change", () => {
+      const r = rows.find((x) => x.code === sel.value);
+      if (onPick) onPick(sel.value, r ? r.label : "");
     });
+    return fill;
   }
 
   // ------------------------------------------------------------------ Views
@@ -1000,6 +1011,8 @@
     let missing = false;
     let locked = false;
     let activeTab = R.formTabs ? R.formTabs[0][0] : null; // R.formTabs: sections shown as tabs
+    let refreshers = []; // lookups whose list depends on other fields
+    lookupCache = {};
     let taxInfo = null; // { code, tps, tvq } of the supplier, when R.tax
     let taxLive = isNew; // existing records keep their stored taxes until something is changed
 
@@ -1040,17 +1053,21 @@
         return `<div class="${cls}"><label class="check"><input type="checkbox" id="f-${fd.f}" data-f="${fd.f}" ${v ? "checked" : ""} ${ro ? "disabled" : ""}> ${esc(t(fd.l))}</label>${help}${err}</div>`;
       }
       let input;
-      if (fd.type === "select") {
+      const blank = (x) => (x == null ? "" : String(x));
+      if (fd.lookup && !ro) {
+        input = `<select id="f-${fd.f}" data-f="${fd.f}">${lookupOptions([], v)}</select>`;
+      } else if (fd.suggestions && !ro) {
+        const opts = ["", ...fd.suggestions, ...(blank(v) && !fd.suggestions.includes(blank(v)) ? [blank(v)] : [])];
+        input = `<select id="f-${fd.f}" data-f="${fd.f}">${opts.map((o) => `<option value="${esc(o)}" ${blank(v) === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+      } else if (fd.type === "select") {
         input = `<select id="f-${fd.f}" data-f="${fd.f}" ${ro ? "disabled" : ""}>${fd.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(v == null ? "" : v) === ov ? "selected" : ""}>${esc(fd.raw ? ol : t(ol))}</option>`).join("")}</select>`;
       } else if (fd.type === "textarea") {
         input = `<textarea id="f-${fd.f}" data-f="${fd.f}" ${ro ? "readonly" : ""}>${esc(v)}</textarea>`;
       } else {
-        const list = fd.suggestions ? `list="sg-${fd.f}"` : "";
-        const sg = fd.suggestions ? `<datalist id="sg-${fd.f}">${fd.suggestions.map((s) => `<option value="${esc(s)}">`).join("")}</datalist>` : "";
         const type = ["date", "password", "email"].includes(fd.type) ? fd.type : "text";
         const auto = fd.type === "password" ? 'autocomplete="new-password"' : fd.autocomplete ? `autocomplete="${fd.autocomplete}"` : "";
         const mode = fd.type === "number" ? 'inputmode="decimal" style="text-align:right"' : fd.inputmode ? `inputmode="${fd.inputmode}"` : "";
-        input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${list} ${auto} ${mode}>${sg}`;
+        input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${auto} ${mode}>`;
       }
       return `<div class="${cls}">${label}${input}${help}${err}</div>`;
     }
@@ -1062,7 +1079,8 @@
       if (c.type === "select") {
         return `<select data-lf="${c.f}" ${ro ? "disabled" : ""} ${aria}>${c.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(ln[c.f] == null ? "" : ln[c.f]) === ov ? "selected" : ""}>${esc(c.rawOpt ? ol : t(ol))}</option>`).join("")}</select>`;
       }
-      return `<input type="${c.type === "date" ? "date" : "text"}" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${c.lookup && !ro ? `data-lookup="${c.lookup}"` : ""} ${ro ? "readonly" : ""} ${aria}>`;
+      if (c.lookup && !ro) return `<select data-lf="${c.f}" data-lookup="${c.lookup}" ${aria}>${lookupOptions([], ln[c.f])}</select>`;
+      return `<input type="${c.type === "date" ? "date" : "text"}" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${ro ? "readonly" : ""} ${aria}>`;
     }
 
     function linesHtml() {
@@ -1177,6 +1195,8 @@
     }
 
     function bind() {
+      refreshers = [];
+      const refresh = () => refreshers.forEach((f) => f());
       const allFields = R.sections.flatMap((s) => s.fields);
       allFields.forEach((fd) => {
         const el = $(`[data-f="${fd.f}"]`, $("#form"));
@@ -1184,11 +1204,11 @@
         const update = () => {
           model[fd.f] = fd.type === "check" ? el.checked : fd.int ? parseInt(el.value, 10) : fd.type === "number" ? numOnly(el) : el.value;
           if (fd.f === "cDevise" || fd.f === "Devise") refreshAmounts();
-          if (fd.rerender) render();
+          if (fd.rerender) render(); else refresh();
         };
-        el.addEventListener(fd.type === "check" || fd.type === "select" ? "change" : "input", update);
-        if (fd.lookup && !el.readOnly) {
-          bindLookup(el, fd.lookup, (code, label) => {
+        el.addEventListener(fd.type === "check" || el.tagName === "SELECT" ? "change" : "input", update);
+        if (fd.lookup && el.tagName === "SELECT") {
+          const fill = bindLookup(el, fd.lookup, (code, label) => {
             model[fd.f] = code;
             if (fd.fill && label) {
               model[fd.fill] = label;
@@ -1198,6 +1218,7 @@
             if (fd.onPick === "fillFromPo") fillFromPo(code);
             if (R.tax && fd.f === R.tax.supplier) { taxLive = true; loadSupplierTax(code); }
           }, fd.lookupParams ? () => fd.lookupParams(model) : null);
+          if (fd.lookupParams) refreshers.push(fill);
         }
       });
       if (R.lines) {
@@ -1207,11 +1228,11 @@
             const col = R.lines.cols.find((c) => c.f === el.dataset.lf) || {};
             if (el.type === "checkbox" || el.tagName === "SELECT") {
               el.addEventListener("change", () => { ln[el.dataset.lf] = el.type === "checkbox" ? el.checked : el.value; });
-              return;
+            } else {
+              el.addEventListener("input", () => { ln[el.dataset.lf] = el.dataset.num ? numOnly(el) : el.value; taxLive = true; refreshAmounts(); });
             }
-            el.addEventListener("input", () => { ln[el.dataset.lf] = el.dataset.num ? numOnly(el) : el.value; taxLive = true; refreshAmounts(); });
             if (el.dataset.lookup) {
-              bindLookup(el, el.dataset.lookup, (code, label) => {
+              const fill = bindLookup(el, el.dataset.lookup, (code, label) => {
                 ln[el.dataset.lf] = code;
                 if (col.fill && label) {
                   ln[col.fill] = label;
@@ -1219,6 +1240,7 @@
                   if (target) target.value = label;
                 }
               }, col.lookupParams ? () => col.lookupParams(model) : null);
+              if (col.lookupParams) refreshers.push(fill);
             }
           });
         });
