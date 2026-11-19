@@ -64,7 +64,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Without `DATABASE_URL`, the ERP uses `postgresql://powererp:powererp@localhost:5433/powererp` (the database of `docker compose up -d db`).
+Without `DATABASE_URL`, the ERP uses `postgresql://powererp:powererp@127.0.0.1:5433/powererp` (the database of `docker compose up -d db`).
 
 Open http://localhost:5050/ (change the port with the `PORT` environment variable).
 
@@ -89,7 +89,7 @@ The data lives in PostgreSQL (volume `pgdata` with docker compose). Until all ar
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `DATABASE_URL` | `postgresql://powererp:powererp@localhost:5433/powererp` | PostgreSQL database (`postgres://`, `postgresql://` or `postgresql+psycopg://`) |
+| `DATABASE_URL` | `postgresql://powererp:powererp@127.0.0.1:5433/powererp` | PostgreSQL database (`postgres://`, `postgresql://` or `postgresql+psycopg://`) |
 | `ERP_ADMIN_USER` / `ERP_ADMIN_PASSWORD` | `admin` / random (printed in the log) | Administrator created when the database has no user |
 | `ERP_SECRET_KEY` | random, saved in the database | Signs the login cookie |
 | `ERP_COOKIE_SECURE` | off | `1` sends the login cookie over HTTPS only (set it behind HTTPS) |

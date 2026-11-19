@@ -42,6 +42,7 @@ from erp_api import ApiError, _bool, _dec, _num, _s
 
 from powererp.schemas import *  # noqa: F401,F403  (choices, schemas and DEFAULTS)
 from powererp.schemas import DEFAULTS, PRODUCT, PRODUCT_SUPPLIER  # noqa: F401
+from powererp import purchasing as purch
 from powererp.store import store
 
 SEED_FILE = Path(__file__).resolve().parent / "data" / "inventory.json"
@@ -458,14 +459,15 @@ def register_inventory(app, ns, hooks):
 
     def on_order(code):
         """Quantity ordered on open POs (not invoiced yet) and not received yet."""
-        open_pos = {p["cPO"] for p in ns["unbilled_po"]}
+        open_pos = {p["cPO"] for p in purch.unbilled_po_list()}
+        receiving_details = purch.receiving_details_list()
         ordered = received = 0.0
-        for po in ns["po_details"]:
+        for po in purch.po_details_list():
             if po["cPO"] not in open_pos:
                 continue
             ordered += sum(_f(l.get("dQuantity")) for l in po.get("ttPOdetail", [])
                            if _s(l.get("cProductcode")).upper() == code.upper())
-            received += sum(_f(a.get("QuantiteRecue")) for r in ns["receiving_details"]
+            received += sum(_f(a.get("QuantiteRecue")) for r in receiving_details
                             if _s(r.get("NoBonCommande")) == po["cPO"] for a in r.get("Articles", [])
                             if _s(a.get("CodeArticle")).upper() == code.upper())
         return max(0.0, ordered - received)
@@ -891,8 +893,7 @@ def register_inventory(app, ns, hooks):
         return jsonify(paginate(replenishment_rows(), ("cProduct", "cDescFR", "cDescEN", "cSupplierCode", "cSupplierName")))
 
     def next_po_number():
-        nums = [int(p["cPO"]) for p in hooks["all_pos"]() if str(p["cPO"]).isdigit()]
-        return str(max([500500] + nums) + 1)
+        return hooks["next_po_number"](500501)
 
     def po_taxes(prod, supplier, amount, on):
         """TPS / TVQ of a PO line: the product's purchase tax group, else the supplier's TPS / TVQ numbers."""
@@ -946,8 +947,7 @@ def register_inventory(app, ns, hooks):
                 "cBuyerCode": supplier.get("cCodeAch", ""), "cBuyerName": supplier.get("cDescAch", ""),
                 "cApplicantCode": _user(), "dOrderDate": today, "dCreationDate": today, "dFreight": 0,
                 "dGST": gst, "dPST": pst, "lines": po_lines, "lUnbilled": True}, None)
-            det = next(x for x in ns["po_details"] if x["cPO"] == cpo)
-            det["ttPOheader"].update({"cReference": "REAPPRO " + _s(p.get("cWarehouse")), "cSource": "ERP"})
+            hooks["update_po_header"](cpo, {"cReference": "REAPPRO " + _s(p.get("cWarehouse")), "cSource": "ERP"})
             created.append({"cPO": cpo, "cSupplierCode": code, "cSupplierName": supplier.get("cName", ""),
                             "lineCount": len(po_lines), "dTotalAmount": view["dTotalAmount"]})
         return jsonify({"purchaseOrders": created}), 201

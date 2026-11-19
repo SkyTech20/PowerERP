@@ -2,7 +2,9 @@
 import os
 
 # Local development database (docker-compose.yml in this folder publishes PostgreSQL on port 5433).
-DEFAULT_DATABASE_URL = "postgresql+psycopg://powererp:powererp@localhost:5433/powererp"
+# 127.0.0.1 rather than localhost: on Windows, "localhost" goes through IPv6 and Docker's port proxy, which
+# adds ~40 ms to every statement larger than one network packet.
+DEFAULT_DATABASE_URL = "postgresql+psycopg://powererp:powererp@127.0.0.1:5433/powererp"
 
 
 def database_url(url=None):

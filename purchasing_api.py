@@ -17,6 +17,7 @@ from flask import Blueprint, jsonify, request
 from erp_api import _num  # accepts "$12.50" / "12,50 $" like the ERP screens
 from powerware_api import PW_PREFIX
 
+from powererp import purchasing as purch
 from powererp.store import store
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ def _json():
 
 def _last_price(supplier, code):
     best = None
-    for po in _ns["po_details"]:
+    for po in purch.po_details_list():
         h = po.get("ttPOheader", {})
         if h.get("cSupplierCode") != supplier:
             continue
@@ -46,8 +47,7 @@ def _last_price(supplier, code):
 
 
 def _next_po_number():
-    nums = [int(p["cPO"]) for p in _hooks["all_pos"]() if str(p["cPO"]).isdigit()]
-    return str(max([FIRST_PO - 1] + nums) + 1)
+    return _hooks["next_po_number"](FIRST_PO)
 
 
 @bp.route(PW_PREFIX + "/apCreatePO.p", methods=["POST"])
@@ -65,7 +65,7 @@ def ap_create_po():
         return jsonify({"status": "error", "error": "lines required"}), 400
 
     if reference:  # idempotent per requisition + supplier (SkyAI may retry after a partial failure)
-        for po in _ns["po_details"]:
+        for po in purch.po_details_list():
             h = po.get("ttPOheader", {})
             if h.get("cReference") == reference and h.get("cSupplierCode") == supplier_code:
                 return jsonify({"status": "ok", "cPO": po["cPO"], "supplierCode": supplier_code,
@@ -90,8 +90,8 @@ def ap_create_po():
         "dOrderDate": today, "dCreationDate": today, "dFreight": 0, "dGST": gst, "dPST": pst,
         "lines": lines, "lUnbilled": True,
     }, None)
-    det = next(x for x in _ns["po_details"] if x["cPO"] == cpo)
-    det["ttPOheader"].update({"dDueDate": str(p.get("requiredDate") or ""), "cReference": reference, "cSource": "SkyAI"})
+    _hooks["update_po_header"](cpo, {"dDueDate": str(p.get("requiredDate") or ""), "cReference": reference,
+                                     "cSource": "SkyAI"})
     logger.info("apCreatePO.p: PO %s for %s (requisition %s)", cpo, supplier_code, reference)
     return jsonify({"status": "ok", "cPO": cpo, "supplierCode": supplier_code,
                     "dTotalAmount": view["dTotalAmount"], "alreadyExisted": False}), 201

@@ -26,7 +26,7 @@ ADMIN_PASSWORD = "admin-test-pw"
 PW = "/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI"
 
 TEST_DATABASE_URL = os.environ.get(
-    "TEST_DATABASE_URL", "postgresql+psycopg://powererp:powererp@localhost:5433/powererp_test")
+    "TEST_DATABASE_URL", "postgresql+psycopg://powererp:powererp@127.0.0.1:5433/powererp_test")
 if "test" not in TEST_DATABASE_URL.rsplit("/", 1)[-1]:
     sys.exit("TEST_DATABASE_URL must point to a database whose name contains 'test': it is emptied.")
 

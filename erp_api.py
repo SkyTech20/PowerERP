@@ -4,9 +4,9 @@ PowerERP (demo ERP) — JSON API and static UI.
 UI:  http://localhost:5050/
 API: http://localhost:5050/api/<resource>
 
-GL accounts, cost centers and suppliers are relational tables (powererp.store); the other
-tables are seeded from data/*.json and kept in memory, and app.py saves them to the
-PostgreSQL database (db.py) after every change and loads them back at startup.
+GL accounts, cost centers and suppliers (powererp.store), purchase orders, receptions and
+invoices (powererp.purchasing) are relational tables, seeded from data/*.json. Tables of other
+modules still kept in memory (add_tables) are saved by app.py to legacy_datasets.
 POST /api/reset restores the original demo data.
 """
 import copy
@@ -16,6 +16,7 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request, send_from_directory
 
+from powererp import purchasing as purch
 from powererp.store import store
 
 ERP_STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -171,24 +172,26 @@ def register_erp(app, ns):
     gl_db, cc_db, sup_db = store("gl_accounts"), store("cost_centers"), store("suppliers")
     stores = [(gl_db, "gl", ns["gl_ttGL_data"]), (cc_db, "cc", ns["gl_ttCC_data"]),
               (sup_db, "suppliers", ns["supplier_terms_data"])]
-    po_details = ns["po_details"]
-    unbilled_po = ns["unbilled_po"]
-    receiving_details = ns["receiving_details"]
-    unbilled_receiving = ns["unbilled_receiving"]
-    invoices = ns.setdefault("erp_invoices", [])
-
-    state = {"next_invoice_id": 1}
+    # Seed of the purchasing tables (the lists are not used afterwards)
+    seed_lists = {"po_details": ns["po_details"], "unbilled_po": ns["unbilled_po"],
+                  "receiving_details": ns["receiving_details"], "unbilled_receiving": ns["unbilled_receiving"]}
+    seed_invoices = []
     # Tables, lookups and dashboard figures added by other modules (inventory_api.py)
     extra = {"tables": [], "stores": [], "lookups": {}, "summary": []}
 
     def _add_invoice(inv):
-        inv["id"] = state["next_invoice_id"]
-        state["next_invoice_id"] += 1
+        if seeding["on"]:
+            inv["id"] = len(seed_invoices) + 1
+            _compute_invoice(inv)
+            seed_invoices.append(inv)
+            return inv
+        inv["id"] = purch.next_number("AP_INVOICE")
         _compute_invoice(inv)
-        invoices.append(inv)
+        purch.inv_put(inv)
         return inv
 
     bp = Blueprint("erp", __name__)
+    seeding = {"on": False}  # the seed invoices are prepared at start-up, from the seed suppliers
 
     @bp.errorhandler(ApiError)
     def _api_error(err):
@@ -205,7 +208,6 @@ def register_erp(app, ns):
             raise ApiError("invalid_body")
         return data
 
-    seeding = {"on": False}  # the seed invoices are prepared at start-up, from the seed suppliers
 
     def _supplier_name(code):
         if not _s(code):
@@ -230,22 +232,22 @@ def register_erp(app, ns):
 
     @bp.route("/api/summary")
     def erp_summary():
-        po_keys = {p["cPO"] for p in po_details} | {p["cPO"] for p in unbilled_po}
-        rec_keys = {r["NoReception"] for r in receiving_details} | {r["NoReception"] for r in unbilled_receiving}
+        pos, recs, invoices = purch.po_all(), purch.rec_all(), purch.inv_all()
         open_inv = [i for i in invoices if i.get("cStatut") in ("Draft", "Approved")]
         return jsonify({
             "glAccounts": gl_db.count(),
             "costCenters": cc_db.count(),
             "suppliers": sup_db.count(),
             "activeSuppliers": sup_db.count(lambda c: [c["iStatutAch"] == 1]),
-            "purchaseOrders": len(po_keys),
-            "unbilledPOs": len(unbilled_po),
-            "receptions": len(rec_keys),
-            "unbilledReceptions": len(unbilled_receiving),
+            "purchaseOrders": len(pos),
+            "unbilledPOs": sum(1 for _n, _d, u in pos if u is not None),
+            "receptions": len(recs),
+            "unbilledReceptions": sum(1 for _n, _d, u in recs if u is not None),
             "invoices": len(invoices),
             "openInvoices": len(open_inv),
             "openInvoicesAmount": round(sum(_num(i.get("dTotalFacture")) for i in open_inv), 2),
-            "recentInvoices": sorted(invoices, key=lambda i: i["id"], reverse=True)[:5],
+            "recentInvoices": [{**i, "lineCount": len(i.get("lines", []))}
+                               for i in sorted(invoices, key=lambda i: i["id"], reverse=True)[:5]],
             **{k: v for fn in extra["summary"] for k, v in fn().items()},
         })
 
@@ -285,11 +287,10 @@ def register_erp(app, ns):
         return jsonify(rows if request.args.get("all") else rows[:limit])
 
     def _tables():
-        """The tables still kept as in-memory lists (saved as JSON in legacy_datasets)."""
-        return ((po_details, "po_details"),
-                (unbilled_po, "unbilled_po"), (receiving_details, "receiving_details"),
-                (unbilled_receiving, "unbilled_receiving"), (invoices, "invoices"),
-                *extra["tables"])
+        """The tables of other modules still kept as in-memory lists (saved as JSON in legacy_datasets)."""
+        return tuple(extra["tables"])
+
+    PURCHASING_KEYS = ("po_details", "unbilled_po", "receiving_details", "unbilled_receiving", "invoices")
 
     def add_tables(pairs):
         """Other modules' tables ((list, key), ...): saved, loaded, reset and cleared with the ERP's."""
@@ -319,10 +320,15 @@ def register_erp(app, ns):
         for st, key in _all_stores():
             if key in data:
                 st.replace_all(data[key])
-        state["next_invoice_id"] = max((i["id"] for i in invoices), default=0) + 1
+        if "po_details" in data or "unbilled_po" in data:
+            purch.po_replace_all(data.get("po_details", []), data.get("unbilled_po", []))
+        if "receiving_details" in data or "unbilled_receiving" in data:
+            purch.rec_replace_all(data.get("receiving_details", []), data.get("unbilled_receiving", []))
+        if "invoices" in data:
+            purch.inv_replace_all(data["invoices"])
 
     def store_keys():
-        return [key for _st, key in _all_stores()]
+        return [key for _st, key in _all_stores()] + list(PURCHASING_KEYS)
 
     def seed():
         """Load the original data (empty database or other dataset)."""
@@ -338,9 +344,11 @@ def register_erp(app, ns):
         """Empty every table (for demos that start from a blank ERP). /api/reset brings the demo data back."""
         for target, _key in _tables():
             target[:] = []
+        purch.inv_clear()
+        purch.rec_clear()
+        purch.po_clear()
         for st, _key in reversed(_all_stores()):
             st.clear()
-        state["next_invoice_id"] = 1
         return jsonify({"ok": True})
 
     # ---------------- GL accounts ----------------
@@ -458,9 +466,8 @@ def register_erp(app, ns):
 
     _PO_HEADER_STR = ("cSupplierCode", "cSupplierName", "cBuyerCode", "cBuyerName", "cApplicantCode", "dOrderDate")
 
-    def _po_view(cpo):
-        det = next((p for p in po_details if p["cPO"] == cpo), None)
-        unb = next((p for p in unbilled_po if p["cPO"] == cpo), None)
+    def _po_view(cpo, records=None):
+        det, unb = records if records is not None else purch.po_get(cpo)
         if det is None and unb is None:
             return None
         h = (det or {}).get("ttPOheader", {})
@@ -493,12 +500,7 @@ def register_erp(app, ns):
         }
 
     def _all_pos():
-        keys, seen = [], set()
-        for p in list(po_details) + list(unbilled_po):
-            if p["cPO"] not in seen:
-                seen.add(p["cPO"])
-                keys.append(p["cPO"])
-        return [_po_view(k) for k in keys]
+        return [_po_view(no, (det, unb)) for no, det, unb in purch.po_all()]
 
     def _po_save(cpo, p, existing):
         company = _s(p.get("COMPANY")) or "MA2"
@@ -521,27 +523,31 @@ def register_erp(app, ns):
         header.update({"dSubTotal": _money(sub), "dFreight": _money(freight), "dGST": _money(gst),
                        "dPST": _money(pst), "dTotalAmount": _money(sub + freight + gst + pst)})
 
-        det = next((x for x in po_details if x["cPO"] == cpo), None)
+        det, unb = purch.po_get(cpo)
         if det is None:
             det = {"COMPANY": company, "cPO": cpo, "ttPOheader": {}, "ttPOdetail": []}
-            po_details.append(det)
         det["COMPANY"] = company
         det["ttPOheader"].update(header)
         det["ttPOdetail"] = lines
 
-        unb = next((x for x in unbilled_po if x["cPO"] == cpo), None)
         if _bool(p.get("lUnbilled", True)):
             if unb is None:
                 unb = {"COMPANY": company, "cPO": cpo}
-                unbilled_po.append(unb)
             unb.update({
                 "COMPANY": company, "dCreationDate": _s(p.get("dCreationDate")) or datetime.now().strftime("%Y-%m-%d"),
                 "cSupplierName": header["cSupplierName"], "cSupplierCode": header["cSupplierCode"],
                 "lBlanketOrder": _bool(p.get("lBlanketOrder")),
             })
-        elif unb is not None:
-            unbilled_po.remove(unb)
-        return _po_view(cpo)
+        else:
+            unb = None
+        purch.po_put(cpo, det, unb)
+        return _po_view(cpo, (det, unb))
+
+    def _po_update_header(cpo, fields):
+        """Add header fields to a saved PO (due date, reference, source of the POs created by services)."""
+        det, unb = purch.po_get(cpo)
+        det["ttPOheader"].update(fields)
+        purch.po_put(cpo, det, unb)
 
     @bp.route("/api/purchase-orders", methods=["GET", "POST"])
     def po_collection():
@@ -563,8 +569,7 @@ def register_erp(app, ns):
         if request.method == "GET":
             return jsonify(view)
         if request.method == "DELETE":
-            po_details[:] = [x for x in po_details if x["cPO"] != cpo]
-            unbilled_po[:] = [x for x in unbilled_po if x["cPO"] != cpo]
+            purch.po_put(cpo, None, None)
             return jsonify({"ok": True})
         p = _payload()
         _require(p, "cSupplierCode")
@@ -575,9 +580,8 @@ def register_erp(app, ns):
     _REC_STR = ("DateReception", "NoBonCommande", "CodeFournisseur", "Fournisseur", "Statut", "Entrepot",
                 "ResponsableReception", "Commentaires")
 
-    def _rec_view(no):
-        det = next((r for r in receiving_details if r["NoReception"] == no), None)
-        unb = next((r for r in unbilled_receiving if r["NoReception"] == no), None)
+    def _rec_view(no, records=None):
+        det, unb = records if records is not None else purch.rec_get(no)
         if det is None and unb is None:
             return None
         src = det or unb
@@ -608,12 +612,7 @@ def register_erp(app, ns):
         }
 
     def _all_recs():
-        keys, seen = [], set()
-        for r in list(receiving_details) + list(unbilled_receiving):
-            if r["NoReception"] not in seen:
-                seen.add(r["NoReception"])
-                keys.append(r["NoReception"])
-        return [_rec_view(k) for k in keys]
+        return [_rec_view(no, (det, unb)) for no, det, unb in purch.rec_all()]
 
     def _rec_save(no, p):
         company = _s(p.get("COMPANY")) or "MA2"
@@ -636,29 +635,27 @@ def register_erp(app, ns):
         freight, tps, tvq = _num(p.get("Transport")), _num(p.get("TPS")), _num(p.get("TVQ"))
         total = sub + freight + tps + tvq
 
-        det = next((x for x in receiving_details if x["NoReception"] == no), None)
+        det, unb = purch.rec_get(no)
         if det is None:
             det = {"NoReception": no}
-            receiving_details.append(det)
         det.update({f: _s(p.get(f)) for f in _REC_STR})
         det.update({"COMPANY": company, "Articles": articles, "SousTotal": _money(sub),
                     "Transport": _money(freight), "TPS": _money(tps), "TVQ": _money(tvq),
                     "MontantTotal": _money(total)})
 
-        unb = next((x for x in unbilled_receiving if x["NoReception"] == no), None)
         if _bool(p.get("lUnbilled", True)):
             if unb is None:
                 unb = {"NoReception": no, "StatutFacturation": "En attente de facture", "JoursEnAttente": "0",
                        "ResponsableFacturation": "Comptabilité", "PrioriteFacturation": "Normale",
                        "TypeReception": "Standard"}
-                unbilled_receiving.append(unb)
             unb.update({"COMPANY": company, "DateReception": det["DateReception"],
                         "NoBonCommande": det["NoBonCommande"], "Fournisseur": det["Fournisseur"],
                         "CodeFournisseur": det["CodeFournisseur"], "MontantRecu": _money(total),
                         "Devise": devise, "Entrepot": det["Entrepot"]})
-        elif unb is not None:
-            unbilled_receiving.remove(unb)
-        return _rec_view(no)
+        else:
+            unb = None
+        purch.rec_put(no, det, unb)
+        return _rec_view(no, (det, unb))
 
     @bp.route("/api/receptions", methods=["GET", "POST"])
     def rec_collection():
@@ -682,8 +679,7 @@ def register_erp(app, ns):
         if request.method == "GET":
             return jsonify(view)
         if request.method == "DELETE":
-            receiving_details[:] = [x for x in receiving_details if x["NoReception"] != no]
-            unbilled_receiving[:] = [x for x in unbilled_receiving if x["NoReception"] != no]
+            purch.rec_put(no, None, None)
             return jsonify({"ok": True})
         p = _payload()
         _require(p, "NoBonCommande", "DateReception")
@@ -735,52 +731,55 @@ def register_erp(app, ns):
         getUnbilledReceiving.p, and a PO whose receptions are all billed leaves getUnbilledPO.p."""
         recs = {_s(ln.get("iNoReception")) for ln in inv.get("lines") or []} - {"", "0"}
         po = _s(inv.get("cNoCommAch"))
+        all_recs = purch.rec_all()
+        unbilled_receiving = [u for _n, _d, u in all_recs if u is not None]
         if po and not recs:
             recs = {r["NoReception"] for r in unbilled_receiving if _s(r.get("NoBonCommande")) == po}
         if not recs:
             return
         pos = {po} if po else set()
-        pos |= {_s(r.get("NoBonCommande")) for r in list(receiving_details) + list(unbilled_receiving)
-                if r["NoReception"] in recs}
-        unbilled_receiving[:] = [r for r in unbilled_receiving if r["NoReception"] not in recs]
-        still_open = {_s(r.get("NoBonCommande")) for r in unbilled_receiving}
-        unbilled_po[:] = [p for p in unbilled_po if p["cPO"] not in pos - {""} or p["cPO"] in still_open]
+        pos |= {_s(r.get("NoBonCommande")) for _n, d, u in all_recs for r in (d, u)
+                if r is not None and r["NoReception"] in recs}
+        purch.rec_set_billed(recs)
+        still_open = {_s(r.get("NoBonCommande")) for r in unbilled_receiving if r["NoReception"] not in recs}
+        purch.po_set_billed([p["cPO"] for p in purch.unbilled_po_list()
+                             if p["cPO"] in pos - {""} and p["cPO"] not in still_open])
 
     def _inv_duplicate(supplier, number, exclude_id=None):
-        return any(i["cNoFourn"].upper() == supplier.upper() and i["cNoFacture"].upper() == number.upper()
-                   and i["id"] != exclude_id for i in invoices)
+        return purch.inv_duplicate(supplier, number, exclude_id)
 
     @bp.route("/api/invoices", methods=["GET", "POST"])
     def inv_collection():
         if request.method == "GET":
-            rows = [{k: v for k, v in i.items() if k != "lines"} for i in invoices]
+            rows = [{**{k: v for k, v in i.items() if k != "lines"}, "lineCount": len(i.get("lines", []))}
+                    for i in purch.inv_all()]
             return jsonify(_paginate(rows, ("cNoFacture", "cNoFourn", "cNomFourn", "cNoCommAch")))
         p = _payload()
         _require(p, "cNoFourn", "cNoFacture", "dDateFacture")
         if _inv_duplicate(_s(p["cNoFourn"]), _s(p["cNoFacture"])):
             raise ApiError("duplicate", "cNoFacture", 409)
         inv = _inv_from_payload(p, {"cSource": "ERP"})
-        inv["id"] = state["next_invoice_id"]
-        state["next_invoice_id"] += 1
-        invoices.append(inv)
+        inv["id"] = purch.next_number("AP_INVOICE")
+        purch.inv_put(inv)
         _mark_billed(inv)
         return jsonify(inv), 201
 
     @bp.route("/api/invoices/<int:inv_id>", methods=["GET", "PUT", "DELETE"])
     def inv_item(inv_id):
-        inv = next((i for i in invoices if i["id"] == inv_id), None)
+        inv = purch.inv_get(inv_id)
         if inv is None:
             raise ApiError("not_found", status=404)
         if request.method == "GET":
-            return jsonify(inv)
+            return jsonify({**inv, "lineCount": len(inv.get("lines", []))})
         if request.method == "DELETE":
-            invoices.remove(inv)
+            purch.inv_delete(inv_id)
             return jsonify({"ok": True})
         p = _payload()
         _require(p, "cNoFourn", "cNoFacture", "dDateFacture")
         if _inv_duplicate(_s(p["cNoFourn"]), _s(p["cNoFacture"]), inv_id):
             raise ApiError("duplicate", "cNoFacture", 409)
         _inv_from_payload(p, inv)
+        purch.inv_put(inv)
         _mark_billed(inv)
         return jsonify(inv)
 
@@ -791,10 +790,7 @@ def register_erp(app, ns):
     seeding["on"] = False
 
     snapshot = copy.deepcopy({
-        **{key: rows for _st, key, rows in stores}, "po_details": po_details,
-        "unbilled_po": unbilled_po, "receiving_details": receiving_details,
-        "unbilled_receiving": unbilled_receiving, "invoices": invoices,
-        "next_invoice_id": state["next_invoice_id"],
+        **{key: rows for _st, key, rows in stores}, **seed_lists, "invoices": seed_invoices,
     })
 
     app.register_blueprint(bp)
@@ -821,7 +817,7 @@ def register_erp(app, ns):
             code = d.get("cCodeProduit", "")
             desc = ""
             if rec_no:
-                rec = next((r for r in receiving_details if r["NoReception"] == rec_no), None)
+                rec = purch.rec_get(rec_no)[0]
                 art = next((a for a in (rec or {}).get("Articles", []) if a.get("CodeArticle") == code), None)
                 desc = (art or {}).get("Description", "")
                 inv["cDevise"] = (art or {}).get("Devise") or inv["cDevise"]
@@ -843,9 +839,15 @@ def register_erp(app, ns):
     def po_exists(cpo):
         return _po_view(cpo) is not None
 
+    def next_po_number(first):
+        """Next PO number: from the "PO" sequence, never below `first` nor an existing (typed) number."""
+        nums = [int(no) for no, _d, _u in purch.po_all() if str(no).isdigit()]
+        return str(purch.next_number("PO", start=first, minimum=max([first - 1] + nums) + 1))
+
     return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load,
             "seed": seed, "add_stores": add_stores, "store_keys": store_keys,
             "suppliers": sup_db, "gl_accounts": gl_db, "cost_centers": cc_db,
             "save_po": _po_save, "po_exists": po_exists, "all_pos": _all_pos,
+            "update_po_header": _po_update_header, "next_po_number": next_po_number,
             "add_tables": add_tables, "lookups": extra["lookups"], "summary": extra["summary"],
             "api_error": ApiError, "paginate": _paginate}
