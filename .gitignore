@@ -8,3 +8,4 @@ Videos
 db/
 *.db
 .pytest_cache/
+backups/

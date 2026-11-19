@@ -24,6 +24,7 @@ from flask import Flask, jsonify, request
 import db
 from powererp import database
 from auth import PW_PREFIX, register_auth
+from backup_api import register_backup
 from erp_api import register_erp
 from inventory_api import register_inventory
 from powerware_api import register_powerware
@@ -81,6 +82,8 @@ register_powerware(app, data, hooks["invoice_exists"], hooks["record_invoice"])
 register_purchasing(app, data, hooks)
 # Products, taxes and inventory (warehouses, locations, movements, replenishment, counts)
 register_inventory(app, data, hooks)
+# Administration > Backups: pg_dump on a schedule (settings in the database), with rotation
+register_backup(app)
 
 # ERP data: load what the database has; an empty database (or another dataset) is seeded from data/*.json.
 # The name changes when the history is added, so an existing database is re-seeded once with it.

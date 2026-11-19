@@ -5,7 +5,7 @@ Who needs what:
   /  and  /assets/*            open (the page shows the login screen itself)
   /api/health, /api/auth/*     open
   /api/*                       a logged-in user (session cookie) or the API key
-  /api/users*                  an administrator
+  /api/users*, /api/admin/*    an administrator (users, backups)
   PowerWARE web services       open, unless ERP_API_KEY is set: then the
   (/cgi-bin/..., used by SkyAI) caller sends it in the X-API-Key header
 
@@ -136,7 +136,7 @@ def _guard():
     user = current_user()
     if user is None:
         return jsonify({"error": "unauthorized"}), 401
-    if path.startswith("/api/users") and user["role"] != "admin":
+    if path.startswith(("/api/users", "/api/admin/")) and user["role"] != "admin":
         return jsonify({"error": "forbidden"}), 403
     return None
 

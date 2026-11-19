@@ -48,6 +48,7 @@ os.environ.update({
     "ERP_ADMIN_PASSWORD": ADMIN_PASSWORD,
     "ERP_API_KEY": API_KEY,
     "ERP_SECRET_KEY": "test-secret",
+    "BACKUP_SCHEDULER": "0",  # tests run the backups themselves
 })
 os.environ.pop("ERP_COOKIE_SECURE", None)
 

@@ -1,11 +1,19 @@
-FROM python:3.10-slim
+FROM python:3.10-slim-bookworm
 
 WORKDIR /app
+
+# pg_dump 16 (same major version as the PostgreSQL server) for Administration > Backups
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
+ && install -d /usr/share/postgresql-common/pgdg \
+ && curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+ && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+ && apt-get update && apt-get install -y --no-install-recommends postgresql-client-16 \
+ && apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py erp_api.py powerware_api.py purchasing_api.py inventory_api.py db.py auth.py alembic.ini ./
+COPY app.py erp_api.py powerware_api.py purchasing_api.py inventory_api.py db.py auth.py backup_api.py alembic.ini ./
 COPY powererp/ ./powererp/
 COPY migrations/ ./migrations/
 COPY static/ ./static/
@@ -13,7 +21,11 @@ COPY data/ ./data/
 
 # Database: PostgreSQL, set DATABASE_URL (postgresql://user:password@host:5432/powererp).
 # The schema is created and migrated by the ERP when it starts (Alembic).
-ENV PORT=5050
+# Backups (Administration > Backups) go to /app/backups by default: mount it to keep them outside the container.
+RUN mkdir -p /app/backups
+VOLUME /app/backups
+ENV BACKUP_DIR=/app/backups \
+    PORT=5050
 EXPOSE 5050
 
 CMD ["python", "app.py"]
