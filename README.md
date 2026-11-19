@@ -96,6 +96,20 @@ The data lives in PostgreSQL (volume `pgdata` with docker compose). Several ERP 
 | `ERP_API_KEY` | none | Lets scripts call `/api/...` without a login, and, when set, is required by the PowerWARE web services (header `X-API-Key`) |
 | `ERP_DATASET` | full data | `demo` seeds from `data/demo/` |
 
+## Backups
+
+**Administration → Backups** (administrators): automatic backups on/off, every N hours (1–720), the folder
+(on the ERP server; in Docker `/app/backups`, mounted on the host) and how many backups are kept (the oldest
+`powererp-*.dump` files of the folder are deleted beyond it). "Back up now" makes one at once; the files can be
+downloaded from the same screen. A backup is `pg_dump --format=custom` of the whole database (the Docker image
+has pg_dump 16; elsewhere set `PG_DUMP` to the pg_dump command). Restore one into an empty database with:
+
+```bash
+pg_restore --clean --if-exists --no-owner -d <database> powererp-YYYYMMDD-HHMMSS.dump
+```
+
+When several ERP processes share the database, only one of them runs a scheduled backup (PostgreSQL advisory lock).
+
 ## Tests
 
 ```bash
