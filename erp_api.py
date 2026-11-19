@@ -5,7 +5,7 @@ UI:  http://localhost:5050/
 API: http://localhost:5050/api/<resource>
 
 Data is seeded from data/*.json and kept in memory; app.py saves it to the
-SQLite database (db.py) after every change and loads it back at startup.
+PostgreSQL database (db.py) after every change and loads it back at startup.
 POST /api/reset restores the original demo data.
 """
 import copy

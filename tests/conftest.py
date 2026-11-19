@@ -1,18 +1,22 @@
 """
 PowerERP test setup.
 
-The app is imported once per test session, on a temporary SQLite file and the
-fictitious demo dataset (data/demo/). Every test starts from the original demo
-data (POST /api/reset), so tests do not depend on each other.
+The app is imported once per test session, on an empty PostgreSQL test database
+(TEST_DATABASE_URL; its tables are dropped and re-created by the migrations at the
+start of the session) and the fictitious demo dataset (data/demo/). Every test
+starts from the original demo data (POST /api/reset), so tests do not depend on
+each other.
 
-Run from the PowerERP folder:  pip install -r requirements-dev.txt && python -m pytest
+Run from the PowerERP folder:
+  docker compose up -d db                    (PostgreSQL on localhost:5433, with the powererp_test database)
+  pip install -r requirements-dev.txt && python -m pytest
 """
 import os
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
+from sqlalchemy import create_engine, text
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -21,9 +25,24 @@ API_KEY = "test-api-key"
 ADMIN_PASSWORD = "admin-test-pw"
 PW = "/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI"
 
-_tmp = tempfile.mkdtemp(prefix="powererp-tests-")
+TEST_DATABASE_URL = os.environ.get(
+    "TEST_DATABASE_URL", "postgresql+psycopg://powererp:powererp@localhost:5433/powererp_test")
+if "test" not in TEST_DATABASE_URL.rsplit("/", 1)[-1]:
+    sys.exit("TEST_DATABASE_URL must point to a database whose name contains 'test': it is emptied.")
+
+
+def _empty_database(url):
+    from powererp.config import database_url
+    engine = create_engine(database_url(url))
+    with engine.begin() as con:
+        con.execute(text("DROP SCHEMA public CASCADE"))
+        con.execute(text("CREATE SCHEMA public"))
+    engine.dispose()
+
+
+_empty_database(TEST_DATABASE_URL)
 os.environ.update({
-    "ERP_DB_PATH": os.path.join(_tmp, "powererp.db"),
+    "DATABASE_URL": TEST_DATABASE_URL,
     "ERP_DATASET": "demo",
     "ERP_ADMIN_USER": "admin",
     "ERP_ADMIN_PASSWORD": ADMIN_PASSWORD,

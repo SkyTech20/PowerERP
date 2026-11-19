@@ -1,5 +1,21 @@
-"""Changes are saved in SQLite after every successful write, and come back after a restart."""
+"""Changes are saved in PostgreSQL after every successful write, and come back after a restart."""
+from sqlalchemy import text
+
 import db
+from powererp import database
+
+
+def test_schema_is_migrated(app):
+    with database.engine.connect() as con:
+        assert con.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0001"
+        assert con.execute(text("SELECT code FROM companies")).scalar() == "MAIN"
+
+
+def test_settings_round_trip(app):
+    db.set_setting("test_key", "a")
+    db.set_setting("test_key", "b")
+    assert db.get_setting("test_key") == "b"
+    assert db.get_setting("missing", "dflt") == "dflt"
 
 
 def test_changes_are_saved_in_the_database(client):

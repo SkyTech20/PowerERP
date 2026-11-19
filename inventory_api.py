@@ -25,7 +25,7 @@ Inventory management:
 WMS later: locations already have a type, capacity (weight / volume / pallets), mixing rules, a blocked flag and a
 picking sequence, and every balance and movement is by location; a WMS only adds tasks (put-away, picking) on top.
 
-Data is kept in memory like the rest of the ERP and saved to SQLite by app.py (tables registered with add_tables).
+Data is kept in memory like the rest of the ERP and saved to PostgreSQL by app.py (tables registered with add_tables).
 """
 import copy
 import json

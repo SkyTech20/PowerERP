@@ -22,9 +22,11 @@ import secrets
 from datetime import timedelta
 
 from flask import Blueprint, jsonify, request, session
+from sqlalchemy import func, select
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import db
+from powererp.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +57,19 @@ def _s(value):
     return "" if value is None else str(value).strip()
 
 
+def _iso(value):
+    return value.isoformat() if value else None
+
+
+def _row(u):
+    """A users row as a dict (what the rest of the ERP reads)."""
+    if u is None:
+        return None
+    return {"id": u.id, "username": u.username, "name": u.name, "email": u.email, "role": u.role,
+            "lang": u.lang, "active": u.active, "password_hash": u.password_hash,
+            "created_at": _iso(u.created_at), "last_login": _iso(u.last_login)}
+
+
 def _public(row):
     """A user as returned by the API (never the password hash)."""
     return {"id": row["id"], "username": row["username"], "name": row["name"], "email": row["email"],
@@ -63,8 +78,12 @@ def _public(row):
 
 
 def _get_user(user_id):
-    with db.connect() as con:
-        return con.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    with db.session() as s:
+        return _row(s.get(User, user_id))
+
+
+def _by_username(s, username):
+    return s.scalar(select(User).where(func.lower(User.username) == username.lower()))
 
 
 def current_user():
@@ -96,9 +115,9 @@ def _check_password(pw, field="password"):
         raise AuthError("password_short", field)
 
 
-def _count_admins(con, exclude_id=None):
-    return con.execute("SELECT COUNT(*) FROM users WHERE role = 'admin' AND active = 1 AND id != ?",
-                       (exclude_id or 0,)).fetchone()[0]
+def _count_admins(s, exclude_id=None):
+    return s.scalar(select(func.count()).select_from(User).where(
+        User.role == "admin", User.active.is_(True), User.id != (exclude_id or 0)))
 
 
 # ---------------------------------------------------------------- guard
@@ -133,15 +152,16 @@ def health():
 def login():
     p = _payload()
     username, password = _s(p.get("username")), p.get("password") or ""
-    with db.connect() as con:
-        row = con.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-        if row is None or not row["active"] or not check_password_hash(row["password_hash"], password):
+    with db.session() as s:
+        u = _by_username(s, username)
+        if u is None or not u.active or not check_password_hash(u.password_hash, password):
             raise AuthError("bad_login", status=401)
-        con.execute("UPDATE users SET last_login = ? WHERE id = ?", (db.now(), row["id"]))
+        u.last_login = db.now()
+        uid = u.id
     session.clear()
     session.permanent = True
-    session["uid"] = row["id"]
-    return jsonify(_public(_get_user(row["id"])))
+    session["uid"] = uid
+    return jsonify(_public(_get_user(uid)))
 
 
 @bp.route("/api/auth/logout", methods=["POST"])
@@ -169,8 +189,8 @@ def change_password():
         raise AuthError("bad_password", "current")
     new = p.get("password") or ""
     _check_password(new)
-    with db.connect() as con:
-        con.execute("UPDATE users SET password_hash = ? WHERE id = ?", (generate_password_hash(new), user["id"]))
+    with db.session() as s:
+        s.get(User, user["id"]).password_hash = generate_password_hash(new)
     return jsonify({"ok": True})
 
 
@@ -182,8 +202,8 @@ def set_lang():
         raise AuthError("unauthorized", status=401)
     lang = _s(_payload().get("lang"))
     if lang in LANGS:
-        with db.connect() as con:
-            con.execute("UPDATE users SET lang = ? WHERE id = ?", (lang, user["id"]))
+        with db.session() as s:
+            s.get(User, user["id"]).lang = lang
     return jsonify({"ok": True})
 
 
@@ -196,7 +216,7 @@ def _user_from_payload(p, existing=None):
         "email": _s(p.get("email")),
         "role": _s(p.get("role")) or "user",
         "lang": _s(p.get("lang")) or "en",
-        "active": 1 if p.get("active", True) in (True, 1, "1", "true", "on") else 0,
+        "active": p.get("active", True) in (True, 1, "1", "true", "on"),
     }
     if not row["username"]:
         raise AuthError("required", "username")
@@ -213,8 +233,8 @@ def _user_from_payload(p, existing=None):
 def users_collection():
     if request.method == "GET":
         q = _s(request.args.get("q")).lower()
-        with db.connect() as con:
-            rows = [_public(r) for r in con.execute("SELECT * FROM users ORDER BY username")]
+        with db.session() as s:
+            rows = [_public(_row(u)) for u in s.scalars(select(User).order_by(User.username))]
         if q:
             rows = [r for r in rows if any(q in _s(r[f]).lower() for f in ("username", "name", "email"))]
         for key, val in request.args.items():
@@ -235,15 +255,13 @@ def users_collection():
     if not password:
         raise AuthError("required", "password")
     _check_password(password)
-    with db.connect() as con:
-        if con.execute("SELECT 1 FROM users WHERE username = ?", (row["username"],)).fetchone():
+    with db.session() as s:
+        if _by_username(s, row["username"]) is not None:
             raise AuthError("duplicate", "username", 409)
-        cur = con.execute(
-            "INSERT INTO users (username, name, email, role, lang, active, password_hash, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (row["username"], row["name"], row["email"], row["role"], row["lang"], row["active"],
-             generate_password_hash(password), db.now()))
-        new_id = cur.lastrowid
+        u = User(**row, password_hash=generate_password_hash(password))
+        s.add(u)
+        s.flush()
+        new_id = u.id
     return jsonify(_public(_get_user(new_id))), 201
 
 
@@ -258,24 +276,25 @@ def users_item(user_id):
     if request.method == "DELETE":
         if user_id == me_id:
             raise AuthError("self_delete", status=409)
-        with db.connect() as con:
-            if existing["role"] == "admin" and not _count_admins(con, user_id):
+        with db.session() as s:
+            if existing["role"] == "admin" and not _count_admins(s, user_id):
                 raise AuthError("last_admin", status=409)
-            con.execute("DELETE FROM users WHERE id = ?", (user_id,))
+            s.delete(s.get(User, user_id))
         return jsonify({"ok": True})
     p = _payload()
     row = _user_from_payload(p, existing)
     password = p.get("password") or ""
     if password:
         _check_password(password)
-    with db.connect() as con:
+    with db.session() as s:
         if (existing["role"] == "admin" and existing["active"] and (row["role"] != "admin" or not row["active"])
-                and not _count_admins(con, user_id)):
+                and not _count_admins(s, user_id)):
             raise AuthError("last_admin", "role", 409)
-        con.execute("UPDATE users SET name = ?, email = ?, role = ?, lang = ?, active = ? WHERE id = ?",
-                    (row["name"], row["email"], row["role"], row["lang"], row["active"], user_id))
+        u = s.get(User, user_id)
+        for k in ("name", "email", "role", "lang", "active"):
+            setattr(u, k, row[k])
         if password:
-            con.execute("UPDATE users SET password_hash = ? WHERE id = ?", (generate_password_hash(password), user_id))
+            u.password_hash = generate_password_hash(password)
     return jsonify(_public(_get_user(user_id)))
 
 
@@ -290,18 +309,16 @@ def _secret_key():
 
 
 def _ensure_admin():
-    with db.connect() as con:
-        if con.execute("SELECT COUNT(*) FROM users").fetchone()[0]:
+    with db.session() as s:
+        if s.scalar(select(func.count()).select_from(User)):
             return
         username = os.environ.get("ERP_ADMIN_USER", "admin").strip() or "admin"
         password = os.environ.get("ERP_ADMIN_PASSWORD", "")
         generated = not password
         if generated:
             password = secrets.token_urlsafe(9)
-        con.execute(
-            "INSERT INTO users (username, name, email, role, lang, active, password_hash, created_at) "
-            "VALUES (?, ?, '', 'admin', 'en', 1, ?, ?)",
-            (username, "Administrator", generate_password_hash(password), db.now()))
+        s.add(User(username=username, name="Administrator", email="", role="admin", lang="en", active=True,
+                   password_hash=generate_password_hash(password)))
     msg = f"PowerERP: created administrator '{username}'"
     print(msg + (f" with password: {password}  (set ERP_ADMIN_PASSWORD to choose it)" if generated else ""), flush=True)
 

@@ -1,0 +1,42 @@
+# PowerERP with PostgreSQL, for development and tests.
+#   Database only (run the ERP and the tests on your PC):  docker compose up -d db
+#     -> PostgreSQL on localhost:5433, databases powererp (ERP) and powererp_test (pytest)
+#   Database + ERP in Docker:                               docker compose up -d --build
+#     -> http://localhost:5050/
+name: powererp
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: powererp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-powererp}
+      POSTGRES_DB: powererp
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/initdb-test.sql:/docker-entrypoint-initdb.d/01-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U powererp -d powererp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  erp:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://powererp:${POSTGRES_PASSWORD:-powererp}@db:5432/powererp
+      ERP_ADMIN_PASSWORD: ${ERP_ADMIN_PASSWORD:-admin123}
+      ERP_DATASET: ${ERP_DATASET:-default}
+      ERP_COOKIE_SECURE: "0"
+    ports:
+      - "${ERP_PORT:-5050}:5050"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
