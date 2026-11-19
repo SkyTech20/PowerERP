@@ -251,3 +251,27 @@ input[readonly] { background: var(--surface-2); color: var(--muted); }
 .totals .tax-note { flex-basis: 100%; text-align: right; margin: 6px 10px 0; font-size: 11px; color: var(--muted); }
 
 .muted { color: #94a3b8; }
+
+/* ---------- Products, taxes and inventory ---------- */
+.kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.section-help { margin: -4px 0 12px; font-size: 12px; }
+.badge.mv-IN, .badge.mv-CNT { background: #e7f6ee; color: var(--success); }
+.badge.mv-OUT { background: #f6eeee; color: #9b2c2c; }
+.badge.mv-TRF { background: #e6f0fb; color: #1f5fa8; }
+.badge.mv-ADJ { background: #fff4e0; color: #9a5b00; }
+.badge.mv-RSV { background: #efe9fb; color: #6b46c1; }
+.low { color: var(--danger); font-weight: 600; }
+table.grid.lines tr.diff td { background: #fff8e6; }
+.lines input[type=checkbox] { width: 16px; height: 16px; }
+.lines select { padding: 5px 7px; font-size: 13px; }
+.notice { border-color: #b7e3c8; background: #f1fbf5; }
+.notice .card-body { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sim-result { margin-top: 14px; }
+.sim-result tr.total-row td { font-weight: 700; border-top: 1px solid var(--border); }
+@media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+#form + .card { margin-top: 16px; }
+.form-tabs { flex-wrap: wrap; position: sticky; top: 52px; z-index: 5; background: var(--bg); }
+.form-tabs .req { font-size: 9px; vertical-align: middle; }
+.ftab[hidden] { display: none; }
+.ftab > .card { margin: 0 0 16px; }

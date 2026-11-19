@@ -60,6 +60,7 @@
       err.code = (data && data.error) || "generic";
       err.field = data && data.field;
       err.status = res.status;
+      err.detail = data && data.detail;
       throw err;
     }
     return data;
@@ -83,16 +84,20 @@
     { k: "pur", icon: "🛒", items: [{ k: "pur.po", route: "/po" }, { k: "pur.receptions", route: "/receptions" }, "pur.requisitions", "pur.returns", "pur.pricelists"] },
     { k: "ar", icon: "💰", items: ["ar.customers", "ar.invoices", "ar.receipts", "ar.credits", "ar.collections"] },
     { k: "sales", icon: "📈", items: ["sales.quotes", "sales.orders", "sales.shipping", "sales.pricing", "sales.commissions"] },
-    { k: "inv", icon: "📦", items: ["inv.items", "inv.warehouses", "inv.movements", "inv.count", "inv.lots"] },
+    { k: "inv", icon: "📦", items: [
+      { k: "inv.items", route: "/inv/items" }, { k: "inv.stock", route: "/inv/stock" }, { k: "inv.movements", route: "/inv/movements" },
+      { k: "inv.replenishment", route: "/inv/replenishment" }, { k: "inv.count", route: "/inv/counts" }, { k: "inv.valuation", route: "/inv/valuation" },
+      { k: "inv.warehouses", route: "/inv/warehouses" }, { k: "inv.params", route: "/inv/params" }, { k: "inv.setup", route: "/inv/categories" },
+    ] },
     { k: "prod", icon: "🏭", items: ["prod.bom", "prod.workorders", "prod.routings", "prod.mrp", "prod.shopfloor"] },
     { k: "hr", icon: "👥", items: ["hr.employees", "hr.timesheets", "hr.payroll", "hr.benefits"] },
     { k: "fa", icon: "🏢", items: ["fa.assets", "fa.depreciation"] },
     { k: "proj", icon: "📁", items: ["proj.projects", "proj.jobcost"] },
     { k: "crm", icon: "🤝", items: ["crm.contacts", "crm.opportunities"] },
     { k: "rep", icon: "📊", items: ["rep.designer", "rep.bi"] },
-    { k: "admin", icon: "⚙️", items: ["admin.companies", { k: "admin.users", route: "/admin/users", admin: true }, "admin.taxes", "admin.currencies", "admin.settings"] },
+    { k: "admin", icon: "⚙️", items: ["admin.companies", { k: "admin.users", route: "/admin/users", admin: true }, { k: "admin.taxes", route: "/admin/taxes" }, "admin.currencies", "admin.settings"] },
   ];
-  const openGroups = new Set(["gl", "ap", "pur"]);
+  const openGroups = new Set(["gl", "ap", "pur", "inv"]);
   let user = null; // logged-in user (GET api/auth/me)
   const isAdmin = () => !!user && user.role === "admin";
   // Menu items flagged admin: true are links for administrators only.
@@ -100,7 +105,8 @@
 
   function renderSidebar() {
     const path = currentPath();
-    const isActive = (route) => (route === "/" ? path === "/" : path === route || path.startsWith(route + "/"));
+    const menuRoute = activeMenuRoute(path);
+    const isActive = (route) => (route === "/" ? path === "/" : route === menuRoute || path === route || path.startsWith(route + "/"));
     const html = MENU.map((m) => {
       if (m.sep) return '<div class="nav-sep"></div>';
       if (m.route) {
@@ -144,7 +150,7 @@
   const RES = {
     gl: {
       api: "gl-accounts", route: "/gl/accounts", menu: "/gl", title: "gl.title", sub: "gl.subtitle", one: "gl.account", newTitle: "gl.newAccount",
-      tabs: "accounts", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${r.cDesc}`, sort: "cCode",
+      tabset: "gl", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${r.cDesc}`, sort: "cCode",
       columns: [{ f: "cCode", l: "f.cCode" }, { f: "cDesc", l: "f.cDesc", wrap: true }],
       sections: [{ t: "common.general", fields: [
         { f: "cCode", l: "f.cCode", req: true, key: true },
@@ -153,7 +159,7 @@
     },
     cc: {
       api: "cost-centers", route: "/gl/cc", menu: "/gl", title: "gl.title", sub: "gl.subtitle", one: "gl.cc", newTitle: "gl.newCc",
-      tabs: "cc", id: (r) => (r.cCC2 ? r.cCC1 + "/" + r.cCC2 : r.cCC1), label: (r) => `${r.cCC1}${r.cCC2 ? "-" + r.cCC2 : ""} — ${r.cDesc}`, sort: "cCC1",
+      tabset: "gl", id: (r) => (r.cCC2 ? r.cCC1 + "/" + r.cCC2 : r.cCC1), label: (r) => `${r.cCC1}${r.cCC2 ? "-" + r.cCC2 : ""} — ${r.cDesc}`, sort: "cCC1",
       columns: [{ f: "cCC1", l: "f.cCC1" }, { f: "cCC2", l: "f.cCC2" }, { f: "cDesc", l: "f.cDesc", wrap: true }],
       sections: [{ t: "common.general", fields: [
         { f: "cCC1", l: "f.cCC1", req: true, key: true },
@@ -304,7 +310,7 @@
   };
 
   RES.users = {
-    api: "users", route: "/admin/users", title: "usr.title", sub: "usr.subtitle", one: "usr.one", newTitle: "usr.new",
+    api: "users", route: "/admin/users", admin: true, title: "usr.title", sub: "usr.subtitle", one: "usr.one", newTitle: "usr.new",
     id: (r) => r.id, label: (r) => `${r.username} — ${r.name}`, sort: "username",
     filters: [
       { f: "role", l: "f.role", options: [["admin", "role.admin"], ["user", "role.user"]] },
@@ -333,6 +339,492 @@
     ],
   };
 
+  // ------------------------------------------------------------------ Products, taxes and inventory
+  const today = () => new Date().toISOString().slice(0, 10);
+  const opts = (prefix, values) => values.map((v) => [v, prefix + v]);
+  // FR / EN text of a record (cDescFR / cDescEN, cNameFR / cNameEN): the UI language, else French
+  const dl = (r, base) => (lang === "fr" ? r[base + "FR"] : r[base + "EN"] || r[base + "FR"]) || "";
+  const qtyFmt = (v) => (v === "" || v == null ? "" : new Intl.NumberFormat(lang === "fr" ? "fr-CA" : "en-CA", { maximumFractionDigits: 4 }).format(num(v)));
+  const optBadge = (prefix, cls) => (v) => (v ? `<span class="badge ${cls ? cls(v) : ""}">${esc(t(prefix + v))}</span>` : "");
+  const descCol = (base) => ({ f: base + "FR", l: "f.cDescription", wrap: true, fmt: (v, r) => esc(dl(r, base)) });
+  const productLink = (r) => "/inv/items/" + enc(r.cProduct);
+  const whFilter = { f: "cWarehouse", l: "f.inv.cWarehouse", lookup: "warehouses" };
+  const isStockType = (m) => ["stock", "kit", "raw"].includes(m.cType);
+  let prefill = null; // { key, values }: defaults for the next "new" form (e.g. a movement for this product)
+  function newWith(key, values) { prefill = { key, values }; location.hash = "#" + RES[key].route + "/new"; }
+
+  const PRODUCT_TYPES = ["stock", "nonstock", "service", "kit", "raw"];
+  const MOVE_TYPES = ["IN", "OUT", "TRF", "ADJ", "CNT", "RSV"];
+  const DOC_TYPES = ["MAN", "PO", "REC", "INV", "SO", "CNT", "PROD"];
+  const LOCATION_TYPES = ["picking", "reserve", "receiving", "shipping", "quarantine", "staging"];
+  const MV_IN = (m) => m.cType === "IN" || ((m.cType === "ADJ" || m.cType === "CNT") && num(m.dQty) > 0);
+
+  Object.assign(RES, {
+    taxcodes: {
+      api: "tax-codes", route: "/admin/taxes/codes", menu: "/admin/taxes", tabset: "tax", title: "tax.title", sub: "tax.subtitle",
+      one: "tax.code.one", newTitle: "tax.code.new", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
+      columns: [
+        { f: "cCode", l: "f.cCode" }, descCol("cDesc"), { f: "cKind", l: "f.tax.cKind", fmt: optBadge("o.kind.") },
+        { f: "cJurisdiction", l: "f.tax.cJurisdiction" },
+        { f: "dCurrentRate", l: "f.tax.dCurrentRate", num: true, fmt: (v) => (v === "" ? "—" : esc(qtyFmt(v) + " %")) },
+        { f: "cRegistrationNo", l: "f.tax.cRegistrationNo" }, { f: "lActive", l: "opt.active", fmt: yesNo },
+      ],
+      defaults: () => ({ cKind: "gst", dRecoverablePct: "100", lActive: true, lines: [{ dStartDate: today(), dEndDate: "", dRate: "" }] }),
+      sections: [
+        { t: "common.general", fields: [
+          { f: "cCode", l: "f.cCode", req: true, key: true }, { f: "cKind", l: "f.tax.cKind", type: "select", options: opts("o.kind.", ["gst", "pst", "hst", "other"]) },
+          { f: "cJurisdiction", l: "f.tax.cJurisdiction", suggestions: ["CA", "QC", "ON", "NS", "NB", "NL", "PE", "BC", "MB", "SK", "AB"] },
+          { f: "lActive", l: "opt.active", type: "check" },
+          { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+          { f: "cRegistrationNo", l: "f.tax.cRegistrationNo", span: 2, help: "f.tax.cRegistrationNo.help" },
+        ] },
+        { t: "tax.accounting", fields: [
+          { f: "cGLCollected", l: "f.tax.cGLCollected", lookup: "gl" }, { f: "cGLRecoverable", l: "f.tax.cGLRecoverable", lookup: "gl" },
+          { f: "dRecoverablePct", l: "f.tax.dRecoverablePct", type: "number", help: "f.tax.dRecoverablePct.help" },
+        ] },
+      ],
+      lines: {
+        title: "tax.rates", help: "tax.rates.help",
+        cols: [{ f: "dStartDate", l: "f.tax.dStartDate", w: "w-md", type: "date" }, { f: "dEndDate", l: "f.tax.dEndDate", w: "w-md", type: "date" },
+          { f: "dRate", l: "f.tax.dRate", w: "w-sm", n: true }],
+        newLine: () => ({ dStartDate: today(), dEndDate: "", dRate: "" }),
+      },
+    },
+    taxgroups: {
+      api: "tax-groups", route: "/admin/taxes/groups", tabset: "tax", title: "tax.title", sub: "tax.subtitle",
+      one: "tax.group.one", newTitle: "tax.group.new", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
+      columns: [
+        { f: "cCode", l: "f.cCode" }, descCol("cDesc"), { f: "cProvince", l: "f.cProvince" },
+        { f: "cTreatment", l: "f.tax.cTreatment", fmt: optBadge("o.treat.") }, { f: "cTaxList", l: "tax.groupLines" },
+        { f: "lActive", l: "opt.active", fmt: yesNo },
+      ],
+      defaults: () => ({ cTreatment: "taxable", cProvince: "QC", lActive: true, lines: [{ iSeq: 1, cTaxCode: "", lCompound: false }] }),
+      sections: [{ t: "common.general", help: "tax.group.help", fields: [
+        { f: "cCode", l: "f.cCode", req: true, key: true },
+        { f: "cTreatment", l: "f.tax.cTreatment", type: "select", options: opts("o.treat.", ["taxable", "zero", "exempt"]), rerender: true },
+        { f: "cProvince", l: "f.cProvince" }, { f: "lActive", l: "opt.active", type: "check" },
+        { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+      ] }],
+      lines: {
+        title: "tax.groupLines", help: "tax.groupLines.help", show: (m) => m.cTreatment === "taxable",
+        cols: [{ f: "iSeq", l: "f.tax.iSeq", w: "w-xs", n: true }, { f: "cTaxCode", l: "f.tax.cTaxCode", w: "w-md", lookup: "taxcodes" },
+          { f: "lCompound", l: "f.tax.lCompound", w: "w-sm", type: "check" }],
+        newLine: (m) => ({ iSeq: (m.lines || []).length + 1, cTaxCode: "", lCompound: false }),
+      },
+      panel: {
+        html: () => `<div class="card"><div class="card-head"><h2>${esc(t("tax.sim"))}</h2><span class="help muted">${esc(t("tax.sim.help"))}</span></div>
+          <div class="card-body"><div class="form-grid">
+            <div class="field"><label for="simAmount">${esc(t("tax.sim.amount"))}</label><input type="text" id="simAmount" inputmode="decimal" value="100.00" style="text-align:right"></div>
+            <div class="field"><label for="simDate">${esc(t("tax.sim.date"))}</label><input type="date" id="simDate" value="${today()}"></div>
+          </div><div id="simResult" class="sim-result"></div></div></div>`,
+        bind: (m) => {
+          const run = async () => {
+            try {
+              const r = await api(`tax-groups/${enc(m.cCode)}/calc?amount=${enc(num($("#simAmount").value))}&date=${enc($("#simDate").value)}`);
+              $("#simResult").innerHTML = `<table class="grid"><thead><tr><th>${esc(t("f.tax.cTaxCode"))}</th><th class="num">${esc(t("f.tax.dRate"))}</th><th class="num">${esc(t("tax.sim.base"))}</th><th class="num">${esc(t("tax.sim.tax"))}</th><th>${esc(t("f.tax.cGLCollected"))}</th><th>${esc(t("f.tax.cGLRecoverable"))}</th></tr></thead><tbody>
+                ${r.taxes.map((x) => `<tr><td>${esc(x.cTaxCode)}</td><td class="num">${esc(qtyFmt(x.dRate))} %</td><td class="num">${esc(money(x.dBase))}</td><td class="num">${esc(money(x.dTax))}</td><td>${esc(x.cGLCollected)}</td><td>${esc(x.cGLRecoverable)}</td></tr>`).join("")
+                  || `<tr><td colspan="6" class="muted">${esc(t("o.treat." + r.cTreatment))}</td></tr>`}
+                <tr class="total-row"><td colspan="3">${esc(t("tax.sim.total"))}</td><td class="num">${esc(money(r.dTotalTax))}</td><td colspan="2" class="num">${esc(money(r.dTotal))}</td></tr></tbody></table>`;
+            } catch (e) { $("#simResult").innerHTML = ""; }
+          };
+          $("#simAmount").addEventListener("input", (e) => { numOnly(e.target); run(); });
+          $("#simDate").addEventListener("change", run);
+          run();
+        },
+      },
+    },
+    categories: {
+      api: "categories", route: "/inv/categories", tabset: "setup", title: "setup.title", sub: "setup.subtitle",
+      one: "cat.one", newTitle: "cat.new", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
+      columns: [{ f: "cCode", l: "f.cCode" }, descCol("cDesc"), { f: "cParent", l: "f.cat.cParent" }, { f: "lActive", l: "opt.active", fmt: yesNo }],
+      defaults: { lActive: true },
+      sections: [{ t: "common.general", fields: [
+        { f: "cCode", l: "f.cCode", req: true, key: true }, { f: "cParent", l: "f.cat.cParent", lookup: "categories", help: "f.cat.cParent.help" },
+        { f: "lActive", l: "opt.active", type: "check" },
+        { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+      ] }],
+    },
+    uom: {
+      api: "uom", route: "/inv/uom", tabset: "setup", title: "setup.title", sub: "setup.subtitle",
+      one: "uom.one", newTitle: "uom.new", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
+      columns: [{ f: "cCode", l: "f.cCode" }, descCol("cDesc"), { f: "cType", l: "f.uom.cType", fmt: (v) => esc(t("o.uom." + v)) }, { f: "lActive", l: "opt.active", fmt: yesNo }],
+      defaults: { cType: "count", lActive: true },
+      sections: [{ t: "common.general", fields: [
+        { f: "cCode", l: "f.cCode", req: true, key: true },
+        { f: "cType", l: "f.uom.cType", type: "select", options: opts("o.uom.", ["count", "weight", "length", "area", "volume", "time"]) },
+        { f: "lActive", l: "opt.active", type: "check" },
+        { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+      ] }],
+    },
+    products: {
+      api: "products", route: "/inv/items", title: "prod.title", sub: "prod.subtitle", one: "prod.one", newTitle: "prod.new",
+      id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
+      formTabs: [["gen", "prod.tab.general"], ["units", "prod.units"], ["prices", "prod.costs"], ["tax", "prod.tab.taxes"],
+        ["inv", "prod.inventory"], ["log", "prod.tab.logistics"], ["sup", "prod.suppliers"], ["stock", "prod.stock"]],
+      filters: [
+        { f: "cStatus", l: "f.prod.cStatus", options: opts("o.status.", ["active", "inactive", "discontinued"]) },
+        { f: "cType", l: "f.prod.cType", options: opts("o.ptype.", PRODUCT_TYPES) },
+        { f: "cCategory", l: "f.prod.cCategory", lookup: "categories" },
+      ],
+      columns: [
+        { f: "cCode", l: "f.prod.cCode" }, descCol("cDesc"), { f: "cCategory", l: "f.prod.cCategory" },
+        { f: "cType", l: "f.prod.cType", fmt: (v) => esc(t("o.ptype." + v)) }, { f: "cStockUOM", l: "f.prod.unit" },
+        { f: "dQtyOnHand", l: "f.inv.dQtyOnHand", num: true, fmt: (v, r) => (r.lStocked ? esc(qtyFmt(v)) : "—") },
+        { f: "dQtyAvailable", l: "f.inv.dQtyAvailable", num: true, fmt: (v, r) => (r.lStocked ? esc(qtyFmt(v)) : "—") },
+        { f: "dPrice1", l: "f.prod.dPrice1", num: true, fmt: (v, r) => (v ? esc(money(v, r.cCurrency)) : "") },
+        { f: "cStatus", l: "f.prod.cStatus", fmt: optBadge("o.status.", (v) => (v === "active" ? "yes" : "no")) },
+      ],
+      defaults: () => ({ cStatus: "active", cType: "stock", cCostMethod: "avg", cCurrency: "CAD", cStockUOM: "UN", cPurchaseUOM: "UN",
+        dPurchaseFactor: "1", cSalesUOM: "UN", dSalesFactor: "1", cSalesTaxGroup: "QC", cPurchaseTaxGroup: "QC", lStocked: true,
+        lSellable: true, lPurchasable: true, lPORequired: true, cWeightUOM: "kg", cDimUOM: "cm", cCountryOrigin: "CA", cABCClass: "", lines: [] }),
+      sections: [
+        { t: "prod.ident", fields: [
+          { f: "cCode", l: "f.prod.cCode", req: true, key: true },
+          { f: "cType", l: "f.prod.cType", type: "select", options: opts("o.ptype.", PRODUCT_TYPES), rerender: true },
+          { f: "cStatus", l: "f.prod.cStatus", type: "select", options: opts("o.status.", ["active", "inactive", "discontinued"]) },
+          { f: "cCategory", l: "f.prod.cCategory", lookup: "categories" },
+          { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+          { f: "cLongDescFR", l: "f.prod.cLongDescFR", type: "textarea", span: 2 }, { f: "cLongDescEN", l: "f.prod.cLongDescEN", type: "textarea", span: 2 },
+          { f: "cBrand", l: "f.prod.cBrand" }, { f: "cModel", l: "f.prod.cModel" },
+          { f: "cManufacturer", l: "f.prod.cManufacturer" }, { f: "cMfrPartNo", l: "f.prod.cMfrPartNo" },
+          { f: "cUPC", l: "f.prod.cUPC", help: "f.prod.cUPC.help" }, { f: "cImageUrl", l: "f.prod.cImageUrl" },
+          { f: "cSpecUrl", l: "f.prod.cSpecUrl" }, { f: "cSdsUrl", l: "f.prod.cSdsUrl", help: "f.prod.cSdsUrl.help" },
+        ] },
+        { tab: "units", t: "prod.units", fields: [
+          { f: "cStockUOM", l: "f.prod.cStockUOM", req: true, lookup: "uom" },
+          { f: "cPurchaseUOM", l: "f.prod.cPurchaseUOM", lookup: "uom" },
+          { f: "dPurchaseFactor", l: "f.prod.dPurchaseFactor", type: "number", help: "f.prod.factor.help" },
+          { f: "cSalesUOM", l: "f.prod.cSalesUOM", lookup: "uom" }, { f: "dSalesFactor", l: "f.prod.dSalesFactor", type: "number" },
+          { f: "dWeight", l: "f.prod.dWeight", type: "number" },
+          { f: "cWeightUOM", l: "f.prod.cWeightUOM", type: "select", options: [["kg", "kg"], ["lb", "lb"]], raw: true },
+          { f: "dVolume", l: "f.prod.dVolume", type: "number" },
+          { f: "dLength", l: "f.prod.dLength", type: "number" }, { f: "dWidth", l: "f.prod.dWidth", type: "number" },
+          { f: "dHeight", l: "f.prod.dHeight", type: "number" },
+          { f: "cDimUOM", l: "f.prod.cDimUOM", type: "select", options: [["cm", "cm"], ["in", "po / in"]], raw: true },
+        ] },
+        { tab: "prices", t: "prod.costs", fields: [
+          { f: "cCostMethod", l: "f.prod.cCostMethod", type: "select", options: opts("o.cost.", ["avg", "std"]) },
+          { f: "dStdCost", l: "f.prod.dStdCost", type: "number" },
+          { f: "dAvgCost", l: "f.prod.dAvgCost", readonly: true, help: "f.prod.dAvgCost.help" }, { f: "dLastCost", l: "f.prod.dLastCost", readonly: true },
+          { f: "cCurrency", l: "f.cDevise", type: "select", options: CURRENCIES.map((c) => [c, c]), raw: true },
+          { f: "dPrice1", l: "f.prod.dPrice1", type: "number" }, { f: "dPrice2", l: "f.prod.dPrice2", type: "number" },
+          { f: "dPrice3", l: "f.prod.dPrice3", type: "number" }, { f: "dPrice4", l: "f.prod.dPrice4", type: "number" },
+          { f: "dPrice5", l: "f.prod.dPrice5", type: "number" }, { f: "dMinPrice", l: "f.prod.dMinPrice", type: "number" },
+          { f: "dMarginPct", l: "f.prod.dMarginPct", readonly: true, show: (m, n) => !n },
+        ] },
+        { tab: "tax", t: "prod.taxes", help: "prod.taxes.help", fields: [
+          { f: "cSalesTaxGroup", l: "f.prod.cSalesTaxGroup", lookup: "taxgroups" }, { f: "cPurchaseTaxGroup", l: "f.prod.cPurchaseTaxGroup", lookup: "taxgroups" },
+          { f: "dEcoFee", l: "f.prod.dEcoFee", type: "number", help: "f.prod.dEcoFee.help" }, { f: "cEcoFeeCode", l: "f.prod.cEcoFeeCode" },
+        ] },
+        { tab: "tax", t: "prod.accounting", fields: [
+          { f: "cGLSales", l: "f.prod.cGLSales", lookup: "gl" }, { f: "cGLPurchase", l: "f.prod.cGLPurchase", lookup: "gl" },
+          { f: "cGLInventory", l: "f.prod.cGLInventory", lookup: "gl" }, { f: "cGLCOGS", l: "f.prod.cGLCOGS", lookup: "gl" },
+          { f: "cCostCenter", l: "f.prod.cCostCenter", lookup: "cc" }, { f: "cProject", l: "f.prod.cProject" },
+        ] },
+        { tab: "inv", t: "prod.inventory", fields: [
+          { f: "lStocked", l: "f.prod.lStocked", type: "check", show: isStockType, help: "f.prod.lStocked.help" },
+          { f: "cDefaultWarehouse", l: "f.prod.cDefaultWarehouse", lookup: "warehouses", show: isStockType },
+          { f: "cABCClass", l: "f.prod.cABCClass", type: "select", options: [["", "—"], ["A", "A"], ["B", "B"], ["C", "C"]], raw: true, show: isStockType },
+          { f: "iShelfLifeDays", l: "f.prod.iShelfLifeDays", type: "number", show: isStockType },
+          { f: "lLotControl", l: "f.prod.lLotControl", type: "check", show: isStockType },
+          { f: "lSerialControl", l: "f.prod.lSerialControl", type: "check", show: isStockType },
+          { f: "lExpiryControl", l: "f.prod.lExpiryControl", type: "check", show: isStockType },
+        ] },
+        { tab: "log", t: "prod.logistics", fields: [
+          { f: "lSellable", l: "f.prod.lSellable", type: "check" }, { f: "lPurchasable", l: "f.prod.lPurchasable", type: "check" },
+          { f: "lPORequired", l: "f.prod.lPORequired", type: "check" }, { f: "lHazardous", l: "f.prod.lHazardous", type: "check" },
+          { f: "iWarrantyMonths", l: "f.prod.iWarrantyMonths", type: "number" }, { f: "cCountryOrigin", l: "f.prod.cCountryOrigin" },
+          { f: "cHSCode", l: "f.prod.cHSCode", help: "f.prod.cHSCode.help" }, { f: "cFreightClass", l: "f.prod.cFreightClass" },
+          { f: "cNotes", l: "f.prod.cNotes", type: "textarea", span: 4 },
+        ] },
+      ],
+      lines: {
+        tab: "sup", title: "prod.suppliers", help: "prod.suppliers.help",
+        cols: [
+          { f: "cSupplierCode", l: "f.cSupplierCode", w: "w-md", lookup: "suppliers" }, { f: "cSupplierItem", l: "f.prod.cSupplierItem", w: "w-md" },
+          { f: "dPurchasePrice", l: "f.prod.dPurchasePrice", w: "w-sm", n: true }, { f: "cCurrency", l: "f.cDevise", w: "w-xs" },
+          { f: "iLeadTimeDays", l: "f.prod.iLeadTimeDays", w: "w-xs", n: true }, { f: "dMinOrderQty", l: "f.prod.dMinOrderQty", w: "w-xs", n: true },
+          { f: "lPreferred", l: "f.prod.lPreferred", w: "w-xs", type: "check" },
+        ],
+        newLine: (m) => ({ cCurrency: m.cCurrency || "CAD", lPreferred: !(m.lines || []).length }),
+      },
+      panel: {
+        tab: "stock",
+        html: (m) => {
+          if (!m.lStocked) return "";
+          const rows = (m.stock || []).map((s) => `<tr><td>${esc(s.cWarehouse)}</td><td>${esc(s.cWarehouseName)}</td><td class="num">${esc(qtyFmt(s.dQtyOnHand))}</td><td class="num">${esc(qtyFmt(s.dQtyReserved))}</td><td class="num">${esc(qtyFmt(s.dQtyAvailable))}</td><td class="num">${esc(qtyFmt(s.dReorderPoint))}</td><td class="num">${esc(money(s.dValue))}</td></tr>`).join("");
+          return `<div class="card"><div class="card-head"><h2>${esc(t("prod.stock"))}</h2>
+              <span class="muted">${esc(t("prod.stockSummary", { oh: qtyFmt(m.dQtyOnHand), av: qtyFmt(m.dQtyAvailable), oo: qtyFmt(m.dQtyOnOrder), u: m.cStockUOM }))}</span>
+              <span style="margin-left:auto;display:flex;gap:8px"><button class="btn small" id="prodMove">＋ ${esc(t("inv.newMovement"))}</button><a class="btn small" href="#/inv/stock">${esc(t("menu.inv.stock"))} →</a></span></div>
+            ${rows ? `<div class="table-wrap"><table class="grid"><thead><tr><th>${esc(t("f.inv.cWarehouse"))}</th><th></th><th class="num">${esc(t("f.inv.dQtyOnHand"))}</th><th class="num">${esc(t("f.inv.dQtyReserved"))}</th><th class="num">${esc(t("f.inv.dQtyAvailable"))}</th><th class="num">${esc(t("f.par.dReorderPoint"))}</th><th class="num">${esc(t("f.inv.dValue"))}</th></tr></thead><tbody>${rows}</tbody></table></div>`
+              : `<div class="empty">${esc(t("prod.noStock"))}</div>`}</div>`;
+        },
+        bind: (m) => { const b = $("#prodMove"); if (b) b.addEventListener("click", () => newWith("movements", { cProduct: m.cCode, cDescFR: dl(m, "cDesc"), cWarehouse: m.cDefaultWarehouse || "ENT-01" })); },
+      },
+    },
+    warehouses: {
+      api: "warehouses", route: "/inv/warehouses", tabset: "wh", title: "wh.title", sub: "wh.subtitle", one: "wh.one", newTitle: "wh.new",
+      id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cName")}`, sort: "cCode",
+      columns: [
+        { f: "cCode", l: "f.cCode" }, { f: "cNameFR", l: "f.cName", wrap: true, fmt: (v, r) => esc(dl(r, "cName")) },
+        { f: "cType", l: "f.wh.cType", fmt: (v) => esc(t("o.wh." + v)) }, { f: "cCity", l: "f.cCity" },
+        { f: "lUseLocations", l: "f.wh.lUseLocations", fmt: yesNo }, { f: "lActive", l: "opt.active", fmt: yesNo },
+      ],
+      defaults: { cType: "main", cProvince: "QC", cCountry: "CA", lUseLocations: true, lActive: true },
+      sections: [
+        { t: "common.general", fields: [
+          { f: "cCode", l: "f.cCode", req: true, key: true },
+          { f: "cType", l: "f.wh.cType", type: "select", options: opts("o.wh.", ["main", "transit", "consignment", "quarantine", "virtual"]) },
+          { f: "cManager", l: "f.wh.cManager" }, { f: "lActive", l: "opt.active", type: "check" },
+          { f: "cNameFR", l: "f.cNameFR", req: true, span: 2 }, { f: "cNameEN", l: "f.cNameEN", span: 2 },
+        ] },
+        { t: "sup.address", fields: [
+          { f: "cAddress1", l: "f.cAddress1", span: 2 }, { f: "cCity", l: "f.cCity" }, { f: "cProvince", l: "f.cProvince" },
+          { f: "cZipCode", l: "f.cZipCode" }, { f: "cCountry", l: "f.cCountry" }, { f: "cPhone", l: "f.wh.cPhone" }, { f: "cEmail", l: "f.email", type: "email" },
+        ] },
+        { t: "wh.rules", help: "wh.rules.help", fields: [
+          { f: "lUseLocations", l: "f.wh.lUseLocations", type: "check", help: "f.wh.lUseLocations.help" },
+          { f: "lAllowNegative", l: "f.wh.lAllowNegative", type: "check" },
+          { f: "cReceivingLoc", l: "f.wh.cReceivingLoc", lookup: "locations", lookupParams: (m) => ({ wh: m.cCode }) },
+          { f: "cShippingLoc", l: "f.wh.cShippingLoc", lookup: "locations", lookupParams: (m) => ({ wh: m.cCode }) },
+        ] },
+      ],
+    },
+    locations: {
+      api: "locations", route: "/inv/locations", tabset: "wh", title: "wh.title", sub: "wh.subtitle", one: "loc.one", newTitle: "loc.new",
+      id: (r) => r.cWarehouse + "/" + r.cCode, label: (r) => `${r.cWarehouse} / ${r.cCode}`, sort: "iPickSeq",
+      filters: [whFilter, { f: "cType", l: "f.loc.cType", options: opts("o.loc.", LOCATION_TYPES) }, { f: "lBlocked", l: "f.loc.lBlocked", options: [["true", "common.yes"], ["false", "common.no"]] }],
+      columns: [
+        { f: "cWarehouse", l: "f.inv.cWarehouse" }, { f: "cCode", l: "f.loc.cCode" }, { f: "cZone", l: "f.loc.cZone" }, { f: "cAisle", l: "f.loc.cAisle" },
+        { f: "cRack", l: "f.loc.cRack" }, { f: "cLevel", l: "f.loc.cLevel" }, { f: "cBin", l: "f.loc.cBin" },
+        { f: "cType", l: "f.loc.cType", fmt: (v) => esc(t("o.loc." + v)) }, { f: "cDescription", l: "f.cDescription", wrap: true },
+        { f: "iPickSeq", l: "f.loc.iPickSeq", num: true },
+        { f: "lBlocked", l: "f.loc.lBlocked", fmt: (v) => (v ? `<span class="badge no">${esc(t("f.loc.lBlocked"))}</span>` : "") },
+      ],
+      defaults: () => ({ cWarehouse: "ENT-01", cType: "picking", lMixProducts: true, lMixLots: true, lActive: true }),
+      sections: [
+        { t: "common.general", fields: [
+          { f: "cWarehouse", l: "f.inv.cWarehouse", req: true, key: true, lookup: "warehouses" },
+          { f: "cCode", l: "f.loc.cCode", key: true, help: "f.loc.cCode.help" },
+          { f: "cType", l: "f.loc.cType", type: "select", options: opts("o.loc.", LOCATION_TYPES) },
+          { f: "dQtyOnHand", l: "f.inv.dQtyOnHand", readonly: true, show: (m, n) => !n },
+          { f: "cDescription", l: "f.cDescription", span: 2 }, { f: "lActive", l: "opt.active", type: "check" },
+          { f: "lBlocked", l: "f.loc.lBlocked", type: "check", help: "f.loc.lBlocked.help" },
+        ] },
+        { t: "loc.hierarchy", help: "loc.hierarchy.help", fields: [
+          { f: "cZone", l: "f.loc.cZone" }, { f: "cAisle", l: "f.loc.cAisle" }, { f: "cRack", l: "f.loc.cRack" }, { f: "cLevel", l: "f.loc.cLevel" },
+          { f: "cBin", l: "f.loc.cBin" }, { f: "iPickSeq", l: "f.loc.iPickSeq", type: "number", help: "f.loc.iPickSeq.help" },
+        ] },
+        { t: "loc.wms", help: "loc.wms.help", fields: [
+          { f: "dMaxWeight", l: "f.loc.dMaxWeight", type: "number" }, { f: "dMaxVolume", l: "f.loc.dMaxVolume", type: "number" },
+          { f: "iMaxPallets", l: "f.loc.iMaxPallets", type: "number" },
+          { f: "lMixProducts", l: "f.loc.lMixProducts", type: "check" }, { f: "lMixLots", l: "f.loc.lMixLots", type: "check" },
+        ] },
+      ],
+    },
+    params: {
+      api: "stock-params", route: "/inv/params", title: "par.title", sub: "par.subtitle", one: "par.one", newTitle: "par.new",
+      id: (r) => r.cProduct + "/" + r.cWarehouse, label: (r) => `${r.cProduct} / ${r.cWarehouse}`, sort: "cProduct",
+      filters: [whFilter],
+      columns: [
+        { f: "cProduct", l: "f.prod.cCode" }, descCol("cDesc"), { f: "cWarehouse", l: "f.inv.cWarehouse" },
+        { f: "dReorderPoint", l: "f.par.dReorderPoint", num: true, fmt: (v) => esc(qtyFmt(v)) },
+        { f: "dMinQty", l: "f.par.dMinQty", num: true, fmt: (v) => esc(qtyFmt(v)) }, { f: "dMaxQty", l: "f.par.dMaxQty", num: true, fmt: (v) => esc(qtyFmt(v)) },
+        { f: "dOrderQty", l: "f.par.dOrderQty", num: true, fmt: (v) => esc(qtyFmt(v)) },
+        { f: "dQtyAvailable", l: "f.inv.dQtyAvailable", num: true, fmt: (v, r) => `<span class="${r.dReorderPoint !== "" && num(v) <= num(r.dReorderPoint) ? "low" : ""}">${esc(qtyFmt(v))}</span>` },
+        { f: "cDefaultLocation", l: "f.par.cDefaultLocation" },
+      ],
+      defaults: () => ({ cWarehouse: "ENT-01", lActive: true }),
+      sections: [
+        { t: "common.general", help: "par.help", fields: [
+          { f: "cProduct", l: "f.prod.cCode", req: true, key: true, lookup: "stockproducts" },
+          { f: "cWarehouse", l: "f.inv.cWarehouse", req: true, key: true, lookup: "warehouses" },
+          { f: "cDefaultLocation", l: "f.par.cDefaultLocation", lookup: "locations", lookupParams: (m) => ({ wh: m.cWarehouse }) },
+          { f: "lActive", l: "opt.active", type: "check" },
+          { f: "dReorderPoint", l: "f.par.dReorderPoint", type: "number", help: "f.par.dReorderPoint.help" },
+          { f: "dMinQty", l: "f.par.dMinQty", type: "number" }, { f: "dMaxQty", l: "f.par.dMaxQty", type: "number", help: "f.par.dMaxQty.help" },
+          { f: "dOrderQty", l: "f.par.dOrderQty", type: "number", help: "f.par.dOrderQty.help" },
+          { f: "iLeadTimeDays", l: "f.prod.iLeadTimeDays", type: "number" },
+        ] },
+      ],
+    },
+    movements: {
+      api: "stock-movements", route: "/inv/movements", title: "mv.title", sub: "mv.subtitle", one: "mv.one", newTitle: "mv.new",
+      id: (r) => r.iNo, label: (r) => `#${r.iNo} — ${r.cProduct}`, sort: "iNo", dir: "desc", noDelete: true,
+      locked: (m, isNew) => !isNew,
+      badge: (m, isNew) => (isNew ? "" : `<span class="badge mv-${esc(m.cType)}">${esc(t("o.mv." + m.cType))}</span>`),
+      sub2: (m, isNew) => (isNew ? t("mv.newHelp") : t("mv.postedBy", { u: m.cUser, d: fmtDateTime(m.dCreated) })),
+      filters: [{ f: "cType", l: "f.mv.cType", options: opts("o.mv.", MOVE_TYPES) }, whFilter],
+      columns: [
+        { f: "iNo", l: "#", num: true }, { f: "dDate", l: "f.mv.dDate" },
+        { f: "cType", l: "f.mv.cType", fmt: (v) => `<span class="badge mv-${esc(v)}">${esc(t("o.mv." + v))}</span>` },
+        { f: "cProduct", l: "f.prod.cCode" }, descCol("cDesc"),
+        { f: "cWarehouse", l: "f.mv.place", fmt: (v, r) => esc(v + (r.cLocation ? " / " + r.cLocation : "") + (r.cWhTo ? " → " + r.cWhTo + (r.cLocTo ? " / " + r.cLocTo : "") : "")) },
+        { f: "cLot", l: "f.mv.lotSerial", fmt: (v, r) => esc([v, r.cSerial].filter(Boolean).join(" · ")) },
+        { f: "dQty", l: "f.mv.dQty", num: true, fmt: (v, r) => esc(qtyFmt(v) + " " + (r.cUOM || "")) },
+        { f: "dValue", l: "f.inv.dValue", num: true, fmt: (v) => esc(money(v)) },
+        { f: "cDocNo", l: "f.mv.doc", fmt: (v, r) => esc(t("o.doc." + r.cDocType) + (v ? " " + v : "")) }, { f: "cUser", l: "f.mv.cUser" },
+      ],
+      defaults: () => ({ cType: "IN", dDate: today(), cDocType: "MAN", cWarehouse: "ENT-01", dQty: "1" }),
+      sections: [
+        { t: "common.general", fields: [
+          { f: "cType", l: "f.mv.cType", type: "select", options: opts("o.mv.", MOVE_TYPES), rerender: true, help: "mv.typeHelp" },
+          { f: "dDate", l: "f.mv.dDate", type: "date", req: true },
+          { f: "cProduct", l: "f.prod.cCode", req: true, lookup: "stockproducts", fill: "cDescFR" },
+          { f: "cDescFR", l: "f.cDescription", readonly: true },
+          { f: "dQty", l: "f.mv.dQty", type: "number", req: true, help: "mv.qtyHelp" },
+          { f: "dUnitCost", l: "f.mv.dUnitCost", type: "number", show: (m, n) => !n || MV_IN(m), help: "mv.costHelp" },
+          { f: "dValue", l: "f.inv.dValue", readonly: true, show: (m, n) => !n },
+          { f: "dAvgCostAfter", l: "f.mv.dAvgCostAfter", readonly: true, show: (m, n) => !n },
+        ] },
+        { t: "mv.place", fields: [
+          { f: "cWarehouse", l: "f.inv.cWarehouse", req: true, lookup: "warehouses" },
+          { f: "cLocation", l: "f.mv.cLocation", lookup: "locations", lookupParams: (m) => ({ wh: m.cWarehouse }) },
+          { f: "cWhTo", l: "f.mv.cWhTo", req: true, lookup: "warehouses", show: (m) => m.cType === "TRF" },
+          { f: "cLocTo", l: "f.mv.cLocTo", lookup: "locations", lookupParams: (m) => ({ wh: m.cWhTo }), show: (m) => m.cType === "TRF" },
+        ] },
+        { t: "mv.tracking", help: "mv.trackingHelp", fields: [
+          { f: "cLot", l: "f.mv.cLot" }, { f: "cSerial", l: "f.mv.cSerial" }, { f: "dExpiry", l: "f.mv.dExpiry", type: "date" },
+        ] },
+        { t: "mv.reference", fields: [
+          { f: "cDocType", l: "f.mv.cDocType", type: "select", options: opts("o.doc.", DOC_TYPES) }, { f: "cDocNo", l: "f.mv.cDocNo" },
+          { f: "cReason", l: "f.mv.cReason", span: 2 }, { f: "cComment", l: "f.Commentaires", type: "textarea", span: 4 },
+        ] },
+      ],
+    },
+    counts: {
+      api: "stock-counts", route: "/inv/counts", title: "cnt.title", sub: "cnt.subtitle", one: "cnt.one", newTitle: "cnt.new",
+      id: (r) => r.iNo, label: (r) => `#${r.iNo} — ${r.cWarehouse}`, sort: "iNo", dir: "desc",
+      locked: (m) => m.cStatus === "Posted",
+      badge: (m, isNew) => (isNew ? "" : statusBadge(m.cStatus)),
+      sub2: (m, isNew) => (isNew ? t("cnt.newHelp") : t("cnt.progress", { c: m.countedLines, n: m.lineCount })),
+      filters: [{ f: "cStatus", l: "f.cStatut", options: [["Draft", "status.Draft"], ["Posted", "status.Posted"]] }, whFilter],
+      columns: [
+        { f: "iNo", l: "#", num: true }, { f: "dDate", l: "f.mv.dDate" }, { f: "cWarehouse", l: "f.inv.cWarehouse" },
+        { f: "cDescription", l: "f.cDescription", wrap: true }, { f: "lineCount", l: "common.lineCount", num: true },
+        { f: "countedLines", l: "cnt.counted", num: true }, { f: "cStatus", l: "f.cStatut", fmt: statusBadge },
+      ],
+      defaults: () => ({ cWarehouse: "ENT-01", dDate: today(), lines: [] }),
+      sections: [{ t: "common.general", fields: [
+        { f: "cWarehouse", l: "f.inv.cWarehouse", req: true, key: true, lookup: "warehouses" },
+        { f: "dDate", l: "f.mv.dDate", type: "date" }, { f: "cDescription", l: "f.cDescription", span: 2 },
+        { f: "cLocationPrefix", l: "f.cnt.cLocationPrefix", help: "f.cnt.cLocationPrefix.help" },
+        { f: "cProductPrefix", l: "f.cnt.cProductPrefix", help: "f.cnt.cProductPrefix.help" },
+        { f: "dPosted", l: "f.cnt.dPosted", readonly: true, show: (m) => m.cStatus === "Posted" },
+        { f: "dValueDiff", l: "f.cnt.dValueDiff", readonly: true, show: (m) => m.cStatus === "Posted" },
+      ] }],
+      lines: {
+        title: "cnt.lines", help: "cnt.linesHelp", show: (m, isNew) => !isNew,
+        rowClass: (l) => (l.dDiff !== "" && l.dDiff != null && num(l.dDiff) !== 0 ? "diff" : ""),
+        cols: [
+          { f: "cProduct", l: "f.prod.cCode", w: "w-md", lookup: "stockproducts", fill: "cDescFR" }, { f: "cDescFR", l: "f.cDescription", w: "w-lg", ro: true },
+          { f: "cLocation", l: "f.mv.cLocation", w: "w-md", lookup: "locations", lookupParams: (m) => ({ wh: m.cWarehouse }) },
+          { f: "cLot", l: "f.mv.cLot", w: "w-sm" }, { f: "cSerial", l: "f.mv.cSerial", w: "w-sm" },
+          { f: "dQtyExpected", l: "f.cnt.dQtyExpected", w: "w-xs", n: true, ro: true },
+          { f: "dQtyCounted", l: "f.cnt.dQtyCounted", w: "w-sm", n: true }, { f: "dDiff", l: "f.cnt.dDiff", w: "w-xs", n: true, ro: true },
+        ],
+      },
+      actions: [
+        { id: "generate", l: "cnt.generate", show: (m, isNew) => !isNew && m.cStatus === "Draft", confirm: "cnt.generateConfirm",
+          run: async (m, ctx) => { await api(ctx.path, { method: "PUT", body: m }); return api(ctx.path + "/generate", { method: "POST" }); } },
+        { id: "post", l: "cnt.post", primary: true, show: (m, isNew) => !isNew && m.cStatus === "Draft", confirm: "cnt.postConfirm", done: "cnt.posted",
+          run: async (m, ctx) => { await api(ctx.path, { method: "PUT", body: m }); return api(ctx.path + "/post", { method: "POST" }); } },
+      ],
+    },
+    stock: {
+      api: "inventory/stock", route: "/inv/stock", title: "stk.title", sub: "stk.subtitle", noNew: true, rowHref: productLink,
+      id: (r) => r.cProduct, sort: "cProduct", filters: [whFilter],
+      columns: [
+        { f: "cProduct", l: "f.prod.cCode" }, descCol("cDesc"), { f: "cWarehouse", l: "f.inv.cWarehouse" }, { f: "cLocation", l: "f.mv.cLocation" },
+        { f: "cLot", l: "f.mv.cLot" }, { f: "cSerial", l: "f.mv.cSerial" }, { f: "dExpiry", l: "f.mv.dExpiry" },
+        { f: "dQtyOnHand", l: "f.inv.dQtyOnHand", num: true, fmt: (v) => esc(qtyFmt(v)) },
+        { f: "dQtyReserved", l: "f.inv.dQtyReserved", num: true, fmt: (v) => esc(qtyFmt(v)) },
+        { f: "dQtyAvailable", l: "f.inv.dQtyAvailable", num: true, fmt: (v) => esc(qtyFmt(v)) }, { f: "cUOM", l: "f.prod.unit" },
+        { f: "dValue", l: "f.inv.dValue", num: true, fmt: (v) => esc(money(v)) },
+      ],
+    },
+    valuation: {
+      api: "inventory/valuation", route: "/inv/valuation", title: "val.title", sub: "val.subtitle", noNew: true, rowHref: productLink,
+      id: (r) => r.cProduct, sort: "cProduct", filters: [whFilter],
+      columns: [
+        { f: "cProduct", l: "f.prod.cCode" }, descCol("cDesc"), { f: "cCategory", l: "f.prod.cCategory" }, { f: "cWarehouse", l: "f.inv.cWarehouse" },
+        { f: "cCostMethod", l: "f.prod.cCostMethod", fmt: (v) => esc(t("o.cost." + v)) },
+        { f: "dQtyOnHand", l: "f.inv.dQtyOnHand", num: true, fmt: (v, r) => esc(qtyFmt(v) + " " + r.cUOM) },
+        { f: "dUnitCost", l: "f.mv.dUnitCost", num: true, fmt: (v) => esc(money(v)) },
+        { f: "dValue", l: "f.inv.dValue", num: true, fmt: (v) => esc(money(v)) }, { f: "cGLInventory", l: "f.prod.cGLInventory" },
+      ],
+      footer: (data) => `<div class="totals"><table><tr class="grand"><td>${esc(t("val.total"))}</td><td>${esc(money(data.totalValue))}</td></tr></table></div>`,
+    },
+  });
+
+  // ---------- Replenishment: products at or below their reorder point, and the POs to create
+  function replenishmentView() {
+    let data = null;
+    let wh = "";
+    let whs = [];
+    let created = null;
+    return {
+      async load() {
+        whs = await api("lookups/warehouses?lang=" + lang);
+        data = await api("inventory/replenishment?size=500" + (wh ? "&f_cWarehouse=" + enc(wh) : ""));
+        data.items.forEach((r) => { r.pick = !!r.cSupplierCode; });
+      },
+      render() {
+        const rows = data.items.map((r, i) => `<tr data-i="${i}">
+            <td><input type="checkbox" data-pick ${r.pick ? "checked" : ""} ${r.cSupplierCode ? "" : "disabled"} aria-label="${esc(t("rep.pick"))}"></td>
+            <td><a href="#${productLink(r)}">${esc(r.cProduct)}</a></td><td class="wrap">${esc(dl(r, "cDesc"))}</td><td>${esc(r.cWarehouse)}</td>
+            <td class="num">${esc(qtyFmt(r.dQtyAvailable))}</td><td class="num">${esc(qtyFmt(r.dQtyOnOrder))}</td>
+            <td class="num">${esc(qtyFmt(r.dReorderPoint))}</td><td class="num">${esc(qtyFmt(r.dMaxQty))}</td>
+            <td class="num">${esc(qtyFmt(r.dSuggestedQty))} ${esc(r.cStockUOM)}</td>
+            <td class="w-sm"><input type="text" data-qty value="${esc(r.dPurchaseQty)}" inputmode="decimal" style="text-align:right;width:70px"> ${esc(r.cPurchaseUOM)}</td>
+            <td>${r.cSupplierCode ? esc(r.cSupplierCode + " — " + r.cSupplierName) : `<span class="badge no">${esc(t("rep.noSupplier"))}</span>`}</td>
+            <td class="num">${esc(money(r.dUnitCost))}</td><td class="num" data-amt></td></tr>`).join("");
+        const done = created ? `<div class="card notice"><div class="card-body">${esc(t("rep.created"))}
+            ${created.map((p) => `<a class="btn small" href="#/po/${enc(p.cPO)}">${esc(p.cPO)} — ${esc(p.cSupplierName)} (${esc(money(p.dTotalAmount))})</a>`).join(" ")}</div></div>` : "";
+        $("#view").innerHTML = pageHead(t("rep.title"), t("rep.subtitle"), `<button class="btn primary" id="createPo" ${data.items.length ? "" : "disabled"}>${esc(t("rep.createPo"))}</button>`) + done + `
+          <div class="card"><div class="toolbar"><select id="repWh" style="width:auto"><option value="">${esc(t("f.inv.cWarehouse"))}: ${esc(t("common.all"))}</option>
+              ${whs.map((w) => `<option value="${esc(w.code)}" ${w.code === wh ? "selected" : ""}>${esc(w.code)} — ${esc(w.label)}</option>`).join("")}</select>
+              <span class="help muted">${esc(t("rep.help"))}</span><span class="count">${esc(t("common.records", { n: fmtInt(data.total) }))}</span></div>
+            <div class="table-wrap">${data.items.length ? `<table class="grid"><thead><tr><th></th><th>${esc(t("f.prod.cCode"))}</th><th>${esc(t("f.cDescription"))}</th><th>${esc(t("f.inv.cWarehouse"))}</th>
+              <th class="num">${esc(t("f.inv.dQtyAvailable"))}</th><th class="num">${esc(t("f.inv.dQtyOnOrder"))}</th><th class="num">${esc(t("f.par.dReorderPoint"))}</th><th class="num">${esc(t("f.par.dMaxQty"))}</th>
+              <th class="num">${esc(t("rep.suggested"))}</th><th>${esc(t("rep.toOrder"))}</th><th>${esc(t("f.cSupplierName"))}</th><th class="num">${esc(t("rep.unitCost"))}</th><th class="num">${esc(t("f.lineTotal"))}</th></tr></thead>
+              <tbody>${rows}</tbody></table>` : `<div class="empty">${esc(t("rep.none"))}</div>`}</div>
+            <div class="totals"><table><tr class="grand"><td>${esc(t("rep.total"))}</td><td id="repTotal"></td></tr></table></div></div>`;
+        const totals = () => {
+          let sum = 0;
+          $$("tr[data-i]").forEach((tr) => {
+            const r = data.items[+tr.dataset.i];
+            const amt = num(r.dPurchaseQty) * num(r.dUnitCost);
+            $("[data-amt]", tr).textContent = money(amt);
+            if (r.pick) sum += amt;
+          });
+          $("#repTotal").textContent = money(sum);
+        };
+        $$("tr[data-i]").forEach((tr) => {
+          const r = data.items[+tr.dataset.i];
+          $("[data-pick]", tr).addEventListener("change", (e) => { r.pick = e.target.checked; totals(); });
+          $("[data-qty]", tr).addEventListener("input", (e) => { r.dPurchaseQty = numOnly(e.target); totals(); });
+        });
+        totals();
+        $("#repWh").addEventListener("change", async (e) => { wh = e.target.value; created = null; await this.load(); this.render(); });
+        $("#createPo").addEventListener("click", async () => {
+          // Quantity and cost in purchase units (e.g. cases): the PO lines are converted to stock units by the ERP
+          const lines = data.items.filter((r) => r.pick && num(r.dPurchaseQty) > 0)
+            .map((r) => ({ cProduct: r.cProduct, dPurchaseQty: r.dPurchaseQty, cSupplierCode: r.cSupplierCode, dUnitCost: r.dUnitCost }));
+          if (!lines.length) { toast(t("rep.nothing"), "error"); return; }
+          if (!confirm(t("rep.confirm", { n: lines.length }))) return;
+          try {
+            const res = await api("inventory/replenishment/po", { method: "POST", body: { cWarehouse: wh, lines } });
+            created = res.purchaseOrders;
+            toast(t("rep.createdToast", { n: created.length }), "success");
+            await this.load();
+            this.render();
+          } catch (e) { toast(t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic"), "error"); }
+        });
+      },
+    };
+  }
+
   function fmtDateTime(v) {
     if (!v) return "—";
     const d = new Date(v);
@@ -343,7 +835,7 @@
   // ------------------------------------------------------------------ Lookups
   const lookupCache = {};
   let uid = 0;
-  function bindLookup(input, kind, onPick) {
+  function bindLookup(input, kind, onPick, params) {
     const listId = "dl-" + (++uid);
     const dl = document.createElement("datalist");
     dl.id = listId;
@@ -353,13 +845,14 @@
     let timer = null;
     const load = () => {
       const q = input.value.trim();
-      api("lookups/" + kind + "?q=" + enc(q)).then((rows) => {
+      const extra = params ? Object.entries(params()).map(([k, v]) => "&" + k + "=" + enc(v == null ? "" : v)).join("") : "";
+      api("lookups/" + kind + "?q=" + enc(q) + "&lang=" + lang + extra).then((rows) => {
         lookupCache[kind] = lookupCache[kind] || {};
         rows.forEach((r) => { lookupCache[kind][r.code.toUpperCase()] = r.label; });
         dl.innerHTML = rows.map((r) => `<option value="${esc(r.code)}">${esc(r.label)}</option>`).join("");
       }).catch(() => {});
     };
-    input.addEventListener("focus", load, { once: true });
+    input.addEventListener("focus", load, { once: !params });
     input.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(load, 180); });
     input.addEventListener("change", () => {
       const label = (lookupCache[kind] || {})[input.value.trim().toUpperCase()];
@@ -376,10 +869,17 @@
       <div class="actions">${actions || ""}</div></div>`;
   }
 
-  function glTabs(active) {
-    return `<div class="tabs"><a href="#/gl/accounts" class="${active === "accounts" ? "active" : ""}">${esc(t("gl.tab.accounts"))}</a>
-      <a href="#/gl/cc" class="${active === "cc" ? "active" : ""}">${esc(t("gl.tab.cc"))}</a></div>`;
+  // Screens shown as tabs of one menu entry: [resource key, label]
+  const TABSETS = {
+    gl: [["gl", "gl.tab.accounts"], ["cc", "gl.tab.cc"]],
+    tax: [["taxcodes", "tax.tab.codes"], ["taxgroups", "tax.tab.groups"]],
+    wh: [["warehouses", "wh.tab.warehouses"], ["locations", "wh.tab.locations"]],
+    setup: [["categories", "setup.tab.categories"], ["uom", "setup.tab.uom"]],
+  };
+  function tabsHtml(R) {
+    return `<div class="tabs">${TABSETS[R.tabset].map(([k, l]) => `<a href="#${RES[k].route}" class="${RES[k] === R ? "active" : ""}">${esc(t(l))}</a>`).join("")}</div>`;
   }
+  const tabLabel = (R) => { const tab = TABSETS[R.tabset].find(([k]) => RES[k] === R); return tab ? t(tab[1]) : ""; };
 
   // ---------- Dashboard
   function dashboardView() {
@@ -400,6 +900,7 @@
             ${kpi("/po", t("dash.po"), fmtInt(data.purchaseOrders), t("dash.unbilledPo", { n: data.unbilledPOs }))}
             ${kpi("/receptions", t("dash.receptions"), fmtInt(data.receptions), t("dash.unbilledRec", { n: data.unbilledReceptions }))}
             ${kpi("/invoices", t("dash.invoices"), fmtInt(data.openInvoices), money(data.openInvoicesAmount) + " · " + t("dash.invoicesTotal", { n: data.invoices }))}
+            ${data.products != null ? kpi(data.reorderItems ? "/inv/replenishment" : "/inv/valuation", t("dash.inventory"), money(data.stockValue), t("dash.inventoryMeta", { n: fmtInt(data.products), r: data.reorderItems })) : ""}
           </div>
           <div class="card"><div class="card-head"><h2>${esc(t("dash.recent"))}</h2><a class="btn small" style="margin-left:auto" href="#/invoices">${esc(t("menu.ap.invoices"))} →</a></div>${recent}</div>`;
         $$("tr[data-href]").forEach((tr) => tr.addEventListener("click", () => { location.hash = tr.dataset.href; }));
@@ -430,6 +931,11 @@
       async load() {
         const params = new URLSearchParams({ q: st.q, page: st.page, size: st.size, sort: st.sort || "", dir: st.dir });
         Object.entries(st.filters).forEach(([k, v]) => { if (v !== "") params.set("f_" + k, v); });
+        // Filters whose options come from a lookup (e.g. the warehouses)
+        await Promise.all((R.filters || []).filter((f) => f.lookup && !f.options).map(async (f) => {
+          f.options = (await api("lookups/" + f.lookup + "?lang=" + lang)).map((r) => [r.code, r.code]);
+          f.raw = true;
+        }));
         data = await api(R.api + "?" + params.toString());
       },
       render() {
@@ -438,20 +944,22 @@
           const arrow = st.sort === c.f ? `<span class="arrow">${st.dir === "desc" ? "▼" : "▲"}</span>` : "";
           return `<th class="sortable ${c.num ? "num" : ""}" data-sort="${c.f}">${esc(t(c.l))}${arrow}</th>`;
         }).join("");
-        const rows = data.items.map((r) => `<tr class="clickable" data-id="${esc(R.id(r))}">${R.columns.map((c) => {
+        const href = (r) => (R.rowHref ? R.rowHref(r) : R.route + "/" + String(R.id(r)).split("/").map(enc).join("/"));
+        const rows = data.items.map((r) => `<tr class="${R.noClick ? "" : "clickable"}" data-href="${esc(R.noClick ? "" : href(r))}">${R.columns.map((c) => {
           const v = r[c.f];
           const cell = c.fmt ? c.fmt(v, r) : esc(v);
           return `<td class="${c.num ? "num" : ""} ${c.wrap ? "wrap" : ""}">${cell}</td>`;
         }).join("")}</tr>`).join("");
         const filters = (R.filters || []).map((f) => `<select data-filter="${f.f}" aria-label="${esc(t(f.l))}" style="width:auto">
             <option value="">${esc(t(f.l))}: ${esc(t("common.all"))}</option>
-            ${f.options.map(([v, l]) => `<option value="${esc(v)}" ${st.filters[f.f] === v ? "selected" : ""}>${esc(t(l))}</option>`).join("")}
+            ${f.options.map(([v, l]) => `<option value="${esc(v)}" ${st.filters[f.f] === v ? "selected" : ""}>${esc(f.raw ? l : t(l))}</option>`).join("")}
           </select>`).join("");
-        $("#view").innerHTML = pageHead(t(R.title), t(R.sub), `<a class="btn primary" href="#${R.route}/new">＋ ${esc(t("common.new"))}</a>`)
-          + (R.tabs ? glTabs(R.tabs) : "")
+        $("#view").innerHTML = pageHead(t(R.title), t(R.sub), R.noNew ? "" : `<a class="btn primary" href="#${R.route}/new">＋ ${esc(t("common.new"))}</a>`)
+          + (R.tabset ? tabsHtml(R) : "")
           + `<div class="card"><div class="toolbar"><input type="search" id="q" placeholder="${esc(t("common.search"))}" value="${esc(st.q)}">${filters}
               <span class="count">${esc(t("common.records", { n: fmtInt(data.total) }))}</span></div>
             <div class="table-wrap">${data.items.length ? `<table class="grid"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>` : `<div class="empty">${esc(t("common.empty"))}</div>`}</div>
+            ${R.footer ? R.footer(data) : ""}
             <div class="pager"><span>${esc(t("common.page", { p: data.page, n: pages }))}</span>
               <button class="btn small" id="prev" ${data.page <= 1 ? "disabled" : ""}>‹ ${esc(t("common.prev"))}</button>
               <button class="btn small" id="next" ${data.page >= pages ? "disabled" : ""}>${esc(t("common.next"))} ›</button></div></div>`;
@@ -473,7 +981,7 @@
           if (st.sort === f) st.dir = st.dir === "asc" ? "desc" : "asc"; else { st.sort = f; st.dir = "asc"; }
           reload();
         }));
-        $$("tr[data-id]").forEach((tr) => tr.addEventListener("click", () => { location.hash = "#" + R.route + "/" + tr.dataset.id.split("/").map(enc).join("/"); }));
+        $$("tr[data-href]").forEach((tr) => { if (tr.dataset.href) tr.addEventListener("click", () => { location.hash = "#" + tr.dataset.href; }); });
         $("#prev").addEventListener("click", () => { st.page--; reload(); });
         $("#next").addEventListener("click", () => { st.page++; reload(); });
       },
@@ -481,16 +989,22 @@
   }
 
   // ---------- Generic form
+  // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
+  // textarea | password | email), lookup (+ fill, lookupParams, onPick), show(model, isNew), rerender (redraw on change).
+  // Resource options: lines, totals, tax, locked(model, isNew), actions, panel { html(model), bind(model) }.
   function formView(key, id) {
     const R = RES[key];
     const isNew = id == null;
     let model = null;
     let errors = {};
     let missing = false;
+    let locked = false;
+    let activeTab = R.formTabs ? R.formTabs[0][0] : null; // R.formTabs: sections shown as tabs
     let taxInfo = null; // { code, tps, tvq } of the supplier, when R.tax
     let taxLive = isNew; // existing records keep their stored taxes until something is changed
 
     const cur = () => (R.currency ? R.currency(model) : "CAD");
+    const visible = (fd) => !fd.show || fd.show(model, isNew);
 
     // Load the supplier's TPS / TVQ numbers and recompute the taxes.
     async function loadSupplierTax(code) {
@@ -514,41 +1028,55 @@
     }
 
     function fieldHtml(fd) {
+      if (!visible(fd)) return "";
       const v = model[fd.f];
-      const ro = fd.readonly || (fd.key && !isNew);
-      const required = fd.req || (fd.reqNew && isNew);
+      const ro = locked || fd.readonly || (fd.key && !isNew);
+      const required = !locked && (fd.req || (fd.reqNew && isNew));
       const label = `<label for="f-${fd.f}">${esc(t(fd.l))}${required ? '<span class="req">*</span>' : ""}</label>`;
       const err = errors[fd.f] ? `<span class="err">${esc(t("err." + errors[fd.f]))}</span>` : "";
       const help = fd.help ? `<span class="help">${esc(t(fd.help))}</span>` : "";
       const cls = `field ${fd.span === 4 ? "span-4" : fd.span >= 2 ? "span-2" : ""} ${errors[fd.f] ? "invalid" : ""}`;
       if (fd.type === "check") {
-        return `<div class="${cls}"><label class="check"><input type="checkbox" id="f-${fd.f}" data-f="${fd.f}" ${v ? "checked" : ""}> ${esc(t(fd.l))}</label>${help}</div>`;
+        return `<div class="${cls}"><label class="check"><input type="checkbox" id="f-${fd.f}" data-f="${fd.f}" ${v ? "checked" : ""} ${ro ? "disabled" : ""}> ${esc(t(fd.l))}</label>${help}${err}</div>`;
       }
       let input;
       if (fd.type === "select") {
-        input = `<select id="f-${fd.f}" data-f="${fd.f}">${fd.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(v) === ov ? "selected" : ""}>${esc(fd.raw ? ol : t(ol))}</option>`).join("")}</select>`;
+        input = `<select id="f-${fd.f}" data-f="${fd.f}" ${ro ? "disabled" : ""}>${fd.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(v == null ? "" : v) === ov ? "selected" : ""}>${esc(fd.raw ? ol : t(ol))}</option>`).join("")}</select>`;
       } else if (fd.type === "textarea") {
-        input = `<textarea id="f-${fd.f}" data-f="${fd.f}">${esc(v)}</textarea>`;
+        input = `<textarea id="f-${fd.f}" data-f="${fd.f}" ${ro ? "readonly" : ""}>${esc(v)}</textarea>`;
       } else {
         const list = fd.suggestions ? `list="sg-${fd.f}"` : "";
         const sg = fd.suggestions ? `<datalist id="sg-${fd.f}">${fd.suggestions.map((s) => `<option value="${esc(s)}">`).join("")}</datalist>` : "";
         const type = ["date", "password", "email"].includes(fd.type) ? fd.type : "text";
         const auto = fd.type === "password" ? 'autocomplete="new-password"' : fd.autocomplete ? `autocomplete="${fd.autocomplete}"` : "";
-        input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${list} ${auto} ${fd.inputmode ? `inputmode="${fd.inputmode}"` : ""}>${sg}`;
+        const mode = fd.type === "number" ? 'inputmode="decimal" style="text-align:right"' : fd.inputmode ? `inputmode="${fd.inputmode}"` : "";
+        input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${list} ${auto} ${mode}>${sg}`;
       }
       return `<div class="${cls}">${label}${input}${help}${err}</div>`;
     }
 
+    function lineCell(c, ln) {
+      const ro = locked || c.ro;
+      const aria = `aria-label="${esc(c.raw ? c.l : t(c.l))}"`;
+      if (c.type === "check") return `<input type="checkbox" data-lf="${c.f}" ${ln[c.f] ? "checked" : ""} ${ro ? "disabled" : ""} ${aria}>`;
+      if (c.type === "select") {
+        return `<select data-lf="${c.f}" ${ro ? "disabled" : ""} ${aria}>${c.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(ln[c.f] == null ? "" : ln[c.f]) === ov ? "selected" : ""}>${esc(c.rawOpt ? ol : t(ol))}</option>`).join("")}</select>`;
+      }
+      return `<input type="${c.type === "date" ? "date" : "text"}" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${c.lookup && !ro ? `data-lookup="${c.lookup}"` : ""} ${ro ? "readonly" : ""} ${aria}>`;
+    }
+
     function linesHtml() {
       const L = R.lines;
-      const head = L.cols.map((c) => `<th class="${c.n ? "num" : ""}">${esc(c.raw ? c.l : t(c.l))}</th>`).join("") + `<th class="num">${esc(t(L.amountLabel))}</th><th></th>`;
-      const body = (model.lines || []).map((ln, i) => `<tr data-line="${i}">${L.cols.map((c) =>
-        `<td class="${c.w}"><input type="text" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${c.lookup ? `data-lookup="${c.lookup}"` : ""} aria-label="${esc(c.raw ? c.l : t(c.l))}"></td>`).join("")}
-        <td class="num" data-amount>${esc(money(L.amount(ln), cur()))}</td>
-        <td><button type="button" class="link-btn" data-remove="${i}" title="${esc(t("common.removeLine"))}">✕</button></td></tr>`).join("");
-      return `<div class="card"><div class="card-head"><h2>${esc(t("common.lines"))}</h2><button type="button" class="btn small" id="addLine" style="margin-left:auto">＋ ${esc(t("common.addLine"))}</button></div>
-        <div class="table-wrap"><table class="grid lines"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
-        <div class="totals" id="totals"></div></div>`;
+      const head = L.cols.map((c) => `<th class="${c.n ? "num" : ""}">${esc(c.raw ? c.l : t(c.l))}</th>`).join("")
+        + (L.amount ? `<th class="num">${esc(t(L.amountLabel))}</th>` : "") + (locked ? "" : "<th></th>");
+      const body = (model.lines || []).map((ln, i) => `<tr data-line="${i}" class="${L.rowClass ? L.rowClass(ln) : ""}">${L.cols.map((c) => `<td class="${c.w}">${lineCell(c, ln)}</td>`).join("")}
+        ${L.amount ? `<td class="num" data-amount>${esc(money(L.amount(ln), cur()))}</td>` : ""}
+        ${locked ? "" : `<td><button type="button" class="link-btn" data-remove="${i}" title="${esc(t("common.removeLine"))}">✕</button></td>`}</tr>`).join("");
+      const addBtn = locked ? "" : `<button type="button" class="btn small" id="addLine" style="margin-left:auto">＋ ${esc(t("common.addLine"))}</button>`;
+      return `<div class="card"><div class="card-head"><h2>${esc(t(L.title || "common.lines"))}</h2>${L.help ? `<span class="help muted">${esc(t(L.help))}</span>` : ""}${addBtn}</div>
+        <div class="table-wrap"><table class="grid lines"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+        ${(model.lines || []).length ? "" : `<div class="empty">${esc(t("common.noLines"))}</div>`}</div>
+        ${R.totals ? '<div class="totals" id="totals"></div>' : ""}</div>`;
     }
 
     function totalsHtml() {
@@ -565,11 +1093,14 @@
 
     function refreshAmounts() {
       if (!R.lines) return;
-      $$("tr[data-line]").forEach((tr) => {
-        const ln = model.lines[+tr.dataset.line];
-        $("[data-amount]", tr).textContent = money(R.lines.amount(ln), cur());
-      });
+      if (R.lines.amount) {
+        $$("tr[data-line]").forEach((tr) => {
+          const ln = model.lines[+tr.dataset.line];
+          $("[data-amount]", tr).textContent = money(R.lines.amount(ln), cur());
+        });
+      }
       const totals = $("#totals");
+      if (!totals) return;
       const focused = document.activeElement && document.activeElement.id;
       const caret = focused && document.activeElement.selectionStart;
       totals.innerHTML = totalsHtml();
@@ -600,17 +1131,48 @@
         $("#view").innerHTML = pageHead(t(R.one), "", `<a class="btn" href="#${R.route}">← ${esc(t("common.back"))}</a>`) + `<div class="card"><div class="empty">${esc(t("common.notFound"))}</div></div>`;
         return;
       }
+      locked = !!(R.locked && R.locked(model, isNew));
       const title = isNew ? t(R.newTitle) : `${t(R.one)} ${R.label(model)}`;
-      const crumbs = `<a href="#${R.route}">${esc(t(R.title))}</a>${R.tabs ? " / " + esc(t("gl.tab." + R.tabs)) : ""}`;
-      const actions = `<a class="btn" href="#${R.route}">${esc(t("common.cancel"))}</a>
-        ${isNew ? "" : `<button class="btn danger" id="deleteBtn">${esc(t("common.delete"))}</button>`}
-        <button class="btn primary" id="saveBtn">${esc(t("common.save"))}</button>`;
-      const sections = R.sections.map((s) => `<div class="card"><div class="card-head"><h2>${esc(t(s.t))}</h2>
-          ${!isNew && s === R.sections[0] && model.cSource ? sourceBadge(model.cSource) : ""}</div>
-        <div class="card-body"><div class="form-grid">${s.fields.map(fieldHtml).join("")}</div></div></div>`).join("");
-      $("#view").innerHTML = pageHead(title, "", actions, crumbs) + `<form id="form" novalidate>${sections}${R.lines ? linesHtml() : ""}</form>`;
-      if (R.lines) { $("#totals").innerHTML = totalsHtml(); bindTotals(); }
+      const crumbs = `<a href="#${R.route}">${esc(t(R.title))}</a>${R.tabset ? " / " + esc(tabLabel(R)) : ""}`;
+      const extra = (R.actions || []).filter((a) => !a.show || a.show(model, isNew))
+        .map((a) => `<button class="btn ${a.primary ? "primary" : ""}" data-action="${a.id}">${esc(t(a.l))}</button>`).join("");
+      const actions = locked
+        ? `<a class="btn" href="#${R.route}">← ${esc(t("common.back"))}</a>${extra}`
+        : `<a class="btn" href="#${R.route}">${esc(t("common.cancel"))}</a>
+        ${isNew || R.noDelete ? "" : `<button class="btn danger" id="deleteBtn">${esc(t("common.delete"))}</button>`}
+        ${extra}<button class="btn primary" id="saveBtn">${esc(t("common.save"))}</button>`;
+      const badge = R.badge ? R.badge(model, isNew) : (!isNew && model.cSource ? sourceBadge(model.cSource) : "");
+      // Tabs: each section / the lines / the panel says its tab; the tab with an error is opened
+      const tabOf = (x) => (R.formTabs ? x.tab || R.formTabs[0][0] : null);
+      const wrap = (tab, html) => (R.formTabs && html ? `<div class="ftab" data-tab="${tab}" ${tab === activeTab ? "" : "hidden"}>${html}</div>` : html);
+      const tabHasError = (k) => R.sections.some((s) => tabOf(s) === k && s.fields.some((fd) => errors[fd.f]));
+      if (R.formTabs && Object.keys(errors).length) {
+        const bad = R.sections.find((s) => s.fields.some((fd) => errors[fd.f]));
+        if (bad) activeTab = tabOf(bad); else if (errors.lines && R.lines) activeTab = tabOf(R.lines);
+      }
+      const sections = R.sections.map((s, i) => {
+        const fields = s.fields.map(fieldHtml).join("");
+        if (!fields) return "";
+        return wrap(tabOf(s), `<div class="card"><div class="card-head"><h2>${esc(t(s.t))}</h2>${i === 0 ? badge : ""}</div>
+          <div class="card-body">${s.help ? `<p class="help muted section-help">${esc(t(s.help))}</p>` : ""}<div class="form-grid">${fields}</div></div></div>`);
+      }).join("");
+      const lines = R.lines && (!R.lines.show || R.lines.show(model, isNew)) ? wrap(tabOf(R.lines), linesHtml()) : "";
+      const panel = R.panel && !isNew ? wrap(tabOf(R.panel), R.panel.html(model)) : "";
+      const present = (sections + lines + panel).match(/data-tab="[^"]+"/g) || [];
+      if (R.formTabs && present.length && !present.includes(`data-tab="${activeTab}"`)) activeTab = R.formTabs[0][0];
+      const tabBar = R.formTabs ? `<div class="tabs form-tabs" role="tablist">${R.formTabs.filter(([k]) => present.includes(`data-tab="${k}"`))
+        .map(([k, l]) => `<a href="#" role="tab" data-ftab="${k}" class="${k === activeTab ? "active" : ""}">${esc(t(l))}${tabHasError(k) ? ' <span class="req">●</span>' : ""}</a>`).join("")}</div>` : "";
+      $("#view").innerHTML = pageHead(title, R.sub2 ? R.sub2(model, isNew) : "", actions, crumbs)
+        + tabBar + `<form id="form" novalidate>${sections}${lines}</form>${panel}`;
+      $$("[data-ftab]").forEach((a) => a.addEventListener("click", (e) => {
+        e.preventDefault();
+        activeTab = a.dataset.ftab;
+        $$("[data-ftab]").forEach((x) => x.classList.toggle("active", x === a));
+        $$(".ftab").forEach((d) => { d.hidden = d.dataset.tab !== activeTab; });
+      }));
+      if ($("#totals")) { $("#totals").innerHTML = totalsHtml(); bindTotals(); }
       bind();
+      if (R.panel && R.panel.bind && !isNew) R.panel.bind(model);
       if (R.tax && model[R.tax.supplier]) loadSupplierTax(model[R.tax.supplier]);
     }
 
@@ -620,8 +1182,9 @@
         const el = $(`[data-f="${fd.f}"]`, $("#form"));
         if (!el) return;
         const update = () => {
-          model[fd.f] = fd.type === "check" ? el.checked : fd.int ? parseInt(el.value, 10) : el.value;
+          model[fd.f] = fd.type === "check" ? el.checked : fd.int ? parseInt(el.value, 10) : fd.type === "number" ? numOnly(el) : el.value;
           if (fd.f === "cDevise" || fd.f === "Devise") refreshAmounts();
+          if (fd.rerender) render();
         };
         el.addEventListener(fd.type === "check" || fd.type === "select" ? "change" : "input", update);
         if (fd.lookup && !el.readOnly) {
@@ -634,40 +1197,79 @@
             }
             if (fd.onPick === "fillFromPo") fillFromPo(code);
             if (R.tax && fd.f === R.tax.supplier) { taxLive = true; loadSupplierTax(code); }
-          });
+          }, fd.lookupParams ? () => fd.lookupParams(model) : null);
         }
       });
       if (R.lines) {
         $$("tr[data-line]").forEach((tr) => {
           const ln = model.lines[+tr.dataset.line];
-          $$("input[data-lf]", tr).forEach((el) => {
+          $$("[data-lf]", tr).forEach((el) => {
+            const col = R.lines.cols.find((c) => c.f === el.dataset.lf) || {};
+            if (el.type === "checkbox" || el.tagName === "SELECT") {
+              el.addEventListener("change", () => { ln[el.dataset.lf] = el.type === "checkbox" ? el.checked : el.value; });
+              return;
+            }
             el.addEventListener("input", () => { ln[el.dataset.lf] = el.dataset.num ? numOnly(el) : el.value; taxLive = true; refreshAmounts(); });
-            if (el.dataset.lookup) bindLookup(el, el.dataset.lookup, (code) => { ln[el.dataset.lf] = code; });
+            if (el.dataset.lookup) {
+              bindLookup(el, el.dataset.lookup, (code, label) => {
+                ln[el.dataset.lf] = code;
+                if (col.fill && label) {
+                  ln[col.fill] = label;
+                  const target = $(`[data-lf="${col.fill}"]`, tr);
+                  if (target) target.value = label;
+                }
+              }, col.lookupParams ? () => col.lookupParams(model) : null);
+            }
           });
         });
         $$("[data-remove]").forEach((b) => b.addEventListener("click", () => { model.lines.splice(+b.dataset.remove, 1); taxLive = true; render(); }));
-        $("#addLine").addEventListener("click", () => {
-          model.lines = model.lines || [];
-          model.lines.push(R.lines.newLine ? R.lines.newLine(model) : {});
-          render();
-          const rows = $$("tr[data-line]");
-          const first = rows.length && $("input[data-lf]:not([data-lf=cUnique])", rows[rows.length - 1]);
-          if (first) first.focus();
-        });
+        const add = $("#addLine");
+        if (add) {
+          add.addEventListener("click", () => {
+            model.lines = model.lines || [];
+            model.lines.push(R.lines.newLine ? R.lines.newLine(model) : {});
+            render();
+            const rows = $$("tr[data-line]");
+            const first = rows.length && $("input[data-lf]:not([data-lf=cUnique]):not([readonly])", rows[rows.length - 1]);
+            if (first) first.focus();
+          });
+        }
       }
-      $("#form").addEventListener("submit", (e) => { e.preventDefault(); save(); });
-      $("#saveBtn").addEventListener("click", save);
+      $("#form").addEventListener("submit", (e) => { e.preventDefault(); if (!locked) save(); });
+      const sv = $("#saveBtn");
+      if (sv) sv.addEventListener("click", save);
       const del = $("#deleteBtn");
       if (del) del.addEventListener("click", remove);
+      $$("[data-action]").forEach((b) => b.addEventListener("click", async () => {
+        const a = R.actions.find((x) => x.id === b.dataset.action);
+        if (a.confirm && !confirm(t(a.confirm))) return;
+        b.disabled = true;
+        try {
+          const res = await a.run(model, { path: apiPath() });
+          if (res && typeof res === "object") model = res;
+          if (a.done) toast(t(a.done), "success");
+          render();
+        } catch (e) {
+          showError(e);
+          b.disabled = false;
+        }
+      }));
     }
 
     function apiPath() {
       return R.api + "/" + String(id).split("/").map(enc).join("/");
     }
 
+    function showError(e) {
+      if (e.field) { errors[e.field] = e.code; render(); }
+      let msg = t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic");
+      if (e.detail) msg += " (" + e.detail + ")";
+      toast(msg, "error");
+    }
+
     async function save() {
       errors = {};
-      R.sections.flatMap((s) => s.fields).forEach((fd) => {
+      R.sections.flatMap((s) => s.fields).filter(visible).forEach((fd) => {
         if ((fd.req || (fd.reqNew && isNew)) && !String(model[fd.f] == null ? "" : model[fd.f]).trim()) errors[fd.f] = "required";
       });
       if (Object.keys(errors).length) { render(); toast(t("err.form"), "error"); return; }
@@ -681,8 +1283,7 @@
           render();
         }
       } catch (e) {
-        if (e.field) { errors[e.field] = e.code; render(); }
-        toast(t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic"), "error");
+        showError(e);
       }
     }
 
@@ -692,13 +1293,14 @@
         await api(apiPath(), { method: "DELETE" });
         toast(t("common.deleted"), "success");
         location.hash = "#" + R.route;
-      } catch (e) { toast(t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic"), "error"); }
+      } catch (e) { showError(e); }
     }
 
     return {
       async load() {
         if (isNew) {
           model = Object.assign({}, typeof R.defaults === "function" ? R.defaults() : R.defaults || {});
+          if (prefill && prefill.key === key) { Object.assign(model, prefill.values); prefill = null; }
           return;
         }
         try { model = await api(apiPath()); } catch (e) { if (e.status === 404) missing = true; else throw e; }
@@ -740,30 +1342,34 @@
     return h ? (h.startsWith("/") ? h : "/" + h) : "/";
   }
 
+  // Menu entries that open the first screen of a tab set
+  const ALIASES = { "/gl": "gl", "/admin/taxes": "taxcodes" };
+  const routeOf = (path) => {
+    const norm = "/" + path.split("/").filter(Boolean).join("/");
+    if (ALIASES[norm]) return { key: ALIASES[norm], rest: [] };
+    const key = Object.keys(RES).filter((k) => norm === RES[k].route || norm.startsWith(RES[k].route + "/"))
+      .sort((a, b) => RES[b].route.length - RES[a].route.length)[0];
+    return key ? { key, rest: norm.slice(RES[key].route.length).split("/").filter(Boolean) } : null;
+  };
+  function activeMenuRoute(path) {
+    const hit = routeOf(path);
+    if (!hit) return path;
+    const R = RES[hit.key];
+    return R.menu || (R.tabset ? RES[TABSETS[R.tabset][0][0]].menu || RES[TABSETS[R.tabset][0][0]].route : R.route);
+  }
+
   function resolve(path) {
     const parts = path.split("/").filter(Boolean).map(decodeURIComponent);
     if (!parts.length) return dashboardView();
-    const [head, ...rest] = parts;
-    if (head === "gl") {
-      const tab = rest[0] === "cc" ? "cc" : "accounts";
-      const key = tab === "cc" ? "cc" : "gl";
-      const sub = rest.slice(1);
-      if (!sub.length) return listView(key);
-      if (sub[0] === "new") return formView(key, null);
-      return formView(key, sub.join("/"));
-    }
-    if (head === "account") return accountView();
-    if (head === "admin" && rest[0] === "users" && isAdmin()) {
-      if (!rest[1]) return listView("users");
-      if (rest[1] === "new") return formView("users", null);
-      return formView("users", rest[1]);
-    }
-    const map = { suppliers: "suppliers", invoices: "invoices", po: "po", receptions: "receptions" };
-    const key = map[head];
-    if (!key) return dashboardView();
-    if (!rest.length) return listView(key);
-    if (rest[0] === "new") return formView(key, null);
-    return formView(key, rest.join("/"));
+    if (parts[0] === "account") return accountView();
+    if (parts.join("/") === "inv/replenishment") return replenishmentView();
+    const hit = routeOf(parts.join("/"));
+    if (!hit) return dashboardView();
+    const R = RES[hit.key];
+    if (R.admin && !isAdmin()) return dashboardView();
+    if (!hit.rest.length) return listView(hit.key);
+    if (hit.rest[0] === "new" && !R.noNew) return formView(hit.key, null);
+    return formView(hit.key, hit.rest.join("/"));
   }
 
   let navToken = 0;

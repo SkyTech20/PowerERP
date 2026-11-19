@@ -6,9 +6,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py erp_api.py powerware_api.py purchasing_api.py db.py auth.py ./
+COPY app.py erp_api.py powerware_api.py purchasing_api.py inventory_api.py db.py auth.py ./
 COPY static/ ./static/
 COPY data/demo/ ./data/demo/
+# Products, taxes and inventory seed (fictitious, shared by both datasets)
+COPY data/inventory.json ./data/
 
 # SQLite database (users + ERP data). Mount /app/db as a volume to keep it.
 RUN mkdir -p /app/db

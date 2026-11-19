@@ -174,6 +174,8 @@ def register_erp(app, ns):
     invoices = ns.setdefault("erp_invoices", [])
 
     state = {"next_invoice_id": 1}
+    # Tables, lookups and dashboard figures added by other modules (inventory_api.py)
+    extra = {"tables": [], "lookups": {}, "summary": []}
 
     def _add_invoice(inv):
         inv["id"] = state["next_invoice_id"]
@@ -234,6 +236,7 @@ def register_erp(app, ns):
             "openInvoices": len(open_inv),
             "openInvoicesAmount": round(sum(_num(i.get("dTotalFacture")) for i in open_inv), 2),
             "recentInvoices": sorted(invoices, key=lambda i: i["id"], reverse=True)[:5],
+            **{k: v for fn in extra["summary"] for k, v in fn().items()},
         })
 
     @bp.route("/api/lookups/<kind>")
@@ -262,6 +265,8 @@ def register_erp(app, ns):
                     seen[s["cCodeAch"]] = s["cDescAch"]
             rows = [{"code": k, "label": v} for k, v in sorted(seen.items())]
             limit = 200
+        elif kind in extra["lookups"]:
+            rows, limit = extra["lookups"][kind]()
         else:
             raise ApiError("not_found", status=404)
         if q:
@@ -271,7 +276,14 @@ def register_erp(app, ns):
     def _tables():
         return ((gl, "gl"), (cc, "cc"), (suppliers, "suppliers"), (po_details, "po_details"),
                 (unbilled_po, "unbilled_po"), (receiving_details, "receiving_details"),
-                (unbilled_receiving, "unbilled_receiving"), (invoices, "invoices"))
+                (unbilled_receiving, "unbilled_receiving"), (invoices, "invoices"),
+                *extra["tables"])
+
+    def add_tables(pairs):
+        """Other modules' tables ((list, key), ...): saved, loaded, reset and cleared with the ERP's."""
+        extra["tables"].extend(pairs)
+        for target, key in pairs:
+            snapshot[key] = copy.deepcopy(target)
 
     def dump():
         """Every ERP table, for the database."""
@@ -292,7 +304,7 @@ def register_erp(app, ns):
     @bp.route("/api/clear", methods=["POST"])
     def erp_clear():
         """Empty every table (for demos that start from a blank ERP). /api/reset brings the demo data back."""
-        for target in (gl, cc, suppliers, po_details, unbilled_po, receiving_details, unbilled_receiving, invoices):
+        for target, _key in _tables():
             target[:] = []
         state["next_invoice_id"] = 1
         return jsonify({"ok": True})
@@ -793,4 +805,6 @@ def register_erp(app, ns):
         return _po_view(cpo) is not None
 
     return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load,
-            "save_po": _po_save, "po_exists": po_exists, "all_pos": _all_pos}
+            "save_po": _po_save, "po_exists": po_exists, "all_pos": _all_pos,
+            "add_tables": add_tables, "lookups": extra["lookups"], "summary": extra["summary"],
+            "api_error": ApiError, "paginate": _paginate}

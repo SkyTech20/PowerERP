@@ -23,6 +23,7 @@ from flask import Flask, jsonify, request
 import db
 from auth import PW_PREFIX, register_auth
 from erp_api import register_erp
+from inventory_api import register_inventory
 from powerware_api import register_powerware
 from purchasing_api import register_purchasing
 
@@ -76,6 +77,8 @@ hooks = register_erp(app, data)
 register_powerware(app, data, hooks["invoice_exists"], hooks["record_invoice"])
 # Best supplier per item and PO creation for SkyAI requisitions (Offer workflow)
 register_purchasing(app, data, hooks)
+# Products, taxes and inventory (warehouses, locations, movements, replenishment, counts)
+register_inventory(app, data, hooks)
 
 # ERP data: load what the database has; an empty database (or another dataset) is seeded from data/*.json.
 # The name changes when the history is added, so an existing database is re-seeded once with it.
