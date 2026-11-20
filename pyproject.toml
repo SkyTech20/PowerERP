@@ -33,6 +33,6 @@ known-first-party = ["powererp", "db", "auth", "erp_api", "inventory_api", "powe
 
 [tool.mypy]
 python_version = "3.10"
-files = ["powererp/core", "powererp/container.py", "powererp/seed"]
+files = ["powererp/core", "powererp/container.py", "powererp/seed", "powererp/modules"]
 ignore_missing_imports = true
 check_untyped_defs = true

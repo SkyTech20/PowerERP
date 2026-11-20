@@ -18,6 +18,7 @@ from pathlib import Path
 from flask import Blueprint, jsonify, request, send_from_directory
 
 from powererp import purchasing as purch
+from powererp.modules.common.registry import LookupRegistry
 from powererp.store import store
 
 ERP_STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -138,11 +139,8 @@ def register_erp(app, ns):
     """
     # Relational tables (seeded from these lists, which are not used afterwards)
     gl_db, cc_db, sup_db = store("gl_accounts"), store("cost_centers"), store("suppliers")
-    stores = [
-        (gl_db, "gl", ns["gl_ttGL_data"]),
-        (cc_db, "cc", ns["gl_ttCC_data"]),
-        (sup_db, "suppliers", ns["supplier_terms_data"]),
-    ]
+    # Seeded by their modules (powererp.modules.ledger / suppliers) through add_stores
+    stores = []
     # Seed of the purchasing tables (the lists are not used afterwards)
     seed_lists = {
         "po_details": ns["po_details"],
@@ -152,7 +150,14 @@ def register_erp(app, ns):
     }
     seed_invoices = []
     # Tables, lookups and dashboard figures added by other modules (inventory_api.py)
-    extra = {"tables": [], "stores": [], "lookups": {}, "summary": [], "after_load": [], "on_clear": []}
+    extra = {
+        "tables": [],
+        "stores": [],
+        "lookups": LookupRegistry(),
+        "summary": [],
+        "after_load": [],
+        "on_clear": [],
+    }
 
     def _add_invoice(inv):
         if seeding["on"]:
@@ -220,31 +225,8 @@ def register_erp(app, ns):
     def erp_lookup(kind):
         q = (request.args.get("q") or "").strip().lower()
         limit = 20
-        if kind == "suppliers":
-            rows = [{"code": s["cCode"], "label": s["cName"]} for s in sup_db.all()]
-        elif kind == "gl":
-            rows = [{"code": g["cCode"], "label": g["cDesc"]} for g in gl_db.all()]
-        elif kind == "cc":
-            rows = [
-                {"code": f'{c["cCC1"]}-{c["cCC2"]}' if c["cCC2"] else c["cCC1"], "label": c["cDesc"]}
-                for c in cc_db.all()
-            ]
-        elif kind == "po":
+        if kind == "po":
             rows = [{"code": p["cPO"], "label": p["cSupplierName"]} for p in _all_pos()]
-        elif kind == "terms":
-            seen = {}
-            for s in sup_db.all():
-                if s["cTermCode"] and s["cTermCode"] not in seen:
-                    seen[s["cTermCode"]] = s["cTermDesc"]
-            rows = [{"code": k, "label": v} for k, v in sorted(seen.items())]
-            limit = 200
-        elif kind == "buyers":
-            seen = {}
-            for s in sup_db.all():
-                if s["cCodeAch"] and s["cCodeAch"] not in seen:
-                    seen[s["cCodeAch"]] = s["cDescAch"]
-            rows = [{"code": k, "label": v} for k, v in sorted(seen.items())]
-            limit = 200
         elif kind in extra["lookups"]:
             rows, limit = extra["lookups"][kind]()
         else:
@@ -321,131 +303,6 @@ def register_erp(app, ns):
         for st, _key in reversed(_all_stores()):
             st.clear()
         return jsonify({"ok": True})
-
-    # ---------------- GL accounts ----------------
-
-    @bp.route("/api/gl-accounts", methods=["GET", "POST"])
-    def gl_collection():
-        if request.method == "GET":
-            return jsonify(_paginate(gl_db.all(), ("cCode", "cDesc")))
-        p = _payload()
-        _require(p, "cCode", "cDesc")
-        code = _s(p["cCode"])
-        if gl_db.get(code):
-            raise ApiError("duplicate", "cCode", 409)
-        row = {"cCode": code, "cDesc": _s(p["cDesc"])}
-        gl_db.insert(row)
-        return jsonify(row), 201
-
-    @bp.route("/api/gl-accounts/<code>", methods=["GET", "PUT", "DELETE"])
-    def gl_item(code):
-        row = gl_db.get(code, ci=False)
-        if row is None:
-            raise ApiError("not_found", status=404)
-        if request.method == "GET":
-            return jsonify(row)
-        if request.method == "DELETE":
-            gl_db.delete(row)
-            return jsonify({"ok": True})
-        p = _payload()
-        _require(p, "cDesc")
-        row["cDesc"] = _s(p["cDesc"])
-        gl_db.update(row)
-        return jsonify(row)
-
-    # ---------------- Cost centers (key: cCC1 + cCC2) ----------------
-
-    def _cc_find(cc1, cc2):
-        return cc_db.get(cc1, cc2 or "", ci=False)
-
-    @bp.route("/api/cost-centers", methods=["GET", "POST"])
-    def cc_collection():
-        if request.method == "GET":
-            return jsonify(_paginate(cc_db.all(), ("cCC1", "cCC2", "cDesc")))
-        p = _payload()
-        _require(p, "cCC1", "cDesc")
-        cc1, cc2 = _s(p["cCC1"]), _s(p.get("cCC2"))
-        if _cc_find(cc1, cc2):
-            raise ApiError("duplicate", "cCC2" if cc2 else "cCC1", 409)
-        if cc_db.get(cc1, cc2):
-            raise ApiError("duplicate", "cCC2" if cc2 else "cCC1", 409)
-        row = {"cCC1": cc1, "cCC2": cc2, "cDesc": _s(p["cDesc"])}
-        cc_db.insert(row)
-        return jsonify(row), 201
-
-    @bp.route("/api/cost-centers/<cc1>", defaults={"cc2": ""}, methods=["GET", "PUT", "DELETE"])
-    @bp.route("/api/cost-centers/<cc1>/<cc2>", methods=["GET", "PUT", "DELETE"])
-    def cc_item(cc1, cc2):
-        row = _cc_find(cc1, cc2)
-        if row is None:
-            raise ApiError("not_found", status=404)
-        if request.method == "GET":
-            return jsonify(row)
-        if request.method == "DELETE":
-            cc_db.delete(row)
-            return jsonify({"ok": True})
-        p = _payload()
-        _require(p, "cDesc")
-        row["cDesc"] = _s(p["cDesc"])
-        cc_db.update(row)
-        return jsonify(row)
-
-    # ---------------- Suppliers (getSupplierTerm.p) ----------------
-
-    _SUPPLIER_STR = (
-        "cName",
-        "cTermCode",
-        "cTermDesc",
-        "cAddress1",
-        "cAddress2",
-        "cCity",
-        "cProvince",
-        "cCountry",
-        "cZipCode",
-        "cNoTPS",
-        "cNoTVQ",
-        "cCodeAch",
-        "cDescAch",
-        "cDeptSauv",
-    )
-
-    def _supplier_apply(row, p):
-        for f in _SUPPLIER_STR:
-            if f in p:
-                row[f] = _s(p[f])
-        for f in ("iTypePO", "iStatutAch"):
-            if f in p:
-                row[f] = int(_num(p[f]))
-
-    @bp.route("/api/suppliers", methods=["GET", "POST"])
-    def supplier_collection():
-        if request.method == "GET":
-            return jsonify(_paginate(sup_db.all(), ("cCode", "cName", "cCity", "cTermCode", "cDescAch")))
-        p = _payload()
-        _require(p, "cCode", "cName")
-        code = _s(p["cCode"])
-        if sup_db.get(code):
-            raise ApiError("duplicate", "cCode", 409)
-        row = {"cCode": code, **{f: "" for f in _SUPPLIER_STR}, "iTypePO": 1, "iStatutAch": 1}
-        _supplier_apply(row, p)
-        sup_db.insert(row)
-        return jsonify(row), 201
-
-    @bp.route("/api/suppliers/<code>", methods=["GET", "PUT", "DELETE"])
-    def supplier_item(code):
-        row = sup_db.get(code, ci=False)
-        if row is None:
-            raise ApiError("not_found", status=404)
-        if request.method == "GET":
-            return jsonify(row)
-        if request.method == "DELETE":
-            sup_db.delete(row)
-            return jsonify({"ok": True})
-        p = _payload()
-        _require(p, "cName")
-        _supplier_apply(row, p)
-        sup_db.update(row)
-        return jsonify(row)
 
     # ---------------- Purchase orders (getPODetails.p + getUnbilledPO.p) ----------------
 
