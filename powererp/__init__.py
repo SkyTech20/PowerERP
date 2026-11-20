@@ -1,5 +1,2 @@
-"""PowerERP core package: configuration, PostgreSQL access (SQLAlchemy) and the relational models.
-
-The Flask modules at the project root (auth.py, erp_api.py, inventory_api.py...) are moved here
-area by area; see Docs/PowerERP-Reestruturacao.md in the Workflow folder.
-"""
+"""PowerERP: the application (create_app in factory.py), its modules (modules/), core building blocks (core/),
+database (database.py, models/, store.py), integrations (integrations/) and demo data (seed/)."""

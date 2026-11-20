@@ -214,6 +214,29 @@ class PurchaseOrderService:
                     best = (h.get("dOrderDate", ""), number(ln.get("dUnitCost")))
         return best[1] if best else 0.0
 
+    def quantity_on_order(self, product: str) -> float:
+        """Quantity of a product ordered on open POs (not invoiced yet) and not received yet."""
+        open_pos = {p["cPO"] for p in repo.unbilled_po_list()}
+        receptions = repo.receiving_details_list()
+        ordered = received = 0.0
+        code = product.upper()
+        for po in repo.po_details_list():
+            if po["cPO"] not in open_pos:
+                continue
+            ordered += sum(
+                number(ln.get("dQuantity"))
+                for ln in po.get("ttPOdetail", [])
+                if text(ln.get("cProductcode")).upper() == code
+            )
+            received += sum(
+                number(a.get("QuantiteRecue"))
+                for r in receptions
+                if text(r.get("NoBonCommande")) == po["cPO"]
+                for a in r.get("Articles", [])
+                if text(a.get("CodeArticle")).upper() == code
+            )
+        return max(0.0, ordered - received)
+
     def find_by_reference(self, reference: str, supplier: str) -> Row | None:
         """The PO a service created for a requisition and supplier (cReference), if any."""
         for po in repo.po_details_list():

@@ -17,7 +17,7 @@ from . import database
 from .container import Container
 from .core.errors import register_error_handlers
 from .integrations import powerware
-from .modules import catalog, ledger, purchasing, suppliers, system, taxes
+from .modules import catalog, inventory, ledger, purchasing, suppliers, system, taxes
 from .modules.common.registry import ReferenceRegistry
 from .seed.demo import DemoData
 
@@ -25,11 +25,10 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def create_app(database_url: str | None = None, dataset: str | None = None) -> Flask:
-    # Still at the project root: login, inventory and backups (moved into powererp/modules in O4 and O5)
+    # Still at the project root: login and backups (moved into powererp/modules in O5)
     import db
     from auth import register_auth
     from backup_api import register_backup
-    from inventory_api import register_inventory
 
     app = Flask("powererp", root_path=str(ROOT))
     c = Container()
@@ -48,7 +47,7 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     catalog.register(app, c, demo.inventory)
     purchasing.register(app, c, demo.lists)
     powerware.register(app, c)  # the web services SkyAI calls
-    register_inventory(app, c, demo.inventory)
+    inventory.register(app, c, demo.inventory)
     register_backup(app)  # Administration > Backups
     database.init_app(app)  # one transaction per request
     _seed_or_migrate(db, c, demo)

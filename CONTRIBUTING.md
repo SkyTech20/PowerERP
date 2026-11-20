@@ -1,8 +1,7 @@
 # PowerERP: how the code is organized
 
 The code is being reorganized in phases (Docs/PowerERP-Organizacao-Codigo.md in the Workflow folder). New code
-follows these rules; the modules still at the project root (`erp_api.py`, `inventory_api.py`, ...) move into
-`powererp/modules/` one by one.
+follows these rules; the modules still at the project root (`auth.py`, `backup_api.py`) move into `powererp/modules/` in O5.
 
 ## Layers
 

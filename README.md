@@ -40,7 +40,7 @@ SkyAI's **Offer** template (an internal purchase requisition) chooses the best s
 
 ## Products, taxes and inventory
 
-`inventory_api.py`, seeded from `data/inventory.json` (both datasets): taxes, 10 units, 9 categories, 16 products (the items of the demo POs, aluminium and fasteners), 3 warehouses, 9 locations in ENT-01, reorder parameters and opening stock.
+`powererp/modules/inventory` (and taxes / catalog), seeded from `data/inventory.json` (both datasets): taxes, 10 units, 9 categories, 16 products (the items of the demo POs, aluminium and fasteners), 3 warehouses, 9 locations in ENT-01, reorder parameters and opening stock.
 
 - **Administration → Taxes:** *tax codes* (TPS, TVQ, TVH-ON, TVH-NS) with their rate history (e.g. TVQ 9.5 % in 2012, 9.975 % since 2013), registration number, GL accounts and % recoverable; *tax groups* (QC = TPS + TVQ, TPS, ON, NS, EXO exempt, ZERO zero-rated), with the order and the "tax on tax" option. Other screens store only the group code and call `GET /api/tax-groups/<code>/calc`. The purchase orders created by Replenishment already use the product's purchase tax group.
 - **Inventory → Products:** identification (FR / EN descriptions, type, status, category, brand, barcode, manufacturer, links), units (stock / purchase / sales with conversion factors) and dimensions, costs (moving average or standard, last cost) and 5 prices, tax groups and eco fee, GL accounts (sales, purchases, inventory, cost of sales) and cost center, inventory flags (lot, serial, expiry, default warehouse, ABC), logistics (HS code, country of origin, warranty...) and the suppliers (item number, price per purchase unit, lead time, minimum, preferred).
@@ -175,11 +175,10 @@ powererp/
   core/                 # AppError + error handler, value parsing, pagination, HTTP helpers
   modules/              # one package per business area: routes -> services -> repository
     system/             #   screens' files, dashboard, lookups, demo data life cycle (reset / clear)
-    ledger/ suppliers/ taxes/ catalog/ purchasing/
+    ledger/ suppliers/ taxes/ catalog/ purchasing/ inventory/
   integrations/powerware/  # PowerWARE web services used by SkyAI (routes, XML, apCreatePO.p)
   models/ store.py stock.py backup.py database.py schemas.py seed/
 migrations/             # Alembic schema migrations (applied when the ERP starts)
-inventory_api.py        # products, stock, counts, replenishment (moves into powererp/modules in O4)
 auth.py backup_api.py db.py  # login and users, backups screen, settings storage (O5)
 static/                 # UI: index.html, app.js, i18n*.js (EN/FR), styles.css: no build step
 data/                   # Seed data (JSON) for an empty database

@@ -28,6 +28,7 @@ class CrudService:
     keys: tuple[str, ...] = ("cCode",)
     readonly: tuple[str, ...] = ()
     line_schema: dict[str, Any] | None = None
+    full_view_on_create: bool = True  # False: the record created is returned with the list's (short) view
 
     def __init__(self, repo: Store, schema: dict[str, Any], defaults: Row | None = None):
         self.repo = repo
@@ -99,14 +100,16 @@ def register_crud_routes(bp: Blueprint, url: str, name: str, service: CrudServic
         if request.method == "GET":
             rows = [{k: v for k, v in service.view(r, full=False).items() if k != "lines"} for r in service.list()]
             return jsonify(paginate_request(rows, search))
-        return jsonify(service.view(service.create(json_payload()))), 201
+        row = service.create(json_payload())
+        return jsonify(service.view(row, full=service.full_view_on_create)), 201
 
     def item(key: str):
         parts = key.split("/")
         if len(parts) != len(service.keys):
             raise NotFound()
+        current = service.get(*parts)  # 404 before anything else
         if request.method == "GET":
-            return jsonify(service.view(service.get(*parts)))
+            return jsonify(service.view(current))
         if request.method == "DELETE":
             service.delete(parts)
             return jsonify({"ok": True})
