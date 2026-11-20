@@ -70,7 +70,7 @@ export function formView(key, id) {
     } else if (fd.type === "textarea") {
       input = `<textarea id="f-${fd.f}" data-f="${fd.f}" ${ro ? "readonly" : ""}>${esc(v)}</textarea>`;
     } else {
-      const type = ["date", "password", "email"].includes(fd.type) ? fd.type : "text";
+      const type = ["date", "time", "password", "email"].includes(fd.type) ? fd.type : "text";
       const auto = fd.type === "password" ? 'autocomplete="new-password"' : fd.autocomplete ? `autocomplete="${fd.autocomplete}"` : "";
       const mode = fd.type === "number" ? 'inputmode="decimal" style="text-align:right"' : fd.inputmode ? `inputmode="${fd.inputmode}"` : "";
       input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${auto} ${mode}>`;
@@ -86,7 +86,7 @@ export function formView(key, id) {
       return `<select data-lf="${c.f}" ${ro ? "disabled" : ""} ${aria}>${c.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(ln[c.f] == null ? "" : ln[c.f]) === ov ? "selected" : ""}>${esc(c.rawOpt ? ol : t(ol))}</option>`).join("")}</select>`;
     }
     if (c.lookup && !ro) return `<select data-lf="${c.f}" data-lookup="${c.lookup}" ${aria}>${lookupOptions([], ln[c.f])}</select>`;
-    return `<input type="${c.type === "date" ? "date" : "text"}" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${ro ? "readonly" : ""} ${aria}>`;
+    return `<input type="${c.type === "date" || c.type === "time" ? c.type : "text"}" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${ro ? "readonly" : ""} ${aria}>`;
   }
 
   function linesHtml() {

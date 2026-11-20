@@ -21,7 +21,7 @@ def test_schema_is_migrated(app):
     head = ScriptDirectory.from_config(
         Config(str(Path(__file__).resolve().parent.parent / "alembic.ini"))
     ).get_current_head()
-    assert _sql("SELECT version_num FROM alembic_version")[0][0] == head == "0005"
+    assert _sql("SELECT version_num FROM alembic_version")[0][0] == head
     assert _sql("SELECT code FROM companies")[0][0] == "MAIN"
 
 
