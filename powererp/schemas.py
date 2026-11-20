@@ -62,6 +62,10 @@ RUN_FORMATS = ("min_per_unit", "units_per_hour", "min_per_lot")
 SETUP_SCOPES = ("work_center", "resource")
 MAKE_BUY = ("make", "buy", "both")
 TRACE_LEVELS = ("none", "lot", "serial")
+RECIPE_STATUS = ("draft", "in_review", "approved", "obsolete")
+PROCESS_TYPES = ("discrete", "batch", "continuous")
+ISSUE_METHODS = ("manual", "backflush", "pick")
+OUTPUT_KINDS = ("coproduct", "byproduct")
 
 # --------------------------------------------------------------------------- schemas
 # kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
@@ -365,6 +369,60 @@ PRODUCT_MFG = {
     "cNotes": "s",
 }
 PRODUCT_ATTRIBUTE = {"cAttribute": "s", "cUOM": "s", "dNumber": "d", "cValue": "s"}  # width 2.4 m, colour "white"
+# P8: recipes, the full method to make a product (Epicor method of manufacturing): one per product + revision
+RECIPE = {
+    "cProduct": "s",
+    "cRevision": "s",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "cProcessType": PROCESS_TYPES,
+    "dBaseQty": "d",  # the recipe is written for this quantity of the product
+    "cUOM": "s",
+    "dMinBatch": "d",
+    "dMaxBatch": "d",  # also the lot size of the min_per_lot operations
+    "dYieldPct": "d",  # good output / input of the whole recipe
+    "cNotes": "s",
+}
+RECIPE_EXTRA = {"cStatus": RECIPE_STATUS}  # changed by the approval flow (P10), not by an edit
+RECIPE_MATERIAL = {
+    "iSeq": "i",
+    "cComponent": "s",
+    "dQtyPer": "d",  # for the base quantity
+    "cUOM": "s",
+    "lFixedQty": "b",  # per batch whatever the quantity (e.g. a starter)
+    "dScrapPct": "d",
+    "iOpSeq": "i",  # the operation where it is consumed (0 = the first one)
+    "cIssueMethod": ISSUE_METHODS,
+    "cWarehouse": "s",
+    "cNotes": "s",
+}
+RECIPE_OUTPUT = {"cProduct": "s", "cKind": OUTPUT_KINDS, "dQtyPer": "d", "cUOM": "s", "dCostPct": "d"}
+RECIPE_OPERATION = {
+    "iOpSeq": "i",
+    "cOperation": "s",  # the standard operation it starts from (P5)
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "cWorkCenter": "s",  # where: a work center, a resource or a capability (one of them), or subcontracted
+    "cResource": "s",
+    "cCapability": "s",
+    "dSetupMin": "d",
+    "cRunFormat": RUN_FORMATS,
+    "dRunValue": "d",
+    "iCrew": "i",
+    "iQueueMin": "i",
+    "iMoveMin": "i",
+    "dMinWaitMin": "d",  # after the operation, before the next one (proofing, curing)
+    "dMaxWaitMin": "d",  # 0 / empty = no limit ("must not wait" otherwise)
+    "dYieldPct": "d",
+    "lReportingPoint": "b",
+    "lSubcontract": "b",
+    "cSupplier": "s",
+    "dSubcontractCost": "d",
+    "iSubcontractDays": "i",
+    "cPredecessors": "s",  # "10, 20": operations that must end first; empty = the previous one
+    "cInstructionFR": "s",
+    "cInstructionEN": "s",
+}
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
@@ -408,4 +466,5 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "operations": {"cRunFormat": "min_per_unit", "iCrew": 1, "lReportingPoint": True, "lActive": True},
     "setup_matrices": {"cScope": "work_center", "lActive": True},
     "product_mfg": {"cMakeBuy": "make", "cTraceLevel": "lot"},
+    "recipes": {"cRevision": "A", "cProcessType": "discrete", "dBaseQty": "1", "dYieldPct": "100", "cStatus": "draft"},
 }

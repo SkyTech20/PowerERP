@@ -10,6 +10,8 @@ P6: setup matrices /api/setup-matrices/<scope>/<code> (+ /grid), and /api/setup-
     (or &workCenter=) &default=: the changeover a sequence costs, and which rule gave it.
 P7: manufacturing data of the products /api/product-mfg/<product> (make / buy, setup family, lots, traceability,
     attributes); deleted with the product.
+P8: recipes /api/recipes/<product>/<revision> (materials, outputs, operations), and
+    /api/recipes/<product>/<revision>/explode?qty=: materials, times and cost for a quantity.
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -30,6 +32,7 @@ from powererp.store import store
 from .calendar import CalendarExceptionService, CalendarService
 from .operations import OperationService
 from .products import ProductMfgService
+from .recipes import RecipeService, prepare_demo
 from .resources import ResourceService
 from .service import (
     CapabilityService,
@@ -67,6 +70,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     _register_operations(bp, c, seed, centers, resources)
     _register_setup_matrix(bp, c, seed, centers, resources)
     _register_product_mfg(bp, c, seed)
+    _register_recipes(bp, c, seed)
     app.register_blueprint(bp)
 
 
@@ -245,3 +249,32 @@ def _register_product_mfg(bp: Blueprint, c: Container, seed: dict) -> None:
     products.on_delete.append(mfg.delete_for)
     register_crud_routes(bp, "product-mfg", "product_mfg", mfg, ("cProduct", "cSetupFamily", "cMakeBuy", "cNotes"))
     c.get("lifecycle").add(mfg.repo, "prod_product_mfg", seed.get("product_mfg", []))
+
+
+def _register_recipes(bp: Blueprint, c: Container, seed: dict) -> None:
+    refs = {
+        "products": c.get("products").find,
+        "product_mfg": c.get("product_mfg").find,
+        "operations": c.get("operations").find,
+        "work_centers": c.get("work_centers").find,
+        "resources": c.get("resources").find,
+        "capabilities": c.get("capabilities").find,
+        "suppliers": c.get("suppliers").find,
+        "with_capability": c.get("resources").with_capability,
+    }
+    recipes = c.register("recipes", RecipeService(store("recipes"), refs, c.get("references")))
+    register_crud_routes(bp, "recipes", "recipes", recipes, ("cProduct", "cRevision", "cDescFR", "cDescEN", "cStatus"))
+
+    @bp.route("/api/recipes/<product>/<revision>/explode")
+    def recipe_explode(product, revision):
+        recipes.get(product, revision)  # 404 when unknown
+        return jsonify(
+            recipes.explode(product, revision, _number_arg("qty", 0) or _base_qty(recipes, product, revision))
+        )
+
+    demo_lists = {**seed, "products": c.get("demo").inventory.get("products", [])}
+    c.get("lifecycle").add(recipes.repo, "prod_recipes", prepare_demo(seed.get("recipes", []), demo_lists))
+
+
+def _base_qty(recipes: RecipeService, product: str, revision: str) -> float:
+    return float(recipes.get(product, revision)["dBaseQty"] or 1)
