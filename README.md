@@ -179,7 +179,10 @@ powererp/
   integrations/powerware/  # PowerWARE web services used by SkyAI (routes, XML, apCreatePO.p)
   models/ store.py stock.py settings.py database.py schemas.py seed/
 migrations/             # Alembic schema migrations (applied when the ERP starts)
-static/                 # UI: index.html, app.js, i18n*.js (EN/FR), styles.css: no build step
+static/                 # UI, no build step: index.html, styles.css, i18n*.js (EN/FR)
+  js/                   #   ES modules: main.js (entry), core, state, router, login, menu, lookups, views
+    resources/          #   list / form definitions of each screen (erp.js, inventory.js)
+    screens/            #   generic list and form, dashboard, replenishment, backups, account
 data/                   # Seed data (JSON) for an empty database
 tests/                  # API tests (the contract) and tests/unit (services, without Flask nor database)
 ```
