@@ -14,6 +14,8 @@ P8: recipes /api/recipes/<product>/<revision> (materials, outputs, operations), 
     /api/recipes/<product>/<revision>/explode?qty=: materials, times and cost for a quantity.
 P9: the steps of the recipe operations; POST /api/recipes/<product>/<revision>/steps/check
     {iOpSeq, iStep, value}: the value against the limits of the step (what the shop floor will call).
+P10: POST /api/recipes/<product>/<revision>/submit | approve | reject | obsolete | default | copy,
+    GET /api/recipes/<product>/compare?a=&b=, GET /api/products/<code>/recipe?date= (the current version).
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -28,6 +30,8 @@ from flask import Blueprint, Flask, jsonify, request
 from powererp.container import Container
 from powererp.core.errors import AppError
 from powererp.core.http import json_payload
+from powererp.core.security import current_is_admin, current_username
+from powererp.core.values import text
 from powererp.modules.common.crud import register_crud_routes
 from powererp.modules.common.registry import label_lookup
 from powererp.store import store
@@ -35,6 +39,7 @@ from powererp.store import store
 from .calendar import CalendarExceptionService, CalendarService
 from .operations import OperationService
 from .products import ProductMfgService
+from .recipe_flow import RecipeFlow
 from .recipes import RecipeService, prepare_demo
 from .resources import ResourceService
 from .service import (
@@ -293,6 +298,39 @@ def _register_recipes(bp: Blueprint, c: Container, seed: dict) -> None:
         if step is None:
             raise AppError("unknown_ref", "iStep")
         return jsonify(check_value(step, body.get("value")))
+
+    flow = c.register("recipe_flow", RecipeFlow(recipes, current_username, current_is_admin))
+
+    @bp.route("/api/recipes/<product>/<revision>/<action>", methods=["POST"])
+    def recipe_action(product, revision, action):
+        body = request.get_json(silent=True) or {}
+        comment = text(body.get("cComment"))
+        if action == "copy":
+            row = flow.new_version(product, revision, text(body.get("cRevision")), comment)
+            return jsonify(recipes.view(row)), 201
+        moves = {
+            "submit": flow.submit,
+            "approve": flow.approve,
+            "reject": flow.reject,
+            "obsolete": flow.obsolete,
+        }
+        if action == "default":
+            return jsonify(recipes.view(flow.make_default(product, revision)))
+        if action not in moves:
+            raise AppError("not_found", status=404)
+        return jsonify(recipes.view(moves[action](product, revision, comment)))
+
+    @bp.route("/api/recipes/<product>/compare")
+    def recipe_compare(product):
+        return jsonify(flow.compare(product, request.args.get("a", ""), request.args.get("b", "")))
+
+    @bp.route("/api/products/<code>/recipe")
+    def product_current_recipe(code):
+        c.get("products").get(code)  # 404 when unknown
+        row = flow.current(code, _day("date", date.today()))
+        if row is None:
+            raise AppError("no_approved_recipe", status=404)
+        return jsonify(recipes.view(row))
 
     c.get("lifecycle").add(recipes.repo, "prod_recipes", prepare_demo(seed.get("recipes", []), demo_lists))
 

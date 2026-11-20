@@ -9,6 +9,7 @@ P6: setup matrices (one per work center or resource, the family pairs as lines).
 P7: manufacturing data of the products (1 to 1 with the item master), with their attributes.
 P8: recipes (product + revision) with their materials, outputs (co / by-products) and operations.
 P9: the steps of the recipe operations (child list recipes_steps, by operation).
+P10: approval of the recipes: who / when, validity, default version, history (recipes_history).
 """
 
 from .. import schemas as S
@@ -54,11 +55,13 @@ register_specs(
         keys=("cProduct", "cRevision"),
         order=("cProduct", "cRevision"),
         extra=S.RECIPE_EXTRA,
+        sparse=("dApprovedAt",),
         children={
             "materials": S.RECIPE_MATERIAL,
             "outputs": S.RECIPE_OUTPUT,
             "operations": S.RECIPE_OPERATION,
             "steps": S.RECIPE_STEP,
+            "history": S.RECIPE_HISTORY,
         },
     ),
 )

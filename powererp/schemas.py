@@ -386,8 +386,19 @@ RECIPE = {
     "dMaxBatch": "d",  # also the lot size of the min_per_lot operations
     "dYieldPct": "d",  # good output / input of the whole recipe
     "cNotes": "s",
+    "cChangeReason": "s",  # P10: why this version (shown in the history and the comparison)
+    "dEffectiveFrom": "date",
+    "dEffectiveTo": "date",
 }
-RECIPE_EXTRA = {"cStatus": RECIPE_STATUS}  # changed by the approval flow (P10), not by an edit
+# changed by the approval flow (P10), not by an edit
+RECIPE_EXTRA = {
+    "cStatus": RECIPE_STATUS,
+    "lDefault": "b",  # the approved version used by the new orders of the product
+    "cSubmittedBy": "s",
+    "cApprovedBy": "s",
+    "dApprovedAt": "ts",
+}
+RECIPE_HISTORY = {"dAt": "ts", "cUser": "s", "cAction": "s", "cFrom": "s", "cTo": "s", "cComment": "s"}
 RECIPE_MATERIAL = {
     "iSeq": "i",
     "cComponent": "s",

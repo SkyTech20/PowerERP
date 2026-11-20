@@ -355,7 +355,7 @@ def test_manufacturing_data_go_with_the_product(client):
 
 def test_demo_recipes(client):
     page = client.get("/api/recipes?size=50").get_json()
-    assert page["total"] == 6 and "materials" not in page["items"][0]
+    assert page["total"] == 7 and "materials" not in page["items"][0]  # 6 products, the white bread has a revision B
     bread = client.get("/api/recipes/PAIN-BL-675/A").get_json()
     assert [op["cOperation"] for op in bread["operations"]] == [
         "BAK-PESEE",
@@ -431,14 +431,78 @@ def test_step_value_check(client):
 
 
 def test_steps_are_saved_with_the_recipe(client):
-    recipe = client.get("/api/recipes/SUPP-ALU-01/A").get_json()
+    recipe = client.post("/api/recipes/SUPP-ALU-01/A/copy", json={}).get_json()  # A is approved: a new version
     steps = recipe["steps"] + [
         {"iOpSeq": 20, "iStep": 30, "cKind": "instruction", "cTitleFR": "Retouche", "cCondition": "ASPECT = Retouche"}
     ]
-    r = client.put("/api/recipes/SUPP-ALU-01/A", json={"steps": steps})
+    r = client.put("/api/recipes/SUPP-ALU-01/B", json={"steps": steps})
     assert r.status_code == 200 and r.get_json()["steps"][-1]["cCondition"] == "ASPECT = Retouche"
     bad = steps + [
         {"iOpSeq": 20, "iStep": 40, "cKind": "measure", "cTitleFR": "X", "cParam": "X", "dMin": "5", "dMax": "1"}
     ]
-    r = client.put("/api/recipes/SUPP-ALU-01/A", json={"steps": bad})
+    r = client.put("/api/recipes/SUPP-ALU-01/B", json={"steps": bad})
     assert r.status_code == 400 and r.get_json()["error"] == "max_below_min"
+
+
+# ------------------------------------------------------------------ P10: versions and approval of the recipes
+
+
+def test_demo_versions_and_current_recipe(client):
+    a = client.get("/api/recipes/PAIN-BL-675/A").get_json()
+    b = client.get("/api/recipes/PAIN-BL-675/B").get_json()
+    assert (a["cStatus"], a["lDefault"], a["cApprovedBy"]) == ("approved", True, "admin")
+    assert (b["cStatus"], b["lDefault"]) == ("in_review", False)
+    assert [h["cAction"] for h in a["history"]] == ["submit", "approve"]
+    cur = client.get("/api/products/PAIN-BL-675/recipe").get_json()
+    assert cur["cRevision"] == "A"
+    assert client.get("/api/products/PAIN-BL-675/recipe?date=2026-10-01").status_code == 404  # before it was valid
+    assert client.get("/api/products/LAP-14I7/recipe").status_code == 404
+
+
+def test_approval_flow(client):
+    url = "/api/recipes/PAIN-BL-675"
+    assert client.put(f"{url}/B", json={"cNotes": "x"}).status_code == 400  # in review: frozen
+    r = client.post(f"{url}/B/reject", json={})
+    assert r.status_code == 400 and r.get_json()["field"] == "cComment"  # say what to fix
+    r = client.post(f"{url}/B/reject", json={"cComment": "Trop peu de sel pour la levée"}).get_json()
+    assert r["cStatus"] == "draft" and r["history"][-1]["cComment"].startswith("Trop peu")
+    assert client.put(f"{url}/B", json={"cNotes": "corrigé"}).status_code == 200  # a draft is edited
+    assert client.post(f"{url}/B/submit", json={}).get_json()["cStatus"] == "in_review"
+    r = client.post(f"{url}/B/approve", json={"cComment": "OK qualité"}).get_json()
+    assert (r["cStatus"], r["lDefault"], r["cApprovedBy"]) == ("approved", True, "api")
+    assert client.get(f"{url}/A").get_json()["lDefault"] is False  # B is now the default
+    assert client.get("/api/products/PAIN-BL-675/recipe").get_json()["cRevision"] == "B"
+    assert client.post(f"{url}/A/default", json={}).get_json()["lDefault"] is True
+    assert client.post(f"{url}/A/obsolete", json={}).get_json()["cStatus"] == "obsolete"
+    assert client.get("/api/products/PAIN-BL-675/recipe").get_json()["cRevision"] == "B"  # the latest approved
+    r = client.post(f"{url}/A/approve", json={})
+    assert r.status_code == 409 and r.get_json()["error"] == "invalid_status"
+    assert client.delete(f"{url}/B").status_code == 409  # approved: kept
+    assert client.post(f"{url}/B/fly", json={}).status_code == 404
+
+
+def test_only_administrators_approve(app, client):
+    c = app.test_client()
+    client.post(
+        "/api/users", json={"username": "op1", "name": "Op", "role": "user", "password": "secret1", "active": True}
+    )
+    assert c.post("/api/auth/login", json={"username": "op1", "password": "secret1"}).status_code == 200
+    url = "/api/recipes/PAIN-BL-675/B"
+    assert c.post(f"{url}/approve", json={}).status_code == 403
+    assert c.post(f"{url}/reject", json={"cComment": "x"}).status_code == 403
+    r = c.post("/api/recipes/PAIN-BL-675/A/copy", json={"cComment": "Essai"}).get_json()  # anyone makes a new version
+    assert (r["cRevision"], r["cStatus"], r["history"][0]["cUser"]) == ("C", "draft", "op1")
+
+
+def test_new_version_and_compare(client):
+    r = client.post("/api/recipes/PAIN-BL-675/A/copy", json={"cComment": "Plus de levure"})
+    assert r.status_code == 201
+    c = r.get_json()
+    assert (c["cRevision"], c["cStatus"], c["cChangeReason"], len(c["steps"])) == ("C", "draft", "Plus de levure", 15)
+    diff = client.get("/api/recipes/PAIN-BL-675/compare?a=A&b=B").get_json()
+    salt = next(x for x in diff["materials"] if x["cKey"] == "SEL-FIN")
+    assert salt["cChange"] == "changed" and {"cField": "dQtyPer", "cFrom": "1.7", "cTo": "1.5"} in salt["fields"]
+    water = next(x for x in diff["steps"] if x["cKey"] == "20/20")
+    assert {"cField": "dTarget", "cFrom": "50", "cTo": "51"} in water["fields"]
+    assert diff["operations"] == [] and diff["outputs"] == []
+    assert client.get("/api/recipes/PAIN-BL-675/compare?a=A&b=Z").status_code == 404

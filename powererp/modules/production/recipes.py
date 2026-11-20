@@ -115,8 +115,11 @@ class RecipeService(CrudService):
             raise AppError("not_made", "cProduct")  # Production > Manufactured items: make or both
         require(row, "cRevision")
         row["cRevision"] = row["cRevision"].strip().upper()
-        if row.get("cStatus") in ("approved", "obsolete") and not is_new:
-            raise AppError("recipe_locked", "cStatus")  # an approved version is frozen (P10: new version)
+        if row.get("cStatus", "draft") != "draft" and not is_new:
+            # only a draft is edited: in review, approved and obsolete versions are frozen (new version: P10)
+            raise AppError("recipe_locked", "cStatus")
+        if text(row["dEffectiveFrom"]) and text(row["dEffectiveTo"]) and row["dEffectiveTo"] < row["dEffectiveFrom"]:
+            raise AppError("end_before_start", "dEffectiveTo")
         row["cDescFR"] = row["cDescFR"] or prod.get("cDescFR", "")
         row["cDescEN"] = row["cDescEN"] or prod.get("cDescEN", "")
         row["cUOM"] = row["cUOM"] or prod.get("cStockUOM", "")
@@ -281,7 +284,7 @@ class RecipeService(CrudService):
             raise AppError("cost_share_too_high", "outputs")
 
     def before_delete(self, row: Row) -> None:
-        if row.get("cStatus") == "approved":
+        if row.get("cStatus", "draft") != "draft":
             raise AppError("recipe_locked", "cStatus", status=409)
 
     def view(self, row: Row, full: bool = True) -> Row:
@@ -436,8 +439,10 @@ def prepare_demo(recipes: list[Row], seed: dict[str, list[Row]]) -> list[Row]:
     repo = cast(Store, MemoryRepository([], keys=("cProduct", "cRevision")))  # the same methods as a Store
     service = RecipeService(repo, refs, ReferenceRegistry())
     out = []
+    flow_fields = ("cStatus", "lDefault", "cSubmittedBy", "cApprovedBy", "dApprovedAt", "history")
     for raw in recipes:
-        row = service.create({k: v for k, v in raw.items() if k != "cStatus"})
-        row["cStatus"] = raw.get("cStatus", "draft")
+        row = service.create({k: v for k, v in raw.items() if k not in flow_fields})
+        row.update({k: raw[k] for k in flow_fields if k in raw})  # the approval state of the demo
+        row.setdefault("cStatus", "draft")
         out.append(row)
     return out
