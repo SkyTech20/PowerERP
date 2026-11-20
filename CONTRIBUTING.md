@@ -27,3 +27,16 @@ api (Flask routes)  ->  service (business rules)  ->  repository (database)  -> 
 - Type hints on public functions and methods.
 - Before a commit: `ruff check .`, `black .`, `mypy`, `python -m pytest` (the CI runs the same).
 - Tests: the API tests in `tests/` are the contract (screens, SkyAI); add unit tests for every service.
+
+## Front-end (`static/`)
+
+Plain ES modules loaded by the browser (`<script type="module" src="assets/js/main.js">`): no bundler, no build step.
+
+- **core.js**: shared helpers only (`t`, formatting, `api`, toasts). It imports no other module.
+- **state.js**: the shared state (user, screen shown, lookup cache). Other modules read the exported
+  variables and change them only through the setters (`setUser`, `setView`, `setPrefill`).
+- **resources/*.js**: a new screen of an existing kind is a list / form definition added to `RES`
+  (`Object.assign(RES, {...})`), not new rendering code.
+- **screens/*.js**: one file per screen that is not a generic list or form.
+- Every text through `t("key")`, with the key in EN and FR in the `i18n*.js` file of its area (plain scripts, `window.ERP_I18N`).
+- Avoid import cycles with `core.js`: give it a callback instead (see `setUnauthorizedHandler`).

@@ -101,7 +101,9 @@ def _blueprint(lifecycle: DataLifecycle, dashboard: DashboardRegistry, lookups: 
 
     @bp.route("/assets/<path:filename>")
     def assets(filename):
-        return send_from_directory(STATIC_DIR, filename)
+        # ES modules need a JavaScript MIME type (some Windows set-ups map .js to text/plain)
+        mimetype = "text/javascript" if filename.endswith(".js") else None
+        return send_from_directory(STATIC_DIR, filename, mimetype=mimetype)
 
     @bp.route("/api/summary")
     def summary():
