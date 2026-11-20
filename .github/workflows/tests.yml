@@ -1,4 +1,4 @@
-﻿name: Tests
+name: Tests
 
 on:
   push:
@@ -36,15 +36,27 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-          cache: pip
-          cache-dependency-path: |
-            requirements.txt
-            requirements-dev.txt
+
+      # pip cache: every run reads it, only main saves it (pull requests do not keep a copy each)
+      - name: Restore pip cache
+        id: pip-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-py3.10-${{ hashFiles('requirements.txt', 'requirements-dev.txt') }}
+          restore-keys: pip-${{ runner.os }}-py3.10-
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
+
+      - name: Save pip cache (main only)
+        if: github.ref == 'refs/heads/main' && steps.pip-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ steps.pip-cache.outputs.cache-primary-key }}
 
       - name: Lint and formatting
         run: |
