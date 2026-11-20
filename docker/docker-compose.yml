@@ -1,0 +1,60 @@
+# PowerERP on its own: PostgreSQL + the ERP, for a server (one client per project).
+#
+#   cd PowerERP/docker
+#   cp .env.example .env            # then set the passwords in .env
+#   docker compose up -d --build    # http://<server>:5050/ (127.0.0.1 only by default, see ERP_BIND)
+#
+# Guide: docker/README.md (update, backups and restore, several clients, HTTPS).
+# The PostgreSQL for development and the tests stays in ../docker-compose.yml (port 5433).
+name: ${COMPOSE_PROJECT_NAME:-powererp}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: powererp
+      POSTGRES_PASSWORD: ${ERP_DB_PASSWORD:?set ERP_DB_PASSWORD in docker/.env}
+      POSTGRES_DB: powererp
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Not published on the host: only the ERP reaches it, inside the network.
+    # To open it (e.g. a database tool on the server), add:  ports: ["127.0.0.1:5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U powererp -d powererp"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  erp:
+    build:
+      context: ..
+      dockerfile: ${ERP_DOCKERFILE:-Dockerfile}  # Dockerfile.demo: only the fictitious data of data/demo
+    image: ${ERP_IMAGE:-powererp:latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://powererp:${ERP_DB_PASSWORD}@db:5432/powererp
+      ERP_ADMIN_USER: ${ERP_ADMIN_USER:-admin}
+      ERP_ADMIN_PASSWORD: ${ERP_ADMIN_PASSWORD:?set ERP_ADMIN_PASSWORD in docker/.env}
+      ERP_SECRET_KEY: ${ERP_SECRET_KEY:-}
+      ERP_COOKIE_SECURE: ${ERP_COOKIE_SECURE:-0}
+      ERP_API_KEY: ${ERP_API_KEY:-}
+      ERP_DATASET: ${ERP_DATASET:-default}
+      BACKUP_SCHEDULER: ${BACKUP_SCHEDULER:-1}
+    volumes:
+      # Administration > Backups writes to /app/backups (the default folder of the screen)
+      - ${ERP_BACKUP_DIR:-./backups}:/app/backups
+    ports:
+      - "${ERP_BIND:-127.0.0.1}:${ERP_PORT:-5050}:5050"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5050/api/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+volumes:
+  pgdata:
