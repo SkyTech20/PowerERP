@@ -133,9 +133,13 @@ The first start creates the administrator `admin` with the password in `ERP_ADMI
 
 ### Docker
 
+On a server, use **`docker/docker-compose.yml`** (PostgreSQL + ERP, settings in `docker/.env`, backups, several clients, HTTPS): see [`docker/README.md`](docker/README.md).
+
 ```bash
-docker compose up -d --build     # PostgreSQL + ERP, http://localhost:5050/
+cd docker && cp .env.example .env && docker compose up -d --build     # http://localhost:5050/
 ```
+
+For development, `docker-compose.yml` at the root runs PostgreSQL on port 5433 for the ERP and the tests (`docker compose up -d db`), or PostgreSQL + ERP (`docker compose up -d --build`).
 
 Or the image alone, on an existing PostgreSQL (one database per client):
 
