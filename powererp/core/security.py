@@ -12,3 +12,16 @@ def current_username(outside_request: str = "system", without_user: str = "api")
     except RuntimeError:  # outside a request (seed)
         return outside_request
     return user["username"] if user else without_user
+
+
+def current_is_admin(outside_request: bool = True) -> bool:
+    """Administrator rights: a logged-in administrator, a call with the API key, or the start-up."""
+    from powererp.modules.auth import api_key_ok, current_user
+
+    try:
+        if api_key_ok():
+            return True
+        user = current_user()
+    except RuntimeError:  # outside a request (seed)
+        return outside_request
+    return bool(user) and user["role"] == "admin"

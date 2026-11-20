@@ -108,7 +108,12 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - kinds: instruction, add a material (weigh, scan the lot), set a parameter, measure, check, timer, report the production, second signature;
   - one value per step, with a code, a type (number, text, yes / no, list, photo), a target and limits; **critical** steps out of limits block, warn or hold the lot; frequency (once, every N units / minutes, each lot); a condition on an earlier value (`TEMP_PATE < 24`); attachment, required role;
   - `POST /api/recipes/<product>/<revision>/steps/check {iOpSeq, iStep, value}` checks a value against the step (what the shop floor screen will call); the Operator view shows the steps as cards and tests values.
-- Next: versions and approval of the recipes (P10).
+- **P10 (done): versions and approval of the recipes** (tab **Versions and history**, and the actions of the recipe screen):
+  - draft → in review → approved → obsolete (a review can be sent back to draft with a comment); only a draft is edited or deleted; approving and making obsolete need administrator rights;
+  - the approved version becomes the product's **default**; validity dates; `GET /api/products/<code>/recipe?date=` gives the version new orders use that day;
+  - **new version from** any version (next revision letter, reason), **history** of every change (who, when, comment), **comparison** of two versions (`GET /api/recipes/<product>/compare?a=&b=`: header, materials, operations, steps, outputs).
+  - Demo: every recipe approved; a revision B of the white bread (less salt) waits for approval.
+- The master data of Production (P1 to P10) is complete. Next, when Mohamed decides: operators and skills (P11), then production orders, shop floor and scheduling.
 
 ## Run
 

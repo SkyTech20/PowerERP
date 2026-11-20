@@ -41,6 +41,7 @@ _OVERRIDES = {
     "cGLCollected": "gl_collected",
     "cGLRecoverable": "gl_recoverable",
     "cGroup": "reason_group",  # "group" is an SQL keyword
+    "lDefault": "is_default",  # "default" too
 }
 
 

@@ -1,6 +1,7 @@
 /* PowerERP: Production: list / form definitions. P1: the reference lists of the shop floor; P2: calendars. */
-import { $, api, enc, esc, lang, numOnly, t, yesNo } from "../core.js";
+import { $, api, enc, esc, fmtDateTime, lang, numOnly, t, yesNo } from "../core.js";
 import { RES } from "../registry.js";
+import { isAdmin } from "../state.js";
 import { descCol, dl, newWith, optBadge, opts, today } from "./inventory.js";
 
 export const DOWNTIME_GROUPS = ["breakdown", "setup", "minor_stop", "reduced_speed", "no_material", "no_operator", "quality", "planned", "other"];
@@ -504,6 +505,44 @@ const operatorPreview = {
   },
 };
 
+// "approved" -> "Approuvée"; "B (approved)" -> "B (Approuvée)"
+const rsLabel = (v) => String(v || "").replace(/(draft|in_review|approved|obsolete)/g, (x) => t("mfg.o.rs." + x));
+
+// The versions of the product, the history of this one, and a comparison with another version
+const versionsPanel = {
+  tab: "versions",
+  html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.ap.versions"))}</h2></div><div id="apVersions" class="table-wrap"></div></div>
+    <div class="card"><div class="card-head"><h2>${esc(t("mfg.ap.history"))}</h2></div><div class="table-wrap"><table class="grid"><thead><tr>
+      <th>${esc(t("mfg.ap.when"))}</th><th>${esc(t("mfg.ap.who"))}</th><th>${esc(t("mfg.ap.action"))}</th><th>${esc(t("mfg.ap.fromTo"))}</th><th>${esc(t("mfg.ap.comment"))}</th></tr></thead><tbody>
+      ${(m.history || []).map((h) => `<tr><td>${esc(fmtDateTime(h.dAt))}</td><td>${esc(h.cUser)}</td><td>${esc(t("mfg.ap.a." + h.cAction))}</td><td>${esc(rsLabel(h.cFrom))} → ${esc(rsLabel(h.cTo))}</td><td>${esc(h.cComment)}</td></tr>`).join("")
+        || `<tr><td colspan="5" class="muted">${esc(t("mfg.ap.noHistory"))}</td></tr>`}</tbody></table></div></div>
+    <div class="card"><div class="card-head"><h2>${esc(t("mfg.ap.compare"))}</h2><span class="help muted">${esc(t("mfg.ap.compare.help"))}</span></div>
+      <div class="card-body"><div class="form-grid"><div class="field"><label for="apOther">${esc(t("mfg.ap.compareWith"))}</label><select id="apOther"></select></div></div><div id="apDiff"></div></div></div>`,
+  bind: (m) => {
+    const base = `#/prod/recipes/${enc(m.cProduct)}/`;
+    api(`recipes?f_cProduct=${enc(m.cProduct)}&sort=cRevision&size=100`).then((r) => {
+      $("#apVersions").innerHTML = `<table class="grid"><thead><tr><th>${esc(t("mfg.f.cRevision"))}</th><th>${esc(t("mfg.f.cStatus"))}</th><th>${esc(t("mfg.f.cChangeReason"))}</th><th>${esc(t("mfg.f.dEffectiveFrom"))}</th><th>${esc(t("mfg.f.dEffectiveTo"))}</th></tr></thead><tbody>
+        ${r.items.map((v) => `<tr class="${v.cRevision === m.cRevision ? "selected" : ""}"><td><a href="${base}${enc(v.cRevision)}">${esc(v.cRevision)}</a></td><td>${statusBadge(v.cStatus)}${v.lDefault ? " ★" : ""}</td><td>${esc(v.cChangeReason)}</td><td>${esc(v.dEffectiveFrom)}</td><td>${esc(v.dEffectiveTo)}</td></tr>`).join("")}</tbody></table>`;
+      const others = r.items.filter((v) => v.cRevision !== m.cRevision);
+      $("#apOther").innerHTML = `<option value=""></option>` + others.map((v) => `<option value="${esc(v.cRevision)}">${esc(v.cRevision)} — ${esc(t("mfg.o.rs." + v.cStatus))}</option>`).join("");
+    }).catch(() => {});
+    $("#apOther").addEventListener("change", async () => {
+      const other = $("#apOther").value;
+      if (!other) { $("#apDiff").innerHTML = ""; return; }
+      try {
+        const d = await api(`recipes/${enc(m.cProduct)}/compare?a=${enc(other)}&b=${enc(m.cRevision)}`);
+        const label = (f) => ["mfg.f." + f, "f." + f].map((k) => t(k)).find((v, i) => v !== ["mfg.f." + f, "f." + f][i]) || f;
+        const fields = (fs) => fs.map((f) => `<div>${esc(label(f.cField))} : ${esc(f.cFrom || "—")} → <strong>${esc(f.cTo || "—")}</strong></div>`).join("");
+        const block = (key, title) => (d[key].length ? `<h3>${esc(t(title))}</h3><table class="grid"><tbody>${d[key].map((x) =>
+          `<tr><td style="width:140px">${esc(x.cKey)}</td><td style="width:120px"><span class="badge ${x.cChange === "added" ? "yes" : x.cChange === "removed" ? "no" : ""}">${esc(t("mfg.ap.c." + x.cChange))}</span></td><td>${fields(x.fields)}</td></tr>`).join("")}</tbody></table>` : "");
+        const html = (d.header.length ? `<h3>${esc(t("common.general"))}</h3>${fields(d.header)}` : "")
+          + block("materials", "mfg.rc.materials") + block("operations", "mfg.rc.operations") + block("steps", "mfg.st.tab") + block("outputs", "mfg.rc.outputs");
+        $("#apDiff").innerHTML = `<p class="muted">${esc(t("mfg.ap.fromRev", { a: d.cFrom, b: d.cTo }))}</p>` + (html || `<div class="empty">${esc(t("mfg.ap.same"))}</div>`);
+      } catch (e) { $("#apDiff").innerHTML = ""; }
+    });
+  },
+};
+
 // The recipe for a quantity: materials, operations (time and cost), total, attribute warnings
 const explosion = {
   tab: "explode",
@@ -551,19 +590,43 @@ Object.assign(RES, {
       { f: "cProcessType", l: "mfg.f.cProcessType", fmt: (v) => esc(t("mfg.o.pt." + v)) },
       { f: "dBaseQty", l: "mfg.f.dBaseQty", n: true, fmt: (v, r) => `${esc(fmtNum(v))} ${esc(r.cUOM)}` },
       { f: "iMaterials", l: "mfg.rc.materials", n: true }, { f: "iOperations", l: "mfg.rc.operations", n: true }, { f: "iSteps", l: "mfg.st.tab", n: true },
-      { f: "cStatus", l: "mfg.f.cStatus", fmt: statusBadge },
+      { f: "cStatus", l: "mfg.f.cStatus", fmt: (v, r) => statusBadge(v) + (r.lDefault ? ` <span title="${esc(t("mfg.f.lDefault"))}">★</span>` : "") },
     ],
     filters: [{ f: "cStatus", l: "mfg.f.cStatus", options: opts("mfg.o.rs.", RECIPE_STATUS) }, { f: "cProcessType", l: "mfg.f.cProcessType", options: opts("mfg.o.pt.", PROCESS_TYPES) }],
     defaults: () => ({ cRevision: "A", cProcessType: "discrete", dBaseQty: "1", dYieldPct: "100", cStatus: "draft", materials: [], outputs: [], operations: [], steps: [] }),
-    badge: (m, isNew) => (isNew ? "" : statusBadge(m.cStatus)),
+    badge: (m, isNew) => (isNew ? "" : statusBadge(m.cStatus) + (m.lDefault ? ` <span class="badge yes">★ ${esc(t("mfg.f.lDefault"))}</span>` : "")),
+    // only a draft is edited; the other versions are read, and changed through their actions
+    locked: (m, isNew) => !isNew && m.cStatus !== "draft",
+    actions: [
+      { id: "submit", l: "mfg.ap.submit", primary: true, show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "mfg.ap.submit.confirm", done: "mfg.ap.submitted",
+        run: async (m, ctx) => { await api(ctx.path, { method: "PUT", body: m }); return api(ctx.path + "/submit", { method: "POST", body: {} }); } },
+      { id: "approve", l: "mfg.ap.approve", primary: true, show: (m, isNew) => !isNew && m.cStatus === "in_review" && isAdmin(), done: "mfg.ap.approved",
+        run: (m, ctx) => api(ctx.path + "/approve", { method: "POST", body: { cComment: prompt(t("mfg.ap.comment")) || "" } }) },
+      { id: "reject", l: "mfg.ap.reject", show: (m, isNew) => !isNew && m.cStatus === "in_review" && isAdmin(), done: "mfg.ap.rejected",
+        run: (m, ctx) => { const c = prompt(t("mfg.ap.rejectWhy")); if (!c) return null; return api(ctx.path + "/reject", { method: "POST", body: { cComment: c } }); } },
+      { id: "default", l: "mfg.ap.default", show: (m, isNew) => !isNew && m.cStatus === "approved" && !m.lDefault && isAdmin(),
+        run: (m, ctx) => api(ctx.path + "/default", { method: "POST", body: {} }) },
+      { id: "obsolete", l: "mfg.ap.obsolete", show: (m, isNew) => !isNew && m.cStatus === "approved" && isAdmin(), confirm: "mfg.ap.obsolete.confirm",
+        run: (m, ctx) => api(ctx.path + "/obsolete", { method: "POST", body: {} }) },
+      { id: "copy", l: "mfg.ap.copy", show: (m, isNew) => !isNew,
+        run: async (m, ctx) => {
+          const why = prompt(t("mfg.ap.copyWhy"));
+          if (why === null) return null;
+          const r = await api(ctx.path + "/copy", { method: "POST", body: { cComment: why } });
+          location.hash = `#/prod/recipes/${enc(r.cProduct)}/${enc(r.cRevision)}`;
+          return null;
+        } },
+    ],
     formTabs: [["gen", "common.general"], ["ops", "mfg.rc.operations"], ["mat", "mfg.rc.materials"], ["steps", "mfg.st.tab"], ["out", "mfg.rc.outputs"],
-      ["explode", "mfg.rc.explode"], ["preview", "mfg.st.preview"]],
+      ["explode", "mfg.rc.explode"], ["preview", "mfg.st.preview"], ["versions", "mfg.ap.tab"]],
     sections: [
       { tab: "gen", t: "common.general", fields: [
         { f: "cProduct", l: "mfg.f.cProduct", req: true, key: true, lookup: "products" },
         { f: "cRevision", l: "mfg.f.cRevision", req: true, key: true, help: "mfg.f.cRevision.help" },
         { f: "cProcessType", l: "mfg.f.cProcessType", type: "select", options: opts("mfg.o.pt.", PROCESS_TYPES) },
         { f: "cDescFR", l: "f.cDescFR", span: 2, help: "mfg.rc.desc.help" }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+        { f: "cChangeReason", l: "mfg.f.cChangeReason", span: 2 },
+        { f: "dEffectiveFrom", l: "mfg.f.dEffectiveFrom", type: "date" }, { f: "dEffectiveTo", l: "mfg.f.dEffectiveTo", type: "date" },
       ] },
       { tab: "gen", t: "mfg.rc.quantities", help: "mfg.rc.quantities.help", fields: [
         { f: "dBaseQty", l: "mfg.f.dBaseQty", type: "number", req: true }, { f: "cUOM", l: "mfg.f.cUOM", lookup: "uom" },
@@ -628,6 +691,6 @@ Object.assign(RES, {
         newLine: () => ({ cProduct: "", cKind: "byproduct", dQtyPer: "", cUOM: "", dCostPct: "" }) },
     ],
     panel: explosion,
-    panels: [operatorPreview],
+    panels: [operatorPreview, versionsPanel],
   },
 });
