@@ -1,4 +1,4 @@
-"""Products, taxes and inventory management (inventory_api.py), on the seed in data/inventory.json."""
+"""Products, taxes and inventory management (powererp/modules/inventory), on the seed in data/inventory.json."""
 
 
 def mv(client, **over):
