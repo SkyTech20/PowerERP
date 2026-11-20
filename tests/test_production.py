@@ -140,3 +140,50 @@ def test_calendar_exceptions_api(client):
     assert r.status_code == 400 and r.get_json()["field"] == "from"
     assert client.get("/api/calendars/NOPE/availability").status_code == 404
     assert any(x["code"] == "PAP-24-7" for x in client.get("/api/lookups/calendars").get_json())
+
+
+# ------------------------------------------------------------------ P3: work centers
+
+
+def test_demo_work_centers(client):
+    page = client.get("/api/work-centers?sort=cCode&size=50").get_json()
+    assert page["total"] == 11
+    cnc = client.get("/api/work-centers/MET-CNC").get_json()
+    assert (cnc["cCalendar"], cnc["dUtilizationPct"], cnc["cInLocation"]) == ("MET-1X5", "85", "A-01-01-A")
+    crews = client.get("/api/work-centers?f_cType=labor").get_json()["items"]
+    assert {w["cCode"] for w in crews} == {"BAK-EQUIPE", "MET-SOUD", "MET-CQ"}
+
+
+def test_work_center_capacity(client):
+    """MET-1X5 gives 2,700 min that week (2,400 + 300 of overtime); the CNC centers are 85 % utilized."""
+    r = client.get(f"/api/work-centers/MET-CNC/availability?{WEEK}").get_json()
+    assert (r["cWorkCenter"], r["iMinutes"], r["iCapacityMinutes"]) == ("MET-CNC", 2700, 2295)
+
+
+def test_work_center_crud_and_calendar_in_use(client):
+    body = {
+        "cCode": "met-laser",
+        "cDescFR": "Découpe laser",
+        "cCalendar": "MET-1X5",
+        "cWarehouse": "ENT-01",
+        "cOutLocation": "exp-01",
+    }
+    r = client.post("/api/work-centers", json=body)
+    assert r.status_code == 201 and (r.get_json()["cCode"], r.get_json()["cOutLocation"]) == ("MET-LASER", "EXP-01")
+    r = client.post("/api/work-centers", json={**body, "cCode": "X", "cCalendar": "NOPE"})
+    assert r.status_code == 400 and r.get_json() == {"error": "unknown_ref", "field": "cCalendar"}
+    # a calendar used by a work center cannot be deleted
+    assert client.delete("/api/calendars/MET-1X5").status_code == 409
+    assert client.delete("/api/work-centers/MET-LASER").status_code == 200
+    assert any(x["code"] == "MET-CNC" for x in client.get("/api/lookups/work_centers").get_json())
+
+
+def test_subcontract_work_center(client):
+    sup = client.get("/api/suppliers?size=1").get_json()["items"][0]["cCode"]
+    r = client.post(
+        "/api/work-centers",
+        json={"cCode": "TRT", "cDescFR": "Traitement thermique", "cType": "subcontract", "cSupplier": sup},
+    )
+    assert r.status_code == 201 and r.get_json()["lFinite"] is False
+    r = client.get("/api/work-centers/TRT/availability")
+    assert r.status_code == 400 and r.get_json()["error"] == "no_calendar"

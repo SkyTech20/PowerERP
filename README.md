@@ -69,7 +69,14 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - **Holidays and exceptions:** a date that is closed or has other hours (overtime, short day), for one calendar or for all of them (`*`).
   - The calendar screen previews the available hours of a week. `GET /api/calendars/<code>/availability?from=&to=` gives the minutes per day. Work centers and resources (P3, P4) will use them, and so will the scheduler.
   - Demo: a paper mill on 3 shifts, 24/7; a bakery on 2 shifts, Monday to Saturday; a metal shop on 1 shift, Monday to Friday; Québec holidays.
-- Next: work centers (P3), resources (P4), standard operations (P5), setup matrix (P6), product manufacturing tab (P7), then recipes (P8 to P10).
+- **P3 (done): Production → Work centers.** A group of machines, a line, a labour team or a subcontractor doing the same work:
+  - calendar, finite or infinite capacity, efficiency % and utilization % (capacity = calendar time × utilization);
+  - hourly rates (setup, run, overhead) and cost center;
+  - staging and output locations;
+  - default queue and move times.
+  - A subcontractor needs a supplier and no calendar. A calendar used by a work center cannot be deleted.
+  - The screen previews the hours and the capacity of a week (`GET /api/work-centers/<code>/availability`).
+- Next: resources (P4), standard operations (P5), setup matrix (P6), product manufacturing tab (P7), then recipes (P8 to P10).
 
 ## Run
 

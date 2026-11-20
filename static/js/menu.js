@@ -20,7 +20,7 @@ export const MENU = [
   ] },
   { k: "prod", icon: "🏭", items: [
     "prod.recipes", "prod.orders", "prod.shopfloor", "prod.traceability", "prod.schedule", "prod.mrp", "prod.resources",
-    { k: "prod.calendars", route: "/prod/calendars" }, { k: "prod.setup", route: "/prod/capabilities" },
+    { k: "prod.workcenters", route: "/prod/work-centers" }, { k: "prod.calendars", route: "/prod/calendars" }, { k: "prod.setup", route: "/prod/capabilities" },
   ] },
   { k: "hr", icon: "👥", items: ["hr.employees", "hr.timesheets", "hr.payroll", "hr.benefits"] },
   { k: "fa", icon: "🏢", items: ["fa.assets", "fa.depreciation"] },
