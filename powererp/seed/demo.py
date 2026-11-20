@@ -21,6 +21,7 @@ class DemoData:
     inventory: (
         dict  # data/inventory.json: taxes, units, categories, warehouses, products, opening stock (both datasets)
     )
+    production: dict  # data/production.json: shop floor reference lists of a paper, a food and a metal plant
 
     @property
     def name(self) -> str:
@@ -57,4 +58,6 @@ class DemoData:
             lists["seed_invoices"] = hist["invoices"] + lists.get("seed_invoices", [])
         inv_file = DATA_ROOT / "inventory.json"
         inventory = json.loads(inv_file.read_text(encoding="utf-8")) if inv_file.exists() else {}
-        return cls(folder, lists, inventory)
+        prod_file = DATA_ROOT / "production.json"
+        production = json.loads(prod_file.read_text(encoding="utf-8")) if prod_file.exists() else {}
+        return cls(folder, lists, inventory, production)

@@ -17,7 +17,7 @@ from . import database, settings
 from .container import Container
 from .core.errors import register_error_handlers
 from .integrations import powerware
-from .modules import admin, auth, catalog, inventory, ledger, purchasing, suppliers, system, taxes
+from .modules import admin, auth, catalog, inventory, ledger, production, purchasing, suppliers, system, taxes
 from .modules.common.registry import ReferenceRegistry
 from .seed.demo import DemoData
 
@@ -43,6 +43,7 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     purchasing.register(app, c, demo.lists)
     powerware.register(app, c)  # the web services SkyAI calls
     inventory.register(app, c, demo.inventory)
+    production.register(app, c, demo.production)  # reference lists of the shop floor (M0)
     admin.register(app)  # Administration > Backups
     database.init_app(app)  # one transaction per request
     _seed_or_migrate(c, demo)

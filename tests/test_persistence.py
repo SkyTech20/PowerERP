@@ -1,5 +1,7 @@
 """Changes are saved in PostgreSQL: relational tables for the master files, JSON (legacy_datasets) for the rest."""
 
+from pathlib import Path
+
 from sqlalchemy import text
 
 from powererp import database
@@ -13,7 +15,13 @@ def _sql(query, **params):
 
 
 def test_schema_is_migrated(app):
-    assert _sql("SELECT version_num FROM alembic_version")[0][0] == "0004"
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    head = ScriptDirectory.from_config(
+        Config(str(Path(__file__).resolve().parent.parent / "alembic.ini"))
+    ).get_current_head()
+    assert _sql("SELECT version_num FROM alembic_version")[0][0] == head == "0005"
     assert _sql("SELECT code FROM companies")[0][0] == "MAIN"
 
 

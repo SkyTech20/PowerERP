@@ -20,7 +20,7 @@ COPY migrations/ ./migrations/
 COPY static/ ./static/
 COPY data/demo/ ./data/demo/
 # Products, taxes and inventory seed (fictitious, shared by both datasets)
-COPY data/inventory.json ./data/
+COPY data/inventory.json data/production.json ./data/
 
 # Database: PostgreSQL, set DATABASE_URL (postgresql://user:password@host:5432/powererp).
 # The schema is created and migrated by the ERP when it starts (Alembic).

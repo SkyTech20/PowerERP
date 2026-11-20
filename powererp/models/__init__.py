@@ -1,6 +1,7 @@
 """Relational models. Import every module here so Alembic sees all the tables."""
 
 from . import (
+    production,  # noqa: F401  (production reference lists)
     purchasing,  # noqa: F401  (purchase orders, receptions, invoices)
     stock,  # noqa: F401  (stock balances)
 )

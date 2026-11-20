@@ -40,6 +40,7 @@ _OVERRIDES = {
     "cGLInventory": "gl_inventory",
     "cGLCollected": "gl_collected",
     "cGLRecoverable": "gl_recoverable",
+    "cGroup": "reason_group",  # "group" is an SQL keyword
 }
 
 
@@ -184,3 +185,11 @@ SPECS = {
         ),
     )
 }
+
+
+def register_specs(*specs: TableSpec) -> None:
+    """Tables of a module defined outside this file (e.g. models/production.py), reachable through store(name)."""
+    for spec in specs:
+        if spec.name in SPECS:
+            raise ValueError(f"table {spec.name} defined twice")
+        SPECS[spec.name] = _build(spec)
