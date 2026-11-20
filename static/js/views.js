@@ -16,6 +16,7 @@ export const TABSETS = {
   tax: [["taxcodes", "tax.tab.codes"], ["taxgroups", "tax.tab.groups"]],
   wh: [["warehouses", "wh.tab.warehouses"], ["locations", "wh.tab.locations"]],
   setup: [["categories", "setup.tab.categories"], ["uom", "setup.tab.uom"]],
+  mfgsetup: [["capabilities", "mfg.tab.cap"], ["setupfamilies", "mfg.tab.fam"], ["downtimereasons", "mfg.tab.down"], ["scrapreasons", "mfg.tab.scrap"]],
 };
 export function tabsHtml(R) {
   return `<div class="tabs">${TABSETS[R.tabset].map(([k, l]) => `<a href="#${RES[k].route}" class="${RES[k] === R ? "active" : ""}">${esc(t(l))}</a>`).join("")}</div>`;

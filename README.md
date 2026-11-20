@@ -54,6 +54,18 @@ SkyAI's **Offer** template (an internal purchase requisition) chooses the best s
 
 Not done yet: receptions and invoices do not move the stock automatically, there is no FIFO costing, and stock is not posted to the GL.
 
+## Production
+
+`powererp/modules/production`, built milestone by milestone (plan: `Docs/PowerERP-Producao-Plano.md` in the Workflow folder). The goal is a generic module for paper, food, metal and other plants: recipes with step-by-step instructions, full lot traceability, shop floor reporting and scheduling ready for operations research.
+
+- **M0 (done): Production → Production setup.** The reference lists of the shop floor, seeded from `data/production.json` with examples from a paper mill, a bakery and a metal shop:
+  - **Capabilities:** what a resource can do (cutting, baking, CNC machining...). An operation will ask for a capability, so any resource that has it can run the operation.
+  - **Setup families:** products that change over alike. The setup matrix (M1) will give the minutes from one family to another.
+  - **Downtime reasons:** grouped by TPM loss. Planned stops (breaks, preventive maintenance) do not count in the OEE.
+  - **Scrap reasons:** grouped by cause.
+- Production never changes the stock itself: it posts stock movements (`cDocType` `PROD`) through the stock service, so every stock rule applies.
+- Next: work centers, resources and calendars (M1), recipes (M2), production orders and lots (M3), shop floor (M4), scheduling (M5, M6).
+
 ## Run
 
 ### Python
@@ -194,7 +206,7 @@ powererp/
   core/                 # AppError + error handler, value parsing, pagination, HTTP helpers
   modules/              # one package per business area: routes -> services -> repository
     system/             #   screens' files, dashboard, lookups, demo data life cycle (reset / clear)
-    auth/ admin/ ledger/ suppliers/ taxes/ catalog/ purchasing/ inventory/
+    auth/ admin/ ledger/ suppliers/ taxes/ catalog/ purchasing/ inventory/ production/
   integrations/powerware/  # PowerWARE web services used by SkyAI (routes, XML, apCreatePO.p)
   models/ store.py stock.py settings.py database.py schemas.py seed/
 migrations/             # Alembic schema migrations (applied when the ERP starts)

@@ -18,7 +18,10 @@ export const MENU = [
     { k: "inv.replenishment", route: "/inv/replenishment" }, { k: "inv.count", route: "/inv/counts" }, { k: "inv.valuation", route: "/inv/valuation" },
     { k: "inv.warehouses", route: "/inv/warehouses" }, { k: "inv.params", route: "/inv/params" }, { k: "inv.setup", route: "/inv/categories" },
   ] },
-  { k: "prod", icon: "🏭", items: ["prod.bom", "prod.workorders", "prod.routings", "prod.mrp", "prod.shopfloor"] },
+  { k: "prod", icon: "🏭", items: [
+    "prod.recipes", "prod.orders", "prod.shopfloor", "prod.traceability", "prod.schedule", "prod.mrp", "prod.resources",
+    { k: "prod.setup", route: "/prod/capabilities" },
+  ] },
   { k: "hr", icon: "👥", items: ["hr.employees", "hr.timesheets", "hr.payroll", "hr.benefits"] },
   { k: "fa", icon: "🏢", items: ["fa.assets", "fa.depreciation"] },
   { k: "proj", icon: "📁", items: ["proj.projects", "proj.jobcost"] },

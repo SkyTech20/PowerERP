@@ -44,6 +44,19 @@ LOCATION_TYPES = ("picking", "reserve", "receiving", "shipping", "quarantine", "
 MOVE_TYPES = ("IN", "OUT", "TRF", "ADJ", "CNT", "RSV")
 DOC_TYPES = ("MAN", "PO", "REC", "INV", "SO", "CNT", "PROD")
 COUNT_STATUS = ("Draft", "Posted")
+# production: TPM loss groups of a stop (planned stops do not count against OEE availability) and scrap causes
+DOWNTIME_GROUPS = (
+    "breakdown",
+    "setup",
+    "minor_stop",
+    "reduced_speed",
+    "no_material",
+    "no_operator",
+    "quality",
+    "planned",
+    "other",
+)
+SCRAP_GROUPS = ("material", "process", "machine", "operator", "startup", "other")
 
 # --------------------------------------------------------------------------- schemas
 # kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
@@ -223,6 +236,19 @@ MOVEMENT = {
 COUNT = {"cWarehouse": "s", "dDate": "date", "cDescription": "s", "cLocationPrefix": "s", "cProductPrefix": "s"}
 COUNT_LINE = {"cProduct": "s", "cLocation": "s", "cLot": "s", "cSerial": "s", "dQtyExpected": "d", "dQtyCounted": "d"}
 
+# --------------------------------------------------------------------------- production (M0: reference lists)
+CAPABILITY = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "lActive": "b"}  # what a resource can do (e.g. CUT)
+SETUP_FAMILY = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "lActive": "b"}  # products changing over alike
+DOWNTIME_REASON = {
+    "cCode": "s",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "cGroup": DOWNTIME_GROUPS,
+    "lAffectsOEE": "b",
+    "lActive": "b",
+}
+SCRAP_REASON = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "cGroup": SCRAP_GROUPS, "lActive": "b"}
+
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
     "tax_groups": {"cTreatment": "taxable", "lActive": True},
@@ -248,4 +274,8 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "warehouses": {"cType": "main", "cProvince": "QC", "cCountry": "CA", "lUseLocations": True, "lActive": True},
     "locations": {"cType": "picking", "lMixProducts": True, "lMixLots": True, "lActive": True},
     "stock_params": {"lActive": True},
+    "capabilities": {"lActive": True},
+    "setup_families": {"lActive": True},
+    "downtime_reasons": {"cGroup": "breakdown", "lAffectsOEE": True, "lActive": True},
+    "scrap_reasons": {"cGroup": "process", "lActive": True},
 }

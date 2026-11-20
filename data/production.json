@@ -1,0 +1,244 @@
+{
+  "_comment": "Production demo data (M0): reference lists shared by a paper mill, a bakery and a metal shop.",
+  "capabilities": [
+    {
+      "cCode": "CUT",
+      "cDescFR": "Coupe",
+      "cDescEN": "Cutting",
+      "lActive": true
+    },
+    {
+      "cCode": "WIND",
+      "cDescFR": "Bobinage",
+      "cDescEN": "Winding",
+      "lActive": true
+    },
+    {
+      "cCode": "CONVERT",
+      "cDescFR": "Transformation du papier",
+      "cDescEN": "Paper converting",
+      "lActive": true
+    },
+    {
+      "cCode": "MIX",
+      "cDescFR": "Pétrissage et mélange",
+      "cDescEN": "Mixing",
+      "lActive": true
+    },
+    {
+      "cCode": "BAKE",
+      "cDescFR": "Cuisson",
+      "cDescEN": "Baking",
+      "lActive": true
+    },
+    {
+      "cCode": "PACK",
+      "cDescFR": "Emballage",
+      "cDescEN": "Packing",
+      "lActive": true
+    },
+    {
+      "cCode": "CNC",
+      "cDescFR": "Usinage CNC",
+      "cDescEN": "CNC machining",
+      "lActive": true
+    },
+    {
+      "cCode": "WELD",
+      "cDescFR": "Soudage",
+      "cDescEN": "Welding",
+      "lActive": true
+    },
+    {
+      "cCode": "PAINT",
+      "cDescFR": "Peinture",
+      "cDescEN": "Painting",
+      "lActive": true
+    },
+    {
+      "cCode": "INSPECT",
+      "cDescFR": "Contrôle qualité",
+      "cDescEN": "Quality inspection",
+      "lActive": true
+    }
+  ],
+  "setup_families": [
+    {
+      "cCode": "PAP-WHITE",
+      "cDescFR": "Papier blanc",
+      "cDescEN": "White paper",
+      "lActive": true
+    },
+    {
+      "cCode": "PAP-COLOR",
+      "cDescFR": "Papier de couleur",
+      "cDescEN": "Coloured paper",
+      "lActive": true
+    },
+    {
+      "cCode": "FOOD-PLAIN",
+      "cDescFR": "Sans allergène",
+      "cDescEN": "Allergen-free",
+      "lActive": true
+    },
+    {
+      "cCode": "FOOD-ALLERG",
+      "cDescFR": "Avec allergènes (nettoyage avant la suite)",
+      "cDescEN": "Contains allergens (cleaning before the next)",
+      "lActive": true
+    },
+    {
+      "cCode": "MET-STEEL",
+      "cDescFR": "Acier",
+      "cDescEN": "Steel",
+      "lActive": true
+    },
+    {
+      "cCode": "MET-ALU",
+      "cDescFR": "Aluminium",
+      "cDescEN": "Aluminium",
+      "lActive": true
+    }
+  ],
+  "downtime_reasons": [
+    {
+      "cCode": "BRK-MECH",
+      "cDescFR": "Panne mécanique",
+      "cDescEN": "Mechanical breakdown",
+      "cGroup": "breakdown",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "BRK-ELEC",
+      "cDescFR": "Panne électrique",
+      "cDescEN": "Electrical breakdown",
+      "cGroup": "breakdown",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "CHANGE",
+      "cDescFR": "Changement de format",
+      "cDescEN": "Changeover",
+      "cGroup": "setup",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "CLEAN",
+      "cDescFR": "Nettoyage",
+      "cDescEN": "Cleaning",
+      "cGroup": "setup",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "JAM",
+      "cDescFR": "Bourrage",
+      "cDescEN": "Jam",
+      "cGroup": "minor_stop",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "SLOW",
+      "cDescFR": "Vitesse réduite",
+      "cDescEN": "Reduced speed",
+      "cGroup": "reduced_speed",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "NO-MAT",
+      "cDescFR": "Manque de matière",
+      "cDescEN": "No material",
+      "cGroup": "no_material",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "NO-OP",
+      "cDescFR": "Manque d'opérateur",
+      "cDescEN": "No operator",
+      "cGroup": "no_operator",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "QUAL",
+      "cDescFR": "Arrêt qualité",
+      "cDescEN": "Quality hold",
+      "cGroup": "quality",
+      "lAffectsOEE": true,
+      "lActive": true
+    },
+    {
+      "cCode": "BREAK",
+      "cDescFR": "Pause",
+      "cDescEN": "Break",
+      "cGroup": "planned",
+      "lAffectsOEE": false,
+      "lActive": true
+    },
+    {
+      "cCode": "PM",
+      "cDescFR": "Entretien préventif",
+      "cDescEN": "Preventive maintenance",
+      "cGroup": "planned",
+      "lAffectsOEE": false,
+      "lActive": true
+    }
+  ],
+  "scrap_reasons": [
+    {
+      "cCode": "WEB-BREAK",
+      "cDescFR": "Casse de la feuille",
+      "cDescEN": "Web break",
+      "cGroup": "process",
+      "lActive": true
+    },
+    {
+      "cCode": "STARTUP",
+      "cDescFR": "Rebut de démarrage",
+      "cDescEN": "Start-up scrap",
+      "cGroup": "startup",
+      "lActive": true
+    },
+    {
+      "cCode": "CONTAM",
+      "cDescFR": "Contamination",
+      "cDescEN": "Contamination",
+      "cGroup": "material",
+      "lActive": true
+    },
+    {
+      "cCode": "TEMP",
+      "cDescFR": "Température hors limite",
+      "cDescEN": "Temperature out of range",
+      "cGroup": "process",
+      "lActive": true
+    },
+    {
+      "cCode": "DIM",
+      "cDescFR": "Hors tolérance",
+      "cDescEN": "Out of tolerance",
+      "cGroup": "machine",
+      "lActive": true
+    },
+    {
+      "cCode": "MAT-DEF",
+      "cDescFR": "Matière défectueuse",
+      "cDescEN": "Defective material",
+      "cGroup": "material",
+      "lActive": true
+    },
+    {
+      "cCode": "HANDLING",
+      "cDescFR": "Erreur de manipulation",
+      "cDescEN": "Handling error",
+      "cGroup": "operator",
+      "lActive": true
+    }
+  ]
+}
