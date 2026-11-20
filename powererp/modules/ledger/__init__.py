@@ -141,5 +141,6 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     app.register_blueprint(_blueprint(accounts, centers))
     c.get("lookups").register("gl", accounts.lookup)
     c.get("lookups").register("cc", centers.lookup)
-    c.get("seeds").add(accounts.repo, "gl", seed.get("gl_ttGL_data", []))
-    c.get("seeds").add(centers.repo, "cc", seed.get("gl_ttCC_data", []))
+    c.get("dashboard").register(lambda: {"glAccounts": accounts.repo.count(), "costCenters": centers.repo.count()})
+    c.get("lifecycle").add(accounts.repo, "gl", seed.get("gl_ttGL_data", []))
+    c.get("lifecycle").add(centers.repo, "cc", seed.get("gl_ttCC_data", []))

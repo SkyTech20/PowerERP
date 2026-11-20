@@ -2,6 +2,9 @@
 
     from powererp.factory import create_app
     app = create_app()
+
+Each module registers its services in the container and its routes in the app; the modules talk to each other
+through the services they get from the container, never through module-level state.
 """
 
 from __future__ import annotations
@@ -13,65 +16,56 @@ from flask import Flask
 from . import database
 from .container import Container
 from .core.errors import register_error_handlers
-from .modules import catalog, ledger, suppliers, taxes
-from .modules.common.registry import ReferenceRegistry, SeedRegistry
+from .integrations import powerware
+from .modules import catalog, ledger, purchasing, suppliers, system, taxes
+from .modules.common.registry import ReferenceRegistry
 from .seed.demo import DemoData
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
 def create_app(database_url: str | None = None, dataset: str | None = None) -> Flask:
-    # The route modules are still at the project root (moved into powererp/modules in phases O2 to O5)
+    # Still at the project root: login, inventory and backups (moved into powererp/modules in O4 and O5)
     import db
     from auth import register_auth
     from backup_api import register_backup
-    from erp_api import register_erp
     from inventory_api import register_inventory
-    from powerware_api import register_powerware
-    from purchasing_api import register_purchasing
 
     app = Flask("powererp", root_path=str(ROOT))
-    container = Container()
-    app.extensions["powererp"] = container
+    c = Container()
+    app.extensions["powererp"] = c
     register_error_handlers(app)
 
-    container.register("database_url", db.init(database_url))
+    c.register("database_url", db.init(database_url))
     register_auth(app)
-    demo = container.register("demo", DemoData.load(dataset))
-    hooks = container.register("hooks", register_erp(app, demo.lists))
-    # Modules organized in layers (powererp/modules): they register their services in the container
-    container.register("references", ReferenceRegistry())
-    container.register("lookups", hooks["lookups"])
-    container.register("seeds", SeedRegistry(hooks["add_stores"]))
-    ledger.register(app, container, demo.lists)
-    suppliers.register(app, container, demo.lists)
-    taxes.register(app, container, demo.inventory)
-    catalog.register(app, container, demo.inventory)
-    hooks["tax_calculator"] = container.get("tax_calculator")
-    hooks["references"] = container.get("references")
-    # PowerWARE-compatible web services, so SkyAI can read from and write to this ERP
-    register_powerware(app, demo.lists, hooks["invoice_exists"], hooks["record_invoice"])
-    # Best supplier per item and PO creation for SkyAI requisitions (Offer workflow)
-    register_purchasing(app, demo.lists, hooks)
-    # Products, taxes and inventory (warehouses, locations, movements, replenishment, counts)
-    register_inventory(app, demo.lists, hooks)
-    # Administration > Backups: pg_dump on a schedule (settings in the database), with rotation
-    register_backup(app)
+    demo = c.register("demo", DemoData.load(dataset))
+
+    system.register(app, c)  # lifecycle (seed / reset / clear), dashboard, lookups, the screens' files
+    c.register("references", ReferenceRegistry())
+    ledger.register(app, c, demo.lists)
+    suppliers.register(app, c, demo.lists)
+    taxes.register(app, c, demo.inventory)
+    catalog.register(app, c, demo.inventory)
+    purchasing.register(app, c, demo.lists)
+    powerware.register(app, c)  # the web services SkyAI calls
+    register_inventory(app, c, demo.inventory)
+    register_backup(app)  # Administration > Backups
     database.init_app(app)  # one transaction per request
-    _seed_or_migrate(db, hooks, demo)
+    _seed_or_migrate(db, c, demo)
     return app
 
 
-def _seed_or_migrate(db, hooks, demo: DemoData) -> None:
+def _seed_or_migrate(db, c: Container, demo: DemoData) -> None:
     """An empty database (or another dataset) gets the demo data; data of an older database kept as JSON
     (legacy_datasets) is moved into the tables once."""
+    lifecycle = c.get("lifecycle")
     stored = db.load_datasets()
     with database.unit_of_work():
         if stored and db.get_setting("dataset") == demo.name:
-            hooks["load"](stored)
-            moved = [k for k in hooks["store_keys"]() if k in stored]
+            lifecycle.load(stored)
+            moved = [k for k in lifecycle.keys() if k in stored]
         else:
-            hooks["seed"]()
-            moved = hooks["store_keys"]()
+            lifecycle.seed()
+            moved = lifecycle.keys()
     db.drop_datasets(moved)
     db.set_setting("dataset", demo.name)

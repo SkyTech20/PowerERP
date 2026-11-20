@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py erp_api.py powerware_api.py purchasing_api.py inventory_api.py db.py auth.py backup_api.py alembic.ini ./
+COPY app.py inventory_api.py db.py auth.py backup_api.py alembic.ini ./
 COPY powererp/ ./powererp/
 COPY migrations/ ./migrations/
 COPY static/ ./static/

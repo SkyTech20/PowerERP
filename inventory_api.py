@@ -32,7 +32,6 @@ the same stock.
 """
 
 import copy
-import json
 import math
 from datetime import datetime
 from pathlib import Path
@@ -41,14 +40,19 @@ from flask import Blueprint, g, jsonify, request
 from sqlalchemy import func
 
 from auth import current_user
-from erp_api import ApiError, _bool, _dec, _num, _s
-from powererp import purchasing as purch
 from powererp import stock as stockdb
+from powererp.core.errors import AppError as ApiError
+from powererp.core.pagination import paginate_request
 from powererp.core.values import amount as _m  # noqa: E402
+from powererp.core.values import boolean as _bool
+from powererp.core.values import decimal_text as _dec
 from powererp.core.values import number as _f  # noqa: E402
+from powererp.core.values import number as _num
 from powererp.core.values import quantity as _q  # noqa: E402
+from powererp.core.values import text as _s
 from powererp.core.values import today as _today  # noqa: E402
 from powererp.core.values import unit_cost as _c  # noqa: E402
+from powererp.modules.purchasing import repository as purch
 from powererp.schemas import *  # noqa: F401,F403  (choices, schemas and DEFAULTS)
 from powererp.schemas import DEFAULTS, PRODUCT, PRODUCT_SUPPLIER  # noqa: F401
 from powererp.store import store
@@ -136,7 +140,9 @@ def _lines(p, schema, keep):
 # --------------------------------------------------------------------------- module
 
 
-def register_inventory(app, ns, hooks):
+def register_inventory(app, c, seed):
+    """Products, warehouses, locations, stock (movements, balances, counts), valuation and replenishment.
+    `c` is the container (services of the other modules), `seed` the demo inventory (data/inventory.json)."""
     DB = {name: store(table) for name, table in MASTER.items()}
     MOV, CNT = store("stock_movements"), store("stock_counts")
     # The opening movements of the seed, posted in memory at start-up (see "seed" at the end)
@@ -155,8 +161,7 @@ def register_inventory(app, ns, hooks):
         if seeding["rows"] is None:
             DB[name].update(row)
 
-    suppliers = ns["supplier_terms_data"]
-    paginate = hooks["paginate"]
+    paginate = paginate_request
 
     bp = Blueprint("inventory", __name__)
 
@@ -296,8 +301,8 @@ def register_inventory(app, ns, hooks):
 
     # Taxes, units and categories are their own modules now (powererp.modules.taxes / catalog); the products
     # tell them when a code is still used.
-    tax_calc = hooks["tax_calculator"].calc
-    refs = hooks["references"]
+    tax_calc = c.get("tax_calculator").calc
+    refs = c.get("references")
     refs.register(
         "tax_group",
         lambda code: DB["products"].exists(
@@ -500,7 +505,7 @@ def register_inventory(app, ns, hooks):
             row["lStocked"] = False
         if not is_new and not row["lStocked"]:
             in_use(abs(product_totals(row["cCode"])[0]) > 1e-9)  # still has stock
-        codes = {s["cCode"].upper(): s["cCode"] for s in suppliers}
+        codes = {s["cCode"].upper(): s["cCode"] for s in c.get("suppliers").list()}
         for i, ln in enumerate(row.get("lines", []), 1):
             if ln["cSupplierCode"].upper() not in codes:
                 raise ApiError("unknown_ref", "lines", detail=f"line {i}: {ln['cSupplierCode']}")
@@ -935,6 +940,7 @@ def register_inventory(app, ns, hooks):
 
     def replenishment_rows():
         rows = []
+        supplier_names = {s["cCode"]: s["cName"] for s in c.get("suppliers").list()}
         bal = balances()
         params = M("stock_params")
         for par in params:
@@ -994,9 +1000,7 @@ def register_inventory(app, ns, hooks):
                     "cPurchaseUOM": prod.get("cPurchaseUOM", ""),
                     "dPurchaseFactor": _q(factor),
                     "cSupplierCode": (sup or {}).get("cSupplierCode", ""),
-                    "cSupplierName": next(
-                        (s["cName"] for s in suppliers if s["cCode"] == (sup or {}).get("cSupplierCode")), ""
-                    ),
+                    "cSupplierName": supplier_names.get((sup or {}).get("cSupplierCode"), ""),
                     "cSupplierItem": (sup or {}).get("cSupplierItem", ""),
                     "dUnitCost": _c(price),
                     "iLeadTimeDays": (sup or {}).get("iLeadTimeDays") or par.get("iLeadTimeDays") or 0,
@@ -1012,7 +1016,7 @@ def register_inventory(app, ns, hooks):
         )
 
     def next_po_number():
-        return hooks["next_po_number"](500501)
+        return c.get("purchase_orders").next_number(500501)
 
     def po_taxes(prod, supplier, amount, on):
         """TPS / TVQ of a PO line: the product's purchase tax group, else the supplier's TPS / TVQ numbers."""
@@ -1040,7 +1044,7 @@ def register_inventory(app, ns, hooks):
                 raise ApiError("unknown_ref", "lines", detail=f"line {i}: {l.get('cProduct')}")
             sup_line = preferred_supplier(prod) or {}
             code = _s(l.get("cSupplierCode")) or sup_line.get("cSupplierCode", "")
-            supplier = next((s for s in suppliers if s["cCode"].upper() == code.upper()), None)
+            supplier = c.get("suppliers").find(code)
             if supplier is None:
                 raise ApiError("no_supplier", "lines", detail=f"line {i}: {prod['cCode']}")
             item = next((x for x in prod.get("lines", []) if x["cSupplierCode"] == supplier["cCode"]), sup_line)
@@ -1076,7 +1080,7 @@ def register_inventory(app, ns, hooks):
                 g, s_ = po_taxes(prod, supplier, qty * price, today)
                 gst, pst = gst + g, pst + s_
             cpo = next_po_number()
-            view = hooks["save_po"](
+            view = c.get("purchase_orders").save(
                 cpo,
                 {
                     "cSupplierCode": code,
@@ -1092,9 +1096,10 @@ def register_inventory(app, ns, hooks):
                     "lines": po_lines,
                     "lUnbilled": True,
                 },
-                None,
             )
-            hooks["update_po_header"](cpo, {"cReference": "REAPPRO " + _s(p.get("cWarehouse")), "cSource": "ERP"})
+            c.get("purchase_orders").update_header(
+                cpo, {"cReference": "REAPPRO " + _s(p.get("cWarehouse")), "cSource": "ERP"}
+            )
             created.append(
                 {
                     "cPO": cpo,
@@ -1314,7 +1319,7 @@ def register_inventory(app, ns, hooks):
         return fn
 
     desc = lambda fr: ("cDescFR",) if fr else ("cDescEN", "cDescFR")  # noqa: E731
-    hooks["lookups"].update(
+    c.get("lookups").update(
         {
             "products": lk("products", lambda fr: ("cDescFR",) if fr else ("cDescEN", "cDescFR"), limit=30),
             "stockproducts": lk("products", desc, extra=lambda r: r.get("lStocked"), limit=30),
@@ -1334,7 +1339,7 @@ def register_inventory(app, ns, hooks):
         ]
         return rows, 200
 
-    hooks["lookups"]["locations"] = locations_lookup
+    c.get("lookups").register("locations", locations_lookup)
 
     def summary():
         total = sum(_f(r["dValue"]) for r in valuation_rows())
@@ -1345,14 +1350,13 @@ def register_inventory(app, ns, hooks):
             "reorderItems": len(replenishment_rows()),
         }
 
-    hooks["summary"].append(summary)
+    c.get("dashboard").register(summary)
 
     app.register_blueprint(bp)
 
     # ------------------------------------------------------------------ seed
     # Prepared in memory (the opening movements give the products their average cost), then handed to the ERP,
     # which loads it into the tables when the database is empty and on /api/reset.
-    seed = json.loads(SEED_FILE.read_text(encoding="utf-8")) if SEED_FILE.exists() else {}
     seeding["rows"] = {name: copy.deepcopy(seed.get(name, [])) for name in MASTER}
     for p in seeding["rows"]["products"]:
         p.setdefault("lines", [])
@@ -1366,7 +1370,7 @@ def register_inventory(app, ns, hooks):
     master_seed = seeding["rows"]
     seeding["rows"] = None
     # Parents before children (cleared in the reverse order)
-    hooks["add_stores"](
+    c.get("lifecycle").add_stores(
         [
             (DB[name], "inv_" + name, master_seed[name])
             for name in (
@@ -1388,8 +1392,8 @@ def register_inventory(app, ns, hooks):
             purch.set_next_number("STOCK_COUNT", max((int(x["iNo"]) for x in data["inv_counts"]), default=0) + 1)
         forget_balances()
 
-    hooks["after_load"].append(after_load)
-    hooks["on_clear"].append(stockdb.clear)
+    c.get("lifecycle").after_load(after_load)
+    c.get("lifecycle").on_clear(stockdb.clear)
 
     def add_movement(p):
         """Post a movement from another module (e.g. a reception), validated like the screen's."""

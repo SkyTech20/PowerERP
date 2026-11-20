@@ -14,7 +14,6 @@ from powererp.container import container_of
 from powererp.factory import create_app
 
 app = create_app()
-hooks = container_of(app).get("hooks")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5050"))

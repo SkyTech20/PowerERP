@@ -37,5 +37,5 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     app.register_blueprint(bp)
     c.get("lookups").register("taxcodes", label_lookup(codes, DESC_FR, DESC_EN))
     c.get("lookups").register("taxgroups", label_lookup(groups, DESC_FR, DESC_EN))
-    c.get("seeds").add(codes.repo, "inv_tax_codes", seed.get("tax_codes", []))
-    c.get("seeds").add(groups.repo, "inv_tax_groups", seed.get("tax_groups", []))
+    c.get("lifecycle").add(codes.repo, "inv_tax_codes", seed.get("tax_codes", []))
+    c.get("lifecycle").add(groups.repo, "inv_tax_groups", seed.get("tax_groups", []))

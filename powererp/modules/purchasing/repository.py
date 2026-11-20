@@ -12,14 +12,15 @@ Every call uses the session of the current request (powererp.database.current())
 
 from datetime import date
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
-from . import database
-from .models import DocSequence
-from .models import purchasing as m
-from .store import company_id
+from powererp import database
+from powererp.models import DocSequence
+from powererp.models import purchasing as m
+from powererp.store import company_id
 
 # ------------------------------------------------------------------ value conversion
 
@@ -90,7 +91,7 @@ def _session():
 
 
 def _lines_of(s, table, parent_ids):
-    out = {pid: [] for pid in parent_ids}
+    out: dict[int, list] = {pid: [] for pid in parent_ids}
     if parent_ids:
         q = select(table).where(table.c.parent_id.in_(list(parent_ids))).order_by(table.c.parent_id, table.c.line_no)
         for r in s.execute(q).mappings():
@@ -178,7 +179,7 @@ def _po_values(det, unb):
     doc_cols, doc_extra = _split(det or {}, m.PO_DOC, skip=("cPO", "ttPOheader", "ttPOdetail"))
     hdr_cols, hdr_extra = _split((det or {}).get("ttPOheader"), m.PO_HEADER)
     unb_cols, unb_extra = _split(unb or {}, m.PO_UNBILLED, skip=("cPO",))
-    vals = {c: None for c in _PO_COLS}
+    vals: dict[str, Any] = {c: None for c in _PO_COLS}
     vals.update({**doc_cols, **hdr_cols, **unb_cols})
     vals.update(
         has_detail=det is not None,
@@ -309,7 +310,7 @@ def rec_get(no):
 def _rec_values(det, unb):
     doc_cols, doc_extra = _split(det or {}, m.REC_DOC, skip=("NoReception", "Articles"))
     unb_cols, unb_extra = _split(unb or {}, m.REC_UNBILLED, skip=("NoReception",))
-    vals = {c: None for c in _REC_COLS}
+    vals: dict[str, Any] = {c: None for c in _REC_COLS}
     vals.update({**doc_cols, **unb_cols})
     vals.update(
         has_detail=det is not None,

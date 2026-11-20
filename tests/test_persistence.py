@@ -4,6 +4,7 @@ from sqlalchemy import text
 
 import db
 from powererp import database
+from powererp.container import container_of
 
 
 def _sql(query, **params):
@@ -55,7 +56,7 @@ def test_invoice_numbers_come_from_the_sequence(client):
 
 def test_unparseable_date_is_kept_as_sent(client):
     """A date in another format (sent by an external system) is not refused nor lost."""
-    from powererp import purchasing as purch
+    from powererp.modules.purchasing import repository as purch
 
     with database.unit_of_work():
         purch.inv_put({"id": 999, "cNoFourn": "LUMPRO", "cNoFacture": "OLD", "dDateFacture": "10/01/2026", "lines": []})
@@ -92,6 +93,6 @@ def test_reload_from_old_json_dataset(app, client):
     import app as erp_app
 
     with database.unit_of_work():
-        erp_app.hooks["load"]({"gl": [{"cCode": "7777", "cDesc": "Kept"}]})
+        container_of(erp_app.app).get("lifecycle").load({"gl": [{"cCode": "7777", "cDesc": "Kept"}]})
     assert client.get("/api/gl-accounts/7777").get_json()["cDesc"] == "Kept"
     assert client.get("/api/summary").get_json()["glAccounts"] == 1

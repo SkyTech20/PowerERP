@@ -183,6 +183,7 @@ def _pg_dump_command():
 
 def _libpq_target():
     """(URL without password, password) of the ERP database, for pg_dump."""
+    assert database.engine is not None
     url = database.engine.url
     parts = urlsplit(url.render_as_string(hide_password=False).replace("postgresql+psycopg://", "postgresql://"))
     password = unquote(parts.password or "")
@@ -196,6 +197,7 @@ def run_backup(trigger="manual"):
     if not _run_lock.acquire(blocking=False):
         raise BackupError("backup_running")
     try:
+        assert database.engine is not None
         with database.engine.connect() as con:
             got = con.execute(text("SELECT pg_try_advisory_lock(:k)"), {"k": LOCK_KEY}).scalar()
             if not got:
