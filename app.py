@@ -8,10 +8,11 @@ SkyAI (getSupplierTerm.p, getPODetails.p, apInvoiceNoPO.p, ...), so SkyAI can
 read the ERP data and create its invoices here.
 
 Users log in (Administration > Users manages them). Users, settings and the ERP
-data are stored in SQLite (db.py, ERP_DB_PATH, default db/powererp.db); the
-JSON files in data/ only seed an empty database.
+data are stored in PostgreSQL (DATABASE_URL, see db.py and powererp/); the schema
+is created and migrated by Alembic when the ERP starts. The JSON files in data/
+only seed an empty database.
 
-Run:  pip install -r requirements.txt && python app.py
+Run:  docker compose up -d db && pip install -r requirements.txt && python app.py
 Open: http://localhost:5050/
 """
 import json
@@ -21,7 +22,9 @@ from pathlib import Path
 from flask import Flask, jsonify, request
 
 import db
+from powererp import database
 from auth import PW_PREFIX, register_auth
+from backup_api import register_backup
 from erp_api import register_erp
 from inventory_api import register_inventory
 from powerware_api import register_powerware
@@ -69,7 +72,7 @@ def load_data():
 
 
 app = Flask(__name__)
-DB_PATH = db.init()
+DB_URL = db.init()
 register_auth(app)
 data = load_data()
 hooks = register_erp(app, data)
@@ -79,16 +82,25 @@ register_powerware(app, data, hooks["invoice_exists"], hooks["record_invoice"])
 register_purchasing(app, data, hooks)
 # Products, taxes and inventory (warehouses, locations, movements, replenishment, counts)
 register_inventory(app, data, hooks)
+# Administration > Backups: pg_dump on a schedule (settings in the database), with rotation
+register_backup(app)
 
 # ERP data: load what the database has; an empty database (or another dataset) is seeded from data/*.json.
 # The name changes when the history is added, so an existing database is re-seeded once with it.
 DATASET = DATA_DIR.name + ("+history" if HISTORY.exists() else "")
+database.init_app(app)  # one transaction per request for the relational tables
 _stored = db.load_datasets()
-if _stored and db.get_setting("dataset") == DATASET:
-    hooks["load"](_stored)
-else:
-    db.save_datasets(hooks["dump"]())
-    db.set_setting("dataset", DATASET)
+with database.unit_of_work():
+    if _stored and db.get_setting("dataset") == DATASET:
+        # Tables already moved to relational tables but still in an older JSON dataset are loaded into them once.
+        hooks["load"](_stored)
+        _moved = [k for k in hooks["store_keys"]() if k in _stored]
+    else:
+        hooks["seed"]()
+        _moved = hooks["store_keys"]()
+db.drop_datasets(_moved)
+db.save_datasets(hooks["dump"]())
+db.set_setting("dataset", DATASET)
 
 
 @app.after_request
@@ -108,5 +120,5 @@ def not_found(error):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5050"))
-    print(f"PowerERP: http://localhost:{port}/ (data: {DATASET}, database: {DB_PATH})")
+    print(f"PowerERP: http://localhost:{port}/ (data: {DATASET}, database: {DB_URL})")
     app.run(host="0.0.0.0", port=port, debug=os.environ.get("FLASK_DEBUG") == "1")

@@ -14,7 +14,7 @@ A small PowerERP-like ERP for demos and tests.
 - **English / French** toggle in the top bar (remembered in the browser and per user).
 - **Login and users:** every screen needs a login. **Administration → Users** (administrators only) creates, edits, deactivates and deletes users (username, name, email, role *Administrator* / *User*, language, password). Each user changes their own password by clicking their name in the top bar.
 - **SkyAI integration:** the ERP also answers the PowerWARE web services that SkyAI calls (same paths, parameters and XML as the SkyAI mock API). SkyAI reads suppliers, GL accounts, POs and receptions from the ERP, and the invoice it creates at the end of its process shows up in **Invoices** (source "SkyAI").
-- **SQLite database** (`db/powererp.db`, or `ERP_DB_PATH`): users and all ERP data are saved there after every change and survive a restart. An empty database is seeded from `data/*.json` (or `data/demo/`). **Dashboard → Reset demo data** restores the original data; **Dashboard → Clear all data** (`POST /api/clear`) empties everything, to start a demo from a blank ERP. Delete the database file to start over completely (users included).
+- **PostgreSQL database** (`DATABASE_URL`): users, settings and all ERP data are saved there and survive a restart. The schema is created and migrated by Alembic (`migrations/`) when the ERP starts. An empty database is seeded from `data/*.json` (or `data/demo/`). Every area is in relational tables (company_id on each, codes unique per company, one transaction per request); the stock balances are updated with each movement, one movement per product at a time. `legacy_datasets` only receives the JSON of older databases, which is moved into the tables once at start-up. **Dashboard → Reset demo data** restores the original data; **Dashboard → Clear all data** (`POST /api/clear`) empties everything, to start a demo from a blank ERP. Drop and re-create the database to start over completely (users included).
 - Taxes: on purchase orders and receptions, TPS (5%) and TVQ (9.975%) are calculated on subtotal + freight when the supplier has a TPS / TVQ number (supplier form, Terms & taxes). Existing records keep their stored taxes until a line, the freight or the supplier is changed.
 - Demo dataset: with `ERP_DATASET=demo` (set by `docker\rebuild.ps1 -DemoData` / `rebuild.sh --demo-data`) the ERP loads the fictitious French data in `data/demo/` instead of `data/*.json`: GL accounts, cost centers, 5 suppliers and no invoices. It covers the 5 demo scenarios, and the matching invoice PDFs (in French) are in `demo-invoices/`:
 
@@ -59,9 +59,12 @@ Not done yet: receptions and invoices do not move the stock automatically, there
 ### Python
 
 ```bash
+docker compose up -d db          # PostgreSQL on localhost:5433 (databases powererp and powererp_test)
 pip install -r requirements.txt
 python app.py
 ```
+
+Without `DATABASE_URL`, the ERP uses `postgresql://powererp:powererp@127.0.0.1:5433/powererp` (the database of `docker compose up -d db`).
 
 Open http://localhost:5050/ (change the port with the `PORT` environment variable).
 
@@ -70,31 +73,52 @@ The first start creates the administrator `admin` with the password in `ERP_ADMI
 ### Docker
 
 ```bash
-docker build -t erp-sample .
-docker run -d -p 5050:5050 -v "$PWD/powererp-data:/app/db" -e ERP_ADMIN_PASSWORD=change-me --name erp-sample erp-sample
+docker compose up -d --build     # PostgreSQL + ERP, http://localhost:5050/
 ```
 
-The database is `/app/db/powererp.db` inside the container; mount `/app/db` (a folder or a named volume) to keep it when the container is recreated. SQLite needs no server: it is a file written by the ERP itself. Run a single ERP container per database file.
+Or the image alone, on an existing PostgreSQL (one database per client):
+
+```bash
+docker build -t erp-sample .
+docker run -d -p 5050:5050 -e DATABASE_URL=postgresql://user:password@dbhost:5432/powererp -e ERP_ADMIN_PASSWORD=change-me --name erp-sample erp-sample
+```
+
+The data lives in PostgreSQL (volume `pgdata` with docker compose). Several ERP processes (or containers) can use the same database: nothing is kept in memory between requests.
 
 ### Settings (environment variables)
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `ERP_DB_PATH` | `db/powererp.db` (`/app/db/powererp.db` in Docker) | SQLite file |
+| `DATABASE_URL` | `postgresql://powererp:powererp@127.0.0.1:5433/powererp` | PostgreSQL database (`postgres://`, `postgresql://` or `postgresql+psycopg://`) |
 | `ERP_ADMIN_USER` / `ERP_ADMIN_PASSWORD` | `admin` / random (printed in the log) | Administrator created when the database has no user |
 | `ERP_SECRET_KEY` | random, saved in the database | Signs the login cookie |
 | `ERP_COOKIE_SECURE` | off | `1` sends the login cookie over HTTPS only (set it behind HTTPS) |
 | `ERP_API_KEY` | none | Lets scripts call `/api/...` without a login, and, when set, is required by the PowerWARE web services (header `X-API-Key`) |
 | `ERP_DATASET` | full data | `demo` seeds from `data/demo/` |
 
+## Backups
+
+**Administration → Backups** (administrators): automatic backups on/off, every N hours (1–720), the folder
+(on the ERP server; in Docker `/app/backups`, mounted on the host) and how many backups are kept (the oldest
+`powererp-*.dump` files of the folder are deleted beyond it). "Back up now" makes one at once; the files can be
+downloaded from the same screen. A backup is `pg_dump --format=custom` of the whole database (the Docker image
+has pg_dump 16; elsewhere set `PG_DUMP` to the pg_dump command). Restore one into an empty database with:
+
+```bash
+pg_restore --clean --if-exists --no-owner -d <database> powererp-YYYYMMDD-HHMMSS.dump
+```
+
+When several ERP processes share the database, only one of them runs a scheduled backup (PostgreSQL advisory lock).
+
 ## Tests
 
 ```bash
+docker compose up -d db
 pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-The tests (`tests/`) start the ERP on a temporary SQLite file with the demo dataset and reset the data before each test. They cover the value helpers (amounts typed with `$`, spaces or a comma), login and users, GL accounts / cost centers / suppliers, purchase orders, receptions, invoices, the PowerWARE XML services read by SkyAI, `apCreatePO.p`, products / taxes / inventory and the database save. Run them before every change to the ERP.
+The tests (`tests/`) empty the PostgreSQL test database (`TEST_DATABASE_URL`, default `powererp_test` on localhost:5433; its name must contain `test`), migrate it, start the ERP with the demo dataset and reset the data before each test. They cover the value helpers (amounts typed with `$`, spaces or a comma), login and users, GL accounts / cost centers / suppliers, purchase orders, receptions, invoices, the PowerWARE XML services read by SkyAI, `apCreatePO.p`, products / taxes / inventory and the database save. Run them before every change to the ERP.
 
 ## Security and SkyAI
 
@@ -145,7 +169,9 @@ What happens when SkyAI creates an invoice:
 
 ```
 app.py          # Flask entry point: database, login, ERP and PowerWARE services
-db.py           # SQLite storage (users, settings, ERP data)
+db.py           # PostgreSQL storage (users, settings, ERP data)
+powererp/       # core package: config, database (SQLAlchemy), relational models
+migrations/     # Alembic schema migrations (applied when the ERP starts)
 auth.py         # Login, users API (/api/auth/..., /api/users) and access control
 erp_api.py      # JSON API (/api/...) and static file serving
 powerware_api.py # PowerWARE-compatible web services used by SkyAI

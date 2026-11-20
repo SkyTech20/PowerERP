@@ -18,20 +18,17 @@ from xml.sax.saxutils import escape
 
 from flask import Blueprint, Response, jsonify, request
 
+from powererp import purchasing as purch
+from powererp.store import store
+
 logger = logging.getLogger(__name__)
 
 bp = Blueprint("powerware", __name__)
 
 PW_PREFIX = "/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI"
 
-# Shared data lists, bound by register_powerware() to the ERP's in-memory data.
-receiving_details = []
-unbilled_po = []
-unbilled_receiving = []
-gl_ttGL_data = []
-gl_ttCC_data = []
-po_details = []
-supplier_terms_data = []
+# The data comes from the relational tables: GL accounts, cost centers and suppliers (powererp.store),
+# purchase orders and receptions (powererp.purchasing, which rebuilds the PowerWARE records).
 _invoice_hooks = {}
 
 
@@ -420,8 +417,9 @@ def get_receiving_details():
             return jsonify({"error": "Paramètre NoReception requis"}), 400
         
         # Rechercher la réception
-        reception = next((r for r in receiving_details 
-                         if r['NoReception'] == no_reception and r['COMPANY'] == company), None)
+        reception = purch.rec_get(no_reception)[0]
+        if reception is not None and reception.get('COMPANY') != company:
+            reception = None
         
         if not reception:
             return jsonify({"error": f"Réception {no_reception} non trouvée pour la compagnie {company}"}), 404
@@ -440,7 +438,7 @@ def get_unbilled_po():
         if not company:
             return jsonify({"error": "Paramètre COMPANY requis"}), 400
         
-        filtered_po = [po for po in unbilled_po if po.get('COMPANY') == company]
+        filtered_po = [po for po in purch.unbilled_po_list() if po.get('COMPANY') == company]
         supplier = (request.args.get('Supplier') or '').strip()
         if supplier:
             supplier_upper = supplier.upper()
@@ -465,7 +463,7 @@ def get_unbilled_receiving():
             return jsonify({"error": "Paramètre COMPANY requis"}), 400
         
         # Filtrer par compagnie
-        filtered_receiving = [r for r in unbilled_receiving if r['COMPANY'] == company]
+        filtered_receiving = [r for r in purch.unbilled_receiving_list() if r.get('COMPANY') == company]
         
         if not filtered_receiving:
             return jsonify({"error": f"Aucune réception non facturée trouvée pour la compagnie {company}"}), 404
@@ -489,9 +487,10 @@ def get_gl_accounts():
         if not company:
             return jsonify({"error": "Paramètre COMPANY requis"}), 400
 
-        filtered_ttcc = gl_ttCC_data
+        gl_ttGL_data = store("gl_accounts").all()
+        filtered_ttcc = store("cost_centers").all()
         if cc1_filter:
-            filtered_ttcc = [acc for acc in gl_ttCC_data if acc.get('cCC1') == cc1_filter]
+            filtered_ttcc = [acc for acc in filtered_ttcc if acc.get('cCC1') == cc1_filter]
 
         if not gl_ttGL_data and not filtered_ttcc:
             return jsonify({"error": "Aucun compte GL trouvé"}), 404
@@ -516,7 +515,9 @@ def get_po_details():
         if not po_number:
             return jsonify({"error": "Paramètre PO requis"}), 400
         
-        po_detail = next((po for po in po_details if po.get('cPO') == po_number and po.get('COMPANY') == company), None)
+        po_detail = purch.po_get(po_number)[0]
+        if po_detail is not None and po_detail.get('COMPANY') != company:
+            po_detail = None
         
         if not po_detail:
             return jsonify({"error": f"Bon de commande {po_number} non trouvé pour la compagnie {company}"}), 404
@@ -542,7 +543,7 @@ def get_supplier_term():
             return jsonify({"error": "Paramètre COMPANY requis"}), 400
         
         # Filtrer les fournisseurs
-        filtered_suppliers = supplier_terms_data
+        filtered_suppliers = store("suppliers").all()
         
         # Filtrer par code fournisseur si spécifié
         if supplier_code:
@@ -574,10 +575,10 @@ def get_skyai_stats():
         company = request.args.get('COMPANY', 'MA2')
         
         # Calculer les statistiques (format unbilled_po: cPO, dCreationDate, cSupplierName; pas de MontantEnAttente)
-        total_unbilled_po = len([po for po in unbilled_po if po.get('COMPANY') == company])
-        total_unbilled_receiving = len([r for r in unbilled_receiving if r['COMPANY'] == company])
+        total_unbilled_po = len([po for po in purch.unbilled_po_list() if po.get('COMPANY') == company])
+        total_unbilled_receiving = len([r for r in purch.unbilled_receiving_list() if r.get('COMPANY') == company])
         total_amount_pending = 0.0
-        total_suppliers = len(supplier_terms_data)
+        total_suppliers = store("suppliers").count()
         
         stats = {
             "COMPANY": company,
@@ -692,10 +693,6 @@ def ap_invoice_with_po():
 
 def register_powerware(app, ns, invoice_exists, record_invoice):
     """Bind the endpoints to the ERP data (ns) and the ERP invoice hooks, then mount them."""
-    g = globals()
-    for name in ("receiving_details", "unbilled_po", "unbilled_receiving", "gl_ttGL_data", "gl_ttCC_data",
-                 "po_details", "supplier_terms_data"):
-        g[name] = ns[name]
     _invoice_hooks["exists"] = invoice_exists
     _invoice_hooks["record"] = record_invoice
     app.register_blueprint(bp)

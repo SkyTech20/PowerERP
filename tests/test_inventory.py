@@ -1,5 +1,4 @@
 """Products, taxes and inventory management (inventory_api.py), on the seed in data/inventory.json."""
-import db
 
 
 def mv(client, **over):
@@ -209,7 +208,11 @@ def test_lookups_and_persistence(client):
     locs = client.get("/api/lookups/locations?wh=ENT-01").get_json()
     assert locs and all(r["label"].startswith("ENT-01") for r in locs)
     mv(client, dQty="3")
-    assert any(m["cProduct"] == "CLAV-SF" and m["dQty"] == "3" for m in db.load_datasets()["inv_movements"])
+    from sqlalchemy import text
+    from powererp import database
+    with database.engine.connect() as con:
+        rows = con.execute(text("SELECT product, qty FROM stock_movements ORDER BY no DESC LIMIT 1")).all()
+    assert rows[0][0] == "CLAV-SF" and float(rows[0][1]) == 3
 
 
 def test_reset_and_clear(client):
