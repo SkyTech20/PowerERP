@@ -321,3 +321,58 @@ Object.assign(RES, {
   },
 });
 
+// ------------------------------------------------------------------ P6: setup matrix
+export const SETUP_SCOPES = ["work_center", "resource"];
+const cellTitle = (c) => (c.cRule === "matrix" ? `${t("mfg.sm.rule.matrix")} ${c.cFromFamily} → ${c.cToFamily}` : t("mfg.sm.rule." + c.cRule));
+
+// The family x family grid of a matrix, and a test of one changeover
+const setupGrid = {
+  html: () => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.sm.grid"))}</h2><span class="help muted">${esc(t("mfg.sm.grid.help"))}</span></div>
+    <div class="card-body"><div class="form-grid">
+      <div class="field"><label for="smDefault">${esc(t("mfg.sm.default"))}</label><input type="text" id="smDefault" inputmode="decimal" value="30" style="text-align:right"><span class="help">${esc(t("mfg.sm.default.help"))}</span></div>
+    </div><div id="smGrid" class="table-wrap"></div></div></div>`,
+  bind: (m) => {
+    const run = async () => {
+      try {
+        const g = await api(`setup-matrices/${enc(m.cScope)}/${enc(m.cScopeCode)}/grid?default=${enc($("#smDefault").value || "0")}`);
+        $("#smGrid").innerHTML = `<table class="grid"><thead><tr><th>${esc(t("mfg.sm.fromTo"))}</th>${g.families.map((f) => `<th class="num">${esc(f)}</th>`).join("")}</tr></thead><tbody>
+          ${g.families.map((a, i) => `<tr><th>${esc(a)}</th>${g.cells[i].map((c) => `<td class="num ${c.cRule === "matrix" ? "" : "muted"}" title="${esc(cellTitle(c))}">${esc(fmtNum(c.dSetupMin))}${c.cRule === "matrix" && (c.cFromFamily === "*" || c.cToFamily === "*") ? "*" : ""}</td>`).join("")}</tr>`).join("")}
+          </tbody></table><p class="help muted">${esc(t("mfg.sm.grid.legend"))}</p>`;
+      } catch (e) { $("#smGrid").innerHTML = ""; }
+    };
+    $("#smDefault").addEventListener("input", (e) => { numOnly(e.target); run(); });
+    run();
+  },
+};
+const isWc = (m) => m.cScope !== "resource";
+
+Object.assign(RES, {
+  setupmatrices: {
+    api: "setup-matrices", route: "/prod/setup-matrix", title: "mfg.sm.title", sub: "mfg.sm.subtitle",
+    one: "mfg.sm.one", newTitle: "mfg.sm.new", id: (r) => `${r.cScope}/${r.cScopeCode}`, label: (r) => `${t("mfg.o.scope." + r.cScope)} ${r.cScopeCode}`, sort: "cScopeCode",
+    columns: [
+      { f: "cScope", l: "mfg.f.cScope", fmt: optBadge("mfg.o.scope.") }, { f: "cScopeCode", l: "f.cCode" },
+      { f: "cNotes", l: "mfg.f.cNotes", wrap: true }, { f: "iPairs", l: "mfg.sm.pairs", n: true }, { f: "lActive", l: "opt.active", fmt: yesNo },
+    ],
+    filters: [{ f: "cScope", l: "mfg.f.cScope", options: opts("mfg.o.scope.", SETUP_SCOPES) }],
+    defaults: () => ({ cScope: "work_center", cScopeCode: "", lActive: true, lines: [{ cFromFamily: "*", cToFamily: "*", dSetupMin: "30", dSetupCost: "", dScrapQty: "" }] }),
+    sections: [{ t: "common.general", help: "mfg.sm.help", fields: [
+      { f: "cScope", l: "mfg.f.cScope", key: true, type: "select", options: opts("mfg.o.scope.", SETUP_SCOPES), rerender: true },
+      { f: "cScopeCode", l: "mfg.f.cWorkCenter", key: true, req: true, lookup: "work_centers", show: isWc },
+      { f: "cScopeCode", l: "mfg.res.one", key: true, req: true, lookup: "resources", show: (m) => !isWc(m) },
+      { f: "lActive", l: "opt.active", type: "check" },
+      { f: "cNotes", l: "mfg.f.cNotes", type: "textarea", span: 4 },
+    ] }],
+    lines: {
+      title: "mfg.sm.pairs", help: "mfg.sm.pairs.help",
+      cols: [
+        { f: "cFromFamily", l: "mfg.f.cFromFamily", w: "w-md", lookup: "setup_families" }, { f: "cToFamily", l: "mfg.f.cToFamily", w: "w-md", lookup: "setup_families" },
+        { f: "dSetupMin", l: "mfg.f.dSetupMin", w: "w-sm", n: true }, { f: "dSetupCost", l: "mfg.f.dSetupCost", w: "w-sm", n: true },
+        { f: "dScrapQty", l: "mfg.f.dScrapQty", w: "w-sm", n: true },
+      ],
+      newLine: () => ({ cFromFamily: "", cToFamily: "", dSetupMin: "", dSetupCost: "", dScrapQty: "" }),
+    },
+    panel: setupGrid,
+  },
+});
+

@@ -59,6 +59,7 @@ DOWNTIME_GROUPS = (
 SCRAP_GROUPS = ("material", "process", "machine", "operator", "startup", "other")
 WORK_CENTER_TYPES = ("machine", "line", "labor", "subcontract")
 RUN_FORMATS = ("min_per_unit", "units_per_hour", "min_per_lot")
+SETUP_SCOPES = ("work_center", "resource")
 
 # --------------------------------------------------------------------------- schemas
 # kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
@@ -340,6 +341,15 @@ OPERATION = {
     "cInstructionEN": "s",
     "lActive": "b",
 }
+# P6: setup matrix, one per work center or resource: minutes to change over from a setup family to another
+SETUP_MATRIX = {"cScope": SETUP_SCOPES, "cScopeCode": "s", "cNotes": "s", "lActive": "b"}
+SETUP_MATRIX_LINE = {
+    "cFromFamily": "s",
+    "cToFamily": "s",
+    "dSetupMin": "d",
+    "dSetupCost": "d",
+    "dScrapQty": "d",
+}  # "*" = any
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
@@ -381,4 +391,5 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     },
     "resources": {"dSpeedFactor": "1", "iParallel": 1, "lActive": True},
     "operations": {"cRunFormat": "min_per_unit", "iCrew": 1, "lReportingPoint": True, "lActive": True},
+    "setup_matrices": {"cScope": "work_center", "lActive": True},
 }

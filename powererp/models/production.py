@@ -5,6 +5,7 @@ P2: working calendars (shifts by weekday as lines) and their exceptions by date.
 P3: work centers.
 P4: resources, with their capabilities, attributes, subresources and planned downtime (child tables).
 P5: standard operations.
+P6: setup matrices (one per work center or resource, the family pairs as lines).
 """
 
 from .. import schemas as S
@@ -30,4 +31,11 @@ register_specs(
         },
     ),
     TableSpec("operations", S.OPERATION, order=("cCode",)),
+    TableSpec(
+        "setup_matrices",
+        S.SETUP_MATRIX,
+        keys=("cScope", "cScopeCode"),
+        order=("cScope", "cScopeCode"),
+        line_schema=S.SETUP_MATRIX_LINE,
+    ),
 )
