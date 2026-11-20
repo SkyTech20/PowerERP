@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from powererp import backup
+from powererp.modules.admin import backup
 
 FAKE = Path(__file__).resolve().parent / "tools" / "fake_pg_dump.py"
 
@@ -17,7 +17,7 @@ def folder(tmp_path, monkeypatch, admin):
     monkeypatch.setenv("PG_DUMP", f"{sys.executable} {FAKE}")
     r = admin.put("/api/admin/backup", json={"enabled": False, "intervalHours": 24, "path": str(tmp_path), "keep": 3})
     assert r.status_code == 200, r.get_json()
-    import db
+    from powererp import settings as db
 
     db.set_setting("backup_status", "{}")
     return tmp_path

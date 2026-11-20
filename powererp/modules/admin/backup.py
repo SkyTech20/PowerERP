@@ -28,10 +28,9 @@ from urllib.parse import unquote, urlsplit, urlunsplit
 
 from sqlalchemy import text
 
-import db
-
-from . import database
-from .core.errors import AppError
+from powererp import database
+from powererp import settings as settings_store
+from powererp.core.errors import AppError
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +54,7 @@ class BackupError(AppError):
 
 def get_settings():
     try:
-        saved = json.loads(db.get_setting("backup") or "{}")
+        saved = json.loads(settings_store.get_setting("backup") or "{}")
     except ValueError:
         saved = {}
     return {**DEFAULTS, **{k: v for k, v in saved.items() if k in DEFAULTS}}
@@ -87,20 +86,20 @@ def validate(p):
 
 def save_settings(p):
     settings = validate(p)
-    db.set_setting("backup", json.dumps(settings))
+    settings_store.set_setting("backup", json.dumps(settings))
     return settings
 
 
 def get_status():
     try:
-        return json.loads(db.get_setting("backup_status") or "{}")
+        return json.loads(settings_store.get_setting("backup_status") or "{}")
     except ValueError:
         return {}
 
 
 def _set_status(**kw):
     status = {**get_status(), **kw}
-    db.set_setting("backup_status", json.dumps(status))
+    settings_store.set_setting("backup_status", json.dumps(status))
     return status
 
 

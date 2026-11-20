@@ -5,7 +5,7 @@ from __future__ import annotations
 
 def current_username(outside_request: str = "system", without_user: str = "api") -> str:
     """The logged-in user's name; `without_user` for a call with the API key; `outside_request` at start-up."""
-    from auth import current_user  # the login module (auth.py) keeps the session
+    from powererp.modules.auth import current_user  # the login module keeps the session
 
     try:
         user = current_user()

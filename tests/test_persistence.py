@@ -2,8 +2,8 @@
 
 from sqlalchemy import text
 
-import db
 from powererp import database
+from powererp import settings as db
 from powererp.container import container_of
 
 

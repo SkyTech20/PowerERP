@@ -26,15 +26,11 @@ ignore = [
 "tools/*" = ["E741", "E702", "B904"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["powererp", "db", "auth", "backup_api"]
+known-first-party = ["powererp"]
 
 [tool.mypy]
 python_version = "3.10"
-files = ["powererp/core", "powererp/container.py", "powererp/factory.py", "powererp/seed", "powererp/modules", "powererp/integrations"]
+files = ["powererp"]
 ignore_missing_imports = true
 check_untyped_defs = true
 
-[[tool.mypy.overrides]]
-# Modules written before the reorganization (checked once they move into powererp/modules)
-module = ["auth", "backup_api", "db"]
-ignore_errors = true
