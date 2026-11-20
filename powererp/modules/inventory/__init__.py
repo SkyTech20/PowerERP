@@ -192,6 +192,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     s = build_services(repos, ledger, refs, on_order=pos.quantity_on_order)
     stock = c.register("stock", s["stock"])
     products = c.register("products", s["products"])
+    products.references = c.get("references")
     c.register("warehouses", s["warehouses"])
     c.register("locations", s["locations"])
     c.register("stock_params", s["params"])

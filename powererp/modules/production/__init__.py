@@ -8,6 +8,8 @@ P4: resources /api/resources (+ /<code>/availability: calendar - planned downtim
 P5: standard operations /api/operations (+ /<code>/time?qty=&lot=&resource=: setup and run minutes).
 P6: setup matrices /api/setup-matrices/<scope>/<code> (+ /grid), and /api/setup-changeover?from=&to=&resource=
     (or &workCenter=) &default=: the changeover a sequence costs, and which rule gave it.
+P7: manufacturing data of the products /api/product-mfg/<product> (make / buy, setup family, lots, traceability,
+    attributes); deleted with the product.
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -27,6 +29,7 @@ from powererp.store import store
 
 from .calendar import CalendarExceptionService, CalendarService
 from .operations import OperationService
+from .products import ProductMfgService
 from .resources import ResourceService
 from .service import (
     CapabilityService,
@@ -63,6 +66,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     resources = _register_resources(bp, c, seed, calendars, centers)
     _register_operations(bp, c, seed, centers, resources)
     _register_setup_matrix(bp, c, seed, centers, resources)
+    _register_product_mfg(bp, c, seed)
     app.register_blueprint(bp)
 
 
@@ -232,3 +236,12 @@ def _register_setup_matrix(
         )
 
     c.get("lifecycle").add(matrices.repo, "prod_setup_matrices", seed.get("setup_matrices", []))
+
+
+def _register_product_mfg(bp: Blueprint, c: Container, seed: dict) -> None:
+    products = c.get("products")
+    refs = {"products": products.find, "setup_families": c.get("setup_families").find}
+    mfg = c.register("product_mfg", ProductMfgService(store("product_mfg"), refs, c.get("references")))
+    products.on_delete.append(mfg.delete_for)
+    register_crud_routes(bp, "product-mfg", "product_mfg", mfg, ("cProduct", "cSetupFamily", "cMakeBuy", "cNotes"))
+    c.get("lifecycle").add(mfg.repo, "prod_product_mfg", seed.get("product_mfg", []))

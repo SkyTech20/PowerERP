@@ -91,7 +91,13 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - lookup: the resource's matrix, then the work center's; in each one the exact pair, then (from, `*`), (`*`, to), (`*`, `*`); not in a matrix: same family = 0, else the setup of the operation;
   - `GET /api/setup-changeover?from=&to=&resource=|workCenter=&default=` gives the changeover and the rule used; the screen shows the family × family grid (`/api/setup-matrices/<scope>/<code>/grid`).
   - This is the sequence-dependent setup the OR scheduler (M6) will optimize.
-- Next: product manufacturing tab (P7), then recipes (P8 to P10).
+- **P7 (done): Production → Manufactured items**, and the **Manufacturing** tab of Inventory → Products. Kept by Production in its own table (`/api/product-mfg/<product>`), deleted with the product:
+  - make / buy / both, phantom, setup family (which line of the setup matrix applies);
+  - manufacturing lot: minimum, multiple, lead time;
+  - traceability: none, by lot or by serial number (the product's inventory controls must allow it);
+  - attributes (width, basis weight, colour...).
+  - The production demo adds its items to the item master (`data/production.json` → `inventory`): pulp, parent rolls and paper towels; flour, yeast and breads; steel tube, powder paint, an aluminium bracket and a welded frame.
+- Next: recipes (P8 to P10).
 
 ## Run
 

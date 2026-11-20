@@ -9,7 +9,7 @@ import { pageHead, tabLabel } from "../views.js";
 // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
 // textarea | password | email), lookup (+ fill, lookupParams, onPick), show(model, isNew), rerender (redraw on change).
 // Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
-// locked(model, isNew), actions, panel { html(model), bind(model) }.
+// locked(model, isNew), actions, panel { html(model), bind(model), tab } and panels (more of them).
 export function formView(key, id) {
   const R = RES[key];
   const isNew = id == null;
@@ -186,7 +186,8 @@ export function formView(key, id) {
     }).join("");
     const lines = (R.lines && (!R.lines.show || R.lines.show(model, isNew)) ? wrap(tabOf(R.lines), linesHtml()) : "")
       + (R.grids || []).filter((G) => !G.show || G.show(model, isNew)).map((G) => wrap(tabOf(G), linesHtml(G, G.key))).join("");
-    const panel = R.panel && !isNew ? wrap(tabOf(R.panel), R.panel.html(model)) : "";
+    const panelList = [R.panel, ...(R.panels || [])].filter(Boolean);
+    const panel = isNew ? "" : panelList.map((P) => wrap(tabOf(P), P.html(model))).join("");
     const present = (sections + lines + panel).match(/data-tab="[^"]+"/g) || [];
     if (R.formTabs && present.length && !present.includes(`data-tab="${activeTab}"`)) activeTab = R.formTabs[0][0];
     const tabBar = R.formTabs ? `<div class="tabs form-tabs" role="tablist">${R.formTabs.filter(([k]) => present.includes(`data-tab="${k}"`))
@@ -201,7 +202,7 @@ export function formView(key, id) {
     }));
     if ($("#totals")) { $("#totals").innerHTML = totalsHtml(); bindTotals(); }
     bind();
-    if (R.panel && R.panel.bind && !isNew) R.panel.bind(model);
+    if (!isNew) panelList.forEach((P) => P.bind && P.bind(model));
     if (R.tax && model[R.tax.supplier]) loadSupplierTax(model[R.tax.supplier]);
   }
 

@@ -60,6 +60,8 @@ SCRAP_GROUPS = ("material", "process", "machine", "operator", "startup", "other"
 WORK_CENTER_TYPES = ("machine", "line", "labor", "subcontract")
 RUN_FORMATS = ("min_per_unit", "units_per_hour", "min_per_lot")
 SETUP_SCOPES = ("work_center", "resource")
+MAKE_BUY = ("make", "buy", "both")
+TRACE_LEVELS = ("none", "lot", "serial")
 
 # --------------------------------------------------------------------------- schemas
 # kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
@@ -350,6 +352,19 @@ SETUP_MATRIX_LINE = {
     "dSetupCost": "d",
     "dScrapQty": "d",
 }  # "*" = any
+# P7: the manufacturing data of a product (the "Manufacturing" tab), kept by Production next to the item master
+PRODUCT_MFG = {
+    "cProduct": "s",
+    "cMakeBuy": MAKE_BUY,
+    "cSetupFamily": "s",
+    "dMfgLotMin": "d",
+    "dMfgLotMultiple": "d",
+    "iMfgLeadDays": "i",
+    "lPhantom": "b",  # a sub-assembly never stocked: its materials go up to the parent's order
+    "cTraceLevel": TRACE_LEVELS,
+    "cNotes": "s",
+}
+PRODUCT_ATTRIBUTE = {"cAttribute": "s", "cUOM": "s", "dNumber": "d", "cValue": "s"}  # width 2.4 m, colour "white"
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
@@ -392,4 +407,5 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "resources": {"dSpeedFactor": "1", "iParallel": 1, "lActive": True},
     "operations": {"cRunFormat": "min_per_unit", "iCrew": 1, "lReportingPoint": True, "lActive": True},
     "setup_matrices": {"cScope": "work_center", "lActive": True},
+    "product_mfg": {"cMakeBuy": "make", "cTraceLevel": "lot"},
 }

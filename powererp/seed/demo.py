@@ -60,4 +60,7 @@ class DemoData:
         inventory = json.loads(inv_file.read_text(encoding="utf-8")) if inv_file.exists() else {}
         prod_file = DATA_ROOT / "production.json"
         production = json.loads(prod_file.read_text(encoding="utf-8")) if prod_file.exists() else {}
+        # the items of the production demo (paper, bakery, metal) join the item master
+        for key, rows in production.get("inventory", {}).items():
+            inventory[key] = inventory.get(key, []) + rows
         return cls(folder, lists, inventory, production)
