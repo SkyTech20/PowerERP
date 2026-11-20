@@ -24,7 +24,8 @@ PowerShell is the same, with `Copy-Item .env.example .env`.
 - Open `http://localhost:5050/` (on the server) and sign in as `admin` with `ERP_ADMIN_PASSWORD`. The first start creates the tables (Alembic migrations) and the administrator.
 - The port is published on `127.0.0.1` only (`ERP_BIND`): put nginx in front with HTTPS, or set `ERP_BIND=0.0.0.0` to open it on the network.
 - The database is not published on the host. Only the ERP reaches it, inside the Docker network.
-- Data: the volume `<project>_pgdata`. Backups: the folder `ERP_BACKUP_DIR` (default `docker/backups`).
+- Data: the volume `<project>_pgdata` (`powererp-server_pgdata` by default). Backups: the folder `ERP_BACKUP_DIR` (default `docker/backups`).
+- Keep a project name other than `powererp`: that is the development compose (`../docker-compose.yml`). Two projects with the same name share containers and the database volume, and PostgreSQL then refuses the password of the other one.
 
 ## Every day
 
