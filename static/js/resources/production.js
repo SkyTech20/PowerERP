@@ -52,6 +52,30 @@ export const hours = (min) => `${new Intl.NumberFormat(lang === "fr" ? "fr-CA" :
 const monday = (iso) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); };
 const dayName = (iso) => new Date(iso + "T12:00:00").toLocaleDateString(lang === "fr" ? "fr-CA" : "en-CA", { weekday: "long", day: "numeric", month: "long" });
 
+// The available time of a week, day by day (calendar and work center screens). extra(r) adds rows after the total.
+function weekPreview(url, extra = () => "") {
+  return {
+    html: () => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.cal.preview"))}</h2><span class="help muted">${esc(t("mfg.cal.preview.help"))}</span></div>
+      <div class="card-body"><div class="form-grid"><div class="field"><label for="calWeek">${esc(t("mfg.cal.weekOf"))}</label><input type="date" id="calWeek" value="${monday(today())}"></div></div>
+      <div id="calPreview"></div></div></div>`,
+    bind: (m) => {
+      const run = async () => {
+        const from = monday($("#calWeek").value || today());
+        const to = new Date(from + "T12:00:00"); to.setDate(to.getDate() + 6);
+        try {
+          const r = await api(`${url(m)}?from=${from}&to=${to.toISOString().slice(0, 10)}`);
+          $("#calPreview").innerHTML = `<table class="grid"><thead><tr><th>${esc(t("mfg.cal.day"))}</th><th>${esc(t("mfg.cal.shifts"))}</th><th class="num">${esc(t("mfg.cal.available"))}</th></tr></thead><tbody>
+            ${r.days.map((d) => `<tr><td>${esc(dayName(d.dDate))}</td><td>${d.shifts.map((s) => `${s.cShift === "*" ? "" : esc(s.cShift) + " "}${esc(s.cStart)}–${esc(s.cEnd)}`).join(" · ")}
+              ${d.cException ? ` <span class="badge ${d.lClosed ? "no" : ""}">${esc(lang === "fr" ? d.cException : d.cExceptionEN)}</span>` : ""}</td><td class="num">${esc(hours(d.iMinutes))}</td></tr>`).join("")}
+            <tr class="total-row"><td colspan="2">${esc(t("mfg.cal.total"))}</td><td class="num">${esc(hours(r.iMinutes))}</td></tr>${extra(r)}</tbody></table>`;
+        } catch (e) { $("#calPreview").innerHTML = ""; }
+      };
+      $("#calWeek").addEventListener("change", run);
+      run();
+    },
+  };
+}
+
 Object.assign(RES, {
   calendars: {
     api: "calendars", route: "/prod/calendars", tabset: "mfgcal", title: "mfg.cal.title", sub: "mfg.cal.subtitle",
@@ -78,26 +102,7 @@ Object.assign(RES, {
         return last ? { ...last, iWeekday: (Number(last.iWeekday) % 7) + 1 } : { iWeekday: 1, cShift: "", cStart: "07:00", cEnd: "15:30", iBreakMin: 30 };
       },
     },
-    panel: {
-      html: () => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.cal.preview"))}</h2><span class="help muted">${esc(t("mfg.cal.preview.help"))}</span></div>
-        <div class="card-body"><div class="form-grid"><div class="field"><label for="calWeek">${esc(t("mfg.cal.weekOf"))}</label><input type="date" id="calWeek" value="${monday(today())}"></div></div>
-        <div id="calPreview"></div></div></div>`,
-      bind: (m) => {
-        const run = async () => {
-          const from = monday($("#calWeek").value || today());
-          const to = new Date(from + "T12:00:00"); to.setDate(to.getDate() + 6);
-          try {
-            const r = await api(`calendars/${enc(m.cCode)}/availability?from=${from}&to=${to.toISOString().slice(0, 10)}`);
-            $("#calPreview").innerHTML = `<table class="grid"><thead><tr><th>${esc(t("mfg.cal.day"))}</th><th>${esc(t("mfg.cal.shifts"))}</th><th class="num">${esc(t("mfg.cal.available"))}</th></tr></thead><tbody>
-              ${r.days.map((d) => `<tr><td>${esc(dayName(d.dDate))}</td><td>${d.shifts.map((s) => `${s.cShift === "*" ? "" : esc(s.cShift) + " "}${esc(s.cStart)}–${esc(s.cEnd)}`).join(" · ")}
-                ${d.cException ? ` <span class="badge ${d.lClosed ? "no" : ""}">${esc(lang === "fr" ? d.cException : d.cExceptionEN)}</span>` : ""}</td><td class="num">${esc(hours(d.iMinutes))}</td></tr>`).join("")}
-              <tr class="total-row"><td colspan="2">${esc(t("mfg.cal.total"))}</td><td class="num">${esc(hours(r.iMinutes))}</td></tr></tbody></table>`;
-          } catch (e) { $("#calPreview").innerHTML = ""; }
-        };
-        $("#calWeek").addEventListener("change", run);
-        run();
-      },
-    },
+    panel: weekPreview((m) => `calendars/${enc(m.cCode)}/availability`),
   },
   calexceptions: {
     api: "calendar-exceptions", route: "/prod/calendar-exceptions", menu: "/prod/calendars", tabset: "mfgcal", title: "mfg.cal.title", sub: "mfg.cal.subtitle",
@@ -116,6 +121,52 @@ Object.assign(RES, {
       { f: "cStart", l: "mfg.f.cStart", type: "time", show: (m) => !m.lClosed }, { f: "cEnd", l: "mfg.f.cEnd", type: "time", show: (m) => !m.lClosed },
       { f: "iBreakMin", l: "mfg.f.iBreakMin", type: "number", show: (m) => !m.lClosed },
     ] }],
+  },
+});
+
+// ------------------------------------------------------------------ P3: work centers
+export const WORK_CENTER_TYPES = ["machine", "line", "labor", "subcontract"];
+const notSub = (m) => m.cType !== "subcontract";
+
+Object.assign(RES, {
+  workcenters: {
+    api: "work-centers", route: "/prod/work-centers", title: "mfg.wc.title", sub: "mfg.wc.subtitle",
+    one: "mfg.wc.one", newTitle: "mfg.wc.new", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
+    columns: [
+      { f: "cCode", l: "f.cCode" }, descCol("cDesc"), { f: "cType", l: "mfg.f.cType", fmt: optBadge("mfg.o.wc.") },
+      { f: "cCalendar", l: "mfg.f.cCalendar" }, { f: "lFinite", l: "mfg.f.lFinite", fmt: yesNo },
+      { f: "dRunRateHr", l: "mfg.f.dRunRateHr", n: true }, { f: "lActive", l: "opt.active", fmt: yesNo },
+    ],
+    filters: [{ f: "cType", l: "mfg.f.cType", options: opts("mfg.o.wc.", WORK_CENTER_TYPES) }, { f: "cCalendar", l: "mfg.f.cCalendar", lookup: "calendars" }],
+    defaults: { cType: "machine", lFinite: true, dEfficiencyPct: "100", dUtilizationPct: "100", iQueueMin: 0, iMoveMin: 0, lActive: true },
+    sections: [
+      { t: "common.general", fields: [
+        { f: "cCode", l: "f.cCode", req: true, key: true, help: "mfg.code.help" },
+        { f: "cType", l: "mfg.f.cType", type: "select", options: opts("mfg.o.wc.", WORK_CENTER_TYPES), rerender: true },
+        { f: "lActive", l: "opt.active", type: "check" },
+        { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+        { f: "cSupplier", l: "mfg.f.cSupplier", lookup: "suppliers", req: true, show: (m) => m.cType === "subcontract", help: "mfg.f.cSupplier.help" },
+      ] },
+      { t: "mfg.wc.capacity", help: "mfg.wc.capacity.help", fields: [
+        { f: "cCalendar", l: "mfg.f.cCalendar", lookup: "calendars", req: true, show: notSub },
+        { f: "lFinite", l: "mfg.f.lFinite", type: "check", help: "mfg.f.lFinite.help", show: notSub },
+        { f: "dEfficiencyPct", l: "mfg.f.dEfficiencyPct", type: "number", help: "mfg.f.dEfficiencyPct.help" },
+        { f: "dUtilizationPct", l: "mfg.f.dUtilizationPct", type: "number", help: "mfg.f.dUtilizationPct.help", show: notSub },
+        { f: "iQueueMin", l: "mfg.f.iQueueMin", type: "number", help: "mfg.f.iQueueMin.help" },
+        { f: "iMoveMin", l: "mfg.f.iMoveMin", type: "number", help: "mfg.f.iMoveMin.help" },
+      ] },
+      { t: "mfg.wc.costs", help: "mfg.wc.costs.help", fields: [
+        { f: "dSetupRateHr", l: "mfg.f.dSetupRateHr", type: "number" }, { f: "dRunRateHr", l: "mfg.f.dRunRateHr", type: "number" },
+        { f: "dBurdenRateHr", l: "mfg.f.dBurdenRateHr", type: "number" }, { f: "cCostCenter", l: "f.prod.cCostCenter", lookup: "cc" },
+      ] },
+      { t: "mfg.wc.stock", help: "mfg.wc.stock.help", fields: [
+        { f: "cWarehouse", l: "f.inv.cWarehouse", lookup: "warehouses", rerender: true },
+        { f: "cInLocation", l: "mfg.f.cInLocation", lookup: "locations", lookupParams: (m) => ({ wh: m.cWarehouse }) },
+        { f: "cOutLocation", l: "mfg.f.cOutLocation", lookup: "locations", lookupParams: (m) => ({ wh: m.cWarehouse }) },
+      ] },
+      { t: "mfg.wc.notes", fields: [{ f: "cNotes", l: "mfg.f.cNotes", type: "textarea", span: 4 }] },
+    ],
+    panel: weekPreview((m) => `work-centers/${enc(m.cCode)}/availability`, (r) => `<tr><td colspan="2">${esc(t("mfg.wc.capacityTotal"))}</td><td class="num">${esc(hours(r.iCapacityMinutes))}</td></tr>`),
   },
 });
 

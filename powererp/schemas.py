@@ -57,6 +57,7 @@ DOWNTIME_GROUPS = (
     "other",
 )
 SCRAP_GROUPS = ("material", "process", "machine", "operator", "startup", "other")
+WORK_CENTER_TYPES = ("machine", "line", "labor", "subcontract")
 
 # --------------------------------------------------------------------------- schemas
 # kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
@@ -262,6 +263,29 @@ CALENDAR_EXCEPTION = {
     "cEnd": "s",
     "iBreakMin": "i",
 }
+# P3: work centers, the groups of machines / stations doing the same work (Epicor resource group)
+WORK_CENTER = {
+    "cCode": "s",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "cType": WORK_CENTER_TYPES,
+    "cCalendar": "s",
+    "lFinite": "b",  # finite capacity: the scheduler never loads it beyond its calendar
+    "dEfficiencyPct": "d",  # real output vs the standard times (100 = as planned)
+    "dUtilizationPct": "d",  # share of the calendar time really available (breakdowns, meetings...)
+    "dSetupRateHr": "d",
+    "dRunRateHr": "d",
+    "dBurdenRateHr": "d",
+    "cCostCenter": "s",
+    "cWarehouse": "s",
+    "cInLocation": "s",  # where the materials are staged for the work center
+    "cOutLocation": "s",  # where its output is put
+    "iQueueMin": "i",
+    "iMoveMin": "i",
+    "cSupplier": "s",  # subcontract work centers
+    "cNotes": "s",
+    "lActive": "b",
+}
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
@@ -294,4 +318,11 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "scrap_reasons": {"cGroup": "process", "lActive": True},
     "calendars": {"lActive": True},
     "calendar_exceptions": {"cCalendar": "*", "lClosed": True},
+    "work_centers": {
+        "cType": "machine",
+        "lFinite": True,
+        "dEfficiencyPct": "100",
+        "dUtilizationPct": "100",
+        "lActive": True,
+    },
 }
