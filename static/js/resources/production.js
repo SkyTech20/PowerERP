@@ -1,7 +1,7 @@
 /* PowerERP: Production: list / form definitions. P1: the reference lists of the shop floor; P2: calendars. */
 import { $, api, enc, esc, lang, t, yesNo } from "../core.js";
 import { RES } from "../registry.js";
-import { descCol, dl, optBadge, opts, today } from "./inventory.js";
+import { descCol, dl, newWith, optBadge, opts, today } from "./inventory.js";
 
 export const DOWNTIME_GROUPS = ["breakdown", "setup", "minor_stop", "reduced_speed", "no_material", "no_operator", "quality", "planned", "other"];
 export const SCRAP_GROUPS = ["material", "process", "machine", "operator", "startup", "other"];
@@ -52,7 +52,7 @@ export const hours = (min) => `${new Intl.NumberFormat(lang === "fr" ? "fr-CA" :
 const monday = (iso) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); };
 const dayName = (iso) => new Date(iso + "T12:00:00").toLocaleDateString(lang === "fr" ? "fr-CA" : "en-CA", { weekday: "long", day: "numeric", month: "long" });
 
-// The available time of a week, day by day (calendar and work center screens). extra(r) adds rows after the total.
+// The available time of a week, day by day (calendar, work center and resource screens). extra(r) adds rows after the total.
 function weekPreview(url, extra = () => "") {
   return {
     html: () => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.cal.preview"))}</h2><span class="help muted">${esc(t("mfg.cal.preview.help"))}</span></div>
@@ -66,7 +66,8 @@ function weekPreview(url, extra = () => "") {
           const r = await api(`${url(m)}?from=${from}&to=${to.toISOString().slice(0, 10)}`);
           $("#calPreview").innerHTML = `<table class="grid"><thead><tr><th>${esc(t("mfg.cal.day"))}</th><th>${esc(t("mfg.cal.shifts"))}</th><th class="num">${esc(t("mfg.cal.available"))}</th></tr></thead><tbody>
             ${r.days.map((d) => `<tr><td>${esc(dayName(d.dDate))}</td><td>${d.shifts.map((s) => `${s.cShift === "*" ? "" : esc(s.cShift) + " "}${esc(s.cStart)}–${esc(s.cEnd)}`).join(" · ")}
-              ${d.cException ? ` <span class="badge ${d.lClosed ? "no" : ""}">${esc(lang === "fr" ? d.cException : d.cExceptionEN)}</span>` : ""}</td><td class="num">${esc(hours(d.iMinutes))}</td></tr>`).join("")}
+              ${d.cException ? ` <span class="badge ${d.lClosed ? "no" : ""}">${esc(lang === "fr" ? d.cException : d.cExceptionEN)}</span>` : ""}
+              ${d.iDowntimeMinutes ? ` <span class="badge no">− ${esc(hours(d.iDowntimeMinutes))} ${esc(t("mfg.res.plannedStop"))}</span>` : ""}</td><td class="num">${esc(hours(d.iMinutes))}</td></tr>`).join("")}
             <tr class="total-row"><td colspan="2">${esc(t("mfg.cal.total"))}</td><td class="num">${esc(hours(r.iMinutes))}</td></tr>${extra(r)}</tbody></table>`;
         } catch (e) { $("#calPreview").innerHTML = ""; }
       };
@@ -166,7 +167,80 @@ Object.assign(RES, {
       ] },
       { t: "mfg.wc.notes", fields: [{ f: "cNotes", l: "mfg.f.cNotes", type: "textarea", span: 4 }] },
     ],
-    panel: weekPreview((m) => `work-centers/${enc(m.cCode)}/availability`, (r) => `<tr><td colspan="2">${esc(t("mfg.wc.capacityTotal"))}</td><td class="num">${esc(hours(r.iCapacityMinutes))}</td></tr>`),
+    panel: withResources(weekPreview((m) => `work-centers/${enc(m.cCode)}/availability`, (r) => `<tr><td colspan="2">${esc(t("mfg.wc.capacityTotal"))}</td><td class="num">${esc(hours(r.iCapacityMinutes))}</td></tr>`)),
+  },
+});
+
+// ------------------------------------------------------------------ P4: resources
+// The resources of a work center, listed above another panel (the week preview)
+function withResources(panel) {
+  return {
+    html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.res.title"))}</h2>
+        <a class="btn small" style="margin-left:auto" href="#/prod/resources/new" id="wcNewRes">＋ ${esc(t("mfg.res.new"))}</a></div>
+      <div id="wcResources"></div></div>` + panel.html(m),
+    bind: (m) => {
+      api(`resources?f_cWorkCenter=${enc(m.cCode)}&sort=cCode&size=200`).then((r) => {
+        $("#wcResources").innerHTML = r.items.length
+          ? `<div class="table-wrap"><table class="grid"><thead><tr><th>${esc(t("f.cCode"))}</th><th>${esc(t("f.cDescription"))}</th><th>${esc(t("mfg.res.caps"))}</th><th class="num">${esc(t("mfg.f.dSpeedFactor"))}</th><th class="num">${esc(t("mfg.f.iParallel"))}</th></tr></thead><tbody>
+            ${r.items.map((x) => `<tr><td><a href="#/prod/resources/${enc(x.cCode)}">${esc(x.cCode)}</a></td><td>${esc(dl(x, "cDesc"))}</td><td>${esc(x.cCapabilities)}</td><td class="num">${esc(x.dSpeedFactor)}</td><td class="num">${esc(x.iParallel)}</td></tr>`).join("")}</tbody></table></div>`
+          : `<div class="empty">${esc(t("mfg.res.none"))}</div>`;
+      }).catch(() => {});
+      const add = $("#wcNewRes");
+      if (add) add.addEventListener("click", (e) => { e.preventDefault(); newWith("resources", { cWorkCenter: m.cCode }); });
+      panel.bind(m);
+    },
+  };
+}
+
+Object.assign(RES, {
+  resources: {
+    api: "resources", route: "/prod/resources", title: "mfg.res.title", sub: "mfg.res.subtitle",
+    one: "mfg.res.one", newTitle: "mfg.res.new", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
+    columns: [
+      { f: "cCode", l: "f.cCode" }, descCol("cDesc"), { f: "cWorkCenter", l: "mfg.f.cWorkCenter" },
+      { f: "cCapabilities", l: "mfg.res.caps" }, { f: "dSpeedFactor", l: "mfg.f.dSpeedFactor", n: true },
+      { f: "iParallel", l: "mfg.f.iParallel", n: true }, { f: "lActive", l: "opt.active", fmt: yesNo },
+    ],
+    filters: [{ f: "cWorkCenter", l: "mfg.f.cWorkCenter", lookup: "work_centers" }],
+    defaults: () => ({ dSpeedFactor: "1", iParallel: 1, lActive: true, capabilities: [], attributes: [], subresources: [], downtime: [] }),
+    formTabs: [["gen", "common.general"], ["caps", "mfg.res.tab.caps"], ["parts", "mfg.res.tab.parts"], ["down", "mfg.res.tab.downtime"], ["time", "mfg.cal.preview"]],
+    sections: [
+      { tab: "gen", t: "common.general", fields: [
+        { f: "cCode", l: "f.cCode", req: true, key: true, help: "mfg.code.help" },
+        { f: "cWorkCenter", l: "mfg.f.cWorkCenter", req: true, lookup: "work_centers" },
+        { f: "lActive", l: "opt.active", type: "check" },
+        { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+      ] },
+      { tab: "gen", t: "mfg.wc.capacity", help: "mfg.res.capacity.help", fields: [
+        { f: "cCalendar", l: "mfg.f.cCalendar", lookup: "calendars", help: "mfg.f.cCalendarRes.help" },
+        { f: "dSpeedFactor", l: "mfg.f.dSpeedFactor", type: "number", help: "mfg.f.dSpeedFactor.help" },
+        { f: "iParallel", l: "mfg.f.iParallel", type: "number", help: "mfg.f.iParallel.help" },
+      ] },
+      { tab: "gen", t: "mfg.res.machine", fields: [
+        { f: "cManufacturer", l: "mfg.f.cManufacturer" }, { f: "cModel", l: "mfg.f.cModel" }, { f: "cSerialNo", l: "mfg.f.cSerialNo" },
+        { f: "cNotes", l: "mfg.f.cNotes", type: "textarea", span: 4 },
+      ] },
+    ],
+    grids: [
+      { key: "capabilities", tab: "caps", title: "mfg.res.caps", help: "mfg.res.caps.help",
+        cols: [{ f: "cCapability", l: "mfg.res.cap", w: "w-lg", lookup: "capabilities" }, { f: "iPreference", l: "mfg.f.iPreference", w: "w-sm", n: true }],
+        newLine: (m) => ({ cCapability: "", iPreference: (m.capabilities || []).length + 1 }) },
+      { key: "attributes", tab: "caps", title: "mfg.res.attrs", help: "mfg.res.attrs.help",
+        cols: [{ f: "cAttribute", l: "mfg.f.cAttribute", w: "w-md" }, { f: "cUOM", l: "mfg.f.cUOM", w: "w-sm" },
+          { f: "dMin", l: "mfg.f.dMin", w: "w-sm", n: true }, { f: "dMax", l: "mfg.f.dMax", w: "w-sm", n: true }, { f: "cValue", l: "mfg.f.cValue", w: "w-md" }],
+        newLine: () => ({ cAttribute: "", cUOM: "", dMin: "", dMax: "", cValue: "" }) },
+      { key: "subresources", tab: "parts", title: "mfg.res.parts", help: "mfg.res.parts.help",
+        cols: [{ f: "cCode", l: "f.cCode", w: "w-sm" }, { f: "cDescFR", l: "f.cDescFR", w: "w-lg" }, { f: "cDescEN", l: "f.cDescEN", w: "w-lg" }],
+        newLine: () => ({ cCode: "", cDescFR: "", cDescEN: "" }) },
+      { key: "downtime", tab: "down", title: "mfg.res.tab.downtime", help: "mfg.res.downtime.help",
+        cols: [{ f: "dStart", l: "mfg.f.dStart", w: "w-md", type: "date" }, { f: "cStartTime", l: "mfg.f.cStart", w: "w-sm", type: "time" },
+          { f: "dEnd", l: "mfg.f.dEnd", w: "w-md", type: "date" }, { f: "cEndTime", l: "mfg.f.cEnd", w: "w-sm", type: "time" },
+          { f: "cReason", l: "mfg.f.cReason", w: "w-md", lookup: "downtime_reasons" }, { f: "cNotes", l: "mfg.f.cNotes", w: "w-lg" }],
+        newLine: () => ({ dStart: today(), cStartTime: "07:00", dEnd: today(), cEndTime: "11:00", cReason: "PM", cNotes: "" }) },
+    ],
+    panel: { tab: "time", ...weekPreview((m) => `resources/${enc(m.cCode)}/availability`, (r) => `
+      <tr><td colspan="2">${esc(t("mfg.res.plannedStops"))}</td><td class="num">− ${esc(hours(r.iDowntimeMinutes))}</td></tr>
+      <tr><td colspan="2">${esc(t("mfg.res.capacityTotal"))}</td><td class="num">${esc(hours(r.iCapacityMinutes))}</td></tr>`) },
   },
 });
 

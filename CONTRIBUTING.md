@@ -23,6 +23,8 @@ api (Flask routes)  ->  service (business rules)  ->  repository (database)  -> 
 
 - Errors: raise `AppError(code, field)` (or a subclass); one handler turns it into `{"error", "field"}`.
 - One transaction per request (`powererp.database.current()`); never commit inside a service.
+- A record with several child lists: `children = {key: schema}` on the `TableSpec` (tables `<name>_<key>`) and on the
+  `CrudService` (`keep_child`), and `grids: [...]` on the screen (see the resources of Production).
 - New tables only through an Alembic migration (`alembic revision --autogenerate -m "..."`, then review it).
 - Type hints on public functions and methods.
 - Before a commit: `ruff check .`, `black .`, `mypy`, `python -m pytest` (the CI runs the same).

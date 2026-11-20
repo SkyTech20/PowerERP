@@ -187,3 +187,58 @@ def test_subcontract_work_center(client):
     assert r.status_code == 201 and r.get_json()["lFinite"] is False
     r = client.get("/api/work-centers/TRT/availability")
     assert r.status_code == 400 and r.get_json()["error"] == "no_calendar"
+
+
+# ------------------------------------------------------------------ P4: resources
+
+
+def test_demo_resources_and_child_lists(client):
+    page = client.get("/api/resources?size=50").get_json()
+    assert page["total"] == 14 and "capabilities" not in page["items"][0]
+    reb1 = next(r for r in page["items"] if r["cCode"] == "REB1")
+    assert reb1["cCapabilities"] == "WIND, CUT"
+    cnc1 = client.get("/api/resources/CNC1").get_json()
+    assert [a["cAttribute"] for a in cnc1["attributes"]] == ["Course X", "Course Y", "Outils"]
+    assert [s["cCode"] for s in cnc1["subresources"]] == ["BROCHE", "ATC"]
+    assert cnc1["downtime"][0]["cReason"] == "PM"
+
+
+def test_resource_available_time(client):
+    """CNC1: 2,700 min of MET-1X5 that week, minus 4 h of preventive maintenance on Wednesday; 85 % utilization."""
+    r = client.get(f"/api/resources/CNC1/availability?{WEEK}").get_json()
+    assert (r["iCalendarMinutes"], r["iDowntimeMinutes"], r["iMinutes"], r["iCapacityMinutes"]) == (
+        2700,
+        240,
+        2460,
+        2091,
+    )
+    oven = client.get(f"/api/resources/FOUR1/availability?{WEEK}").get_json()
+    assert (oven["iMinutes"], oven["iCapacityMinutes"]) == (5400 - 240, round(5160 * 0.95 * 3))  # 3 trays at once
+
+
+def test_resource_crud_and_references(client):
+    body = {
+        "cCode": "cnc3",
+        "cDescFR": "Tour CNC",
+        "cWorkCenter": "MET-CNC",
+        "capabilities": [{"cCapability": "cnc", "iPreference": 3}],
+        "subresources": [{"cCode": "mandrin", "cDescFR": "Mandrin"}],
+    }
+    r = client.post("/api/resources", json=body)
+    assert r.status_code == 201 and r.get_json()["capabilities"] == [{"cCapability": "CNC", "iPreference": 3}]
+    r = client.put("/api/resources/CNC3", json={"capabilities": [{"cCapability": "WELD"}, {"cCapability": "PAINT"}]})
+    assert [c["cCapability"] for c in r.get_json()["capabilities"]] == ["WELD", "PAINT"]
+    assert client.get("/api/resources/CNC3").get_json()["subresources"][0]["cCode"] == "MANDRIN"  # left as it was
+    r = client.post("/api/resources", json={**body, "cCode": "X", "cWorkCenter": "NOPE"})
+    assert r.status_code == 400 and r.get_json() == {"error": "unknown_ref", "field": "cWorkCenter"}
+    # what the resources use cannot be deleted
+    assert client.delete("/api/work-centers/MET-CNC").status_code == 409
+    assert client.delete("/api/capabilities/CNC").status_code == 409
+    assert client.delete("/api/downtime-reasons/PM").status_code == 409
+    assert client.delete("/api/resources/CNC3").status_code == 200
+
+
+def test_resources_of_a_capability(client):
+    r = client.get("/api/capabilities/WIND/resources").get_json()
+    assert [x["cCode"] for x in r] == ["REB1", "REB2"]  # preferred first
+    assert client.get("/api/capabilities/NOPE/resources").status_code == 404

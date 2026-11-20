@@ -76,10 +76,10 @@ class RecordForm:
                     raise AppError(_error_code(kind), f) from None
         return row
 
-    def lines(self, payload: Row, keep: Callable[[Row], Any]) -> list[Row]:
-        """The cleaned "lines" of a payload; keep(line) says whether an (almost) empty line is kept."""
+    def lines(self, payload: Row, keep: Callable[[Row], Any], key: str = "lines") -> list[Row]:
+        """The cleaned child list `key` of a payload; keep(line) says whether an (almost) empty line is kept."""
         out = []
-        for ln in payload.get("lines") or []:
+        for ln in payload.get(key) or []:
             if not isinstance(ln, dict):
                 continue
             row = self.apply(self.blank(), ln)

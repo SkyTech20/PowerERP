@@ -8,7 +8,8 @@ import { pageHead, tabLabel } from "../views.js";
 // ---------- Generic form
 // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
 // textarea | password | email), lookup (+ fill, lookupParams, onPick), show(model, isNew), rerender (redraw on change).
-// Resource options: lines, totals, tax, locked(model, isNew), actions, panel { html(model), bind(model) }.
+// Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
+// locked(model, isNew), actions, panel { html(model), bind(model) }.
 export function formView(key, id) {
   const R = RES[key];
   const isNew = id == null;
@@ -89,18 +90,20 @@ export function formView(key, id) {
     return `<input type="${c.type === "date" || c.type === "time" ? c.type : "text"}" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${ro ? "readonly" : ""} ${aria}>`;
   }
 
-  function linesHtml() {
-    const L = R.lines;
+  // A grid of child lines: R.lines (model.lines, with amounts and totals) or one of R.grids (model[G.key]).
+  function linesHtml(L = R.lines, key = "lines") {
+    const rows = model[key] || [];
+    const amount = key === "lines" && L.amount;
     const head = L.cols.map((c) => `<th class="${c.n ? "num" : ""}">${esc(c.raw ? c.l : t(c.l))}</th>`).join("")
-      + (L.amount ? `<th class="num">${esc(t(L.amountLabel))}</th>` : "") + (locked ? "" : "<th></th>");
-    const body = (model.lines || []).map((ln, i) => `<tr data-line="${i}" class="${L.rowClass ? L.rowClass(ln) : ""}">${L.cols.map((c) => `<td class="${c.w}">${lineCell(c, ln)}</td>`).join("")}
-      ${L.amount ? `<td class="num" data-amount>${esc(money(L.amount(ln), cur()))}</td>` : ""}
+      + (amount ? `<th class="num">${esc(t(L.amountLabel))}</th>` : "") + (locked ? "" : "<th></th>");
+    const body = rows.map((ln, i) => `<tr data-line="${i}" class="${L.rowClass ? L.rowClass(ln) : ""}">${L.cols.map((c) => `<td class="${c.w}">${lineCell(c, ln)}</td>`).join("")}
+      ${amount ? `<td class="num" data-amount>${esc(money(L.amount(ln), cur()))}</td>` : ""}
       ${locked ? "" : `<td><button type="button" class="link-btn" data-remove="${i}" title="${esc(t("common.removeLine"))}">✕</button></td>`}</tr>`).join("");
-    const addBtn = locked ? "" : `<button type="button" class="btn small" id="addLine" style="margin-left:auto">＋ ${esc(t("common.addLine"))}</button>`;
-    return `<div class="card"><div class="card-head"><h2>${esc(t(L.title || "common.lines"))}</h2>${L.help ? `<span class="help muted">${esc(t(L.help))}</span>` : ""}${addBtn}</div>
+    const addBtn = locked ? "" : `<button type="button" class="btn small" ${key === "lines" ? 'id="addLine"' : ""} data-add style="margin-left:auto">＋ ${esc(t("common.addLine"))}</button>`;
+    return `<div class="card" data-grid="${key}"><div class="card-head"><h2>${esc(t(L.title || "common.lines"))}</h2>${L.help ? `<span class="help muted">${esc(t(L.help))}</span>` : ""}${addBtn}</div>
       <div class="table-wrap"><table class="grid lines"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
-      ${(model.lines || []).length ? "" : `<div class="empty">${esc(t("common.noLines"))}</div>`}</div>
-      ${R.totals ? '<div class="totals" id="totals"></div>' : ""}</div>`;
+      ${rows.length ? "" : `<div class="empty">${esc(t("common.noLines"))}</div>`}</div>
+      ${key === "lines" && R.totals ? '<div class="totals" id="totals"></div>' : ""}</div>`;
   }
 
   function totalsHtml() {
@@ -118,7 +121,7 @@ export function formView(key, id) {
   function refreshAmounts() {
     if (!R.lines) return;
     if (R.lines.amount) {
-      $$("tr[data-line]").forEach((tr) => {
+      $$('[data-grid="lines"] tr[data-line]').forEach((tr) => {
         const ln = model.lines[+tr.dataset.line];
         $("[data-amount]", tr).textContent = money(R.lines.amount(ln), cur());
       });
@@ -172,7 +175,8 @@ export function formView(key, id) {
     const tabHasError = (k) => R.sections.some((s) => tabOf(s) === k && s.fields.some((fd) => errors[fd.f]));
     if (R.formTabs && Object.keys(errors).length) {
       const bad = R.sections.find((s) => s.fields.some((fd) => errors[fd.f]));
-      if (bad) activeTab = tabOf(bad); else if (errors.lines && R.lines) activeTab = tabOf(R.lines);
+      const badGrid = (R.grids || []).find((G) => errors[G.key]);
+      if (bad) activeTab = tabOf(bad); else if (errors.lines && R.lines) activeTab = tabOf(R.lines); else if (badGrid) activeTab = tabOf(badGrid);
     }
     const sections = R.sections.map((s, i) => {
       const fields = s.fields.map(fieldHtml).join("");
@@ -180,7 +184,8 @@ export function formView(key, id) {
       return wrap(tabOf(s), `<div class="card"><div class="card-head"><h2>${esc(t(s.t))}</h2>${i === 0 ? badge : ""}</div>
         <div class="card-body">${s.help ? `<p class="help muted section-help">${esc(t(s.help))}</p>` : ""}<div class="form-grid">${fields}</div></div></div>`);
     }).join("");
-    const lines = R.lines && (!R.lines.show || R.lines.show(model, isNew)) ? wrap(tabOf(R.lines), linesHtml()) : "";
+    const lines = (R.lines && (!R.lines.show || R.lines.show(model, isNew)) ? wrap(tabOf(R.lines), linesHtml()) : "")
+      + (R.grids || []).filter((G) => !G.show || G.show(model, isNew)).map((G) => wrap(tabOf(G), linesHtml(G, G.key))).join("");
     const panel = R.panel && !isNew ? wrap(tabOf(R.panel), R.panel.html(model)) : "";
     const present = (sections + lines + panel).match(/data-tab="[^"]+"/g) || [];
     if (R.formTabs && present.length && !present.includes(`data-tab="${activeTab}"`)) activeTab = R.formTabs[0][0];
@@ -227,42 +232,8 @@ export function formView(key, id) {
         if (fd.lookupParams) refreshers.push(fill);
       }
     });
-    if (R.lines) {
-      $$("tr[data-line]").forEach((tr) => {
-        const ln = model.lines[+tr.dataset.line];
-        $$("[data-lf]", tr).forEach((el) => {
-          const col = R.lines.cols.find((c) => c.f === el.dataset.lf) || {};
-          if (el.type === "checkbox" || el.tagName === "SELECT") {
-            el.addEventListener("change", () => { ln[el.dataset.lf] = el.type === "checkbox" ? el.checked : el.value; });
-          } else {
-            el.addEventListener("input", () => { ln[el.dataset.lf] = el.dataset.num ? numOnly(el) : el.value; taxLive = true; refreshAmounts(); });
-          }
-          if (el.dataset.lookup) {
-            const fill = bindLookup(el, el.dataset.lookup, (code, label) => {
-              ln[el.dataset.lf] = code;
-              if (col.fill && label) {
-                ln[col.fill] = label;
-                const target = $(`[data-lf="${col.fill}"]`, tr);
-                if (target) target.value = label;
-              }
-            }, col.lookupParams ? () => col.lookupParams(model) : null);
-            if (col.lookupParams) refreshers.push(fill);
-          }
-        });
-      });
-      $$("[data-remove]").forEach((b) => b.addEventListener("click", () => { model.lines.splice(+b.dataset.remove, 1); taxLive = true; render(); }));
-      const add = $("#addLine");
-      if (add) {
-        add.addEventListener("click", () => {
-          model.lines = model.lines || [];
-          model.lines.push(R.lines.newLine ? R.lines.newLine(model) : {});
-          render();
-          const rows = $$("tr[data-line]");
-          const first = rows.length && $("input[data-lf]:not([data-lf=cUnique]):not([readonly])", rows[rows.length - 1]);
-          if (first) first.focus();
-        });
-      }
-    }
+    if (R.lines) bindGrid(R.lines, "lines");
+    (R.grids || []).forEach((G) => bindGrid(G, G.key));
     $("#form").addEventListener("submit", (e) => { e.preventDefault(); if (!locked) save(); });
     const sv = $("#saveBtn");
     if (sv) sv.addEventListener("click", save);
@@ -282,6 +253,46 @@ export function formView(key, id) {
         b.disabled = false;
       }
     }));
+  }
+
+  // Events of one grid of child lines (edit a cell, lookups, remove a line, add a line)
+  function bindGrid(L, key) {
+    const card = $(`[data-grid="${key}"]`);
+    if (!card) return;
+    $$("tr[data-line]", card).forEach((tr) => {
+      const ln = model[key][+tr.dataset.line];
+      $$("[data-lf]", tr).forEach((el) => {
+        const col = L.cols.find((c) => c.f === el.dataset.lf) || {};
+        if (el.type === "checkbox" || el.tagName === "SELECT") {
+          el.addEventListener("change", () => { ln[el.dataset.lf] = el.type === "checkbox" ? el.checked : el.value; });
+        } else {
+          el.addEventListener("input", () => { ln[el.dataset.lf] = el.dataset.num ? numOnly(el) : el.value; taxLive = true; refreshAmounts(); });
+        }
+        if (el.dataset.lookup) {
+          const fill = bindLookup(el, el.dataset.lookup, (code, label) => {
+            ln[el.dataset.lf] = code;
+            if (col.fill && label) {
+              ln[col.fill] = label;
+              const target = $(`[data-lf="${col.fill}"]`, tr);
+              if (target) target.value = label;
+            }
+          }, col.lookupParams ? () => col.lookupParams(model) : null);
+          if (col.lookupParams) refreshers.push(fill);
+        }
+      });
+    });
+    $$("[data-remove]", card).forEach((b) => b.addEventListener("click", () => { model[key].splice(+b.dataset.remove, 1); taxLive = true; render(); }));
+    const add = $("[data-add]", card);
+    if (add) {
+      add.addEventListener("click", () => {
+        model[key] = model[key] || [];
+        model[key].push(L.newLine ? L.newLine(model) : {});
+        render();
+        const rows = $$("tr[data-line]", $(`[data-grid="${key}"]`));
+        const first = rows.length && $("input[data-lf]:not([data-lf=cUnique]):not([readonly])", rows[rows.length - 1]);
+        if (first) first.focus();
+      });
+    }
   }
 
   function apiPath() {

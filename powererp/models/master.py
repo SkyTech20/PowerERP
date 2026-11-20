@@ -92,14 +92,20 @@ class TableSpec:
     keys: tuple = ("cCode",)  # business key (unique per company, case-insensitive)
     order: tuple = ()  # default order of lists (API fields); () = insertion order
     extra: dict = field(default_factory=dict)  # stored fields outside the input schema (read-only in the API)
-    line_schema: dict | None = None
+    line_schema: dict | None = None  # the child list "lines" (table <name>_lines)
+    children: dict = field(default_factory=dict)  # other child lists: key -> schema (table <name>_<key>)
     sparse: tuple = ()  # fields left out of a record while they are empty (NULL)
     table: Table | None = None
     lines: Table | None = None
+    child_tables: dict = field(default_factory=dict)  # key -> Table, "lines" included
 
     @property
     def fields(self):
         return {**self.schema, **self.extra}
+
+    def child_schemas(self) -> dict:
+        """Every child list of a record: key in the API ("lines", "capabilities"...) -> field schema."""
+        return {**({"lines": self.line_schema} if self.line_schema else {}), **self.children}
 
 
 def _build(spec):
@@ -121,11 +127,12 @@ def _build(spec):
         ),
         comment=f"business key: {key_expr}",
     )
-    if spec.line_schema:
-        lcols = [_column(f, k, spec.name + "_lines") for f, k in spec.line_schema.items()]
+    for key, schema in spec.child_schemas().items():
+        name = f"{spec.name}_{key}"
+        lcols = [_column(f, k, name) for f, k in schema.items()]
         lchecks = [c.info.pop("check") for c in lcols if "check" in c.info]
-        spec.lines = Table(
-            spec.name + "_lines",
+        spec.child_tables[key] = Table(
+            name,
             Base.metadata,
             Column("id", BigInteger, primary_key=True, autoincrement=True),
             Column(
@@ -135,6 +142,7 @@ def _build(spec):
             *lcols,
             *lchecks,
         )
+    spec.lines = spec.child_tables.get("lines")
     return spec
 
 

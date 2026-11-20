@@ -3,6 +3,7 @@
 P1: the reference lists of the shop floor (capabilities, setup families, stop and scrap reasons).
 P2: working calendars (shifts by weekday as lines) and their exceptions by date.
 P3: work centers.
+P4: resources, with their capabilities, attributes, subresources and planned downtime (child tables).
 """
 
 from .. import schemas as S
@@ -16,4 +17,15 @@ register_specs(
     TableSpec("calendars", S.CALENDAR, order=("cCode",), line_schema=S.CALENDAR_SHIFT),
     TableSpec("calendar_exceptions", S.CALENDAR_EXCEPTION, keys=("cCalendar", "dDate"), order=("dDate", "cCalendar")),
     TableSpec("work_centers", S.WORK_CENTER, order=("cCode",)),
+    TableSpec(
+        "resources",
+        S.RESOURCE,
+        order=("cCode",),
+        children={
+            "capabilities": S.RESOURCE_CAPABILITY,
+            "attributes": S.RESOURCE_ATTRIBUTE,
+            "subresources": S.RESOURCE_SUBRESOURCE,
+            "downtime": S.RESOURCE_DOWNTIME,
+        },
+    ),
 )
