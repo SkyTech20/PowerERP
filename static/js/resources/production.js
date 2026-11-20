@@ -450,6 +450,60 @@ export const ISSUE_METHODS = ["manual", "backflush", "pick"];
 export const OUTPUT_KINDS = ["coproduct", "byproduct"];
 const statusBadge = (v) => `<span class="badge ${v === "approved" ? "yes" : v === "obsolete" ? "no" : ""}">${esc(t("mfg.o.rs." + v))}</span>`;
 
+export const STEP_KINDS = ["instruction", "material_add", "parameter", "measure", "check", "timer", "output", "signature"];
+export const STEP_DATA_TYPES = ["number", "text", "yes_no", "list", "photo"];
+export const STEP_ON_FAIL = ["block", "warn", "hold_lot"];
+export const STEP_FREQUENCIES = ["once", "every_n_units", "every_n_min", "per_lot"];
+const STEP_ICON = { instruction: "📄", material_add: "⚖️", parameter: "🎛️", measure: "📏", check: "☑️", timer: "⏱️", output: "🏷️", signature: "✍️" };
+
+// How the operator will see the steps of an operation (the shop floor screen, M4), with a value test
+const operatorPreview = {
+  tab: "preview",
+  html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.st.preview"))}</h2><span class="help muted">${esc(t("mfg.st.preview.help"))}</span></div>
+    <div class="card-body"><div class="form-grid"><div class="field"><label for="stOp">${esc(t("mfg.op.one"))}</label><select id="stOp">
+      ${(m.operations || []).map((o) => `<option value="${esc(o.iOpSeq)}">${esc(o.iOpSeq)} — ${esc(dl(o, "cDesc"))}</option>`).join("")}</select></div></div>
+    <div id="stCards" class="step-cards"></div></div></div>`,
+  bind: (m) => {
+    const limits = (s) => [s.dMin && `min ${fmtNum(s.dMin)}`, s.dTarget && `${t("mfg.f.dTarget").toLowerCase()} ${fmtNum(s.dTarget)}`, s.dMax && `max ${fmtNum(s.dMax)}`].filter(Boolean).join(" · ");
+    const render = () => {
+      const op = $("#stOp").value;
+      const steps = (m.steps || []).filter((s) => String(s.iOpSeq) === String(op));
+      $("#stCards").innerHTML = steps.length ? steps.map((s, i) => {
+        const mat = s.cKind === "material_add" ? (m.materials || []).find((x) => String(x.iSeq) === String(s.iMaterialSeq)) : null;
+        const valued = ["parameter", "measure", "check"].includes(s.cKind);
+        const input = !valued ? "" : s.cKind === "check" || s.cDataType === "yes_no"
+          ? `<select data-check="${i}"><option value=""></option><option value="oui">${esc(t("common.yes"))}</option><option value="non">${esc(t("common.no"))}</option></select>`
+          : s.cDataType === "list" ? `<select data-check="${i}"><option value=""></option>${s.cOptions.split(",").map((o) => `<option>${esc(o.trim())}</option>`).join("")}</select>`
+            : `<input type="text" data-check="${i}" inputmode="decimal" placeholder="${esc(s.cUOM)}">`;
+        return `<div class="step-card ${s.lCritical ? "critical" : ""}">
+          <div class="step-head"><span class="step-no">${esc(s.iStep)}</span><span class="step-icon">${STEP_ICON[s.cKind] || ""}</span><strong>${esc(lang === "fr" ? s.cTitleFR : s.cTitleEN || s.cTitleFR)}</strong>
+            ${s.lCritical ? `<span class="badge no">${esc(t("mfg.f.lCritical"))}</span>` : ""}${s.lSecondSignature ? `<span class="badge">${esc(t("mfg.f.lSecondSignature"))}</span>` : ""}</div>
+          ${s.cCondition ? `<div class="muted">${esc(t("mfg.st.onlyIf", { c: s.cCondition }))}</div>` : ""}
+          ${(lang === "fr" ? s.cInstructionFR : s.cInstructionEN || s.cInstructionFR) ? `<p>${esc(lang === "fr" ? s.cInstructionFR : s.cInstructionEN || s.cInstructionFR)}</p>` : ""}
+          ${mat ? `<p>⚖️ ${esc(mat.cComponent)} — ${esc(fmtNum(mat.dQtyPer))} ${esc(mat.cUOM)} / ${esc(fmtNum(m.dBaseQty))} ${esc(m.cUOM)}</p>` : ""}
+          ${s.cKind === "timer" ? `<p>⏱️ ${esc(minutesText(s.dDurationMin))}</p>` : ""}
+          ${valued ? `<div class="step-value"><span>${esc(s.cParam)}${s.cUOM ? ` (${esc(s.cUOM)})` : ""}</span>${input}<span class="muted">${esc(limits(s))}</span><span data-result="${i}"></span></div>` : ""}
+          ${s.cFrequency !== "once" ? `<div class="muted">${esc(t("mfg.o.fq." + s.cFrequency))}${s.dFrequencyValue ? " " + esc(fmtNum(s.dFrequencyValue)) : ""}</div>` : ""}
+          ${s.cAttachmentUrl ? `<a href="${esc(s.cAttachmentUrl)}" target="_blank" rel="noopener">📎 ${esc(t("mfg.f.cAttachmentUrl"))}</a>` : ""}
+        </div>`;
+      }).join("") : `<div class="empty">${esc(t("mfg.st.none"))}</div>`;
+      steps.forEach((s, i) => {
+        const el = $(`[data-check="${i}"]`);
+        if (!el) return;
+        el.addEventListener("change", async () => {
+          try {
+            const r = await api(`recipes/${enc(m.cProduct)}/${enc(m.cRevision)}/steps/check`, { method: "POST", body: { iOpSeq: s.iOpSeq, iStep: s.iStep, value: el.value } });
+            $(`[data-result="${i}"]`).innerHTML = r.ok ? `<span class="badge yes">✓</span>`
+              : `<span class="badge no">${esc(t("mfg.st.r." + r.reason))} → ${esc(t("mfg.st.a." + r.action))}</span>`;
+          } catch (e) { /* ignore */ }
+        });
+      });
+    };
+    $("#stOp").addEventListener("change", render);
+    render();
+  },
+};
+
 // The recipe for a quantity: materials, operations (time and cost), total, attribute warnings
 const explosion = {
   tab: "explode",
@@ -496,13 +550,14 @@ Object.assign(RES, {
       { f: "cProduct", l: "mfg.f.cProduct" }, { f: "cRevision", l: "mfg.f.cRevision" }, descCol("cDesc"),
       { f: "cProcessType", l: "mfg.f.cProcessType", fmt: (v) => esc(t("mfg.o.pt." + v)) },
       { f: "dBaseQty", l: "mfg.f.dBaseQty", n: true, fmt: (v, r) => `${esc(fmtNum(v))} ${esc(r.cUOM)}` },
-      { f: "iMaterials", l: "mfg.rc.materials", n: true }, { f: "iOperations", l: "mfg.rc.operations", n: true },
+      { f: "iMaterials", l: "mfg.rc.materials", n: true }, { f: "iOperations", l: "mfg.rc.operations", n: true }, { f: "iSteps", l: "mfg.st.tab", n: true },
       { f: "cStatus", l: "mfg.f.cStatus", fmt: statusBadge },
     ],
     filters: [{ f: "cStatus", l: "mfg.f.cStatus", options: opts("mfg.o.rs.", RECIPE_STATUS) }, { f: "cProcessType", l: "mfg.f.cProcessType", options: opts("mfg.o.pt.", PROCESS_TYPES) }],
-    defaults: () => ({ cRevision: "A", cProcessType: "discrete", dBaseQty: "1", dYieldPct: "100", cStatus: "draft", materials: [], outputs: [], operations: [] }),
+    defaults: () => ({ cRevision: "A", cProcessType: "discrete", dBaseQty: "1", dYieldPct: "100", cStatus: "draft", materials: [], outputs: [], operations: [], steps: [] }),
     badge: (m, isNew) => (isNew ? "" : statusBadge(m.cStatus)),
-    formTabs: [["gen", "common.general"], ["ops", "mfg.rc.operations"], ["mat", "mfg.rc.materials"], ["out", "mfg.rc.outputs"], ["explode", "mfg.rc.explode"]],
+    formTabs: [["gen", "common.general"], ["ops", "mfg.rc.operations"], ["mat", "mfg.rc.materials"], ["steps", "mfg.st.tab"], ["out", "mfg.rc.outputs"],
+      ["explode", "mfg.rc.explode"], ["preview", "mfg.st.preview"]],
     sections: [
       { tab: "gen", t: "common.general", fields: [
         { f: "cProduct", l: "mfg.f.cProduct", req: true, key: true, lookup: "products" },
@@ -540,6 +595,30 @@ Object.assign(RES, {
           { f: "cIssueMethod", l: "mfg.f.cIssueMethod", w: "w-md", type: "select", options: opts("mfg.o.issue.", ISSUE_METHODS) },
         ],
         newLine: (m) => ({ iSeq: ((m.materials || []).length + 1) * 10, cComponent: "", dQtyPer: "", cUOM: "", dScrapPct: "", lFixedQty: false, iOpSeq: (m.operations || [])[0] ? m.operations[0].iOpSeq : 0, cIssueMethod: "manual" }) },
+      { key: "steps", tab: "steps", title: "mfg.st.tab", help: "mfg.st.help",
+        cols: [
+          { f: "iOpSeq", l: "mfg.f.iOpSeq", w: "w-xs", n: true }, { f: "iStep", l: "mfg.f.iStep", w: "w-xs", n: true },
+          { f: "cKind", l: "mfg.f.cStepKind", w: "w-md", type: "select", options: opts("mfg.o.sk.", STEP_KINDS) },
+          { f: "cTitleFR", l: "mfg.f.cTitleFR", w: "w-lg" }, { f: "cTitleEN", l: "mfg.f.cTitleEN", w: "w-lg" },
+          { f: "cInstructionFR", l: "mfg.f.cInstructionFR", w: "w-lg" },
+          { f: "cParam", l: "mfg.f.cParam", w: "w-sm" },
+          { f: "cDataType", l: "mfg.f.cDataType", w: "w-sm", type: "select", options: opts("mfg.o.dt.", STEP_DATA_TYPES) },
+          { f: "cUOM", l: "mfg.f.cUOM", w: "w-xs" },
+          { f: "dMin", l: "mfg.f.dMin", w: "w-xs", n: true }, { f: "dTarget", l: "mfg.f.dTarget", w: "w-xs", n: true }, { f: "dMax", l: "mfg.f.dMax", w: "w-xs", n: true },
+          { f: "cOptions", l: "mfg.f.cOptions", w: "w-md" },
+          { f: "lRequired", l: "mfg.f.lRequired", w: "w-xs", type: "check" }, { f: "lCritical", l: "mfg.f.lCritical", w: "w-xs", type: "check" },
+          { f: "cOnFail", l: "mfg.f.cOnFail", w: "w-sm", type: "select", options: opts("mfg.o.of.", STEP_ON_FAIL) },
+          { f: "cFrequency", l: "mfg.f.cFrequency", w: "w-md", type: "select", options: opts("mfg.o.fq.", STEP_FREQUENCIES) },
+          { f: "dFrequencyValue", l: "mfg.f.dFrequencyValue", w: "w-xs", n: true },
+          { f: "iMaterialSeq", l: "mfg.f.iMaterialSeq", w: "w-xs", n: true }, { f: "dDurationMin", l: "mfg.f.dDurationMin", w: "w-xs", n: true },
+          { f: "lSecondSignature", l: "mfg.f.lSecondSignature", w: "w-xs", type: "check" }, { f: "cCondition", l: "mfg.f.cCondition", w: "w-md" },
+        ],
+        newLine: (m) => {
+          const last = (m.steps || [])[(m.steps || []).length - 1];
+          const op = last ? last.iOpSeq : ((m.operations || [])[0] || {}).iOpSeq || 10;
+          const next = (m.steps || []).filter((x) => String(x.iOpSeq) === String(op)).reduce((a, x) => Math.max(a, Number(x.iStep) || 0), 0) + 10;
+          return { iOpSeq: op, iStep: next, cKind: "instruction", cTitleFR: "", cDataType: "number", cOnFail: "block", cFrequency: "once", lRequired: false, lCritical: false, lSecondSignature: false };
+        } },
       { key: "outputs", tab: "out", title: "mfg.rc.outputs", help: "mfg.rc.outputs.help",
         cols: [
           { f: "cProduct", l: "mfg.f.cProduct", w: "w-lg", lookup: "products" },
@@ -549,6 +628,6 @@ Object.assign(RES, {
         newLine: () => ({ cProduct: "", cKind: "byproduct", dQtyPer: "", cUOM: "", dCostPct: "" }) },
     ],
     panel: explosion,
+    panels: [operatorPreview],
   },
 });
-

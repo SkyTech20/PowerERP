@@ -66,6 +66,10 @@ RECIPE_STATUS = ("draft", "in_review", "approved", "obsolete")
 PROCESS_TYPES = ("discrete", "batch", "continuous")
 ISSUE_METHODS = ("manual", "backflush", "pick")
 OUTPUT_KINDS = ("coproduct", "byproduct")
+STEP_KINDS = ("instruction", "material_add", "parameter", "measure", "check", "timer", "output", "signature")
+STEP_DATA_TYPES = ("number", "text", "yes_no", "list", "photo")
+STEP_ON_FAIL = ("block", "warn", "hold_lot")
+STEP_FREQUENCIES = ("once", "every_n_units", "every_n_min", "per_lot")
 
 # --------------------------------------------------------------------------- schemas
 # kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
@@ -422,6 +426,34 @@ RECIPE_OPERATION = {
     "cPredecessors": "s",  # "10, 20": operations that must end first; empty = the previous one
     "cInstructionFR": "s",
     "cInstructionEN": "s",
+}
+# P9: the steps of each operation of a recipe ("the recipe step by step"), one parameter per step
+RECIPE_STEP = {
+    "iOpSeq": "i",
+    "iStep": "i",
+    "cKind": STEP_KINDS,
+    "cTitleFR": "s",
+    "cTitleEN": "s",
+    "cInstructionFR": "s",
+    "cInstructionEN": "s",
+    "cAttachmentUrl": "s",  # photo, drawing, video, safety data sheet
+    "dDurationMin": "d",
+    "cParam": "s",  # code of the value recorded (TEMP_PATE), used by the conditions of the next steps
+    "cDataType": STEP_DATA_TYPES,
+    "cUOM": "s",
+    "dTarget": "d",
+    "dMin": "d",
+    "dMax": "d",
+    "cOptions": "s",  # list: "OK, Retouche, Rebut"
+    "lRequired": "b",
+    "lCritical": "b",  # critical control point: out of limits -> cOnFail
+    "cOnFail": STEP_ON_FAIL,
+    "cFrequency": STEP_FREQUENCIES,
+    "dFrequencyValue": "d",  # every N units / N minutes
+    "iMaterialSeq": "i",  # material_add: the line of the materials
+    "cRequiredRole": "s",
+    "lSecondSignature": "b",
+    "cCondition": "s",  # done only when an earlier value matches: "TEMP_PATE < 24"
 }
 
 DEFAULTS: dict[str, dict[str, Any]] = {
