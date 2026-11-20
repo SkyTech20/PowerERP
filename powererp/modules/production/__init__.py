@@ -12,6 +12,8 @@ P7: manufacturing data of the products /api/product-mfg/<product> (make / buy, s
     attributes); deleted with the product.
 P8: recipes /api/recipes/<product>/<revision> (materials, outputs, operations), and
     /api/recipes/<product>/<revision>/explode?qty=: materials, times and cost for a quantity.
+P9: the steps of the recipe operations; POST /api/recipes/<product>/<revision>/steps/check
+    {iOpSeq, iStep, value}: the value against the limits of the step (what the shop floor will call).
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -25,6 +27,7 @@ from flask import Blueprint, Flask, jsonify, request
 
 from powererp.container import Container
 from powererp.core.errors import AppError
+from powererp.core.http import json_payload
 from powererp.modules.common.crud import register_crud_routes
 from powererp.modules.common.registry import label_lookup
 from powererp.store import store
@@ -42,6 +45,7 @@ from .service import (
     SetupFamilyService,
 )
 from .setup_matrix import SetupMatrixService
+from .steps import check_value
 from .work_centers import WorkCenterService
 
 DESC_FR, DESC_EN = ("cDescFR",), ("cDescEN", "cDescFR")
@@ -273,6 +277,23 @@ def _register_recipes(bp: Blueprint, c: Container, seed: dict) -> None:
         )
 
     demo_lists = {**seed, "products": c.get("demo").inventory.get("products", [])}
+
+    @bp.route("/api/recipes/<product>/<revision>/steps/check", methods=["POST"])
+    def recipe_step_check(product, revision):
+        body = json_payload()
+        recipe = recipes.get(product, revision)
+        step = next(
+            (
+                s
+                for s in recipe.get("steps", [])
+                if str(s["iOpSeq"]) == str(body.get("iOpSeq")) and str(s["iStep"]) == str(body.get("iStep"))
+            ),
+            None,
+        )
+        if step is None:
+            raise AppError("unknown_ref", "iStep")
+        return jsonify(check_value(step, body.get("value")))
+
     c.get("lifecycle").add(recipes.repo, "prod_recipes", prepare_demo(seed.get("recipes", []), demo_lists))
 
 

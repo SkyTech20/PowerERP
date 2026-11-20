@@ -104,7 +104,11 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - `GET /api/recipes/<product>/<revision>/explode?qty=`: materials scaled, the time of each operation on its resource (a capability is estimated on the preferred resource), the estimated cost (materials + work center rates; labour x crew), and warnings when a product attribute is outside a resource's limits.
   - Only made products have recipes; what a recipe uses (products, operations, resources...) cannot be deleted.
   - Demo: parent roll and paper towels, white bread and seed bread, machined bracket and welded frame.
-- Next: the steps and parameters of each operation (P9), then versions and approval (P10).
+- **P9 (done): the steps of each operation** ("the recipe step by step"), on the **Steps** and **Operator view** tabs of a recipe:
+  - kinds: instruction, add a material (weigh, scan the lot), set a parameter, measure, check, timer, report the production, second signature;
+  - one value per step, with a code, a type (number, text, yes / no, list, photo), a target and limits; **critical** steps out of limits block, warn or hold the lot; frequency (once, every N units / minutes, each lot); a condition on an earlier value (`TEMP_PATE < 24`); attachment, required role;
+  - `POST /api/recipes/<product>/<revision>/steps/check {iOpSeq, iStep, value}` checks a value against the step (what the shop floor screen will call); the Operator view shows the steps as cards and tests values.
+- Next: versions and approval of the recipes (P10).
 
 ## Run
 

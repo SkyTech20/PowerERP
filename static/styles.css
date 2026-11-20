@@ -275,3 +275,15 @@ table.grid.lines tr.diff td { background: #fff8e6; }
 .form-tabs .req { font-size: 9px; vertical-align: middle; }
 .ftab[hidden] { display: none; }
 .ftab > .card { margin: 0 0 16px; }
+
+/* Production: operator preview of the recipe steps */
+.step-cards { display: grid; gap: 12px; margin-top: 12px; }
+.step-card { border: 1px solid #dde3ea; border-radius: 10px; padding: 14px 16px; background: #fff; font-size: 15px; }
+.step-card.critical { border-left: 5px solid #c53030; }
+.step-card p { margin: 8px 0 0; }
+.step-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.step-no { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 30px; border-radius: 15px; background: #1f5fa8; color: #fff; font-weight: 700; }
+.step-icon { font-size: 18px; }
+.step-value { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.step-value input, .step-value select { width: 160px; }
+

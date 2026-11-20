@@ -407,3 +407,38 @@ def test_recipe_crud_and_rules(client):
     assert client.delete("/api/resources/CNC2").status_code == 409
     assert client.delete("/api/recipes/SUPP-ALU-01/B").status_code == 200
     assert client.get("/api/recipes/NOPE/A/explode").status_code == 404
+
+
+# ------------------------------------------------------------------ P9: steps of the recipe operations
+
+
+def test_demo_steps(client):
+    bread = client.get("/api/recipes/PAIN-BL-675/A").get_json()
+    assert len(bread["steps"]) == 15
+    mixing = [s for s in bread["steps"] if s["iOpSeq"] == 20]
+    assert [s["cKind"] for s in mixing] == ["check", "parameter", "timer", "measure", "instruction"]
+    assert mixing[0]["lSecondSignature"] and mixing[4]["cCondition"] == "TEMP_PATE < 24"
+    row = next(r for r in client.get("/api/recipes?size=50").get_json()["items"] if r["cProduct"] == "PAIN-BL-675")
+    assert row["iSteps"] == 15 and "steps" not in row
+
+
+def test_step_value_check(client):
+    url = "/api/recipes/PAIN-BL-675/A/steps/check"
+    r = client.post(url, json={"iOpSeq": 40, "iStep": 20, "value": "89"}).get_json()
+    assert r == {"ok": False, "reason": "below_min", "action": "hold_lot"}  # core temperature: hold the lot
+    assert client.post(url, json={"iOpSeq": 20, "iStep": 40, "value": "25,5"}).get_json()["ok"] is True
+    assert client.post(url, json={"iOpSeq": 20, "iStep": 99, "value": "1"}).status_code == 400
+
+
+def test_steps_are_saved_with_the_recipe(client):
+    recipe = client.get("/api/recipes/SUPP-ALU-01/A").get_json()
+    steps = recipe["steps"] + [
+        {"iOpSeq": 20, "iStep": 30, "cKind": "instruction", "cTitleFR": "Retouche", "cCondition": "ASPECT = Retouche"}
+    ]
+    r = client.put("/api/recipes/SUPP-ALU-01/A", json={"steps": steps})
+    assert r.status_code == 200 and r.get_json()["steps"][-1]["cCondition"] == "ASPECT = Retouche"
+    bad = steps + [
+        {"iOpSeq": 20, "iStep": 40, "cKind": "measure", "cTitleFR": "X", "cParam": "X", "dMin": "5", "dMax": "1"}
+    ]
+    r = client.put("/api/recipes/SUPP-ALU-01/A", json={"steps": bad})
+    assert r.status_code == 400 and r.get_json()["error"] == "max_below_min"

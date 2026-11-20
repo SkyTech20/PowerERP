@@ -6,7 +6,8 @@ A recipe = product + revision, with:
 - operations: in which order, where (a work center, a resource or a capability; or subcontracted), how long.
   An operation starts from a standard operation (P5): its empty fields take the standard's values.
   Predecessors ("10, 20") allow operations in parallel; empty = the previous operation.
-The steps of each operation (the "recipe step by step") come in P9; the approval flow and versions in P10.
+The steps of each operation ("the recipe step by step", P9) are in steps.py; the approval flow and versions
+come in P10.
 
 explode(): the recipe for a quantity: materials scaled (with scrap and yield), the time of each operation
 (on its resource, with the speed and the efficiency), the estimated cost, and warnings when a product attribute
@@ -28,6 +29,7 @@ from powererp.modules.common.registry import ReferenceRegistry
 from powererp.store import Store
 
 from .operations import run_minutes
+from .steps import validate_steps
 
 # fields an operation takes from its standard operation when they are left empty
 FROM_STANDARD = (
@@ -62,7 +64,12 @@ def product_cost(prod: Row) -> float:
 class RecipeService(CrudService):
     keys = ("cProduct", "cRevision")
     readonly = ("cStatus",)
-    children = {"materials": S.RECIPE_MATERIAL, "outputs": S.RECIPE_OUTPUT, "operations": S.RECIPE_OPERATION}
+    children = {
+        "materials": S.RECIPE_MATERIAL,
+        "outputs": S.RECIPE_OUTPUT,
+        "operations": S.RECIPE_OPERATION,
+        "steps": S.RECIPE_STEP,
+    }
 
     def __init__(self, repo: Store, refs: dict[str, Any], references: ReferenceRegistry):
         """refs: finders given by the container: products, product_mfg, operations, work_centers, resources,
@@ -93,6 +100,8 @@ class RecipeService(CrudService):
         return False
 
     def keep_child(self, key: str, line: Row) -> bool:
+        if key == "steps":
+            return bool(text(line["cTitleFR"]) or text(line["cInstructionFR"]))
         first = {"materials": "cComponent", "outputs": "cProduct", "operations": "iOpSeq"}[key]
         return bool(text(line[first])) and line[first] != 0
 
@@ -125,6 +134,7 @@ class RecipeService(CrudService):
         self._check_operations(row)
         self._check_materials(row)
         self._check_outputs(row)
+        validate_steps(row)
 
     def _check_operations(self, row: Row) -> None:
         ops = row.get("operations", [])
@@ -277,7 +287,12 @@ class RecipeService(CrudService):
     def view(self, row: Row, full: bool = True) -> Row:
         if full:
             return row
-        return {**row, "iMaterials": len(row.get("materials", [])), "iOperations": len(row.get("operations", []))}
+        return {
+            **row,
+            "iMaterials": len(row.get("materials", [])),
+            "iOperations": len(row.get("operations", [])),
+            "iSteps": len(row.get("steps", [])),
+        }
 
     # ---------------------------------------------------------- explosion
     @staticmethod
