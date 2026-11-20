@@ -1,13 +1,9 @@
-"""
-PowerERP: storage in PostgreSQL (DATABASE_URL), through powererp.database.
+"""Settings (key / value) and the JSON datasets of older databases, in PostgreSQL.
 
-Tables (migrations/versions):
-  users            ERP users (login screen, Administration > Users)
-  settings         key/value (session secret, dataset the data was seeded from)
-  companies        companies; documents and master data get a company_id as they move to tables
-  doc_sequences    document numbering per company
-  legacy_datasets  JSON documents of older databases (before the relational tables); moved into the
-                   tables once at start-up (app.py), then removed.
+  settings         key / value: session secret, dataset the demo data was seeded from, backup settings and status
+  legacy_datasets  JSON documents of older databases (before the relational tables): moved into the tables once
+                   at start-up (powererp.factory), then removed.
+init() opens the database (DATABASE_URL) and applies the pending migrations.
 """
 
 from datetime import datetime, timezone

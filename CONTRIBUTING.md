@@ -1,7 +1,7 @@
 # PowerERP: how the code is organized
 
-The code is being reorganized in phases (Docs/PowerERP-Organizacao-Codigo.md in the Workflow folder). New code
-follows these rules; the modules still at the project root (`auth.py`, `backup_api.py`) move into `powererp/modules/` in O5.
+All the server code is in `powererp/` (the plan was Docs/PowerERP-Organizacao-Codigo.md in the Workflow folder);
+`app.py` only builds the app. New code follows these rules.
 
 ## Layers
 

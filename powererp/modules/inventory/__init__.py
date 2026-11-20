@@ -259,4 +259,3 @@ def register(app: Flask, c: Container, seed: dict) -> None:
 
     lifecycle.after_load(after_load)
     lifecycle.on_clear(DatabaseLedger.clear_balances)
-

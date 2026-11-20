@@ -13,11 +13,11 @@ from pathlib import Path
 
 from flask import Flask
 
-from . import database
+from . import database, settings
 from .container import Container
 from .core.errors import register_error_handlers
 from .integrations import powerware
-from .modules import catalog, inventory, ledger, purchasing, suppliers, system, taxes
+from .modules import admin, auth, catalog, inventory, ledger, purchasing, suppliers, system, taxes
 from .modules.common.registry import ReferenceRegistry
 from .seed.demo import DemoData
 
@@ -25,18 +25,13 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def create_app(database_url: str | None = None, dataset: str | None = None) -> Flask:
-    # Still at the project root: login and backups (moved into powererp/modules in O5)
-    import db
-    from auth import register_auth
-    from backup_api import register_backup
-
     app = Flask("powererp", root_path=str(ROOT))
     c = Container()
     app.extensions["powererp"] = c
     register_error_handlers(app)
 
-    c.register("database_url", db.init(database_url))
-    register_auth(app)
+    c.register("database_url", settings.init(database_url))
+    auth.register(app, c)  # login, users, access control
     demo = c.register("demo", DemoData.load(dataset))
 
     system.register(app, c)  # lifecycle (seed / reset / clear), dashboard, lookups, the screens' files
@@ -48,23 +43,23 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     purchasing.register(app, c, demo.lists)
     powerware.register(app, c)  # the web services SkyAI calls
     inventory.register(app, c, demo.inventory)
-    register_backup(app)  # Administration > Backups
+    admin.register(app)  # Administration > Backups
     database.init_app(app)  # one transaction per request
-    _seed_or_migrate(db, c, demo)
+    _seed_or_migrate(c, demo)
     return app
 
 
-def _seed_or_migrate(db, c: Container, demo: DemoData) -> None:
+def _seed_or_migrate(c: Container, demo: DemoData) -> None:
     """An empty database (or another dataset) gets the demo data; data of an older database kept as JSON
     (legacy_datasets) is moved into the tables once."""
     lifecycle = c.get("lifecycle")
-    stored = db.load_datasets()
+    stored = settings.load_datasets()
     with database.unit_of_work():
-        if stored and db.get_setting("dataset") == demo.name:
+        if stored and settings.get_setting("dataset") == demo.name:
             lifecycle.load(stored)
             moved = [k for k in lifecycle.keys() if k in stored]
         else:
             lifecycle.seed()
             moved = lifecycle.keys()
-    db.drop_datasets(moved)
-    db.set_setting("dataset", demo.name)
+    settings.drop_datasets(moved)
+    settings.set_setting("dataset", demo.name)

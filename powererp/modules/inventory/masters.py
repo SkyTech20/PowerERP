@@ -184,4 +184,3 @@ class StockParamService(CrudService):
             "cDescEN": prod.get("cDescEN", ""),
             "dQtyAvailable": quantity(qty - res),
         }
-

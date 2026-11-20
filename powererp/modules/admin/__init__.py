@@ -1,17 +1,17 @@
 """
-PowerERP — Administration > Backups (administrators only, see auth.py).
+Administration module: Backups (administrators only, see powererp.modules.auth).
 
   GET    /api/admin/backup                 settings, last result, next run and the backup files
   PUT    /api/admin/backup                 save the settings {enabled, intervalHours, path, keep}
   POST   /api/admin/backup/run             make a backup now
   GET    /api/admin/backup/files/<name>    download a backup file
 
-The work is in powererp/backup.py (pg_dump, rotation, scheduler).
+The work is in backup.py (pg_dump, rotation, scheduler).
 """
 
 from flask import Blueprint, jsonify, request, send_file
 
-from powererp import backup
+from . import backup
 
 bp = Blueprint("backup", __name__)
 
@@ -51,7 +51,7 @@ def backup_file(name):
     return send_file(path.resolve(), as_attachment=True, download_name=name, mimetype="application/octet-stream")
 
 
-def register_backup(app):
+def register(app):
     app.register_blueprint(bp)
     if not app.config.get("TESTING"):
         backup.start_scheduler()

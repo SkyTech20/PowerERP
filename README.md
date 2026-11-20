@@ -175,11 +175,10 @@ powererp/
   core/                 # AppError + error handler, value parsing, pagination, HTTP helpers
   modules/              # one package per business area: routes -> services -> repository
     system/             #   screens' files, dashboard, lookups, demo data life cycle (reset / clear)
-    ledger/ suppliers/ taxes/ catalog/ purchasing/ inventory/
+    auth/ admin/ ledger/ suppliers/ taxes/ catalog/ purchasing/ inventory/
   integrations/powerware/  # PowerWARE web services used by SkyAI (routes, XML, apCreatePO.p)
-  models/ store.py stock.py backup.py database.py schemas.py seed/
+  models/ store.py stock.py settings.py database.py schemas.py seed/
 migrations/             # Alembic schema migrations (applied when the ERP starts)
-auth.py backup_api.py db.py  # login and users, backups screen, settings storage (O5)
 static/                 # UI: index.html, app.js, i18n*.js (EN/FR), styles.css: no build step
 data/                   # Seed data (JSON) for an empty database
 tests/                  # API tests (the contract) and tests/unit (services, without Flask nor database)
