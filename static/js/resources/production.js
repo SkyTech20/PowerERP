@@ -443,3 +443,112 @@ if (RES.products) {
   }];
 }
 
+// ------------------------------------------------------------------ P8: recipes
+export const RECIPE_STATUS = ["draft", "in_review", "approved", "obsolete"];
+export const PROCESS_TYPES = ["discrete", "batch", "continuous"];
+export const ISSUE_METHODS = ["manual", "backflush", "pick"];
+export const OUTPUT_KINDS = ["coproduct", "byproduct"];
+const statusBadge = (v) => `<span class="badge ${v === "approved" ? "yes" : v === "obsolete" ? "no" : ""}">${esc(t("mfg.o.rs." + v))}</span>`;
+
+// The recipe for a quantity: materials, operations (time and cost), total, attribute warnings
+const explosion = {
+  tab: "explode",
+  html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.rc.explode"))}</h2><span class="help muted">${esc(t("mfg.rc.explode.help"))}</span></div>
+    <div class="card-body"><div class="form-grid">
+      <div class="field"><label for="rcQty">${esc(t("mfg.op.qty"))} (${esc(m.cUOM)})</label><input type="text" id="rcQty" inputmode="decimal" value="${esc(m.dBaseQty)}" style="text-align:right"></div>
+    </div><div id="rcExplode"></div></div></div>`,
+  bind: (m) => {
+    const run = async () => {
+      try {
+        const e = await api(`recipes/${enc(m.cProduct)}/${enc(m.cRevision)}/explode?qty=${enc($("#rcQty").value || "0")}`);
+        const money2 = (v) => fmtNum(v);
+        const warn = e.warnings.length ? `<div class="card" style="border-color:#e3b341"><div class="card-body">${e.warnings.map((w) =>
+          `<div>⚠ ${esc(t("mfg.rc.warn", { op: w.iOpSeq, res: w.cResource, attr: w.cAttribute, v: fmtNum(w.dValue), min: w.dMin || "—", max: w.dMax || "—" }))}</div>`).join("")}</div></div>` : "";
+        $("#rcExplode").innerHTML = warn + `<h3>${esc(t("mfg.rc.materials"))}</h3><div class="table-wrap"><table class="grid"><thead><tr>
+            <th>${esc(t("mfg.f.cComponent"))}</th><th>${esc(t("f.cDescription"))}</th><th class="num">${esc(t("mfg.f.iOpSeq"))}</th><th class="num">${esc(t("mfg.op.qty"))}</th><th class="num">${esc(t("mfg.rc.unitCost"))}</th><th class="num">${esc(t("mfg.rc.cost"))}</th></tr></thead><tbody>
+          ${e.materials.map((x) => `<tr><td>${esc(x.cComponent)}</td><td>${esc(dl(x, "cDesc"))}</td><td class="num">${esc(x.iOpSeq || "")}</td><td class="num">${esc(fmtNum(x.dQty))} ${esc(x.cUOM)}</td><td class="num">${esc(money2(x.dUnitCost))}</td><td class="num">${esc(money2(x.dCost))}</td></tr>`).join("")}
+          </tbody></table></div>
+          <h3>${esc(t("mfg.rc.operations"))}</h3><div class="table-wrap"><table class="grid"><thead><tr>
+            <th class="num">${esc(t("mfg.f.iOpSeq"))}</th><th>${esc(t("mfg.op.one"))}</th><th>${esc(t("mfg.op.where"))}</th><th class="num">${esc(t("mfg.f.dSetupMin"))}</th><th class="num">${esc(t("mfg.op.run"))}</th><th class="num">${esc(t("mfg.f.dMinWaitMin"))}</th><th class="num">${esc(t("mfg.rc.cost"))}</th></tr></thead><tbody>
+          ${e.operations.map((x) => `<tr><td class="num">${esc(x.iOpSeq)}</td><td>${esc(dl(x, "cDesc"))}</td><td>${esc(x.cWhere)}</td><td class="num">${esc(minutesText(x.dSetupMin))}</td><td class="num">${esc(minutesText(x.dRunMin))}</td><td class="num">${x.dWaitMin ? esc(minutesText(x.dWaitMin)) : ""}</td><td class="num">${esc(money2(x.dCost))}</td></tr>`).join("")}
+          </tbody></table></div>
+          ${e.outputs.length ? `<h3>${esc(t("mfg.rc.outputs"))}</h3><div>${e.outputs.map((o) => `${esc(o.cProduct)} ${esc(fmtNum(o.dQty))} ${esc(o.cUOM)}`).join(" · ")}</div>` : ""}
+          <table class="grid" style="margin-top:12px"><tbody>
+            <tr><td>${esc(t("mfg.rc.batches"))}</td><td class="num">${esc(e.iBatches)}</td></tr>
+            <tr><td>${esc(t("mfg.rc.time"))}</td><td class="num">${esc(minutesText(e.dTotalMin))}</td></tr>
+            <tr><td>${esc(t("mfg.rc.materialCost"))}</td><td class="num">${esc(money2(e.dMaterialCost))}</td></tr>
+            <tr><td>${esc(t("mfg.rc.operationCost"))}</td><td class="num">${esc(money2(e.dOperationCost))}</td></tr>
+            <tr class="total-row"><td>${esc(t("mfg.rc.totalCost"))}</td><td class="num">${esc(money2(e.dTotalCost))}</td></tr>
+            <tr><td>${esc(t("mfg.rc.unitCostTotal"))}</td><td class="num">${esc(fmtNum(e.dUnitCost))} / ${esc(e.cUOM)}</td></tr>
+          </tbody></table>`;
+      } catch (err) { $("#rcExplode").innerHTML = ""; }
+    };
+    $("#rcQty").addEventListener("input", (ev) => { numOnly(ev.target); run(); });
+    run();
+  },
+};
+
+Object.assign(RES, {
+  recipes: {
+    api: "recipes", route: "/prod/recipes", title: "mfg.rc.title", sub: "mfg.rc.subtitle",
+    one: "mfg.rc.one", newTitle: "mfg.rc.new", id: (r) => `${r.cProduct}/${r.cRevision}`, label: (r) => `${r.cProduct} ${t("mfg.f.cRevision")} ${r.cRevision} — ${dl(r, "cDesc")}`, sort: "cProduct",
+    columns: [
+      { f: "cProduct", l: "mfg.f.cProduct" }, { f: "cRevision", l: "mfg.f.cRevision" }, descCol("cDesc"),
+      { f: "cProcessType", l: "mfg.f.cProcessType", fmt: (v) => esc(t("mfg.o.pt." + v)) },
+      { f: "dBaseQty", l: "mfg.f.dBaseQty", n: true, fmt: (v, r) => `${esc(fmtNum(v))} ${esc(r.cUOM)}` },
+      { f: "iMaterials", l: "mfg.rc.materials", n: true }, { f: "iOperations", l: "mfg.rc.operations", n: true },
+      { f: "cStatus", l: "mfg.f.cStatus", fmt: statusBadge },
+    ],
+    filters: [{ f: "cStatus", l: "mfg.f.cStatus", options: opts("mfg.o.rs.", RECIPE_STATUS) }, { f: "cProcessType", l: "mfg.f.cProcessType", options: opts("mfg.o.pt.", PROCESS_TYPES) }],
+    defaults: () => ({ cRevision: "A", cProcessType: "discrete", dBaseQty: "1", dYieldPct: "100", cStatus: "draft", materials: [], outputs: [], operations: [] }),
+    badge: (m, isNew) => (isNew ? "" : statusBadge(m.cStatus)),
+    formTabs: [["gen", "common.general"], ["ops", "mfg.rc.operations"], ["mat", "mfg.rc.materials"], ["out", "mfg.rc.outputs"], ["explode", "mfg.rc.explode"]],
+    sections: [
+      { tab: "gen", t: "common.general", fields: [
+        { f: "cProduct", l: "mfg.f.cProduct", req: true, key: true, lookup: "products" },
+        { f: "cRevision", l: "mfg.f.cRevision", req: true, key: true, help: "mfg.f.cRevision.help" },
+        { f: "cProcessType", l: "mfg.f.cProcessType", type: "select", options: opts("mfg.o.pt.", PROCESS_TYPES) },
+        { f: "cDescFR", l: "f.cDescFR", span: 2, help: "mfg.rc.desc.help" }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+      ] },
+      { tab: "gen", t: "mfg.rc.quantities", help: "mfg.rc.quantities.help", fields: [
+        { f: "dBaseQty", l: "mfg.f.dBaseQty", type: "number", req: true }, { f: "cUOM", l: "mfg.f.cUOM", lookup: "uom" },
+        { f: "dMinBatch", l: "mfg.f.dMinBatch", type: "number" }, { f: "dMaxBatch", l: "mfg.f.dMaxBatch", type: "number", help: "mfg.f.dMaxBatch.help" },
+        { f: "dYieldPct", l: "mfg.f.dYieldPct", type: "number", help: "mfg.f.dYieldPct.help" },
+      ] },
+      { tab: "gen", t: "mfg.f.cNotes", fields: [{ f: "cNotes", l: "mfg.f.cNotes", type: "textarea", span: 4 }] },
+    ],
+    grids: [
+      { key: "operations", tab: "ops", title: "mfg.rc.operations", help: "mfg.rc.operations.help",
+        cols: [
+          { f: "iOpSeq", l: "mfg.f.iOpSeq", w: "w-xs", n: true }, { f: "cOperation", l: "mfg.op.one", w: "w-md", lookup: "operations" },
+          { f: "cDescFR", l: "f.cDescFR", w: "w-md" },
+          { f: "cWorkCenter", l: "mfg.f.cWorkCenter", w: "w-md", lookup: "work_centers" }, { f: "cResource", l: "mfg.res.one", w: "w-md", lookup: "resources" },
+          { f: "cCapability", l: "mfg.res.cap", w: "w-md", lookup: "capabilities" },
+          { f: "dSetupMin", l: "mfg.f.dSetupMin", w: "w-sm", n: true },
+          { f: "cRunFormat", l: "mfg.f.cRunFormat", w: "w-md", type: "select", options: opts("mfg.o.run.", RUN_FORMATS) },
+          { f: "dRunValue", l: "mfg.f.dRunValue", w: "w-sm", n: true }, { f: "iCrew", l: "mfg.f.iCrew", w: "w-xs", n: true },
+          { f: "dMinWaitMin", l: "mfg.f.dMinWaitMin", w: "w-sm", n: true }, { f: "dMaxWaitMin", l: "mfg.f.dMaxWaitMin", w: "w-sm", n: true },
+          { f: "cPredecessors", l: "mfg.f.cPredecessors", w: "w-sm" },
+        ],
+        newLine: (m) => ({ iOpSeq: ((m.operations || []).reduce((a, o) => Math.max(a, Number(o.iOpSeq) || 0), 0) + 10), cOperation: "", cRunFormat: "min_per_unit", iCrew: 0, lReportingPoint: true }) },
+      { key: "materials", tab: "mat", title: "mfg.rc.materials", help: "mfg.rc.materials.help",
+        cols: [
+          { f: "iSeq", l: "mfg.f.iSeq", w: "w-xs", n: true }, { f: "cComponent", l: "mfg.f.cComponent", w: "w-lg", lookup: "products" },
+          { f: "dQtyPer", l: "mfg.f.dQtyPer", w: "w-sm", n: true }, { f: "cUOM", l: "mfg.f.cUOM", w: "w-xs" },
+          { f: "dScrapPct", l: "mfg.f.dScrapPct", w: "w-xs", n: true }, { f: "lFixedQty", l: "mfg.f.lFixedQty", w: "w-xs", type: "check" },
+          { f: "iOpSeq", l: "mfg.f.iOpSeq", w: "w-xs", n: true },
+          { f: "cIssueMethod", l: "mfg.f.cIssueMethod", w: "w-md", type: "select", options: opts("mfg.o.issue.", ISSUE_METHODS) },
+        ],
+        newLine: (m) => ({ iSeq: ((m.materials || []).length + 1) * 10, cComponent: "", dQtyPer: "", cUOM: "", dScrapPct: "", lFixedQty: false, iOpSeq: (m.operations || [])[0] ? m.operations[0].iOpSeq : 0, cIssueMethod: "manual" }) },
+      { key: "outputs", tab: "out", title: "mfg.rc.outputs", help: "mfg.rc.outputs.help",
+        cols: [
+          { f: "cProduct", l: "mfg.f.cProduct", w: "w-lg", lookup: "products" },
+          { f: "cKind", l: "mfg.f.cKind", w: "w-md", type: "select", options: opts("mfg.o.out.", OUTPUT_KINDS) },
+          { f: "dQtyPer", l: "mfg.f.dQtyPer", w: "w-sm", n: true }, { f: "cUOM", l: "mfg.f.cUOM", w: "w-xs" }, { f: "dCostPct", l: "mfg.f.dCostPct", w: "w-sm", n: true },
+        ],
+        newLine: () => ({ cProduct: "", cKind: "byproduct", dQtyPer: "", cUOM: "", dCostPct: "" }) },
+    ],
+    panel: explosion,
+  },
+});
+

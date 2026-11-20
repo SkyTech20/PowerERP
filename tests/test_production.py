@@ -348,3 +348,62 @@ def test_manufacturing_data_go_with_the_product(client):
     client.post("/api/product-mfg", json={"cProduct": "TEST-MFG"})
     assert client.delete("/api/products/TEST-MFG").status_code == 200
     assert client.get("/api/product-mfg/TEST-MFG").status_code == 404
+
+
+# ------------------------------------------------------------------ P8: recipes
+
+
+def test_demo_recipes(client):
+    page = client.get("/api/recipes?size=50").get_json()
+    assert page["total"] == 6 and "materials" not in page["items"][0]
+    bread = client.get("/api/recipes/PAIN-BL-675/A").get_json()
+    assert [op["cOperation"] for op in bread["operations"]] == [
+        "BAK-PESEE",
+        "BAK-PETRIS",
+        "BAK-FERM",
+        "BAK-CUISS",
+        "BAK-EMB",
+    ]
+    # the empty fields of the demo took the standard operation's values
+    assert (bread["operations"][1]["cDescFR"], bread["operations"][1]["cWorkCenter"]) == ("Pétrissage", "BAK-PETRIN")
+    assert bread["operations"][2]["dMinWaitMin"] == "60" and bread["materials"][0]["cUOM"] == "KG"
+
+
+def test_recipe_explosion(client):
+    """400 white breads = 2 batches of 200, 98 % yield: flour 85 x 400 / 200 / 0.98."""
+    e = client.get("/api/recipes/PAIN-BL-675/A/explode?qty=400").get_json()
+    assert e["iBatches"] == 2
+    assert e["materials"][0]["dQty"] == round(85 * 2 / 0.98, 4)
+    mix = e["operations"][1]
+    assert (mix["cWhere"], mix["dSetupMin"], mix["dRunMin"]) == ("PET1", 10, 24)  # 2 batches x 12 min
+    proof = e["operations"][2]
+    assert proof["dCost"] == 0  # unattended (crew 0)
+    assert e["dTotalCost"] == round(e["dMaterialCost"] + e["dOperationCost"], 2)
+    base = client.get("/api/recipes/SUPP-ALU-01/A/explode").get_json()  # the base quantity by default
+    assert base["dQty"] == 1 and base["operations"][0]["cWhere"] == "CNC (CNC1)"  # the preferred resource
+    assert base["operations"][0]["dCost"] > 0
+
+
+def test_recipe_crud_and_rules(client):
+    body = {
+        "cProduct": "supp-alu-01",
+        "cRevision": "b",
+        "materials": [{"cComponent": "al6061-f125-48", "dQtyPer": "0.04"}],
+        "operations": [{"iOpSeq": 10, "cOperation": "met-usin", "cResource": "cnc2"}],
+    }
+    r = client.post("/api/recipes", json=body)
+    assert r.status_code == 201
+    row = r.get_json()
+    assert (row["cProduct"], row["cRevision"], row["cStatus"]) == ("SUPP-ALU-01", "B", "draft")
+    assert (row["operations"][0]["cWorkCenter"], row["operations"][0]["dRunValue"]) == ("MET-CNC", "6.5")
+    assert client.post("/api/recipes", json=body).status_code == 409
+    r = client.post("/api/recipes", json={**body, "cRevision": "C", "cProduct": "LAP-14I7"})
+    assert r.status_code == 400 and r.get_json() == {"error": "not_made", "field": "cProduct"}
+    r = client.put("/api/recipes/SUPP-ALU-01/B", json={"cStatus": "approved", "cNotes": "ok"})
+    assert r.get_json()["cStatus"] == "draft"  # the status is not edited (approval flow, P10)
+    # what a recipe uses cannot be deleted
+    assert client.delete("/api/products/AL6061-F125-48").status_code == 409
+    assert client.delete("/api/operations/MET-USIN").status_code == 409
+    assert client.delete("/api/resources/CNC2").status_code == 409
+    assert client.delete("/api/recipes/SUPP-ALU-01/B").status_code == 200
+    assert client.get("/api/recipes/NOPE/A/explode").status_code == 404

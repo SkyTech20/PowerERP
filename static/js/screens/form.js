@@ -101,7 +101,7 @@ export function formView(key, id) {
       ${locked ? "" : `<td><button type="button" class="link-btn" data-remove="${i}" title="${esc(t("common.removeLine"))}">✕</button></td>`}</tr>`).join("");
     const addBtn = locked ? "" : `<button type="button" class="btn small" ${key === "lines" ? 'id="addLine"' : ""} data-add style="margin-left:auto">＋ ${esc(t("common.addLine"))}</button>`;
     return `<div class="card" data-grid="${key}"><div class="card-head"><h2>${esc(t(L.title || "common.lines"))}</h2>${L.help ? `<span class="help muted">${esc(t(L.help))}</span>` : ""}${addBtn}</div>
-      <div class="table-wrap"><table class="grid lines"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+      <div class="table-wrap"><table class="grid lines" ${L.cols.length > 8 ? `style="min-width:${L.cols.length * 115}px"` : ""}><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
       ${rows.length ? "" : `<div class="empty">${esc(t("common.noLines"))}</div>`}</div>
       ${key === "lines" && R.totals ? '<div class="totals" id="totals"></div>' : ""}</div>`;
   }

@@ -97,7 +97,14 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - traceability: none, by lot or by serial number (the product's inventory controls must allow it);
   - attributes (width, basis weight, colour...).
   - The production demo adds its items to the item master (`data/production.json` → `inventory`): pulp, parent rolls and paper towels; flour, yeast and breads; steel tube, powder paint, an aluminium bracket and a welded frame.
-- Next: recipes (P8 to P10).
+- **P8 (done): Production → Recipes.** How each product is made, for a base quantity (product + revision):
+  - **operations** in order: from a standard operation (its values fill the empty fields), on a work center, a resource or a capability, or subcontracted; setup and run time, crew, minimum / maximum wait after it (proofing, curing), predecessors for operations in parallel;
+  - **materials**: quantity for the base, scrap %, fixed per batch, the operation where it is consumed, issue (manual, backflush, picking list);
+  - **co-products and by-products** with their share of the cost; batch size, yield, process type (discrete, batch, continuous);
+  - `GET /api/recipes/<product>/<revision>/explode?qty=`: materials scaled, the time of each operation on its resource (a capability is estimated on the preferred resource), the estimated cost (materials + work center rates; labour x crew), and warnings when a product attribute is outside a resource's limits.
+  - Only made products have recipes; what a recipe uses (products, operations, resources...) cannot be deleted.
+  - Demo: parent roll and paper towels, white bread and seed bread, machined bracket and welded frame.
+- Next: the steps and parameters of each operation (P9), then versions and approval (P10).
 
 ## Run
 

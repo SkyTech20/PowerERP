@@ -7,6 +7,7 @@ P4: resources, with their capabilities, attributes, subresources and planned dow
 P5: standard operations.
 P6: setup matrices (one per work center or resource, the family pairs as lines).
 P7: manufacturing data of the products (1 to 1 with the item master), with their attributes.
+P8: recipes (product + revision) with their materials, outputs (co / by-products) and operations.
 """
 
 from .. import schemas as S
@@ -45,5 +46,13 @@ register_specs(
         keys=("cProduct",),
         order=("cProduct",),
         children={"attributes": S.PRODUCT_ATTRIBUTE},
+    ),
+    TableSpec(
+        "recipes",
+        S.RECIPE,
+        keys=("cProduct", "cRevision"),
+        order=("cProduct", "cRevision"),
+        extra=S.RECIPE_EXTRA,
+        children={"materials": S.RECIPE_MATERIAL, "outputs": S.RECIPE_OUTPUT, "operations": S.RECIPE_OPERATION},
     ),
 )
