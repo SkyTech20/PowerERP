@@ -6,6 +6,8 @@ P3: work centers /api/work-centers (+ /<code>/availability?from=&to=: the calend
 P4: resources /api/resources (+ /<code>/availability: calendar - planned downtime, capacity), and
     /api/capabilities/<code>/resources: the resources able to do it, preferred first.
 P5: standard operations /api/operations (+ /<code>/time?qty=&lot=&resource=: setup and run minutes).
+P6: setup matrices /api/setup-matrices/<scope>/<code> (+ /grid), and /api/setup-changeover?from=&to=&resource=
+    (or &workCenter=) &default=: the changeover a sequence costs, and which rule gave it.
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -33,6 +35,7 @@ from .service import (
     ScrapReasonService,
     SetupFamilyService,
 )
+from .setup_matrix import SetupMatrixService
 from .work_centers import WorkCenterService
 
 DESC_FR, DESC_EN = ("cDescFR",), ("cDescEN", "cDescFR")
@@ -59,6 +62,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     centers = _register_work_centers(bp, c, seed, calendars)
     resources = _register_resources(bp, c, seed, calendars, centers)
     _register_operations(bp, c, seed, centers, resources)
+    _register_setup_matrix(bp, c, seed, centers, resources)
     app.register_blueprint(bp)
 
 
@@ -194,3 +198,37 @@ def _register_operations(
 
     c.get("lookups").register("operations", label_lookup(operations, DESC_FR, DESC_EN, keep=lambda r: r.get("lActive")))
     c.get("lifecycle").add(operations.repo, "prod_operations", seed.get("operations", []))
+
+
+def _register_setup_matrix(
+    bp: Blueprint, c: Container, seed: dict, centers: WorkCenterService, resources: ResourceService
+) -> None:
+    families = c.get("setup_families")
+    refs = {
+        "work_centers": centers.find,
+        "resources": resources.find,
+        "setup_families": families.find,
+        "families": families.active,
+    }
+    matrices = c.register("setup_matrices", SetupMatrixService(store("setup_matrices"), refs, c.get("references")))
+    register_crud_routes(bp, "setup-matrices", "setup_matrices", matrices, ("cScope", "cScopeCode", "cNotes"))
+
+    @bp.route("/api/setup-matrices/<scope>/<code>/grid")
+    def setup_matrix_grid(scope, code):
+        matrices.get(scope, code)  # 404 when unknown
+        return jsonify(matrices.grid(scope, code, _number_arg("default", 0)))
+
+    @bp.route("/api/setup-changeover")
+    def setup_changeover():
+        a = request.args
+        return jsonify(
+            matrices.changeover(
+                a.get("from", ""),
+                a.get("to", ""),
+                a.get("resource", ""),
+                a.get("workCenter", ""),
+                _number_arg("default", 0),
+            )
+        )
+
+    c.get("lifecycle").add(matrices.repo, "prod_setup_matrices", seed.get("setup_matrices", []))

@@ -276,3 +276,42 @@ def test_operation_crud_and_references(client):
     assert client.delete("/api/work-centers/MET-PEINT").status_code == 409  # MET-PEINT runs there
     assert client.delete("/api/operations/MET-EBAV").status_code == 200
     assert any(x["code"] == "MET-USIN" for x in client.get("/api/lookups/operations").get_json())
+
+
+# ------------------------------------------------------------------ P6: setup matrix
+
+
+def test_demo_setup_matrices(client):
+    page = client.get("/api/setup-matrices").get_json()
+    assert page["total"] == 5 and {r["cScopeCode"]: r["iPairs"] for r in page["items"]}["PAP-MP"] == 4
+
+
+def test_changeover_lookup(client):
+    r = client.get("/api/setup-changeover?from=PAP-COLOR&to=PAP-WHITE&workCenter=PAP-MP").get_json()
+    assert (r["dSetupMin"], r["dScrapQty"], r["cRule"]) == (45, 1200, "matrix")
+    # REB2 has its own matrix; REB1 uses the work center's
+    assert client.get("/api/setup-changeover?from=PAP-WHITE&to=PAP-COLOR&resource=REB2").get_json()["dSetupMin"] == 45
+    assert client.get("/api/setup-changeover?from=PAP-WHITE&to=PAP-COLOR&resource=REB1").get_json()["dSetupMin"] == 30
+    # allergens: the cleaning goes one way only
+    r = client.get("/api/setup-changeover?from=FOOD-ALLERG&to=FOOD-PLAIN&resource=PET1").get_json()
+    assert (r["dSetupMin"], r["cScope"]) == (60, "work_center")
+    r = client.get("/api/setup-changeover?from=MET-STEEL&to=MET-STEEL&resource=CNC1&default=45").get_json()
+    assert (r["dSetupMin"], r["cRule"]) == (0, "same_family")
+
+
+def test_setup_matrix_crud_grid_and_references(client):
+    r = client.post(
+        "/api/setup-matrices",
+        json={
+            "cScope": "resource",
+            "cScopeCode": "cnc2",
+            "lines": [{"cFromFamily": "met-steel", "cToFamily": "met-alu", "dSetupMin": "15"}],
+        },
+    )
+    assert r.status_code == 201 and r.get_json()["lines"][0]["cToFamily"] == "MET-ALU"
+    assert client.post("/api/setup-matrices", json={"cScope": "resource", "cScopeCode": "CNC2"}).status_code == 409
+    g = client.get("/api/setup-matrices/resource/CNC2/grid?default=45").get_json()
+    i, j = g["families"].index("MET-STEEL"), g["families"].index("MET-ALU")
+    assert g["cells"][i][j]["dSetupMin"] == 15 and g["cells"][j][i]["dSetupMin"] == 45
+    assert client.delete("/api/setup-families/MET-ALU").status_code == 409  # used by a matrix
+    assert client.delete("/api/setup-matrices/resource/CNC2").status_code == 200

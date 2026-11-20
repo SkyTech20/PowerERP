@@ -86,7 +86,12 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - where it runs: a work center, or a capability (any resource that has it); or subcontracted to a supplier, with a cost per unit and a lead time;
   - the standard time: setup minutes, and a run time in minutes per unit, units per hour or minutes per lot; the crew; a reporting point flag; an FR/EN instruction;
   - `GET /api/operations/<code>/time?qty=&lot=&resource=`: setup + run minutes of a quantity, at the standard or on a resource (time / speed of the resource / efficiency of its work center). The screen has the calculator.
-- Next: setup matrix (P6), product manufacturing tab (P7), then recipes (P8 to P10).
+- **P6 (done): Production → Setup matrix.** The changeover time from one setup family to another, for a work center or a resource (a resource's matrix replaces its work center's):
+  - lines from family → to family (`*` = any), with minutes, cost and scrap;
+  - lookup: the resource's matrix, then the work center's; in each one the exact pair, then (from, `*`), (`*`, to), (`*`, `*`); not in a matrix: same family = 0, else the setup of the operation;
+  - `GET /api/setup-changeover?from=&to=&resource=|workCenter=&default=` gives the changeover and the rule used; the screen shows the family × family grid (`/api/setup-matrices/<scope>/<code>/grid`).
+  - This is the sequence-dependent setup the OR scheduler (M6) will optimize.
+- Next: product manufacturing tab (P7), then recipes (P8 to P10).
 
 ## Run
 

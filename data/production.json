@@ -1,5 +1,5 @@
 {
-  "_comment": "Production demo data: a paper mill (PAP), a bakery (BAK) and a metal shop (MET). P1 reference lists, P2 calendars, P3 work centers, P4 resources, P5 standard operations.",
+  "_comment": "Production demo data: a paper mill (PAP), a bakery (BAK) and a metal shop (MET). P1 reference lists, P2 calendars, P3 work centers, P4 resources, P5 standard operations, P6 setup matrices.",
   "capabilities": [
     {
       "cCode": "CUT",
@@ -1759,6 +1759,132 @@
       "cInstructionFR": "",
       "cInstructionEN": "",
       "lActive": true
+    }
+  ],
+  "setup_matrices": [
+    {
+      "cScope": "work_center",
+      "cScopeCode": "PAP-MP",
+      "cNotes": "Passer du coloré au blanc demande un lavage complet du circuit.",
+      "lActive": true,
+      "lines": [
+        {
+          "cFromFamily": "PAP-WHITE",
+          "cToFamily": "PAP-COLOR",
+          "dSetupMin": "20",
+          "dSetupCost": "150",
+          "dScrapQty": "300"
+        },
+        {
+          "cFromFamily": "PAP-COLOR",
+          "cToFamily": "PAP-WHITE",
+          "dSetupMin": "45",
+          "dSetupCost": "400",
+          "dScrapQty": "1200"
+        },
+        {
+          "cFromFamily": "PAP-COLOR",
+          "cToFamily": "PAP-COLOR",
+          "dSetupMin": "15",
+          "dSetupCost": "100",
+          "dScrapQty": "200"
+        },
+        {
+          "cFromFamily": "*",
+          "cToFamily": "*",
+          "dSetupMin": "30",
+          "dSetupCost": "200",
+          "dScrapQty": "500"
+        }
+      ]
+    },
+    {
+      "cScope": "work_center",
+      "cScopeCode": "PAP-REBOB",
+      "cNotes": "Changement de largeur et réglage des couteaux.",
+      "lActive": true,
+      "lines": [
+        {
+          "cFromFamily": "*",
+          "cToFamily": "*",
+          "dSetupMin": "30",
+          "dSetupCost": "60",
+          "dScrapQty": "0"
+        }
+      ]
+    },
+    {
+      "cScope": "resource",
+      "cScopeCode": "REB2",
+      "cNotes": "Ancienne rebobineuse : réglage manuel des couteaux, plus long.",
+      "lActive": true,
+      "lines": [
+        {
+          "cFromFamily": "*",
+          "cToFamily": "*",
+          "dSetupMin": "45",
+          "dSetupCost": "90",
+          "dScrapQty": "0"
+        }
+      ]
+    },
+    {
+      "cScope": "work_center",
+      "cScopeCode": "BAK-PETRIN",
+      "cNotes": "Après un produit avec allergènes, nettoyage complet avant un produit sans allergène.",
+      "lActive": true,
+      "lines": [
+        {
+          "cFromFamily": "FOOD-PLAIN",
+          "cToFamily": "FOOD-ALLERG",
+          "dSetupMin": "10",
+          "dSetupCost": "15",
+          "dScrapQty": ""
+        },
+        {
+          "cFromFamily": "FOOD-ALLERG",
+          "cToFamily": "FOOD-PLAIN",
+          "dSetupMin": "60",
+          "dSetupCost": "90",
+          "dScrapQty": ""
+        },
+        {
+          "cFromFamily": "FOOD-ALLERG",
+          "cToFamily": "FOOD-ALLERG",
+          "dSetupMin": "10",
+          "dSetupCost": "15",
+          "dScrapQty": ""
+        }
+      ]
+    },
+    {
+      "cScope": "work_center",
+      "cScopeCode": "MET-PEINT",
+      "cNotes": "Purge des pistolets et changement de filtres entre l'acier et l'aluminium.",
+      "lActive": true,
+      "lines": [
+        {
+          "cFromFamily": "MET-STEEL",
+          "cToFamily": "MET-ALU",
+          "dSetupMin": "30",
+          "dSetupCost": "45",
+          "dScrapQty": ""
+        },
+        {
+          "cFromFamily": "MET-ALU",
+          "cToFamily": "MET-STEEL",
+          "dSetupMin": "30",
+          "dSetupCost": "45",
+          "dScrapQty": ""
+        },
+        {
+          "cFromFamily": "*",
+          "cToFamily": "*",
+          "dSetupMin": "20",
+          "dSetupCost": "30",
+          "dScrapQty": ""
+        }
+      ]
     }
   ]
 }

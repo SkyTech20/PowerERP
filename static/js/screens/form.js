@@ -210,6 +210,7 @@ export function formView(key, id) {
     const refresh = () => refreshers.forEach((f) => f());
     const allFields = R.sections.flatMap((s) => s.fields);
     allFields.forEach((fd) => {
+      if (!visible(fd)) return; // a hidden field may share its name with a visible one (e.g. a lookup per type)
       const el = $(`[data-f="${fd.f}"]`, $("#form"));
       if (!el) return;
       const update = () => {
