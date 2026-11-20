@@ -1,5 +1,5 @@
 """Administration > Backups: settings, manual and scheduled backups, rotation, access."""
-import os
+
 import sys
 import time
 from datetime import datetime, timedelta, timezone
@@ -18,6 +18,7 @@ def folder(tmp_path, monkeypatch, admin):
     r = admin.put("/api/admin/backup", json={"enabled": False, "intervalHours": 24, "path": str(tmp_path), "keep": 3})
     assert r.status_code == 200, r.get_json()
     import db
+
     db.set_setting("backup_status", "{}")
     return tmp_path
 

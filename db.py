@@ -9,6 +9,7 @@ Tables (migrations/versions):
   legacy_datasets  JSON documents of older databases (before the relational tables); moved into the
                    tables once at start-up (app.py), then removed.
 """
+
 from datetime import datetime, timezone
 
 from sqlalchemy import delete, select
@@ -32,6 +33,7 @@ session = database.session_scope
 
 # ---------------------------------------------------------------- settings
 
+
 def get_setting(key, default=None):
     with session() as s:
         row = s.get(Setting, key)
@@ -40,11 +42,15 @@ def get_setting(key, default=None):
 
 def set_setting(key, value):
     with session() as s:
-        s.execute(insert(Setting).values(key=key, value=value)
-                  .on_conflict_do_update(index_elements=[Setting.key], set_={"value": value}))
+        s.execute(
+            insert(Setting)
+            .values(key=key, value=value)
+            .on_conflict_do_update(index_elements=[Setting.key], set_={"value": value})
+        )
 
 
 # ---------------------------------------------------------------- legacy datasets (transition)
+
 
 def load_datasets():
     """{name: data} of every stored table, or {} when the ERP was never saved."""
@@ -58,8 +64,9 @@ def save_datasets(datasets):
     stamp = now()
     rows = [{"name": name, "data": data, "updated_at": stamp} for name, data in datasets.items()]
     stmt = insert(LegacyDataset).values(rows)
-    stmt = stmt.on_conflict_do_update(index_elements=[LegacyDataset.name],
-                                      set_={"data": stmt.excluded.data, "updated_at": stmt.excluded.updated_at})
+    stmt = stmt.on_conflict_do_update(
+        index_elements=[LegacyDataset.name], set_={"data": stmt.excluded.data, "updated_at": stmt.excluded.updated_at}
+    )
     with session() as s:
         s.execute(stmt)
 

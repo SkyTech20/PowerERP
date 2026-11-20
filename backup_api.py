@@ -8,6 +8,7 @@ PowerERP — Administration > Backups (administrators only, see auth.py).
 
 The work is in powererp/backup.py (pg_dump, rotation, scheduler).
 """
+
 from flask import Blueprint, jsonify, request, send_file
 
 from powererp import backup
@@ -15,22 +16,15 @@ from powererp import backup
 bp = Blueprint("backup", __name__)
 
 
-@bp.errorhandler(backup.BackupError)
-def _error(e):
-    body = {"error": e.code}
-    if e.field:
-        body["field"] = e.field
-    if e.detail:
-        body["detail"] = e.detail
-    status = 409 if e.code == "backup_running" else 500 if e.code in ("backup_failed", "pg_dump_missing") else 400
-    return jsonify(body), status
-
-
 def _state():
     settings = backup.get_settings()
     status = backup.get_status()
-    return {"settings": settings, "status": status, "nextRun": backup.next_run(settings, status),
-            "files": backup.list_files(settings)}
+    return {
+        "settings": settings,
+        "status": status,
+        "nextRun": backup.next_run(settings, status),
+        "files": backup.list_files(settings),
+    }
 
 
 @bp.route("/api/admin/backup", methods=["GET", "PUT"])

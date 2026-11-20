@@ -14,6 +14,7 @@ The scheduler is a thread of the ERP that wakes up every minute. When several ER
 a PostgreSQL advisory lock makes sure only one of them runs a backup at a time.
 The pg_dump command is PG_DUMP (default "pg_dump"); the Docker image has pg_dump 16.
 """
+
 import json
 import logging
 import os
@@ -21,7 +22,6 @@ import re
 import shlex
 import subprocess
 import threading
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import unquote, urlsplit, urlunsplit
@@ -29,7 +29,9 @@ from urllib.parse import unquote, urlsplit, urlunsplit
 from sqlalchemy import text
 
 import db
+
 from . import database
+from .core.errors import AppError
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +42,16 @@ DEFAULTS = {"enabled": False, "intervalHours": 24, "path": os.environ.get("BACKU
 _run_lock = threading.Lock()
 
 
-class BackupError(Exception):
+class BackupError(AppError):
+    """409 while another backup runs, 500 when pg_dump fails, 400 for the settings."""
+
     def __init__(self, code, field=None, detail=None):
-        super().__init__(code)
-        self.code, self.field, self.detail = code, field, detail
+        status = 409 if code == "backup_running" else 500 if code in ("backup_failed", "pg_dump_missing") else 400
+        super().__init__(code, field=field, status=status, detail=detail)
 
 
 # ------------------------------------------------------------------ settings and status
+
 
 def get_settings():
     try:
@@ -67,7 +72,7 @@ def validate(p):
             try:
                 v = cast(str(p[field]).replace(",", ".").strip())
             except ValueError:
-                raise BackupError("numeric", field)
+                raise BackupError("numeric", field) from None
             if not lo <= v <= hi:
                 raise BackupError("out_of_range", field, f"{lo}-{hi}")
             out[field] = int(v) if float(v).is_integer() else v
@@ -108,7 +113,9 @@ def next_run(settings=None, status=None):
     last = status.get("lastSuccess")
     if not last:
         return _now().isoformat(timespec="seconds")
-    return (datetime.fromisoformat(last) + timedelta(hours=float(settings["intervalHours"]))).isoformat(timespec="seconds")
+    return (datetime.fromisoformat(last) + timedelta(hours=float(settings["intervalHours"]))).isoformat(
+        timespec="seconds"
+    )
 
 
 def _now():
@@ -116,6 +123,7 @@ def _now():
 
 
 # ------------------------------------------------------------------ files
+
 
 def _check_folder(path):
     folder = Path(path)
@@ -125,7 +133,7 @@ def _check_folder(path):
         probe.write_text("ok", encoding="utf-8")
         probe.unlink()
     except OSError as e:
-        raise BackupError("folder_not_writable", "path", str(e))
+        raise BackupError("folder_not_writable", "path", str(e)) from e
     return folder
 
 
@@ -136,9 +144,14 @@ def list_files(settings=None):
         return []
     files = [f for f in folder.iterdir() if f.is_file() and FILE_RE.match(f.name)]
     files.sort(key=lambda f: f.name, reverse=True)  # the name holds the date
-    return [{"name": f.name, "size": f.stat().st_size,
-             "date": datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")}
-            for f in files]
+    return [
+        {
+            "name": f.name,
+            "size": f.stat().st_size,
+            "date": datetime.fromtimestamp(f.stat().st_mtime, timezone.utc).isoformat(timespec="seconds"),
+        }
+        for f in files
+    ]
 
 
 def file_path(name, settings=None):
@@ -151,7 +164,7 @@ def file_path(name, settings=None):
 def rotate(settings):
     """Delete the oldest backup files beyond `keep` (only files named like a backup)."""
     removed = []
-    for f in list_files(settings)[int(settings["keep"]):]:
+    for f in list_files(settings)[int(settings["keep"]) :]:
         try:
             (Path(settings["path"]) / f["name"]).unlink()
             removed.append(f["name"])
@@ -161,6 +174,7 @@ def rotate(settings):
 
 
 # ------------------------------------------------------------------ running pg_dump
+
 
 def _pg_dump_command():
     raw = os.environ.get("PG_DUMP", "pg_dump")
@@ -208,11 +222,11 @@ def _run(trigger):
         res = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=3600)
     except FileNotFoundError:
         _fail(trigger, started, "pg_dump not found (PG_DUMP)")
-        raise BackupError("pg_dump_missing")
+        raise BackupError("pg_dump_missing") from None
     except subprocess.TimeoutExpired:
         part.unlink(missing_ok=True)
         _fail(trigger, started, "timeout")
-        raise BackupError("backup_failed", detail="timeout")
+        raise BackupError("backup_failed", detail="timeout") from None
     if res.returncode != 0 or not part.is_file():
         part.unlink(missing_ok=True)
         msg = (res.stderr or res.stdout or f"exit {res.returncode}").strip()[-500:]
@@ -221,9 +235,15 @@ def _run(trigger):
     part.replace(target)
     removed = rotate(settings)
     logger.info("backup: %s written (%s), %d old file(s) removed", name, trigger, len(removed))
-    return _set_status(lastRun=started.isoformat(timespec="seconds"), lastSuccess=started.isoformat(timespec="seconds"),
-                       lastFile=name, lastSize=target.stat().st_size, lastError="", lastTrigger=trigger,
-                       removed=removed)
+    return _set_status(
+        lastRun=started.isoformat(timespec="seconds"),
+        lastSuccess=started.isoformat(timespec="seconds"),
+        lastFile=name,
+        lastSize=target.stat().st_size,
+        lastError="",
+        lastTrigger=trigger,
+        removed=removed,
+    )
 
 
 def _fail(trigger, started, msg):
@@ -232,6 +252,7 @@ def _fail(trigger, started, msg):
 
 
 # ------------------------------------------------------------------ scheduler
+
 
 def due(now=None):
     nxt = next_run()

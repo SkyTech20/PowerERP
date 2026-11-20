@@ -22,7 +22,9 @@ def test_cost_center_with_and_without_cc2(client):
 
 
 def test_supplier_crud(client):
-    r = client.post("/api/suppliers", json={"cCode": "NEWSUP", "cName": "New supplier", "cNoTPS": "123", "iStatutAch": "0"})
+    r = client.post(
+        "/api/suppliers", json={"cCode": "NEWSUP", "cName": "New supplier", "cNoTPS": "123", "iStatutAch": "0"}
+    )
     assert r.status_code == 201
     row = r.get_json()
     assert row["iStatutAch"] == 0 and row["iTypePO"] == 1 and row["cNoTVQ"] == ""
@@ -64,7 +66,9 @@ def test_bad_page_values_fall_back(client):
 
 
 def test_lookups(client):
-    assert {"code": "LUMPRO", "label": client.get("/api/suppliers/LUMPRO").get_json()["cName"]} in client.get("/api/lookups/suppliers?q=lum").get_json()
+    assert {"code": "LUMPRO", "label": client.get("/api/suppliers/LUMPRO").get_json()["cName"]} in client.get(
+        "/api/lookups/suppliers?q=lum"
+    ).get_json()
     assert any(p["code"] == "500101" for p in client.get("/api/lookups/po?q=500101").get_json())
     # the forms show lookups as plain selects with the whole list (all=1), not the first 20
     n = len(client.get("/api/suppliers?size=500").get_json()["items"])

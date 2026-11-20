@@ -1,4 +1,5 @@
 """Core tables: companies, users, settings, document numbering and the transition table."""
+
 from datetime import datetime
 
 from sqlalchemy import BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Index, String, Text, func, text
@@ -13,6 +14,7 @@ LANGS = ("en", "fr")
 
 class Company(Base):
     """A company (legal entity / plant). Master data and documents get a company_id as they move here."""
+
     __tablename__ = "companies"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
@@ -51,6 +53,7 @@ class Setting(Base):
 
 class DocSequence(Base):
     """Next number of each document type, per company (taken with SELECT ... FOR UPDATE)."""
+
     __tablename__ = "doc_sequences"
 
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), primary_key=True)
@@ -64,6 +67,7 @@ class LegacyDataset(Base):
 
     Same role as the old SQLite "datasets" table; emptied area by area during R1 to R3 and dropped in R4.
     """
+
     __tablename__ = "legacy_datasets"
 
     name: Mapped[str] = mapped_column(String(100), primary_key=True)

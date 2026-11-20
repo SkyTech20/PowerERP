@@ -4,6 +4,7 @@ A Store reads and writes one table of powererp.models.master as the dicts the AP
 (cCode, dPrice1 "1649.00", lActive True, "lines": [...]), so the routes keep their contract while the data
 lives in relational tables. Every call uses the session of the current request (powererp.database.current()).
 """
+
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
@@ -19,6 +20,7 @@ def company_id(code="MAIN"):
     """Id of the company the ERP works on (one company for now: MAIN)."""
     if code not in _company_cache:
         from .models import Company
+
         cid = database.current().scalar(select(Company.id).where(Company.code == code))
         if cid is None:
             raise RuntimeError(f"company {code} missing (migration 0001 creates MAIN)")
@@ -33,7 +35,7 @@ def _to_db(kind, value):
         try:
             return Decimal(str(value).strip())
         except InvalidOperation:
-            raise ValueError(value)
+            raise ValueError(value) from None
     if kind == "date":
         v = str(value or "").strip()[:10]
         return date.fromisoformat(v) if v else None
@@ -78,8 +80,11 @@ class Store:
 
     def _row_out(self, r):
         m = r._mapping
-        return {f: _from_db(k, m[self.cols[f]]) for f, k in self.fields.items()
-                if not (f in self.spec.sparse and m[self.cols[f]] is None)}
+        return {
+            f: _from_db(k, m[self.cols[f]])
+            for f, k in self.fields.items()
+            if not (f in self.spec.sparse and m[self.cols[f]] is None)
+        }
 
     @staticmethod
     def _default(kind):
@@ -88,8 +93,11 @@ class Store:
     def _values(self, row, full=False):
         """Column values of the fields present in `row`; full=True gives every column (missing = default),
         as multi-row INSERTs need the same columns in every row."""
-        return {self.cols[f].name: _to_db(k, row.get(f, self._default(k)))
-                for f, k in self.fields.items() if full or f in row}
+        return {
+            self.cols[f].name: _to_db(k, row.get(f, self._default(k)))
+            for f, k in self.fields.items()
+            if full or f in row
+        }
 
     def _line_values(self, ln):
         return {self.lcols[f].name: _to_db(k, ln.get(f, self._default(k))) for f, k in self.spec.line_schema.items()}
@@ -98,7 +106,7 @@ class Store:
 
     def _where_key(self, key_values, ci):
         conds = [self.t.c.company_id == company_id()]
-        for f, v in zip(self.spec.keys, key_values):
+        for f, v in zip(self.spec.keys, key_values, strict=False):
             c = self.cols[f]
             if self.fields[f] != "s":
                 conds.append(c == _to_db(self.fields[f], v))
@@ -116,12 +124,16 @@ class Store:
             r["lines"] = []
         if not rows_by_id:
             return
-        q = select(self.lt).where(self.lt.c.parent_id.in_(list(rows_by_id))).order_by(self.lt.c.parent_id,
-                                                                                     self.lt.c.line_no)
+        q = (
+            select(self.lt)
+            .where(self.lt.c.parent_id.in_(list(rows_by_id)))
+            .order_by(self.lt.c.parent_id, self.lt.c.line_no)
+        )
         for ln in s.execute(q):
             m = ln._mapping
             rows_by_id[m["parent_id"]]["lines"].append(
-                {f: _from_db(k, m[self.lcols[f]]) for f, k in self.spec.line_schema.items()})
+                {f: _from_db(k, m[self.lcols[f]]) for f, k in self.spec.line_schema.items()}
+            )
 
     def all(self, lines=True, where=None):
         """Every row of the company, in the table's default order."""
@@ -172,8 +184,9 @@ class Store:
 
     def insert(self, row):
         s = database.current()
-        new_id = s.execute(insert(self.t).values(company_id=company_id(), **self._values(row, full=True))
-                           .returning(self.t.c.id)).scalar()
+        new_id = s.execute(
+            insert(self.t).values(company_id=company_id(), **self._values(row, full=True)).returning(self.t.c.id)
+        ).scalar()
         if self.lt is not None:
             self._write_lines(s, new_id, row.get("lines") or [])
         return row
@@ -215,7 +228,7 @@ class Store:
         key_cols = [self.cols[k] for k in self.spec.keys]
         ids = {}
         for chunk in range(0, len(params), 500):
-            part = params[chunk:chunk + 500]
+            part = params[chunk : chunk + 500]
             if self.lt is None:
                 s.execute(insert(self.t).values(part))
                 continue
@@ -223,11 +236,17 @@ class Store:
                 ids[tuple(str(v).lower() for v in r[1:])] = r[0]
         if self.lt is None:
             return
-        lines = [{"parent_id": ids[tuple(str(r.get(k) or "").lower() for k in self.spec.keys)], "line_no": i,
-                  **self._line_values(ln)}
-                 for r in rows for i, ln in enumerate(r.get("lines") or [], 1)]
+        lines = [
+            {
+                "parent_id": ids[tuple(str(r.get(k) or "").lower() for k in self.spec.keys)],
+                "line_no": i,
+                **self._line_values(ln),
+            }
+            for r in rows
+            for i, ln in enumerate(r.get("lines") or [], 1)
+        ]
         for chunk in range(0, len(lines), 500):
-            s.execute(insert(self.lt).values(lines[chunk:chunk + 500]))
+            s.execute(insert(self.lt).values(lines[chunk : chunk + 500]))
 
 
 _stores = {}

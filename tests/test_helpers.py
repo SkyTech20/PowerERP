@@ -1,25 +1,29 @@
 """Unit tests for the value helpers shared by every ERP screen and service."""
+
 import pytest
 
 import erp_api
 import purchasing_api
 
 
-@pytest.mark.parametrize("raw, expected", [
-    ("12.50", "12.50"),
-    ("$12.50", "12.50"),
-    ("12,50 $", "12.50"),
-    ("$1,234.56", "1234.56"),
-    ("1 234,56 $", "1234.56"),
-    ("1.234,56", "1234.56"),
-    ("1,234,567", "1234567"),
-    ("1.2.3", "12.3"),
-    ("CAD 99.9", "99.9"),
-    ("-$5", "-5"),
-    (" 7 ", "7"),
-    (42, "42"),
-    (3.5, "3.5"),
-])
+@pytest.mark.parametrize(
+    "raw, expected",
+    [
+        ("12.50", "12.50"),
+        ("$12.50", "12.50"),
+        ("12,50 $", "12.50"),
+        ("$1,234.56", "1234.56"),
+        ("1 234,56 $", "1234.56"),
+        ("1.234,56", "1234.56"),
+        ("1,234,567", "1234567"),
+        ("1.2.3", "12.3"),
+        ("CAD 99.9", "99.9"),
+        ("-$5", "-5"),
+        (" 7 ", "7"),
+        (42, "42"),
+        (3.5, "3.5"),
+    ],
+)
 def test_dec_keeps_only_the_number(raw, expected):
     assert erp_api._dec(raw) == expected
 
@@ -30,9 +34,17 @@ def test_dec_without_number_returns_default(raw):
     assert erp_api._dec(raw, "") == ""
 
 
-@pytest.mark.parametrize("raw, expected", [
-    ("10", 10.0), ("10,5", 10.5), ("$10.25", 10.25), ("abc", 0.0), (None, 0.0), ("", 0.0),
-])
+@pytest.mark.parametrize(
+    "raw, expected",
+    [
+        ("10", 10.0),
+        ("10,5", 10.5),
+        ("$10.25", 10.25),
+        ("abc", 0.0),
+        (None, 0.0),
+        ("", 0.0),
+    ],
+)
 def test_num(raw, expected):
     assert erp_api._num(raw) == expected
 
@@ -52,10 +64,22 @@ def test_qty(raw, expected):
     assert erp_api._qty(raw) == expected
 
 
-@pytest.mark.parametrize("raw, expected", [
-    (True, True), ("true", True), ("1", True), (1, True), ("on", True), ("yes", True),
-    (False, False), ("false", False), ("0", False), (None, False), ("", False),
-])
+@pytest.mark.parametrize(
+    "raw, expected",
+    [
+        (True, True),
+        ("true", True),
+        ("1", True),
+        (1, True),
+        ("on", True),
+        ("yes", True),
+        (False, False),
+        ("false", False),
+        ("0", False),
+        (None, False),
+        ("", False),
+    ],
+)
 def test_bool(raw, expected):
     assert erp_api._bool(raw) is expected
 

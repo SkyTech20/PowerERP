@@ -15,6 +15,7 @@ APIs > Authentication "API Key", header X-API-Key).
 The first start creates the administrator ERP_ADMIN_USER (default "admin") with
 ERP_ADMIN_PASSWORD; without it a random password is generated and printed in the log.
 """
+
 import hmac
 import logging
 import os
@@ -26,6 +27,9 @@ from sqlalchemy import func, select
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import db
+from powererp.core.errors import AppError
+from powererp.core.http import json_payload
+from powererp.core.values import text as _s
 from powererp.models import User
 
 logger = logging.getLogger(__name__)
@@ -39,22 +43,8 @@ MIN_PASSWORD = 6
 bp = Blueprint("auth", __name__)
 
 
-class AuthError(Exception):
-    def __init__(self, code, field=None, status=400):
-        super().__init__(code)
-        self.code, self.field, self.status = code, field, status
-
-
-@bp.errorhandler(AuthError)
-def _auth_error(err):
-    body = {"error": err.code}
-    if err.field:
-        body["field"] = err.field
-    return jsonify(body), err.status
-
-
-def _s(value):
-    return "" if value is None else str(value).strip()
+class AuthError(AppError):
+    """Login and user errors (same JSON as every other error)."""
 
 
 def _iso(value):
@@ -65,16 +55,33 @@ def _row(u):
     """A users row as a dict (what the rest of the ERP reads)."""
     if u is None:
         return None
-    return {"id": u.id, "username": u.username, "name": u.name, "email": u.email, "role": u.role,
-            "lang": u.lang, "active": u.active, "password_hash": u.password_hash,
-            "created_at": _iso(u.created_at), "last_login": _iso(u.last_login)}
+    return {
+        "id": u.id,
+        "username": u.username,
+        "name": u.name,
+        "email": u.email,
+        "role": u.role,
+        "lang": u.lang,
+        "active": u.active,
+        "password_hash": u.password_hash,
+        "created_at": _iso(u.created_at),
+        "last_login": _iso(u.last_login),
+    }
 
 
 def _public(row):
     """A user as returned by the API (never the password hash)."""
-    return {"id": row["id"], "username": row["username"], "name": row["name"], "email": row["email"],
-            "role": row["role"], "lang": row["lang"], "active": bool(row["active"]),
-            "created_at": row["created_at"], "last_login": row["last_login"]}
+    return {
+        "id": row["id"],
+        "username": row["username"],
+        "name": row["name"],
+        "email": row["email"],
+        "role": row["role"],
+        "lang": row["lang"],
+        "active": bool(row["active"]),
+        "created_at": row["created_at"],
+        "last_login": row["last_login"],
+    }
 
 
 def _get_user(user_id):
@@ -103,11 +110,7 @@ def _api_key_ok():
     return bool(key) and hmac.compare_digest(sent.encode(), key.encode())
 
 
-def _payload():
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict):
-        raise AuthError("invalid_body")
-    return data
+_payload = json_payload
 
 
 def _check_password(pw, field="password"):
@@ -116,11 +119,15 @@ def _check_password(pw, field="password"):
 
 
 def _count_admins(s, exclude_id=None):
-    return s.scalar(select(func.count()).select_from(User).where(
-        User.role == "admin", User.active.is_(True), User.id != (exclude_id or 0)))
+    return s.scalar(
+        select(func.count())
+        .select_from(User)
+        .where(User.role == "admin", User.active.is_(True), User.id != (exclude_id or 0))
+    )
 
 
 # ---------------------------------------------------------------- guard
+
 
 def _guard():
     path = request.path
@@ -142,6 +149,7 @@ def _guard():
 
 
 # ---------------------------------------------------------------- login
+
 
 @bp.route("/api/health")
 def health():
@@ -209,6 +217,7 @@ def set_lang():
 
 # ---------------------------------------------------------------- users (admin)
 
+
 def _user_from_payload(p, existing=None):
     row = {
         "username": _s(p.get("username")) if existing is None else existing["username"],
@@ -248,7 +257,7 @@ def users_collection():
         except ValueError:
             size, page = 25, 1
         start = (page - 1) * size
-        return jsonify({"total": len(rows), "page": page, "size": size, "items": rows[start:start + size]})
+        return jsonify({"total": len(rows), "page": page, "size": size, "items": rows[start : start + size]})
     p = _payload()
     row = _user_from_payload(p)
     password = p.get("password") or ""
@@ -287,8 +296,12 @@ def users_item(user_id):
     if password:
         _check_password(password)
     with db.session() as s:
-        if (existing["role"] == "admin" and existing["active"] and (row["role"] != "admin" or not row["active"])
-                and not _count_admins(s, user_id)):
+        if (
+            existing["role"] == "admin"
+            and existing["active"]
+            and (row["role"] != "admin" or not row["active"])
+            and not _count_admins(s, user_id)
+        ):
             raise AuthError("last_admin", "role", 409)
         u = s.get(User, user_id)
         for k in ("name", "email", "role", "lang", "active"):
@@ -299,6 +312,7 @@ def users_item(user_id):
 
 
 # ---------------------------------------------------------------- setup
+
 
 def _secret_key():
     key = os.environ.get("ERP_SECRET_KEY") or db.get_setting("secret_key")
@@ -317,8 +331,17 @@ def _ensure_admin():
         generated = not password
         if generated:
             password = secrets.token_urlsafe(9)
-        s.add(User(username=username, name="Administrator", email="", role="admin", lang="en", active=True,
-                   password_hash=generate_password_hash(password)))
+        s.add(
+            User(
+                username=username,
+                name="Administrator",
+                email="",
+                role="admin",
+                lang="en",
+                active=True,
+                password_hash=generate_password_hash(password),
+            )
+        )
     msg = f"PowerERP: created administrator '{username}'"
     print(msg + (f" with password: {password}  (set ERP_ADMIN_PASSWORD to choose it)" if generated else ""), flush=True)
 

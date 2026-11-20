@@ -30,10 +30,11 @@ parameters, movements (the ledger, insert only) and counts. The balances are a t
 in the same transaction as each movement, with a lock per product so two simultaneous movements cannot both use
 the same stock.
 """
+
 import copy
 import json
 import math
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 
 from flask import Blueprint, g, jsonify, request
@@ -41,19 +42,30 @@ from sqlalchemy import func
 
 from auth import current_user
 from erp_api import ApiError, _bool, _dec, _num, _s
-
-from powererp.schemas import *  # noqa: F401,F403  (choices, schemas and DEFAULTS)
-from powererp.schemas import DEFAULTS, PRODUCT, PRODUCT_SUPPLIER  # noqa: F401
 from powererp import purchasing as purch
 from powererp import stock as stockdb
+from powererp.core.values import amount as _m  # noqa: E402
+from powererp.core.values import number as _f  # noqa: E402
+from powererp.core.values import quantity as _q  # noqa: E402
+from powererp.core.values import today as _today  # noqa: E402
+from powererp.core.values import unit_cost as _c  # noqa: E402
+from powererp.schemas import *  # noqa: F401,F403  (choices, schemas and DEFAULTS)
+from powererp.schemas import DEFAULTS, PRODUCT, PRODUCT_SUPPLIER  # noqa: F401
 from powererp.store import store
 
 SEED_FILE = Path(__file__).resolve().parent / "data" / "inventory.json"
 
 # Master files in relational tables: API name -> table
-MASTER = {"tax_codes": "tax_codes", "tax_groups": "tax_groups", "uom": "uoms", "categories": "product_categories",
-          "warehouses": "warehouses", "locations": "locations", "products": "products",
-          "stock_params": "stock_params"}
+MASTER = {
+    "tax_codes": "tax_codes",
+    "tax_groups": "tax_groups",
+    "uom": "uoms",
+    "categories": "product_categories",
+    "warehouses": "warehouses",
+    "locations": "locations",
+    "products": "products",
+    "stock_params": "stock_params",
+}
 
 
 def _clean(kind, value):
@@ -90,13 +102,21 @@ def _apply(row, p, schema, skip=()):
             try:
                 row[f] = _clean(kind, p[f])
             except (ValueError, TypeError):
-                raise ApiError("invalid_choice" if isinstance(kind, tuple) else "numeric" if kind in ("d", "i")
-                               else "invalid_date", f)
+                raise ApiError(
+                    (
+                        "invalid_choice"
+                        if isinstance(kind, tuple)
+                        else "numeric" if kind in ("d", "i") else "invalid_date"
+                    ),
+                    f,
+                )
     return row
 
 
 def _blank(schema, defaults=None):
-    row = {f: (False if k == "b" else 0 if k == "i" else (k[0] if isinstance(k, tuple) else "")) for f, k in schema.items()}
+    row = {
+        f: (False if k == "b" else 0 if k == "i" else (k[0] if isinstance(k, tuple) else "")) for f, k in schema.items()
+    }
     row.update(copy.deepcopy(defaults or {}))
     return row
 
@@ -104,7 +124,7 @@ def _blank(schema, defaults=None):
 def _lines(p, schema, keep):
     """Clean the "lines" of a payload; keep(line) says whether an (almost) empty line is kept."""
     out = []
-    for i, ln in enumerate(p.get("lines") or [], 1):
+    for _i, ln in enumerate(p.get("lines") or [], 1):
         if not isinstance(ln, dict):
             continue
         row = _apply(_blank(schema), ln, schema)
@@ -113,31 +133,8 @@ def _lines(p, schema, keep):
     return out
 
 
-def _f(v):
-    return _num(v)
-
-
-def _q(v):
-    """A quantity as text: "12", "12.5", "0.125"."""
-    v = round(float(v), 4)
-    return str(int(v)) if v == int(v) else f"{v:.4f}".rstrip("0").rstrip(".")
-
-
-def _m(v):
-    return f"{round(float(v) + 1e-9, 2):.2f}"
-
-
-def _c(v):
-    """A unit cost (4 decimals, trailing zeros removed down to 2)."""
-    s = f"{float(v):.4f}"
-    return s[:-2] if s.endswith("00") else s.rstrip("0")
-
-
-def _today():
-    return date.today().isoformat()
-
-
 # --------------------------------------------------------------------------- module
+
 
 def register_inventory(app, ns, hooks):
     DB = {name: store(table) for name, table in MASTER.items()}
@@ -157,25 +154,13 @@ def register_inventory(app, ns, hooks):
         """Write back a master row changed outside its screen (e.g. the average cost of a product)."""
         if seeding["rows"] is None:
             DB[name].update(row)
+
     suppliers = ns["supplier_terms_data"]
     paginate = hooks["paginate"]
 
     bp = Blueprint("inventory", __name__)
 
-    @bp.errorhandler(ApiError)
-    def _api_error(err):
-        body = {"error": err.code}
-        if err.field:
-            body["field"] = err.field
-        if err.detail:
-            body["detail"] = err.detail
-        return jsonify(body), err.status
-
-    def _payload():
-        data = request.get_json(silent=True)
-        if not isinstance(data, dict):
-            raise ApiError("invalid_body")
-        return data
+    from powererp.core.http import json_payload as _payload
 
     def _find(name, code, field="cCode"):
         cu = _s(code).upper()
@@ -205,8 +190,20 @@ def register_inventory(app, ns, hooks):
 
     # ------------------------------------------------------------------ generic master CRUD
 
-    def crud(name, url, schema, search, validate=None, view=None, on_delete=None, keys=("cCode",),
-             line_schema=None, keep_line=None, sort=None, readonly=()):
+    def crud(
+        name,
+        url,
+        schema,
+        search,
+        validate=None,
+        view=None,
+        on_delete=None,
+        keys=("cCode",),
+        line_schema=None,
+        keep_line=None,
+        sort=None,
+        readonly=(),
+    ):
         """List / create / read / update / delete routes of a master file (relational table, or in-memory list)."""
         view = view or (lambda r: r)
         db = DB.get(name)
@@ -217,7 +214,14 @@ def register_inventory(app, ns, hooks):
         def find(parts):
             if db:
                 return db.get(*parts)
-            return next((r for r in T[name] if all(_s(r.get(k)).upper() == _s(v).upper() for k, v in zip(keys, parts))), None)
+            return next(
+                (
+                    r
+                    for r in T[name]
+                    if all(_s(r.get(k)).upper() == _s(v).upper() for k, v in zip(keys, parts, strict=False))
+                ),
+                None,
+            )
 
         def add(row):
             if db:
@@ -251,8 +255,9 @@ def register_inventory(app, ns, hooks):
 
         def collection():
             if request.method == "GET":
-                return jsonify(paginate([{k: v for k, v in view(r).items() if k != "lines"}
-                                         for r in all_rows()], search))
+                return jsonify(
+                    paginate([{k: v for k, v in view(r).items() if k != "lines"} for r in all_rows()], search)
+                )
             p = _payload()
             row = _blank(schema, DEFAULTS.get(name))
             if line_schema is not None:
@@ -298,8 +303,11 @@ def register_inventory(app, ns, hooks):
     def rate_on(tax, on=None):
         """The tax rate (percent) valid at a date, from the rate history (latest start date that applies)."""
         on = on or _today()
-        valid = [r for r in tax.get("lines", []) if (r.get("dStartDate") or "0000") <= on
-                 and (not r.get("dEndDate") or r["dEndDate"] >= on)]
+        valid = [
+            r
+            for r in tax.get("lines", [])
+            if (r.get("dStartDate") or "0000") <= on and (not r.get("dEndDate") or r["dEndDate"] >= on)
+        ]
         if not valid:
             return None
         return _f(max(valid, key=lambda r: r.get("dStartDate") or "")["dRate"])
@@ -317,18 +325,25 @@ def register_inventory(app, ns, hooks):
                 raise ApiError("invalid_dates", "lines", detail=f"line {i + 1}")
         row.setdefault("lines", []).sort(key=lambda r: r.get("dStartDate") or "")
 
-    crud("tax_codes", "tax-codes", TAX_CODE, ("cCode", "cDescFR", "cDescEN", "cJurisdiction"),
-         validate=tax_code_validate, view=tax_code_view, line_schema=TAX_RATE,
-         keep_line=lambda r: r["dRate"] != "" or r["dStartDate"],
-         on_delete=lambda r: in_use(any(_s(l["cTaxCode"]).upper() == r["cCode"].upper()
-                                        for g in M("tax_groups") for l in g.get("lines", []))),
-         sort=lambda r: r["cCode"])
+    crud(
+        "tax_codes",
+        "tax-codes",
+        TAX_CODE,
+        ("cCode", "cDescFR", "cDescEN", "cJurisdiction"),
+        validate=tax_code_validate,
+        view=tax_code_view,
+        line_schema=TAX_RATE,
+        keep_line=lambda r: r["dRate"] != "" or r["dStartDate"],
+        on_delete=lambda r: in_use(
+            any(_s(l["cTaxCode"]).upper() == r["cCode"].upper() for g in M("tax_groups") for l in g.get("lines", []))
+        ),
+        sort=lambda r: r["cCode"],
+    )
 
     def tax_group_view(r):
         lines = sorted(r.get("lines", []), key=lambda l: l["iSeq"])
         names = [l["cTaxCode"] for l in lines]
-        return {**r, "cTaxList": " + ".join(names) if names and r.get("cTreatment") == "taxable"
-                else ""}
+        return {**r, "cTaxList": " + ".join(names) if names and r.get("cTreatment") == "taxable" else ""}
 
     def tax_group_validate(row, is_new):
         _require(row, "cDescFR")
@@ -341,13 +356,22 @@ def register_inventory(app, ns, hooks):
 
     def group_used(code):
         cu = code.upper()
-        return DB["products"].exists(lambda c: [(func.upper(c["cSalesTaxGroup"]) == cu)
-                                                | (func.upper(c["cPurchaseTaxGroup"]) == cu)])
+        return DB["products"].exists(
+            lambda c: [(func.upper(c["cSalesTaxGroup"]) == cu) | (func.upper(c["cPurchaseTaxGroup"]) == cu)]
+        )
 
-    crud("tax_groups", "tax-groups", TAX_GROUP, ("cCode", "cDescFR", "cDescEN", "cProvince"),
-         validate=tax_group_validate, view=tax_group_view, line_schema=TAX_GROUP_LINE,
-         keep_line=lambda r: bool(r["cTaxCode"]), on_delete=lambda r: in_use(group_used(r["cCode"])),
-         sort=lambda r: r["cCode"])
+    crud(
+        "tax_groups",
+        "tax-groups",
+        TAX_GROUP,
+        ("cCode", "cDescFR", "cDescEN", "cProvince"),
+        validate=tax_group_validate,
+        view=tax_group_view,
+        line_schema=TAX_GROUP_LINE,
+        keep_line=lambda r: bool(r["cTaxCode"]),
+        on_delete=lambda r: in_use(group_used(r["cCode"])),
+        sort=lambda r: r["cCode"],
+    )
 
     def tax_calc(group_code, amount, on=None):
         """Taxes of `amount` for a tax group at a date. Compound taxes are calculated on the amount + the taxes before them."""
@@ -365,12 +389,27 @@ def register_inventory(app, ns, hooks):
                 base = amount + (total if ln.get("lCompound") else 0.0)
                 value = round(base * rate / 100 + 1e-9, 2)
                 total += value
-                out.append({"cTaxCode": tax["cCode"], "cKind": tax.get("cKind", ""), "dRate": _q(rate),
-                            "dBase": _m(base), "dTax": _m(value), "cGLCollected": tax.get("cGLCollected", ""),
-                            "cGLRecoverable": tax.get("cGLRecoverable", ""),
-                            "dRecoverable": _m(value * _f(tax.get("dRecoverablePct") or 100) / 100)})
-        return {"cTaxGroup": group["cCode"], "cTreatment": group.get("cTreatment"), "dDate": on,
-                "dAmount": _m(amount), "taxes": out, "dTotalTax": _m(total), "dTotal": _m(amount + total)}
+                out.append(
+                    {
+                        "cTaxCode": tax["cCode"],
+                        "cKind": tax.get("cKind", ""),
+                        "dRate": _q(rate),
+                        "dBase": _m(base),
+                        "dTax": _m(value),
+                        "cGLCollected": tax.get("cGLCollected", ""),
+                        "cGLRecoverable": tax.get("cGLRecoverable", ""),
+                        "dRecoverable": _m(value * _f(tax.get("dRecoverablePct") or 100) / 100),
+                    }
+                )
+        return {
+            "cTaxGroup": group["cCode"],
+            "cTreatment": group.get("cTreatment"),
+            "dDate": on,
+            "dAmount": _m(amount),
+            "taxes": out,
+            "dTotalTax": _m(total),
+            "dTotal": _m(amount + total),
+        }
 
     @bp.route("/api/tax-groups/<code>/calc")
     def tax_group_calc(code):
@@ -383,14 +422,26 @@ def register_inventory(app, ns, hooks):
 
     def uom_used(code):
         cu = code.upper()
-        return DB["products"].exists(lambda c: [(func.upper(c["cStockUOM"]) == cu) | (func.upper(c["cPurchaseUOM"]) == cu)
-                                                | (func.upper(c["cSalesUOM"]) == cu)])
+        return DB["products"].exists(
+            lambda c: [
+                (func.upper(c["cStockUOM"]) == cu)
+                | (func.upper(c["cPurchaseUOM"]) == cu)
+                | (func.upper(c["cSalesUOM"]) == cu)
+            ]
+        )
 
     def simple_validate(row, is_new):
         _require(row, "cDescFR")
 
-    crud("uom", "uom", UOM, ("cCode", "cDescFR", "cDescEN"), validate=simple_validate,
-         on_delete=lambda r: in_use(uom_used(r["cCode"])), sort=lambda r: r["cCode"])
+    crud(
+        "uom",
+        "uom",
+        UOM,
+        ("cCode", "cDescFR", "cDescEN"),
+        validate=simple_validate,
+        on_delete=lambda r: in_use(uom_used(r["cCode"])),
+        sort=lambda r: r["cCode"],
+    )
 
     def category_validate(row, is_new):
         _require(row, "cDescFR")
@@ -399,12 +450,18 @@ def register_inventory(app, ns, hooks):
                 raise ApiError("invalid_ref", "cParent")
             _must("categories", row, "cParent")
 
-    crud("categories", "categories", CATEGORY, ("cCode", "cDescFR", "cDescEN", "cParent"),
-         validate=category_validate,
-         on_delete=lambda r: in_use(
-             DB["products"].exists(lambda c: [func.upper(c["cCategory"]) == r["cCode"].upper()])
-             or DB["categories"].exists(lambda c: [func.upper(c["cParent"]) == r["cCode"].upper()])),
-         sort=lambda r: r["cCode"])
+    crud(
+        "categories",
+        "categories",
+        CATEGORY,
+        ("cCode", "cDescFR", "cDescEN", "cParent"),
+        validate=category_validate,
+        on_delete=lambda r: in_use(
+            DB["products"].exists(lambda c: [func.upper(c["cCategory"]) == r["cCode"].upper()])
+            or DB["categories"].exists(lambda c: [func.upper(c["cParent"]) == r["cCode"].upper()])
+        ),
+        sort=lambda r: r["cCode"],
+    )
 
     # ------------------------------------------------------------------ balances (calculated from the movements)
 
@@ -456,10 +513,26 @@ def register_inventory(app, ns, hooks):
         out = {} if out is None else out
         for m in list(movements) + list(extra):
             for wh, loc, dq, dr in _effects(m):
-                key = (m["cProduct"].upper(), wh.upper(), loc.upper(), m.get("cLot", "").upper(), m.get("cSerial", "").upper())
-                b = out.setdefault(key, {"cProduct": m["cProduct"], "cWarehouse": wh, "cLocation": loc,
-                                         "cLot": m.get("cLot", ""), "cSerial": m.get("cSerial", ""), "qty": 0.0,
-                                         "reserved": 0.0, "dExpiry": ""})
+                key = (
+                    m["cProduct"].upper(),
+                    wh.upper(),
+                    loc.upper(),
+                    m.get("cLot", "").upper(),
+                    m.get("cSerial", "").upper(),
+                )
+                b = out.setdefault(
+                    key,
+                    {
+                        "cProduct": m["cProduct"],
+                        "cWarehouse": wh,
+                        "cLocation": loc,
+                        "cLot": m.get("cLot", ""),
+                        "cSerial": m.get("cSerial", ""),
+                        "qty": 0.0,
+                        "reserved": 0.0,
+                        "dExpiry": "",
+                    },
+                )
                 b["qty"] = round(b["qty"] + dq, 6)
                 b["reserved"] = round(b["reserved"] + dr, 6)
                 if m.get("dExpiry") and dq > 0:
@@ -483,11 +556,18 @@ def register_inventory(app, ns, hooks):
         for po in purch.po_details_list():
             if po["cPO"] not in open_pos:
                 continue
-            ordered += sum(_f(l.get("dQuantity")) for l in po.get("ttPOdetail", [])
-                           if _s(l.get("cProductcode")).upper() == code.upper())
-            received += sum(_f(a.get("QuantiteRecue")) for r in receiving_details
-                            if _s(r.get("NoBonCommande")) == po["cPO"] for a in r.get("Articles", [])
-                            if _s(a.get("CodeArticle")).upper() == code.upper())
+            ordered += sum(
+                _f(l.get("dQuantity"))
+                for l in po.get("ttPOdetail", [])
+                if _s(l.get("cProductcode")).upper() == code.upper()
+            )
+            received += sum(
+                _f(a.get("QuantiteRecue"))
+                for r in receiving_details
+                if _s(r.get("NoBonCommande")) == po["cPO"]
+                for a in r.get("Articles", [])
+                if _s(a.get("CodeArticle")).upper() == code.upper()
+            )
         return max(0.0, ordered - received)
 
     def unit_cost(prod):
@@ -516,17 +596,31 @@ def register_inventory(app, ns, hooks):
         for s in rows.values():
             wh = _find("warehouses", s["cWarehouse"])
             par = DB["stock_params"].get(r["cCode"], s["cWarehouse"])
-            stock.append({"cWarehouse": s["cWarehouse"], "cWarehouseName": (wh or {}).get("cNameFR", ""),
-                          "dQtyOnHand": _q(s["qty"]), "dQtyReserved": _q(s["reserved"]),
-                          "dQtyAvailable": _q(s["qty"] - s["reserved"]), "dValue": _m(s["qty"] * cost),
-                          "dReorderPoint": (par or {}).get("dReorderPoint", "")})
+            stock.append(
+                {
+                    "cWarehouse": s["cWarehouse"],
+                    "cWarehouseName": (wh or {}).get("cNameFR", ""),
+                    "dQtyOnHand": _q(s["qty"]),
+                    "dQtyReserved": _q(s["reserved"]),
+                    "dQtyAvailable": _q(s["qty"] - s["reserved"]),
+                    "dValue": _m(s["qty"] * cost),
+                    "dReorderPoint": (par or {}).get("dReorderPoint", ""),
+                }
+            )
         qty = sum(s["qty"] for s in rows.values())
         res = sum(s["reserved"] for s in rows.values())
         price = _f(r.get("dPrice1"))
-        out.update({"stock": sorted(stock, key=lambda s: s["cWarehouse"]), "dQtyOnHand": _q(qty),
-                    "dQtyReserved": _q(res), "dQtyAvailable": _q(qty - res), "dQtyOnOrder": _q(on_order(r["cCode"])),
-                    "dStockValue": _m(qty * cost),
-                    "dMarginPct": f"{(price - cost) / price * 100:.1f}" if price and cost else ""})
+        out.update(
+            {
+                "stock": sorted(stock, key=lambda s: s["cWarehouse"]),
+                "dQtyOnHand": _q(qty),
+                "dQtyReserved": _q(res),
+                "dQtyAvailable": _q(qty - res),
+                "dQtyOnOrder": _q(on_order(r["cCode"])),
+                "dStockValue": _m(qty * cost),
+                "dMarginPct": f"{(price - cost) / price * 100:.1f}" if price and cost else "",
+            }
+        )
         return out
 
     def product_validate(row, is_new):
@@ -559,12 +653,19 @@ def register_inventory(app, ns, hooks):
         in_use(MOV.exists(lambda c: [func.upper(c["cProduct"]) == cu]))
         DB["stock_params"].delete_where(lambda c: [func.upper(c["cProduct"]) == cu])
 
-    crud("products", "products", PRODUCT,
-         ("cCode", "cDescFR", "cDescEN", "cCategory", "cBrand", "cUPC", "cMfrPartNo", "cManufacturer"),
-         validate=product_validate, view=lambda r: product_view(r, full=request.method != "GET" or
-                                                                 request.endpoint.endswith("_item")),
-         on_delete=product_delete, line_schema=PRODUCT_SUPPLIER, keep_line=lambda r: bool(r["cSupplierCode"]),
-         sort=lambda r: r["cCode"], readonly=("dAvgCost", "dLastCost"))
+    crud(
+        "products",
+        "products",
+        PRODUCT,
+        ("cCode", "cDescFR", "cDescEN", "cCategory", "cBrand", "cUPC", "cMfrPartNo", "cManufacturer"),
+        validate=product_validate,
+        view=lambda r: product_view(r, full=request.method != "GET" or request.endpoint.endswith("_item")),
+        on_delete=product_delete,
+        line_schema=PRODUCT_SUPPLIER,
+        keep_line=lambda r: bool(r["cSupplierCode"]),
+        sort=lambda r: r["cCode"],
+        readonly=("dAvgCost", "dLastCost"),
+    )
 
     # ------------------------------------------------------------------ warehouses and locations
 
@@ -580,14 +681,27 @@ def register_inventory(app, ns, hooks):
         DB["locations"].delete_where(lambda c: [func.upper(c["cWarehouse"]) == cu])
         DB["stock_params"].delete_where(lambda c: [func.upper(c["cWarehouse"]) == cu])
 
-    crud("warehouses", "warehouses", WAREHOUSE, ("cCode", "cNameFR", "cNameEN", "cCity", "cManager"),
-         validate=wh_validate, on_delete=wh_delete, sort=lambda r: r["cCode"])
+    crud(
+        "warehouses",
+        "warehouses",
+        WAREHOUSE,
+        ("cCode", "cNameFR", "cNameEN", "cCity", "cManager"),
+        validate=wh_validate,
+        on_delete=wh_delete,
+        sort=lambda r: r["cCode"],
+    )
 
     def find_location(wh, code):
         if seeding["rows"] is None:
             return DB["locations"].get(_s(wh), _s(code)) if _s(code) else None
-        return next((l for l in M("locations") if l["cWarehouse"].upper() == _s(wh).upper()
-                     and l["cCode"].upper() == _s(code).upper()), None)
+        return next(
+            (
+                l
+                for l in M("locations")
+                if l["cWarehouse"].upper() == _s(wh).upper() and l["cCode"].upper() == _s(code).upper()
+            ),
+            None,
+        )
 
     def has_locations(wh):
         if seeding["rows"] is None:
@@ -599,24 +713,43 @@ def register_inventory(app, ns, hooks):
             wh = _must("warehouses", row, "cWarehouse", required=True)
             row["cWarehouse"] = wh["cCode"]
             if not row["cCode"]:
-                row["cCode"] = "-".join(x for x in (row["cZone"], row["cAisle"], row["cRack"], row["cLevel"], row["cBin"]) if x)
+                row["cCode"] = "-".join(
+                    x for x in (row["cZone"], row["cAisle"], row["cRack"], row["cLevel"], row["cBin"]) if x
+                )
             if not row["cCode"]:
                 raise ApiError("required", "cCode")
             row["cCode"] = row["cCode"].upper()
 
     def loc_view(r):
-        q = sum(b["qty"] for (p, w, l, *_x), b in balances().items()
-                if w == r["cWarehouse"].upper() and l == r["cCode"].upper())
+        q = sum(
+            b["qty"]
+            for (p, w, l, *_x), b in balances().items()
+            if w == r["cWarehouse"].upper() and l == r["cCode"].upper()
+        )
         return {**r, "dQtyOnHand": _q(q)} if request.endpoint and request.endpoint.endswith("_item") else r
 
     def loc_delete(r):
         wh, code = r["cWarehouse"].upper(), r["cCode"].upper()
-        in_use(MOV.exists(lambda c: [((func.upper(c["cWarehouse"]) == wh) & (func.upper(c["cLocation"]) == code))
-                                     | ((func.upper(c["cWhTo"]) == wh) & (func.upper(c["cLocTo"]) == code))]))
+        in_use(
+            MOV.exists(
+                lambda c: [
+                    ((func.upper(c["cWarehouse"]) == wh) & (func.upper(c["cLocation"]) == code))
+                    | ((func.upper(c["cWhTo"]) == wh) & (func.upper(c["cLocTo"]) == code))
+                ]
+            )
+        )
 
-    crud("locations", "locations", LOCATION, ("cWarehouse", "cCode", "cZone", "cDescription", "cType"),
-         keys=("cWarehouse", "cCode"), validate=loc_validate, view=loc_view, on_delete=loc_delete,
-         sort=lambda r: (r["cWarehouse"], r.get("iPickSeq") or 0, r["cCode"]))
+    crud(
+        "locations",
+        "locations",
+        LOCATION,
+        ("cWarehouse", "cCode", "cZone", "cDescription", "cType"),
+        keys=("cWarehouse", "cCode"),
+        validate=loc_validate,
+        view=loc_view,
+        on_delete=loc_delete,
+        sort=lambda r: (r["cWarehouse"], r.get("iPickSeq") or 0, r["cCode"]),
+    )
 
     # ------------------------------------------------------------------ replenishment parameters
 
@@ -632,12 +765,23 @@ def register_inventory(app, ns, hooks):
     def param_view(r):
         prod = _find("products", r["cProduct"]) or {}
         qty, res = product_totals(r["cProduct"], r["cWarehouse"])
-        return {**r, "cDescFR": prod.get("cDescFR", ""), "cDescEN": prod.get("cDescEN", ""),
-                "dQtyAvailable": _q(qty - res)}
+        return {
+            **r,
+            "cDescFR": prod.get("cDescFR", ""),
+            "cDescEN": prod.get("cDescEN", ""),
+            "dQtyAvailable": _q(qty - res),
+        }
 
-    crud("stock_params", "stock-params", STOCK_PARAM, ("cProduct", "cWarehouse", "cDescFR", "cDescEN"),
-         keys=("cProduct", "cWarehouse"), validate=param_validate, view=param_view,
-         sort=lambda r: (r["cProduct"], r["cWarehouse"]))
+    crud(
+        "stock_params",
+        "stock-params",
+        STOCK_PARAM,
+        ("cProduct", "cWarehouse", "cDescFR", "cDescEN"),
+        keys=("cProduct", "cWarehouse"),
+        validate=param_validate,
+        view=param_view,
+        sort=lambda r: (r["cProduct"], r["cWarehouse"]),
+    )
 
     # ------------------------------------------------------------------ movements
 
@@ -708,8 +852,13 @@ def register_inventory(app, ns, hooks):
             raise ApiError("required", "dExpiry")
 
         bal = balances(staged)
-        key = (prod["cCode"].upper(), wh["cCode"].upper(), _s(m.get("cLocation")).upper(),
-               _s(m.get("cLot")).upper(), _s(m.get("cSerial")).upper())
+        key = (
+            prod["cCode"].upper(),
+            wh["cCode"].upper(),
+            _s(m.get("cLocation")).upper(),
+            _s(m.get("cLot")).upper(),
+            _s(m.get("cSerial")).upper(),
+        )
         b = bal.get(key, {"qty": 0.0, "reserved": 0.0})
         decrease = -q if m["cType"] in ("ADJ", "CNT") and q < 0 else q if m["cType"] in ("OUT", "TRF") else 0
         if decrease and b["qty"] - b["reserved"] - decrease < -1e-9 and not wh.get("lAllowNegative"):
@@ -719,19 +868,34 @@ def register_inventory(app, ns, hooks):
                 raise ApiError("insufficient_stock", "dQty", detail=_q(b["qty"] - b["reserved"]))
             if q < 0 and b["reserved"] + q < -1e-9:
                 raise ApiError("insufficient_reserved", "dQty", detail=_q(b["reserved"]))
-        if prod.get("lSerialControl") and increases_stock(m) and any(
+        if (
+            prod.get("lSerialControl")
+            and increases_stock(m)
+            and any(
                 k[0] == prod["cCode"].upper() and k[4] == _s(m.get("cSerial")).upper() and v["qty"] > 1e-9
-                for k, v in bal.items()):
+                for k, v in bal.items()
+            )
+        ):
             raise ApiError("duplicate", "cSerial", 409)  # a serial number is in stock once only
 
         # Mixing rules of the location that receives the stock
-        incoming = dest if m["cType"] == "TRF" else (wh, loc) if (m["cType"] == "IN" or (m["cType"] in ("ADJ", "CNT") and q > 0)) else None
+        incoming = (
+            dest
+            if m["cType"] == "TRF"
+            else (wh, loc) if (m["cType"] == "IN" or (m["cType"] in ("ADJ", "CNT") and q > 0)) else None
+        )
         if incoming and incoming[1] is not None:
             iw, il = incoming
-            others = [k for k, v in bal.items() if k[1] == iw["cCode"].upper() and k[2] == il["cCode"].upper() and v["qty"] > 1e-9]
+            others = [
+                k
+                for k, v in bal.items()
+                if k[1] == iw["cCode"].upper() and k[2] == il["cCode"].upper() and v["qty"] > 1e-9
+            ]
             if not il.get("lMixProducts", True) and any(k[0] != prod["cCode"].upper() for k in others):
                 raise ApiError("location_mixed", "cLocTo" if m["cType"] == "TRF" else "cLocation")
-            if not il.get("lMixLots", True) and any(k[0] == prod["cCode"].upper() and k[3] != _s(m.get("cLot")).upper() for k in others):
+            if not il.get("lMixLots", True) and any(
+                k[0] == prod["cCode"].upper() and k[3] != _s(m.get("cLot")).upper() for k in others
+            ):
                 raise ApiError("location_mixed_lots", "cLocTo" if m["cType"] == "TRF" else "cLocation")
         return prod
 
@@ -742,7 +906,11 @@ def register_inventory(app, ns, hooks):
         avg = _f(prod.get("dAvgCost"))
         increases = m["cType"] == "IN" or (m["cType"] in ("ADJ", "CNT") and q > 0)
         if increases:
-            cost = _f(m["dUnitCost"]) if _s(m.get("dUnitCost")) else (avg or _f(prod.get("dLastCost")) or _f(prod.get("dStdCost")))
+            cost = (
+                _f(m["dUnitCost"])
+                if _s(m.get("dUnitCost"))
+                else (avg or _f(prod.get("dLastCost")) or _f(prod.get("dStdCost")))
+            )
             new_qty = qty_before + q
             new_avg = cost if qty_before <= 0 or new_qty <= 0 else (qty_before * avg + q * cost) / new_qty
             prod["dAvgCost"] = _c(new_avg)
@@ -782,14 +950,22 @@ def register_inventory(app, ns, hooks):
 
     def movement_view(m):
         prod = _find("products", m["cProduct"]) or {}
-        return {**m, "cDescFR": prod.get("cDescFR", ""), "cDescEN": prod.get("cDescEN", ""),
-                "cUOM": prod.get("cStockUOM", "")}
+        return {
+            **m,
+            "cDescFR": prod.get("cDescFR", ""),
+            "cDescEN": prod.get("cDescEN", ""),
+            "cUOM": prod.get("cStockUOM", ""),
+        }
 
     @bp.route("/api/stock-movements", methods=["GET", "POST"])
     def movements_collection():
         if request.method == "GET":
-            return jsonify(paginate([movement_view(m) for m in MOV.all()],
-                                    ("cProduct", "cDescFR", "cDescEN", "cDocNo", "cLot", "cSerial", "cReason", "cWarehouse")))
+            return jsonify(
+                paginate(
+                    [movement_view(m) for m in MOV.all()],
+                    ("cProduct", "cDescFR", "cDescEN", "cDocNo", "cLot", "cSerial", "cReason", "cWarehouse"),
+                )
+            )
         m = movement_from(_payload())
         prod = check_movement(m)
         return jsonify(movement_view(post_movement(m, prod))), 201
@@ -813,20 +989,37 @@ def register_inventory(app, ns, hooks):
                 continue
             prod = products.get(b["cProduct"].upper(), {})
             loc = find_location(b["cWarehouse"], b["cLocation"]) if b["cLocation"] else None
-            rows.append({"cProduct": b["cProduct"], "cDescFR": prod.get("cDescFR", ""), "cDescEN": prod.get("cDescEN", ""),
-                         "cCategory": prod.get("cCategory", ""), "cWarehouse": b["cWarehouse"], "cLocation": b["cLocation"],
-                         "cZone": (loc or {}).get("cZone", ""), "cLocationType": (loc or {}).get("cType", ""),
-                         "cLot": b["cLot"], "cSerial": b["cSerial"], "dExpiry": b["dExpiry"],
-                         "dQtyOnHand": _q(b["qty"]), "dQtyReserved": _q(b["reserved"]),
-                         "dQtyAvailable": _q(b["qty"] - b["reserved"]), "cUOM": prod.get("cStockUOM", ""),
-                         "dValue": _m(b["qty"] * unit_cost(prod)) if prod else "0.00"})
+            rows.append(
+                {
+                    "cProduct": b["cProduct"],
+                    "cDescFR": prod.get("cDescFR", ""),
+                    "cDescEN": prod.get("cDescEN", ""),
+                    "cCategory": prod.get("cCategory", ""),
+                    "cWarehouse": b["cWarehouse"],
+                    "cLocation": b["cLocation"],
+                    "cZone": (loc or {}).get("cZone", ""),
+                    "cLocationType": (loc or {}).get("cType", ""),
+                    "cLot": b["cLot"],
+                    "cSerial": b["cSerial"],
+                    "dExpiry": b["dExpiry"],
+                    "dQtyOnHand": _q(b["qty"]),
+                    "dQtyReserved": _q(b["reserved"]),
+                    "dQtyAvailable": _q(b["qty"] - b["reserved"]),
+                    "cUOM": prod.get("cStockUOM", ""),
+                    "dValue": _m(b["qty"] * unit_cost(prod)) if prod else "0.00",
+                }
+            )
         rows.sort(key=lambda r: (r["cProduct"], r["cWarehouse"], r["cLocation"], r["cLot"], r["cSerial"]))
         return rows
 
     @bp.route("/api/inventory/stock")
     def inventory_stock():
-        return jsonify(paginate(stock_rows(_bool(request.args.get("zero"))),
-                                ("cProduct", "cDescFR", "cDescEN", "cLocation", "cLot", "cSerial")))
+        return jsonify(
+            paginate(
+                stock_rows(_bool(request.args.get("zero"))),
+                ("cProduct", "cDescFR", "cDescEN", "cLocation", "cLot", "cSerial"),
+            )
+        )
 
     def valuation_rows():
         per = {}
@@ -839,11 +1032,21 @@ def register_inventory(app, ns, hooks):
             cost = unit_cost(prod)
             if abs(v["qty"]) < 1e-9:
                 continue
-            rows.append({"cProduct": v["cProduct"], "cDescFR": prod.get("cDescFR", ""), "cDescEN": prod.get("cDescEN", ""),
-                         "cCategory": prod.get("cCategory", ""), "cWarehouse": v["cWarehouse"],
-                         "cCostMethod": prod.get("cCostMethod", "avg"), "dQtyOnHand": _q(v["qty"]),
-                         "cUOM": prod.get("cStockUOM", ""), "dUnitCost": _c(cost), "dValue": _m(v["qty"] * cost),
-                         "cGLInventory": prod.get("cGLInventory", "")})
+            rows.append(
+                {
+                    "cProduct": v["cProduct"],
+                    "cDescFR": prod.get("cDescFR", ""),
+                    "cDescEN": prod.get("cDescEN", ""),
+                    "cCategory": prod.get("cCategory", ""),
+                    "cWarehouse": v["cWarehouse"],
+                    "cCostMethod": prod.get("cCostMethod", "avg"),
+                    "dQtyOnHand": _q(v["qty"]),
+                    "cUOM": prod.get("cStockUOM", ""),
+                    "dUnitCost": _c(cost),
+                    "dValue": _m(v["qty"] * cost),
+                    "cGLInventory": prod.get("cGLInventory", ""),
+                }
+            )
         rows.sort(key=lambda r: (r["cProduct"], r["cWarehouse"]))
         return rows
 
@@ -855,7 +1058,9 @@ def register_inventory(app, ns, hooks):
         total = 0.0
         q = (request.args.get("q") or "").strip().lower()
         for r in rows:
-            if q and not any(q in _s(r.get(f)).lower() for f in ("cProduct", "cDescFR", "cDescEN", "cCategory", "cGLInventory")):
+            if q and not any(
+                q in _s(r.get(f)).lower() for f in ("cProduct", "cDescFR", "cDescEN", "cCategory", "cGLInventory")
+            ):
                 continue
             if any(k.startswith("f_") and v and _s(r.get(k[2:])).lower() != v.lower() for k, v in request.args.items()):
                 continue
@@ -881,10 +1086,14 @@ def register_inventory(app, ns, hooks):
             avail = qty - res
             # Open POs are not by warehouse: they count for the product's default warehouse (or its only one)
             params_of_prod = [x for x in params if x["cProduct"].upper() == prod["cCode"].upper()]
-            home = prod.get("cDefaultWarehouse") or (params_of_prod[0]["cWarehouse"] if len(params_of_prod) == 1 else "")
+            home = prod.get("cDefaultWarehouse") or (
+                params_of_prod[0]["cWarehouse"] if len(params_of_prod) == 1 else ""
+            )
             ordered = on_order(prod["cCode"]) if home.upper() == par["cWarehouse"].upper() else 0.0
             projected = avail + ordered
-            rop, mn, mx, oq = (_f(par.get(f)) if _s(par.get(f)) else None for f in ("dReorderPoint", "dMinQty", "dMaxQty", "dOrderQty"))
+            rop, mn, mx, oq = (
+                _f(par.get(f)) if _s(par.get(f)) else None for f in ("dReorderPoint", "dMinQty", "dMaxQty", "dOrderQty")
+            )
             trigger = rop if rop is not None else mn
             if trigger is None or projected > trigger + 1e-9:
                 continue
@@ -903,23 +1112,43 @@ def register_inventory(app, ns, hooks):
             factor = _f(prod.get("dPurchaseFactor")) or 1
             purchase_qty = math.ceil(need / factor - 1e-9)
             # Price per purchase unit (e.g. a case): the supplier's, else the last / average cost x the factor
-            price = _f((sup or {}).get("dPurchasePrice")) or (_f(prod.get("dLastCost")) or _f(prod.get("dAvgCost"))) * factor
-            rows.append({"cProduct": prod["cCode"], "cDescFR": prod.get("cDescFR", ""), "cDescEN": prod.get("cDescEN", ""),
-                         "cWarehouse": par["cWarehouse"], "dQtyAvailable": _q(avail), "dQtyOnOrder": _q(ordered),
-                         "dReorderPoint": par.get("dReorderPoint", ""), "dMinQty": par.get("dMinQty", ""),
-                         "dMaxQty": par.get("dMaxQty", ""), "dSuggestedQty": _q(purchase_qty * factor),
-                         "cStockUOM": prod.get("cStockUOM", ""), "dPurchaseQty": _q(purchase_qty),
-                         "cPurchaseUOM": prod.get("cPurchaseUOM", ""), "dPurchaseFactor": _q(factor),
-                         "cSupplierCode": (sup or {}).get("cSupplierCode", ""),
-                         "cSupplierName": next((s["cName"] for s in suppliers if s["cCode"] == (sup or {}).get("cSupplierCode")), ""),
-                         "cSupplierItem": (sup or {}).get("cSupplierItem", ""),
-                         "dUnitCost": _c(price), "iLeadTimeDays": (sup or {}).get("iLeadTimeDays") or par.get("iLeadTimeDays") or 0})
+            price = (
+                _f((sup or {}).get("dPurchasePrice"))
+                or (_f(prod.get("dLastCost")) or _f(prod.get("dAvgCost"))) * factor
+            )
+            rows.append(
+                {
+                    "cProduct": prod["cCode"],
+                    "cDescFR": prod.get("cDescFR", ""),
+                    "cDescEN": prod.get("cDescEN", ""),
+                    "cWarehouse": par["cWarehouse"],
+                    "dQtyAvailable": _q(avail),
+                    "dQtyOnOrder": _q(ordered),
+                    "dReorderPoint": par.get("dReorderPoint", ""),
+                    "dMinQty": par.get("dMinQty", ""),
+                    "dMaxQty": par.get("dMaxQty", ""),
+                    "dSuggestedQty": _q(purchase_qty * factor),
+                    "cStockUOM": prod.get("cStockUOM", ""),
+                    "dPurchaseQty": _q(purchase_qty),
+                    "cPurchaseUOM": prod.get("cPurchaseUOM", ""),
+                    "dPurchaseFactor": _q(factor),
+                    "cSupplierCode": (sup or {}).get("cSupplierCode", ""),
+                    "cSupplierName": next(
+                        (s["cName"] for s in suppliers if s["cCode"] == (sup or {}).get("cSupplierCode")), ""
+                    ),
+                    "cSupplierItem": (sup or {}).get("cSupplierItem", ""),
+                    "dUnitCost": _c(price),
+                    "iLeadTimeDays": (sup or {}).get("iLeadTimeDays") or par.get("iLeadTimeDays") or 0,
+                }
+            )
         rows.sort(key=lambda r: (r["cSupplierCode"] or "~", r["cProduct"]))
         return rows
 
     @bp.route("/api/inventory/replenishment")
     def inventory_replenishment():
-        return jsonify(paginate(replenishment_rows(), ("cProduct", "cDescFR", "cDescEN", "cSupplierCode", "cSupplierName")))
+        return jsonify(
+            paginate(replenishment_rows(), ("cProduct", "cDescFR", "cDescEN", "cSupplierCode", "cSupplierName"))
+        )
 
     def next_po_number():
         return hooks["next_po_number"](500501)
@@ -928,8 +1157,10 @@ def register_inventory(app, ns, hooks):
         """TPS / TVQ of a PO line: the product's purchase tax group, else the supplier's TPS / TVQ numbers."""
         res = tax_calc(prod.get("cPurchaseTaxGroup"), amount, on) if prod.get("cPurchaseTaxGroup") else None
         if res is None:
-            return (round(amount * 0.05 + 1e-9, 2) if supplier.get("cNoTPS") else 0.0,
-                    round(amount * 0.09975 + 1e-9, 2) if supplier.get("cNoTVQ") else 0.0)
+            return (
+                round(amount * 0.05 + 1e-9, 2) if supplier.get("cNoTPS") else 0.0,
+                round(amount * 0.09975 + 1e-9, 2) if supplier.get("cNoTVQ") else 0.0,
+            )
         gst = sum(_f(t["dTax"]) for t in res["taxes"] if t["cKind"] in ("gst", "hst"))
         pst = sum(_f(t["dTax"]) for t in res["taxes"] if t["cKind"] not in ("gst", "hst"))
         return gst, pst
@@ -953,11 +1184,17 @@ def register_inventory(app, ns, hooks):
                 raise ApiError("no_supplier", "lines", detail=f"line {i}: {prod['cCode']}")
             item = next((x for x in prod.get("lines", []) if x["cSupplierCode"] == supplier["cCode"]), sup_line)
             factor = _f(prod.get("dPurchaseFactor")) or 1
-            price = _f(l.get("dUnitCost")) if _s(l.get("dUnitCost")) else (
-                _f(item.get("dPurchasePrice")) or (_f(prod.get("dLastCost")) or _f(prod.get("dAvgCost"))) * factor)
+            price = (
+                _f(l.get("dUnitCost"))
+                if _s(l.get("dUnitCost"))
+                else (
+                    _f(item.get("dPurchasePrice")) or (_f(prod.get("dLastCost")) or _f(prod.get("dAvgCost"))) * factor
+                )
+            )
             # PO lines are in stock units (like the receptions), so "on order" compares with the stock
             groups.setdefault(supplier["cCode"], (supplier, []))[1].append(
-                (prod, _f(l["dPurchaseQty"]) * factor, price / factor, _f(l["dPurchaseQty"])))
+                (prod, _f(l["dPurchaseQty"]) * factor, price / factor, _f(l["dPurchaseQty"]))
+            )
         today = _today()
         created = []
         for code, (supplier, items) in groups.items():
@@ -966,19 +1203,46 @@ def register_inventory(app, ns, hooks):
                 desc = prod.get("cDescFR", "")
                 if prod.get("cPurchaseUOM") and prod.get("cPurchaseUOM") != prod.get("cStockUOM"):
                     desc += f" ({_q(pqty)} {prod['cPurchaseUOM']})"
-                po_lines.append({"cUnique": str(n), "cProductcode": prod["cCode"], "cProductDesc": desc,
-                                 "dQuantity": _q(qty), "dUnitCost": _c(price)})
+                po_lines.append(
+                    {
+                        "cUnique": str(n),
+                        "cProductcode": prod["cCode"],
+                        "cProductDesc": desc,
+                        "dQuantity": _q(qty),
+                        "dUnitCost": _c(price),
+                    }
+                )
                 g, s_ = po_taxes(prod, supplier, qty * price, today)
                 gst, pst = gst + g, pst + s_
             cpo = next_po_number()
-            view = hooks["save_po"](cpo, {
-                "cSupplierCode": code, "cSupplierName": supplier.get("cName", ""),
-                "cBuyerCode": supplier.get("cCodeAch", ""), "cBuyerName": supplier.get("cDescAch", ""),
-                "cApplicantCode": _user(), "dOrderDate": today, "dCreationDate": today, "dFreight": 0,
-                "dGST": gst, "dPST": pst, "lines": po_lines, "lUnbilled": True}, None)
+            view = hooks["save_po"](
+                cpo,
+                {
+                    "cSupplierCode": code,
+                    "cSupplierName": supplier.get("cName", ""),
+                    "cBuyerCode": supplier.get("cCodeAch", ""),
+                    "cBuyerName": supplier.get("cDescAch", ""),
+                    "cApplicantCode": _user(),
+                    "dOrderDate": today,
+                    "dCreationDate": today,
+                    "dFreight": 0,
+                    "dGST": gst,
+                    "dPST": pst,
+                    "lines": po_lines,
+                    "lUnbilled": True,
+                },
+                None,
+            )
             hooks["update_po_header"](cpo, {"cReference": "REAPPRO " + _s(p.get("cWarehouse")), "cSource": "ERP"})
-            created.append({"cPO": cpo, "cSupplierCode": code, "cSupplierName": supplier.get("cName", ""),
-                            "lineCount": len(po_lines), "dTotalAmount": view["dTotalAmount"]})
+            created.append(
+                {
+                    "cPO": cpo,
+                    "cSupplierCode": code,
+                    "cSupplierName": supplier.get("cName", ""),
+                    "lineCount": len(po_lines),
+                    "dTotalAmount": view["dTotalAmount"],
+                }
+            )
         return jsonify({"purchaseOrders": created}), 201
 
     # ------------------------------------------------------------------ physical counts
@@ -999,9 +1263,18 @@ def register_inventory(app, ns, hooks):
             if pp and not r["cProduct"].upper().startswith(pp):
                 continue
             k = (r["cProduct"], r["cLocation"], r["cLot"], r["cSerial"])
-            lines.append({"cProduct": r["cProduct"], "cDescFR": r["cDescFR"], "cLocation": r["cLocation"],
-                          "cLot": r["cLot"], "cSerial": r["cSerial"], "dQtyExpected": r["dQtyOnHand"],
-                          "dQtyCounted": keep.get(k, ""), "dDiff": ""})
+            lines.append(
+                {
+                    "cProduct": r["cProduct"],
+                    "cDescFR": r["cDescFR"],
+                    "cLocation": r["cLocation"],
+                    "cLot": r["cLot"],
+                    "cSerial": r["cSerial"],
+                    "dQtyExpected": r["dQtyOnHand"],
+                    "dQtyCounted": keep.get(k, ""),
+                    "dDiff": "",
+                }
+            )
         c["lines"] = lines
 
     def count_view(c):
@@ -1039,7 +1312,13 @@ def register_inventory(app, ns, hooks):
                 row["cDescFR"] = prod.get("cDescFR", "")
                 row["cLocation"] = row["cLocation"].upper()
                 if not row["dQtyExpected"]:
-                    k = (prod["cCode"].upper(), wh["cCode"].upper(), row["cLocation"], row["cLot"].upper(), row["cSerial"].upper())
+                    k = (
+                        prod["cCode"].upper(),
+                        wh["cCode"].upper(),
+                        row["cLocation"],
+                        row["cLot"].upper(),
+                        row["cSerial"].upper(),
+                    )
                     row["dQtyExpected"] = _q(balances().get(k, {"qty": 0.0})["qty"])
                 row["dDiff"] = ""
                 lines.append(row)
@@ -1048,8 +1327,12 @@ def register_inventory(app, ns, hooks):
     @bp.route("/api/stock-counts", methods=["GET", "POST"])
     def counts_collection():
         if request.method == "GET":
-            return jsonify(paginate([{k: v for k, v in count_view(c).items() if k != "lines"} for c in CNT.all()],
-                                    ("cWarehouse", "cDescription", "cStatus")))
+            return jsonify(
+                paginate(
+                    [{k: v for k, v in count_view(c).items() if k != "lines"} for c in CNT.all()],
+                    ("cWarehouse", "cDescription", "cStatus"),
+                )
+            )
         p = _payload()
         c = {**_blank(COUNT), "cStatus": "Draft", "lines": []}
         count_save(c, p, True)
@@ -1103,17 +1386,34 @@ def register_inventory(app, ns, hooks):
         bal = balances()
         staged = []
         for i, l in enumerate(counted, 1):
-            k = (l["cProduct"].upper(), c["cWarehouse"].upper(), l["cLocation"].upper(), l["cLot"].upper(), l["cSerial"].upper())
+            k = (
+                l["cProduct"].upper(),
+                c["cWarehouse"].upper(),
+                l["cLocation"].upper(),
+                l["cLot"].upper(),
+                l["cSerial"].upper(),
+            )
             now = bal.get(k, {"qty": 0.0})["qty"]
             diff = round(_f(l["dQtyCounted"]) - now, 6)
             l["dQtyExpected"] = _q(now)
             l["dDiff"] = _q(diff)
             if abs(diff) < 1e-9:
                 continue
-            m = movement_from({"cType": "CNT", "cProduct": l["cProduct"], "dQty": diff, "cWarehouse": c["cWarehouse"],
-                               "cLocation": l["cLocation"], "cLot": l["cLot"], "cSerial": l["cSerial"],
-                               "cDocType": "CNT", "cDocNo": str(no), "cReason": c.get("cDescription", ""),
-                               "dDate": c.get("dDate") or _today()})
+            m = movement_from(
+                {
+                    "cType": "CNT",
+                    "cProduct": l["cProduct"],
+                    "dQty": diff,
+                    "cWarehouse": c["cWarehouse"],
+                    "cLocation": l["cLocation"],
+                    "cLot": l["cLot"],
+                    "cSerial": l["cSerial"],
+                    "cDocType": "CNT",
+                    "cDocNo": str(no),
+                    "cReason": c.get("cDescription", ""),
+                    "dDate": c.get("dDate") or _today(),
+                }
+            )
             try:
                 prod = check_movement(m, staged)
             except ApiError as e:
@@ -1126,8 +1426,14 @@ def register_inventory(app, ns, hooks):
             done = post_movement(m, prod)
             posted.append(done["iNo"])
             value += _f(done["dValue"])
-        c.update({"cStatus": "Posted", "dPosted": datetime.now().isoformat(timespec="seconds"), "movements": posted,
-                  "dValueDiff": _m(value)})
+        c.update(
+            {
+                "cStatus": "Posted",
+                "dPosted": datetime.now().isoformat(timespec="seconds"),
+                "movements": posted,
+                "dValueDiff": _m(value),
+            }
+        )
         CNT.update(c)
         return jsonify(count_view(c))
 
@@ -1143,31 +1449,44 @@ def register_inventory(app, ns, hooks):
                 label = " · ".join(_s(r.get(f)) for f in label_fields(lang_fr) if _s(r.get(f)))
                 rows.append({"code": r["cCode"], "label": label})
             return rows, limit
+
         return fn
 
     desc = lambda fr: ("cDescFR",) if fr else ("cDescEN", "cDescFR")  # noqa: E731
-    hooks["lookups"].update({
-        "taxcodes": lk("tax_codes", desc),
-        "taxgroups": lk("tax_groups", desc),
-        "uom": lk("uom", desc),
-        "categories": lk("categories", desc),
-        "products": lk("products", lambda fr: ("cDescFR",) if fr else ("cDescEN", "cDescFR"), limit=30),
-        "stockproducts": lk("products", desc, extra=lambda r: r.get("lStocked"), limit=30),
-        "warehouses": lk("warehouses", lambda fr: ("cNameFR",) if fr else ("cNameEN", "cNameFR")),
-    })
+    hooks["lookups"].update(
+        {
+            "taxcodes": lk("tax_codes", desc),
+            "taxgroups": lk("tax_groups", desc),
+            "uom": lk("uom", desc),
+            "categories": lk("categories", desc),
+            "products": lk("products", lambda fr: ("cDescFR",) if fr else ("cDescEN", "cDescFR"), limit=30),
+            "stockproducts": lk("products", desc, extra=lambda r: r.get("lStocked"), limit=30),
+            "warehouses": lk("warehouses", lambda fr: ("cNameFR",) if fr else ("cNameEN", "cNameFR")),
+        }
+    )
 
     def locations_lookup():
         wh = _s(request.args.get("wh")).upper()
-        rows = [{"code": l["cCode"], "label": " · ".join(x for x in (l["cWarehouse"], l.get("cDescription") or l.get("cType", "")) if x)}
-                for l in M("locations") if not wh or l["cWarehouse"].upper() == wh]
+        rows = [
+            {
+                "code": l["cCode"],
+                "label": " · ".join(x for x in (l["cWarehouse"], l.get("cDescription") or l.get("cType", "")) if x),
+            }
+            for l in M("locations")
+            if not wh or l["cWarehouse"].upper() == wh
+        ]
         return rows, 200
 
     hooks["lookups"]["locations"] = locations_lookup
 
     def summary():
         total = sum(_f(r["dValue"]) for r in valuation_rows())
-        return {"products": DB["products"].count(), "warehouses": DB["warehouses"].count(),
-                "stockValue": round(total, 2), "reorderItems": len(replenishment_rows())}
+        return {
+            "products": DB["products"].count(),
+            "warehouses": DB["warehouses"].count(),
+            "stockValue": round(total, 2),
+            "reorderItems": len(replenishment_rows()),
+        }
 
     hooks["summary"].append(summary)
 
@@ -1190,10 +1509,22 @@ def register_inventory(app, ns, hooks):
     master_seed = seeding["rows"]
     seeding["rows"] = None
     # Parents before children (cleared in the reverse order)
-    hooks["add_stores"]([(DB[name], "inv_" + name, master_seed[name]) for name in
-                         ("tax_codes", "tax_groups", "uom", "categories", "warehouses", "locations", "products",
-                          "stock_params")]
-                        + [(MOV, "inv_movements", T["movements"]), (CNT, "inv_counts", [])])
+    hooks["add_stores"](
+        [
+            (DB[name], "inv_" + name, master_seed[name])
+            for name in (
+                "tax_codes",
+                "tax_groups",
+                "uom",
+                "categories",
+                "warehouses",
+                "locations",
+                "products",
+                "stock_params",
+            )
+        ]
+        + [(MOV, "inv_movements", T["movements"]), (CNT, "inv_counts", [])]
+    )
 
     def after_load(data):
         """Balances and numbering follow the movements and counts that were loaded."""

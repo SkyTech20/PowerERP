@@ -1,0 +1,38 @@
+# Code style and checks (run in CI, see .github/workflows/tests.yml):
+#   ruff check .        lint (errors, unused imports, import order)
+#   black --check .     formatting
+#   mypy                types of the packages listed below (more as the modules move into powererp/)
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+extend-exclude = "migrations/versions"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["migrations/versions", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = [
+    "E501",   # long lines: black decides the formatting
+    "B008",   # function calls in defaults (Flask / SQLAlchemy idioms)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011", "E741"]
+# Modules written before the reorganization: these rules are fixed as each one moves into powererp/modules (O2 to O5)
+"erp_api.py" = ["E741", "E702", "B904"]
+"inventory_api.py" = ["E741", "E702", "B904", "F403", "F405"]
+"powerware_api.py" = ["E741", "E702", "B904"]
+"tools/*" = ["E741", "E702", "B904"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["powererp", "db", "auth", "erp_api", "inventory_api", "powerware_api", "purchasing_api", "backup_api"]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["powererp/core", "powererp/container.py", "powererp/seed"]
+ignore_missing_imports = true
+check_untyped_defs = true

@@ -11,6 +11,7 @@ Run from the PowerERP folder:
   docker compose up -d db                    (PostgreSQL on localhost:5433, with the powererp_test database)
   pip install -r requirements-dev.txt && python -m pytest
 """
+
 import os
 import sys
 from pathlib import Path
@@ -26,13 +27,15 @@ ADMIN_PASSWORD = "admin-test-pw"
 PW = "/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI"
 
 TEST_DATABASE_URL = os.environ.get(
-    "TEST_DATABASE_URL", "postgresql+psycopg://powererp:powererp@127.0.0.1:5433/powererp_test")
+    "TEST_DATABASE_URL", "postgresql+psycopg://powererp:powererp@127.0.0.1:5433/powererp_test"
+)
 if "test" not in TEST_DATABASE_URL.rsplit("/", 1)[-1]:
     sys.exit("TEST_DATABASE_URL must point to a database whose name contains 'test': it is emptied.")
 
 
 def _empty_database(url):
     from powererp.config import database_url
+
     engine = create_engine(database_url(url))
     with engine.begin() as con:
         con.execute(text("DROP SCHEMA public CASCADE"))
@@ -41,21 +44,24 @@ def _empty_database(url):
 
 
 _empty_database(TEST_DATABASE_URL)
-os.environ.update({
-    "DATABASE_URL": TEST_DATABASE_URL,
-    "ERP_DATASET": "demo",
-    "ERP_ADMIN_USER": "admin",
-    "ERP_ADMIN_PASSWORD": ADMIN_PASSWORD,
-    "ERP_API_KEY": API_KEY,
-    "ERP_SECRET_KEY": "test-secret",
-    "BACKUP_SCHEDULER": "0",  # tests run the backups themselves
-})
+os.environ.update(
+    {
+        "DATABASE_URL": TEST_DATABASE_URL,
+        "ERP_DATASET": "demo",
+        "ERP_ADMIN_USER": "admin",
+        "ERP_ADMIN_PASSWORD": ADMIN_PASSWORD,
+        "ERP_API_KEY": API_KEY,
+        "ERP_SECRET_KEY": "test-secret",
+        "BACKUP_SCHEDULER": "0",  # tests run the backups themselves
+    }
+)
 os.environ.pop("ERP_COOKIE_SECURE", None)
 
 
 @pytest.fixture(scope="session")
 def app():
     import app as erp_app  # noqa: E402  (needs the environment above)
+
     erp_app.app.config.update(TESTING=True)
     return erp_app.app
 
@@ -93,9 +99,16 @@ def _fresh_data(app):
 
 def new_po(client, cpo="990001", **over):
     body = {
-        "cPO": cpo, "cSupplierCode": "TECBUR", "dCreationDate": "2026-10-01",
-        "dFreight": "0", "dGST": "0", "dPST": "0", "lUnbilled": True,
-        "lines": [{"cUnique": "1", "cProductcode": "ITEM-1", "cProductDesc": "Item 1", "dQuantity": "2", "dUnitCost": "10.00"}],
+        "cPO": cpo,
+        "cSupplierCode": "TECBUR",
+        "dCreationDate": "2026-10-01",
+        "dFreight": "0",
+        "dGST": "0",
+        "dPST": "0",
+        "lUnbilled": True,
+        "lines": [
+            {"cUnique": "1", "cProductcode": "ITEM-1", "cProductDesc": "Item 1", "dQuantity": "2", "dUnitCost": "10.00"}
+        ],
     }
     body.update(over)
     return client.post("/api/purchase-orders", json=body)
@@ -103,10 +116,24 @@ def new_po(client, cpo="990001", **over):
 
 def new_reception(client, no="990101", po="500301", **over):
     body = {
-        "NoReception": no, "NoBonCommande": po, "DateReception": "2026-10-02",
-        "CodeFournisseur": "PAPCEN", "Devise": "CAD", "lUnbilled": True,
-        "Transport": "0", "TPS": "0", "TVQ": "0",
-        "lines": [{"CodeArticle": "PAP-01", "Description": "Papier", "QuantiteCommandee": "5", "QuantiteRecue": "5", "PrixUnitaire": "4.00"}],
+        "NoReception": no,
+        "NoBonCommande": po,
+        "DateReception": "2026-10-02",
+        "CodeFournisseur": "PAPCEN",
+        "Devise": "CAD",
+        "lUnbilled": True,
+        "Transport": "0",
+        "TPS": "0",
+        "TVQ": "0",
+        "lines": [
+            {
+                "CodeArticle": "PAP-01",
+                "Description": "Papier",
+                "QuantiteCommandee": "5",
+                "QuantiteRecue": "5",
+                "PrixUnitaire": "4.00",
+            }
+        ],
     }
     body.update(over)
     return client.post("/api/receptions", json=body)

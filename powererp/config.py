@@ -1,4 +1,5 @@
 """Settings read from the environment."""
+
 import os
 
 # Local development database (docker-compose.yml in this folder publishes PostgreSQL on port 5433).
@@ -12,7 +13,7 @@ def database_url(url=None):
     url = (url or os.environ.get("DATABASE_URL") or DEFAULT_DATABASE_URL).strip()
     for prefix in ("postgres://", "postgresql://"):
         if url.startswith(prefix):
-            return "postgresql+psycopg://" + url[len(prefix):]
+            return "postgresql+psycopg://" + url[len(prefix) :]
     return url
 
 

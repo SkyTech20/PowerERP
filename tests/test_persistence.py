@@ -1,4 +1,5 @@
 """Changes are saved in PostgreSQL: relational tables for the master files, JSON (legacy_datasets) for the rest."""
+
 from sqlalchemy import text
 
 import db
@@ -40,8 +41,12 @@ def test_purchasing_is_in_tables(client):
 
 
 def test_invoice_numbers_come_from_the_sequence(client):
-    body = {"cNoFourn": "LUMPRO", "cNoFacture": "SEQ-1", "dDateFacture": "2026-11-01",
-            "lines": [{"cCodeProduit": "X", "dQuantite": "1", "dCoutUnitaire": "10"}]}
+    body = {
+        "cNoFourn": "LUMPRO",
+        "cNoFacture": "SEQ-1",
+        "dDateFacture": "2026-11-01",
+        "lines": [{"cCodeProduit": "X", "dQuantite": "1", "dCoutUnitaire": "10"}],
+    }
     first = client.post("/api/invoices", json=body).get_json()["id"]
     second = client.post("/api/invoices", json={**body, "cNoFacture": "SEQ-2"}).get_json()["id"]
     assert second == first + 1
@@ -51,9 +56,9 @@ def test_invoice_numbers_come_from_the_sequence(client):
 def test_unparseable_date_is_kept_as_sent(client):
     """A date in another format (sent by an external system) is not refused nor lost."""
     from powererp import purchasing as purch
+
     with database.unit_of_work():
-        purch.inv_put({"id": 999, "cNoFourn": "LUMPRO", "cNoFacture": "OLD", "dDateFacture": "10/01/2026",
-                       "lines": []})
+        purch.inv_put({"id": 999, "cNoFourn": "LUMPRO", "cNoFacture": "OLD", "dDateFacture": "10/01/2026", "lines": []})
     assert client.get("/api/invoices/999").get_json()["dDateFacture"] == "10/01/2026"
 
 
@@ -85,6 +90,7 @@ def test_case_insensitive_codes_are_unique(client):
 def test_reload_from_old_json_dataset(app, client):
     """An older database kept the master files as JSON: loading it fills the tables."""
     import app as erp_app
+
     with database.unit_of_work():
         erp_app.hooks["load"]({"gl": [{"cCode": "7777", "cDesc": "Kept"}]})
     assert client.get("/api/gl-accounts/7777").get_json()["cDesc"] == "Kept"
