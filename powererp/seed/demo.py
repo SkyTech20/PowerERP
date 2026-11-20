@@ -18,6 +18,9 @@ DATA_ROOT = Path(__file__).resolve().parent.parent.parent / "data"
 class DemoData:
     folder: Path
     lists: dict
+    inventory: (
+        dict  # data/inventory.json: taxes, units, categories, warehouses, products, opening stock (both datasets)
+    )
 
     @property
     def name(self) -> str:
@@ -52,4 +55,6 @@ class DemoData:
             lists["po_details"] = hist["po_details"] + lists["po_details"]
             lists["receiving_details"] = hist["receiving_details"] + lists["receiving_details"]
             lists["seed_invoices"] = hist["invoices"] + lists.get("seed_invoices", [])
-        return cls(folder, lists)
+        inv_file = DATA_ROOT / "inventory.json"
+        inventory = json.loads(inv_file.read_text(encoding="utf-8")) if inv_file.exists() else {}
+        return cls(folder, lists, inventory)

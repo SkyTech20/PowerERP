@@ -294,174 +294,35 @@ def register_inventory(app, ns, hooks):
         bp.add_url_rule(f"/api/{url}/<path:key>", f"{name}_item", item, methods=["GET", "PUT", "DELETE"])
         return find
 
+    # Taxes, units and categories are their own modules now (powererp.modules.taxes / catalog); the products
+    # tell them when a code is still used.
+    tax_calc = hooks["tax_calculator"].calc
+    refs = hooks["references"]
+    refs.register(
+        "tax_group",
+        lambda code: DB["products"].exists(
+            lambda c: [
+                (func.upper(c["cSalesTaxGroup"]) == code.upper()) | (func.upper(c["cPurchaseTaxGroup"]) == code.upper())
+            ]
+        ),
+    )
+    refs.register(
+        "uom",
+        lambda code: DB["products"].exists(
+            lambda c: [
+                (func.upper(c["cStockUOM"]) == code.upper())
+                | (func.upper(c["cPurchaseUOM"]) == code.upper())
+                | (func.upper(c["cSalesUOM"]) == code.upper())
+            ]
+        ),
+    )
+    refs.register(
+        "category", lambda code: DB["products"].exists(lambda c: [func.upper(c["cCategory"]) == code.upper()])
+    )
+
     def in_use(cond):
         if cond:
             raise ApiError("in_use", status=409)
-
-    # ------------------------------------------------------------------ taxes
-
-    def rate_on(tax, on=None):
-        """The tax rate (percent) valid at a date, from the rate history (latest start date that applies)."""
-        on = on or _today()
-        valid = [
-            r
-            for r in tax.get("lines", [])
-            if (r.get("dStartDate") or "0000") <= on and (not r.get("dEndDate") or r["dEndDate"] >= on)
-        ]
-        if not valid:
-            return None
-        return _f(max(valid, key=lambda r: r.get("dStartDate") or "")["dRate"])
-
-    def tax_code_view(r):
-        rate = rate_on(r)
-        return {**r, "dCurrentRate": "" if rate is None else _q(rate)}
-
-    def tax_code_validate(row, is_new):
-        _require(row, "cDescFR")
-        for i, ln in enumerate(row.get("lines", [])):
-            if ln["dRate"] == "":
-                raise ApiError("required", "lines", detail=f"line {i + 1}: rate")
-            if ln["dEndDate"] and ln["dStartDate"] and ln["dEndDate"] < ln["dStartDate"]:
-                raise ApiError("invalid_dates", "lines", detail=f"line {i + 1}")
-        row.setdefault("lines", []).sort(key=lambda r: r.get("dStartDate") or "")
-
-    crud(
-        "tax_codes",
-        "tax-codes",
-        TAX_CODE,
-        ("cCode", "cDescFR", "cDescEN", "cJurisdiction"),
-        validate=tax_code_validate,
-        view=tax_code_view,
-        line_schema=TAX_RATE,
-        keep_line=lambda r: r["dRate"] != "" or r["dStartDate"],
-        on_delete=lambda r: in_use(
-            any(_s(l["cTaxCode"]).upper() == r["cCode"].upper() for g in M("tax_groups") for l in g.get("lines", []))
-        ),
-        sort=lambda r: r["cCode"],
-    )
-
-    def tax_group_view(r):
-        lines = sorted(r.get("lines", []), key=lambda l: l["iSeq"])
-        names = [l["cTaxCode"] for l in lines]
-        return {**r, "cTaxList": " + ".join(names) if names and r.get("cTreatment") == "taxable" else ""}
-
-    def tax_group_validate(row, is_new):
-        _require(row, "cDescFR")
-        for i, ln in enumerate(row.get("lines", []), 1):
-            if not _find("tax_codes", ln["cTaxCode"]):
-                raise ApiError("unknown_ref", "lines", detail=f"line {i}: {ln['cTaxCode']}")
-            ln["cTaxCode"] = _find("tax_codes", ln["cTaxCode"])["cCode"]
-            ln["iSeq"] = ln["iSeq"] or i
-        row["lines"] = sorted(row.get("lines", []), key=lambda l: l["iSeq"])
-
-    def group_used(code):
-        cu = code.upper()
-        return DB["products"].exists(
-            lambda c: [(func.upper(c["cSalesTaxGroup"]) == cu) | (func.upper(c["cPurchaseTaxGroup"]) == cu)]
-        )
-
-    crud(
-        "tax_groups",
-        "tax-groups",
-        TAX_GROUP,
-        ("cCode", "cDescFR", "cDescEN", "cProvince"),
-        validate=tax_group_validate,
-        view=tax_group_view,
-        line_schema=TAX_GROUP_LINE,
-        keep_line=lambda r: bool(r["cTaxCode"]),
-        on_delete=lambda r: in_use(group_used(r["cCode"])),
-        sort=lambda r: r["cCode"],
-    )
-
-    def tax_calc(group_code, amount, on=None):
-        """Taxes of `amount` for a tax group at a date. Compound taxes are calculated on the amount + the taxes before them."""
-        group = _find("tax_groups", group_code)
-        if group is None:
-            return None
-        on = on or _today()
-        out, total = [], 0.0
-        if group.get("cTreatment") == "taxable":
-            for ln in sorted(group.get("lines", []), key=lambda l: l["iSeq"]):
-                tax = _find("tax_codes", ln["cTaxCode"])
-                rate = rate_on(tax, on) if tax else None
-                if rate is None:
-                    continue
-                base = amount + (total if ln.get("lCompound") else 0.0)
-                value = round(base * rate / 100 + 1e-9, 2)
-                total += value
-                out.append(
-                    {
-                        "cTaxCode": tax["cCode"],
-                        "cKind": tax.get("cKind", ""),
-                        "dRate": _q(rate),
-                        "dBase": _m(base),
-                        "dTax": _m(value),
-                        "cGLCollected": tax.get("cGLCollected", ""),
-                        "cGLRecoverable": tax.get("cGLRecoverable", ""),
-                        "dRecoverable": _m(value * _f(tax.get("dRecoverablePct") or 100) / 100),
-                    }
-                )
-        return {
-            "cTaxGroup": group["cCode"],
-            "cTreatment": group.get("cTreatment"),
-            "dDate": on,
-            "dAmount": _m(amount),
-            "taxes": out,
-            "dTotalTax": _m(total),
-            "dTotal": _m(amount + total),
-        }
-
-    @bp.route("/api/tax-groups/<code>/calc")
-    def tax_group_calc(code):
-        res = tax_calc(code, _num(request.args.get("amount")), _s(request.args.get("date"))[:10] or None)
-        if res is None:
-            raise ApiError("not_found", status=404)
-        return jsonify(res)
-
-    # ------------------------------------------------------------------ units and categories
-
-    def uom_used(code):
-        cu = code.upper()
-        return DB["products"].exists(
-            lambda c: [
-                (func.upper(c["cStockUOM"]) == cu)
-                | (func.upper(c["cPurchaseUOM"]) == cu)
-                | (func.upper(c["cSalesUOM"]) == cu)
-            ]
-        )
-
-    def simple_validate(row, is_new):
-        _require(row, "cDescFR")
-
-    crud(
-        "uom",
-        "uom",
-        UOM,
-        ("cCode", "cDescFR", "cDescEN"),
-        validate=simple_validate,
-        on_delete=lambda r: in_use(uom_used(r["cCode"])),
-        sort=lambda r: r["cCode"],
-    )
-
-    def category_validate(row, is_new):
-        _require(row, "cDescFR")
-        if row["cParent"]:
-            if row["cParent"].upper() == row["cCode"].upper():
-                raise ApiError("invalid_ref", "cParent")
-            _must("categories", row, "cParent")
-
-    crud(
-        "categories",
-        "categories",
-        CATEGORY,
-        ("cCode", "cDescFR", "cDescEN", "cParent"),
-        validate=category_validate,
-        on_delete=lambda r: in_use(
-            DB["products"].exists(lambda c: [func.upper(c["cCategory"]) == r["cCode"].upper()])
-            or DB["categories"].exists(lambda c: [func.upper(c["cParent"]) == r["cCode"].upper()])
-        ),
-        sort=lambda r: r["cCode"],
-    )
 
     # ------------------------------------------------------------------ balances (calculated from the movements)
 
@@ -1455,10 +1316,6 @@ def register_inventory(app, ns, hooks):
     desc = lambda fr: ("cDescFR",) if fr else ("cDescEN", "cDescFR")  # noqa: E731
     hooks["lookups"].update(
         {
-            "taxcodes": lk("tax_codes", desc),
-            "taxgroups": lk("tax_groups", desc),
-            "uom": lk("uom", desc),
-            "categories": lk("categories", desc),
             "products": lk("products", lambda fr: ("cDescFR",) if fr else ("cDescEN", "cDescFR"), limit=30),
             "stockproducts": lk("products", desc, extra=lambda r: r.get("lStocked"), limit=30),
             "warehouses": lk("warehouses", lambda fr: ("cNameFR",) if fr else ("cNameEN", "cNameFR")),
@@ -1513,10 +1370,6 @@ def register_inventory(app, ns, hooks):
         [
             (DB[name], "inv_" + name, master_seed[name])
             for name in (
-                "tax_codes",
-                "tax_groups",
-                "uom",
-                "categories",
                 "warehouses",
                 "locations",
                 "products",

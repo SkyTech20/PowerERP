@@ -4,6 +4,8 @@ kind: s = text, d = number (kept as text "12.50" in the API, NUMERIC in the data
 date = YYYY-MM-DD, (choices) = one of.
 """
 
+from typing import Any
+
 # --------------------------------------------------------------------------- general ledger and suppliers
 
 GL_ACCOUNT = {"cCode": "s", "cDesc": "s"}
@@ -221,7 +223,7 @@ MOVEMENT = {
 COUNT = {"cWarehouse": "s", "dDate": "date", "cDescription": "s", "cLocationPrefix": "s", "cProductPrefix": "s"}
 COUNT_LINE = {"cProduct": "s", "cLocation": "s", "cLot": "s", "cSerial": "s", "dQtyExpected": "d", "dQtyCounted": "d"}
 
-DEFAULTS = {
+DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
     "tax_groups": {"cTreatment": "taxable", "lActive": True},
     "uom": {"cType": "count", "lActive": True},

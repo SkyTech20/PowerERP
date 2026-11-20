@@ -13,6 +13,8 @@ from flask import Flask
 from . import database
 from .container import Container
 from .core.errors import register_error_handlers
+from .modules import catalog, ledger, suppliers, taxes
+from .modules.common.registry import ReferenceRegistry, SeedRegistry
 from .seed.demo import DemoData
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -37,6 +39,16 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     register_auth(app)
     demo = container.register("demo", DemoData.load(dataset))
     hooks = container.register("hooks", register_erp(app, demo.lists))
+    # Modules organized in layers (powererp/modules): they register their services in the container
+    container.register("references", ReferenceRegistry())
+    container.register("lookups", hooks["lookups"])
+    container.register("seeds", SeedRegistry(hooks["add_stores"]))
+    ledger.register(app, container, demo.lists)
+    suppliers.register(app, container, demo.lists)
+    taxes.register(app, container, demo.inventory)
+    catalog.register(app, container, demo.inventory)
+    hooks["tax_calculator"] = container.get("tax_calculator")
+    hooks["references"] = container.get("references")
     # PowerWARE-compatible web services, so SkyAI can read from and write to this ERP
     register_powerware(app, demo.lists, hooks["invoice_exists"], hooks["record_invoice"])
     # Best supplier per item and PO creation for SkyAI requisitions (Offer workflow)

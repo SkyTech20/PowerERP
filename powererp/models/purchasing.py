@@ -135,7 +135,8 @@ INV_LINE = {
 
 
 def _cols(*maps):
-    seen, out = set(), []
+    seen: set[str] = set()
+    out: list[Column] = []
     for m in maps:
         for col, kind in m.values():
             if col not in seen:

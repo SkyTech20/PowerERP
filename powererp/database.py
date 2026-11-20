@@ -10,8 +10,8 @@ from contextvars import ContextVar
 from pathlib import Path
 
 from flask import g, has_request_context
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from . import config
 
@@ -23,7 +23,7 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = None
+engine: Engine | None = None
 SessionLocal = sessionmaker(expire_on_commit=False)
 
 
@@ -53,6 +53,7 @@ def upgrade(revision="head"):
     from alembic import command
 
     cfg = alembic_config()
+    assert engine is not None, "database.init() first"
     with engine.begin() as con:
         cfg.attributes["connection"] = con
         command.upgrade(cfg, revision)
@@ -77,7 +78,7 @@ def session_scope():
 # otherwise), so a request that fails half-way leaves nothing behind. Outside a request (start-up, seed,
 # scripts), `with unit_of_work():` gives the same.
 
-_standalone = ContextVar("powererp_session", default=None)
+_standalone: ContextVar[Session | None] = ContextVar("powererp_session", default=None)
 
 
 def current():
