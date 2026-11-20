@@ -4,6 +4,7 @@ P1: the reference lists of the shop floor (capabilities, setup families, stop an
 P2: working calendars (shifts by weekday as lines) and their exceptions by date.
 P3: work centers.
 P4: resources, with their capabilities, attributes, subresources and planned downtime (child tables).
+P5: standard operations.
 """
 
 from .. import schemas as S
@@ -28,4 +29,5 @@ register_specs(
             "downtime": S.RESOURCE_DOWNTIME,
         },
     ),
+    TableSpec("operations", S.OPERATION, order=("cCode",)),
 )

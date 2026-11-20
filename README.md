@@ -82,7 +82,11 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - **attributes** with limits (width, knives, temperature), the **parts of the machine** (to say where a stop was), and the **planned downtime** (preventive maintenance);
   - available time = calendar − planned downtime; capacity = available × utilization of the work center × parallel orders (`GET /api/resources/<code>/availability`);
   - the work center screen lists its resources. What a resource uses (work center, calendar, capabilities, downtime reasons) cannot be deleted.
-- Next: standard operations (P5), setup matrix (P6), product manufacturing tab (P7), then recipes (P8 to P10).
+- **P5 (done): Production → Standard operations.** The catalog the recipe operations start from (Epicor OpMaster):
+  - where it runs: a work center, or a capability (any resource that has it); or subcontracted to a supplier, with a cost per unit and a lead time;
+  - the standard time: setup minutes, and a run time in minutes per unit, units per hour or minutes per lot; the crew; a reporting point flag; an FR/EN instruction;
+  - `GET /api/operations/<code>/time?qty=&lot=&resource=`: setup + run minutes of a quantity, at the standard or on a resource (time / speed of the resource / efficiency of its work center). The screen has the calculator.
+- Next: setup matrix (P6), product manufacturing tab (P7), then recipes (P8 to P10).
 
 ## Run
 

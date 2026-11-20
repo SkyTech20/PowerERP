@@ -242,3 +242,37 @@ def test_resources_of_a_capability(client):
     r = client.get("/api/capabilities/WIND/resources").get_json()
     assert [x["cCode"] for x in r] == ["REB1", "REB2"]  # preferred first
     assert client.get("/api/capabilities/NOPE/resources").status_code == 404
+
+
+# ------------------------------------------------------------------ P5: standard operations
+
+
+def test_demo_operations(client):
+    page = client.get("/api/operations?size=50").get_json()
+    assert page["total"] == 12
+    usin = client.get("/api/operations/MET-USIN").get_json()
+    assert (usin["cCapability"], usin["cRunFormat"], usin["dRunValue"]) == ("CNC", "min_per_unit", "6.5")
+
+
+def test_operation_time(client):
+    """MET-USIN: 45 min setup + 6.5 min per part; on CNC2 (speed 0.85, work center at 100 %)."""
+    r = client.get("/api/operations/MET-USIN/time?qty=100").get_json()
+    assert (r["dSetupMin"], r["dRunMin"], r["dTotalMin"]) == (45, 650, 695)
+    r = client.get("/api/operations/MET-USIN/time?qty=100&resource=CNC2").get_json()
+    assert r["dRunMin"] == round(650 / 0.85, 2)
+    r = client.get("/api/operations/BAK-CUISS/time?qty=600&lot=200").get_json()
+    assert r["dRunMin"] == 75  # 3 batches of 25 min
+    assert client.get("/api/operations/MET-USIN/time?qty=abc").status_code == 400
+    assert client.get("/api/operations/MET-USIN/time?resource=NOPE").status_code == 404
+
+
+def test_operation_crud_and_references(client):
+    r = client.post(
+        "/api/operations", json={"cCode": "met-ebav", "cDescFR": "Ébavurage", "cCapability": "cnc", "dRunValue": "1.5"}
+    )
+    assert r.status_code == 201 and r.get_json()["cCapability"] == "CNC"
+    r = client.post("/api/operations", json={"cCode": "X", "cDescFR": "x"})
+    assert r.status_code == 400 and r.get_json()["error"] == "work_center_or_capability"
+    assert client.delete("/api/work-centers/MET-PEINT").status_code == 409  # MET-PEINT runs there
+    assert client.delete("/api/operations/MET-EBAV").status_code == 200
+    assert any(x["code"] == "MET-USIN" for x in client.get("/api/lookups/operations").get_json())

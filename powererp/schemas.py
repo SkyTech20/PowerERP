@@ -58,6 +58,7 @@ DOWNTIME_GROUPS = (
 )
 SCRAP_GROUPS = ("material", "process", "machine", "operator", "startup", "other")
 WORK_CENTER_TYPES = ("machine", "line", "labor", "subcontract")
+RUN_FORMATS = ("min_per_unit", "units_per_hour", "min_per_lot")
 
 # --------------------------------------------------------------------------- schemas
 # kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
@@ -319,6 +320,26 @@ RESOURCE_DOWNTIME = {
     "cReason": "s",
     "cNotes": "s",
 }
+# P5: standard operations (Epicor OpMaster): the catalog the recipe operations start from
+OPERATION = {
+    "cCode": "s",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "cWorkCenter": "s",  # where it runs ... or
+    "cCapability": "s",  # ... what it needs: any resource having the capability can run it
+    "cRunFormat": RUN_FORMATS,
+    "dSetupMin": "d",
+    "dRunValue": "d",  # in cRunFormat: 6.5 min per unit, 1,200 units per hour, 25 min per lot
+    "iCrew": "i",  # operators needed
+    "lReportingPoint": "b",  # the operator reports the quantity done at this operation
+    "lSubcontract": "b",
+    "cSupplier": "s",
+    "dSubcontractCost": "d",  # per unit
+    "iSubcontractDays": "i",
+    "cInstructionFR": "s",
+    "cInstructionEN": "s",
+    "lActive": "b",
+}
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
@@ -359,4 +380,5 @@ DEFAULTS: dict[str, dict[str, Any]] = {
         "lActive": True,
     },
     "resources": {"dSpeedFactor": "1", "iParallel": 1, "lActive": True},
+    "operations": {"cRunFormat": "min_per_unit", "iCrew": 1, "lReportingPoint": True, "lActive": True},
 }

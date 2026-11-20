@@ -1,5 +1,5 @@
 /* PowerERP: Production: list / form definitions. P1: the reference lists of the shop floor; P2: calendars. */
-import { $, api, enc, esc, lang, t, yesNo } from "../core.js";
+import { $, api, enc, esc, lang, numOnly, t, yesNo } from "../core.js";
 import { RES } from "../registry.js";
 import { descCol, dl, newWith, optBadge, opts, today } from "./inventory.js";
 
@@ -241,6 +241,83 @@ Object.assign(RES, {
     panel: { tab: "time", ...weekPreview((m) => `resources/${enc(m.cCode)}/availability`, (r) => `
       <tr><td colspan="2">${esc(t("mfg.res.plannedStops"))}</td><td class="num">− ${esc(hours(r.iDowntimeMinutes))}</td></tr>
       <tr><td colspan="2">${esc(t("mfg.res.capacityTotal"))}</td><td class="num">${esc(hours(r.iCapacityMinutes))}</td></tr>`) },
+  },
+});
+
+// ------------------------------------------------------------------ P5: standard operations
+export const RUN_FORMATS = ["min_per_unit", "units_per_hour", "min_per_lot"];
+const fmtNum = (v) => new Intl.NumberFormat(lang === "fr" ? "fr-CA" : "en-CA", { maximumFractionDigits: 2 }).format(Number(v) || 0);
+const minutesText = (m) => `${fmtNum(m)} min${Number(m) >= 60 ? ` (${hours(m)})` : ""}`;
+
+// Time of a quantity, at the standard or on a resource (its speed and the efficiency of its work center)
+const timeCalculator = {
+  html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.op.calc"))}</h2><span class="help muted">${esc(t("mfg.op.calc.help"))}</span></div>
+    <div class="card-body"><div class="form-grid">
+      <div class="field"><label for="opQty">${esc(t("mfg.op.qty"))}</label><input type="text" id="opQty" inputmode="decimal" value="100" style="text-align:right"></div>
+      ${m.cRunFormat === "min_per_lot" ? `<div class="field"><label for="opLot">${esc(t("mfg.op.lot"))}</label><input type="text" id="opLot" inputmode="decimal" value="" style="text-align:right"><span class="help">${esc(t("mfg.op.lot.help"))}</span></div>` : ""}
+      <div class="field"><label for="opRes">${esc(t("mfg.res.one"))}</label><select id="opRes"><option value="">${esc(t("mfg.op.standard"))}</option></select></div>
+    </div><div id="opTime"></div></div></div>`,
+  bind: (m) => {
+    const run = async () => {
+      const lot = $("#opLot") ? `&lot=${enc($("#opLot").value)}` : "";
+      try {
+        const r = await api(`operations/${enc(m.cCode)}/time?qty=${enc($("#opQty").value || "0")}${lot}&resource=${enc($("#opRes").value)}`);
+        $("#opTime").innerHTML = `<table class="grid"><tbody>
+          <tr><td>${esc(t("mfg.f.dSetupMin"))}</td><td class="num">${esc(minutesText(r.dSetupMin))}</td></tr>
+          <tr><td>${esc(t("mfg.op.run"))}</td><td class="num">${esc(minutesText(r.dRunMin))}</td></tr>
+          <tr class="total-row"><td>${esc(t("mfg.op.total"))}</td><td class="num">${esc(minutesText(r.dTotalMin))}</td></tr>
+          <tr><td>${esc(t("mfg.op.labor"))}</td><td class="num">${esc(minutesText(r.dLaborMin))}</td></tr></tbody></table>`;
+      } catch (e) { $("#opTime").innerHTML = ""; }
+    };
+    // the resources that can run it: those with the capability, else those of the work center
+    const fill = (rows) => { $("#opRes").innerHTML += rows.map((x) => `<option value="${esc(x.cCode)}">${esc(x.cCode)} — ${esc(dl(x, "cDesc"))}</option>`).join(""); };
+    if (m.cCapability) api(`capabilities/${enc(m.cCapability)}/resources`).then(fill).catch(() => {});
+    else if (m.cWorkCenter) api(`resources?f_cWorkCenter=${enc(m.cWorkCenter)}&size=200`).then((r) => fill(r.items)).catch(() => {});
+    ["#opQty", "#opLot"].forEach((id) => { if ($(id)) $(id).addEventListener("input", (e) => { numOnly(e.target); run(); }); });
+    $("#opRes").addEventListener("change", run);
+    run();
+  },
+};
+const sub = (m) => !!m.lSubcontract;
+const inHouse = (m) => !m.lSubcontract;
+
+Object.assign(RES, {
+  operations: {
+    api: "operations", route: "/prod/operations", title: "mfg.op.title", sub: "mfg.op.subtitle",
+    one: "mfg.op.one", newTitle: "mfg.op.new", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
+    columns: [
+      { f: "cCode", l: "f.cCode" }, descCol("cDesc"),
+      { f: "cWorkCenter", l: "mfg.op.where", fmt: (v, r) => esc(r.lSubcontract ? `${t("mfg.o.wc.subcontract")} ${r.cSupplier}` : v || `${t("mfg.res.cap")} ${r.cCapability}`) },
+      { f: "dRunValue", l: "mfg.f.dRunValue", n: true, fmt: (v, r) => `${esc(fmtNum(v))} <span class="muted">${esc(t("mfg.o.run." + r.cRunFormat))}</span>` },
+      { f: "dSetupMin", l: "mfg.f.dSetupMin", n: true, fmt: (v) => esc(fmtNum(v)) }, { f: "lActive", l: "opt.active", fmt: yesNo },
+    ],
+    filters: [{ f: "cWorkCenter", l: "mfg.f.cWorkCenter", lookup: "work_centers" }, { f: "cCapability", l: "mfg.res.cap", lookup: "capabilities" }],
+    defaults: { cRunFormat: "min_per_unit", iCrew: 1, lReportingPoint: true, lSubcontract: false, lActive: true },
+    sections: [
+      { t: "common.general", fields: [
+        { f: "cCode", l: "f.cCode", req: true, key: true, help: "mfg.code.help" }, { f: "lActive", l: "opt.active", type: "check" },
+        { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+      ] },
+      { t: "mfg.op.where", help: "mfg.op.where.help", fields: [
+        { f: "lSubcontract", l: "mfg.f.lSubcontract", type: "check", rerender: true },
+        { f: "cWorkCenter", l: "mfg.f.cWorkCenter", lookup: "work_centers", show: inHouse },
+        { f: "cCapability", l: "mfg.res.cap", lookup: "capabilities", show: inHouse },
+        { f: "cSupplier", l: "mfg.f.cSupplier", lookup: "suppliers", req: true, show: sub },
+        { f: "dSubcontractCost", l: "mfg.f.dSubcontractCost", type: "number", show: sub },
+        { f: "iSubcontractDays", l: "mfg.f.iSubcontractDays", type: "number", show: sub },
+      ] },
+      { t: "mfg.op.time", help: "mfg.op.time.help", fields: [
+        { f: "cRunFormat", l: "mfg.f.cRunFormat", type: "select", options: opts("mfg.o.run.", RUN_FORMATS), rerender: true },
+        { f: "dRunValue", l: "mfg.f.dRunValue", type: "number", help: "mfg.f.dRunValue.help" },
+        { f: "dSetupMin", l: "mfg.f.dSetupMin", type: "number" },
+        { f: "iCrew", l: "mfg.f.iCrew", type: "number", help: "mfg.f.iCrew.help" },
+        { f: "lReportingPoint", l: "mfg.f.lReportingPoint", type: "check", help: "mfg.f.lReportingPoint.help" },
+      ] },
+      { t: "mfg.op.instruction", help: "mfg.op.instruction.help", fields: [
+        { f: "cInstructionFR", l: "mfg.f.cInstructionFR", type: "textarea", span: 2 }, { f: "cInstructionEN", l: "mfg.f.cInstructionEN", type: "textarea", span: 2 },
+      ] },
+    ],
+    panel: timeCalculator,
   },
 });
 

@@ -5,6 +5,7 @@ P2: working calendars /api/calendars (+ /<code>/availability?from=&to=) and /api
 P3: work centers /api/work-centers (+ /<code>/availability?from=&to=: the calendar time and the capacity).
 P4: resources /api/resources (+ /<code>/availability: calendar - planned downtime, capacity), and
     /api/capabilities/<code>/resources: the resources able to do it, preferred first.
+P5: standard operations /api/operations (+ /<code>/time?qty=&lot=&resource=: setup and run minutes).
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -23,6 +24,7 @@ from powererp.modules.common.registry import label_lookup
 from powererp.store import store
 
 from .calendar import CalendarExceptionService, CalendarService
+from .operations import OperationService
 from .resources import ResourceService
 from .service import (
     CapabilityService,
@@ -55,7 +57,8 @@ def register(app: Flask, c: Container, seed: dict) -> None:
         c.get("lifecycle").add(service.repo, "prod_" + key, seed.get(key, []))
     calendars = _register_calendars(bp, c, seed)
     centers = _register_work_centers(bp, c, seed, calendars)
-    _register_resources(bp, c, seed, calendars, centers)
+    resources = _register_resources(bp, c, seed, calendars, centers)
+    _register_operations(bp, c, seed, centers, resources)
     app.register_blueprint(bp)
 
 
@@ -128,7 +131,7 @@ def _register_work_centers(bp: Blueprint, c: Container, seed: dict, calendars: C
 
 def _register_resources(
     bp: Blueprint, c: Container, seed: dict, calendars: CalendarService, centers: WorkCenterService
-) -> None:
+) -> ResourceService:
     refs = {
         "work_centers": centers.find,
         "capabilities": c.get("capabilities").find,
@@ -154,3 +157,40 @@ def _register_resources(
 
     c.get("lookups").register("resources", label_lookup(resources, DESC_FR, DESC_EN, keep=lambda r: r.get("lActive")))
     c.get("lifecycle").add(resources.repo, "prod_resources", seed.get("resources", []))
+    return resources
+
+
+def _number_arg(name: str, default: float) -> float:
+    value = request.args.get(name)
+    if value in (None, ""):
+        return default
+    try:
+        return float(str(value).replace(",", "."))
+    except ValueError:
+        raise AppError("numeric", name) from None
+
+
+def _register_operations(
+    bp: Blueprint, c: Container, seed: dict, centers: WorkCenterService, resources: ResourceService
+) -> None:
+    refs = {
+        "work_centers": centers.find,
+        "capabilities": c.get("capabilities").find,
+        "suppliers": c.get("suppliers").find,
+    }
+    operations = c.register("operations", OperationService(store("operations"), refs, c.get("references")))
+    register_crud_routes(bp, "operations", "operations", operations, SEARCH + ("cWorkCenter", "cCapability"))
+
+    @bp.route("/api/operations/<code>/time")
+    def operation_time(code):
+        """Minutes of ?qty= units (?lot= lot size for min_per_lot), on ?resource= (its speed and the
+        efficiency of its work center), else at the standard."""
+        speed, efficiency = 1.0, 100.0
+        if request.args.get("resource"):
+            res = resources.get(request.args["resource"])
+            wc = centers.find(res["cWorkCenter"]) or {}
+            speed, efficiency = float(res["dSpeedFactor"] or 1), float(wc.get("dEfficiencyPct") or 100)
+        return jsonify(operations.minutes(code, _number_arg("qty", 1), _number_arg("lot", 0), speed, efficiency))
+
+    c.get("lookups").register("operations", label_lookup(operations, DESC_FR, DESC_EN, keep=lambda r: r.get("lActive")))
+    c.get("lifecycle").add(operations.repo, "prod_operations", seed.get("operations", []))
