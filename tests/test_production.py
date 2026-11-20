@@ -315,3 +315,36 @@ def test_setup_matrix_crud_grid_and_references(client):
     assert g["cells"][i][j]["dSetupMin"] == 15 and g["cells"][j][i]["dSetupMin"] == 45
     assert client.delete("/api/setup-families/MET-ALU").status_code == 409  # used by a matrix
     assert client.delete("/api/setup-matrices/resource/CNC2").status_code == 200
+
+
+# ------------------------------------------------------------------ P7: manufacturing data of the products
+
+
+def test_demo_items_join_the_item_master(client):
+    assert client.get("/api/products/PAIN-BL-675").get_json()["cCategory"] == "BOUL"
+    assert client.get("/api/products/LAP-14I7").status_code == 200  # the inventory demo is still there
+    page = client.get("/api/product-mfg?size=50").get_json()
+    assert page["total"] == 8 and "attributes" not in page["items"][0]
+    bread = client.get("/api/product-mfg/PAIN-GR-600").get_json()
+    assert (bread["cSetupFamily"], bread["cDescFR"], bread["cTraceLevel"]) == (
+        "FOOD-ALLERG",
+        "Pain aux graines 600 g (sésame)",
+        "lot",
+    )
+    assert [a["cAttribute"] for a in bread["attributes"]] == ["Poids", "Allergènes"]
+
+
+def test_product_mfg_crud_and_rules(client):
+    r = client.post("/api/product-mfg", json={"cProduct": "LAP-14I7", "cMakeBuy": "buy", "cTraceLevel": "lot"})
+    assert r.status_code == 400 and r.get_json() == {"error": "lot_control_required", "field": "cTraceLevel"}
+    r = client.post("/api/product-mfg", json={"cProduct": "lap-14i7", "cMakeBuy": "buy", "cTraceLevel": "none"})
+    assert r.status_code == 201 and r.get_json()["cProduct"] == "LAP-14I7"
+    assert client.post("/api/product-mfg", json={"cProduct": "LAP-14I7", "cTraceLevel": "none"}).status_code == 409
+    assert client.delete("/api/setup-families/FOOD-ALLERG").status_code == 409  # a product uses it
+
+
+def test_manufacturing_data_go_with_the_product(client):
+    client.post("/api/products", json={"cCode": "TEST-MFG", "cDescFR": "Test", "cStockUOM": "UN", "lLotControl": True})
+    client.post("/api/product-mfg", json={"cProduct": "TEST-MFG"})
+    assert client.delete("/api/products/TEST-MFG").status_code == 200
+    assert client.get("/api/product-mfg/TEST-MFG").status_code == 404

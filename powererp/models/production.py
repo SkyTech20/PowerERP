@@ -6,6 +6,7 @@ P3: work centers.
 P4: resources, with their capabilities, attributes, subresources and planned downtime (child tables).
 P5: standard operations.
 P6: setup matrices (one per work center or resource, the family pairs as lines).
+P7: manufacturing data of the products (1 to 1 with the item master), with their attributes.
 """
 
 from .. import schemas as S
@@ -37,5 +38,12 @@ register_specs(
         keys=("cScope", "cScopeCode"),
         order=("cScope", "cScopeCode"),
         line_schema=S.SETUP_MATRIX_LINE,
+    ),
+    TableSpec(
+        "product_mfg",
+        S.PRODUCT_MFG,
+        keys=("cProduct",),
+        order=("cProduct",),
+        children={"attributes": S.PRODUCT_ATTRIBUTE},
     ),
 )

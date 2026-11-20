@@ -376,3 +376,70 @@ Object.assign(RES, {
   },
 });
 
+// ------------------------------------------------------------------ P7: manufacturing data of the products
+export const MAKE_BUY = ["make", "buy", "both"];
+export const TRACE_LEVELS = ["none", "lot", "serial"];
+
+Object.assign(RES, {
+  productmfg: {
+    api: "product-mfg", route: "/prod/items", title: "mfg.pm.title", sub: "mfg.pm.subtitle",
+    one: "mfg.pm.one", newTitle: "mfg.pm.new", id: (r) => r.cProduct, label: (r) => `${r.cProduct} — ${dl(r, "cDesc")}`, sort: "cProduct",
+    columns: [
+      { f: "cProduct", l: "mfg.f.cProduct" }, descCol("cDesc"), { f: "cMakeBuy", l: "mfg.f.cMakeBuy", fmt: optBadge("mfg.o.mb.") },
+      { f: "cSetupFamily", l: "mfg.f.cSetupFamily" }, { f: "dMfgLotMin", l: "mfg.f.dMfgLotMin", n: true, fmt: (v) => esc(v ? fmtNum(v) : "") },
+      { f: "iMfgLeadDays", l: "mfg.f.iMfgLeadDays", n: true }, { f: "cTraceLevel", l: "mfg.f.cTraceLevel", fmt: (v) => esc(t("mfg.o.trace." + v)) },
+    ],
+    filters: [{ f: "cMakeBuy", l: "mfg.f.cMakeBuy", options: opts("mfg.o.mb.", MAKE_BUY) }, { f: "cSetupFamily", l: "mfg.f.cSetupFamily", lookup: "setup_families" }],
+    defaults: () => ({ cMakeBuy: "make", cTraceLevel: "lot", lPhantom: false, iMfgLeadDays: 0, attributes: [] }),
+    sections: [
+      { t: "mfg.pm.mfg", fields: [
+        { f: "cProduct", l: "mfg.f.cProduct", req: true, key: true, lookup: "products" },
+        { f: "cMakeBuy", l: "mfg.f.cMakeBuy", type: "select", options: opts("mfg.o.mb.", MAKE_BUY) },
+        { f: "lPhantom", l: "mfg.f.lPhantom", type: "check", help: "mfg.f.lPhantom.help" },
+        { f: "cSetupFamily", l: "mfg.f.cSetupFamily", lookup: "setup_families", help: "mfg.f.cSetupFamily.help" },
+      ] },
+      { t: "mfg.pm.lots", help: "mfg.pm.lots.help", fields: [
+        { f: "dMfgLotMin", l: "mfg.f.dMfgLotMin", type: "number" }, { f: "dMfgLotMultiple", l: "mfg.f.dMfgLotMultiple", type: "number" },
+        { f: "iMfgLeadDays", l: "mfg.f.iMfgLeadDays", type: "number" },
+      ] },
+      { t: "mfg.pm.trace", help: "mfg.pm.trace.help", fields: [
+        { f: "cTraceLevel", l: "mfg.f.cTraceLevel", type: "select", options: opts("mfg.o.trace.", TRACE_LEVELS) },
+        { f: "cNotes", l: "mfg.f.cNotes", type: "textarea", span: 4 },
+      ] },
+    ],
+    grids: [
+      { key: "attributes", title: "mfg.res.attrs", help: "mfg.pm.attrs.help",
+        cols: [{ f: "cAttribute", l: "mfg.f.cAttribute", w: "w-md" }, { f: "cUOM", l: "mfg.f.cUOM", w: "w-sm" },
+          { f: "dNumber", l: "mfg.f.dNumber", w: "w-sm", n: true }, { f: "cValue", l: "mfg.f.cValueText", w: "w-md" }],
+        newLine: () => ({ cAttribute: "", cUOM: "", dNumber: "", cValue: "" }) },
+    ],
+  },
+});
+
+// The "Manufacturing" tab of the product screen (Inventory > Products): a summary and a link to the data above
+if (RES.products) {
+  RES.products.formTabs = [...RES.products.formTabs, ["mfg", "mfg.pm.tab"]];
+  RES.products.panels = [...(RES.products.panels || []), {
+    tab: "mfg",
+    html: () => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.pm.tab"))}</h2><span class="help muted">${esc(t("mfg.pm.tab.help"))}</span><span id="pmAction" style="margin-left:auto"></span></div>
+      <div class="card-body" id="pmSummary"><div class="empty">…</div></div></div>`,
+    bind: (m) => {
+      api(`product-mfg/${enc(m.cCode)}`).then((r) => {
+        $("#pmAction").innerHTML = `<a class="btn small" href="#/prod/items/${enc(m.cCode)}">${esc(t("mfg.pm.edit"))} →</a>`;
+        const row = (l, v) => `<tr><td>${esc(t(l))}</td><td>${v}</td></tr>`;
+        $("#pmSummary").innerHTML = `<table class="grid"><tbody>
+          ${row("mfg.f.cMakeBuy", esc(t("mfg.o.mb." + r.cMakeBuy)) + (r.lPhantom ? ` <span class="badge">${esc(t("mfg.f.lPhantom"))}</span>` : ""))}
+          ${row("mfg.f.cSetupFamily", esc(r.cSetupFamily))}
+          ${row("mfg.pm.lots", esc(`${r.dMfgLotMin ? fmtNum(r.dMfgLotMin) : "—"} / ${r.dMfgLotMultiple ? fmtNum(r.dMfgLotMultiple) : "—"} ${r.cStockUOM} · ${r.iMfgLeadDays} ${t("mfg.pm.days")}`))}
+          ${row("mfg.f.cTraceLevel", esc(t("mfg.o.trace." + r.cTraceLevel)))}
+          ${row("mfg.res.attrs", esc((r.attributes || []).map((a) => `${a.cAttribute} ${a.dNumber ? fmtNum(a.dNumber) : ""}${a.cUOM ? " " + a.cUOM : ""}${a.cValue ? " " + a.cValue : ""}`.trim()).join(" · ")))}
+          </tbody></table>`;
+      }).catch(() => {
+        $("#pmSummary").innerHTML = `<div class="empty">${esc(t("mfg.pm.none"))}</div>`;
+        $("#pmAction").innerHTML = `<button class="btn small" id="pmAdd">＋ ${esc(t("mfg.pm.add"))}</button>`;
+        $("#pmAdd").addEventListener("click", () => newWith("productmfg", { cProduct: m.cCode }));
+      });
+    },
+  }];
+}
+

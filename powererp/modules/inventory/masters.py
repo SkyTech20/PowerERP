@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from powererp import schemas as S
@@ -105,6 +106,10 @@ class ProductService(CrudService):
         super().__init__(repo, S.PRODUCT, S.DEFAULTS["products"])
         self.refs = refs  # finders of the other master files: categories, uom, tax_groups, warehouses, suppliers
         self.stock = stock
+        # set by the module: other modules say whether a product is used (ReferenceRegistry, kind "product")
+        # and what goes with it when it is deleted (e.g. its manufacturing data)
+        self.references = None
+        self.on_delete: list[Callable[[str], None]] = []
 
     def keep_line(self, line: Row) -> bool:
         return bool(line["cSupplierCode"])
@@ -141,6 +146,10 @@ class ProductService(CrudService):
 
     def before_delete(self, row: Row) -> None:
         in_use(self.stock is not None and self.stock.product_used(row["cCode"]))
+        if self.references is not None:
+            self.references.check("product", row["cCode"])
+        for fn in self.on_delete:
+            fn(row["cCode"])
         code = row["cCode"].upper()
         for par in self.stock.params_repo.all(lines=False) if self.stock else []:
             if par["cProduct"].upper() == code:
