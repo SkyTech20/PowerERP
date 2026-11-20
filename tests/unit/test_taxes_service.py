@@ -5,7 +5,7 @@ import pytest
 from powererp.core.errors import AppError
 from powererp.modules.common.registry import ReferenceRegistry
 from powererp.modules.taxes import TaxCalculator, TaxCodeService, TaxGroupService, rate_on
-from tests.unit.fakes import FakeRepo
+from tests.unit.helpers import memory
 
 TPS = {
     "cCode": "TPS",
@@ -35,8 +35,8 @@ QC = {
 @pytest.fixture
 def services():
     refs = ReferenceRegistry()
-    codes = TaxCodeService(FakeRepo([TPS, TVQ]), refs)
-    groups = TaxGroupService(FakeRepo([QC]), codes, refs)
+    codes = TaxCodeService(memory([TPS, TVQ]), refs)
+    groups = TaxGroupService(memory([QC]), codes, refs)
     return codes, groups, TaxCalculator(codes, groups), refs
 
 
