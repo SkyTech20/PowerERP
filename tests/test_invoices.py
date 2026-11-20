@@ -2,9 +2,15 @@
 
 
 def _inv(**over):
-    body = {"cNoFourn": "TECBUR", "cNoFacture": "T-1", "dDateFacture": "2026-10-05",
-            "dTransport": "0", "dTotalTPS": "0", "dTotalTVP": "0",
-            "lines": [{"cCodeProduit": "A", "dQuantite": "2", "dCoutUnitaire": "10"}]}
+    body = {
+        "cNoFourn": "TECBUR",
+        "cNoFacture": "T-1",
+        "dDateFacture": "2026-10-05",
+        "dTransport": "0",
+        "dTotalTPS": "0",
+        "dTotalTVP": "0",
+        "lines": [{"cCodeProduit": "A", "dQuantite": "2", "dCoutUnitaire": "10"}],
+    }
     body.update(over)
     return body
 
@@ -36,7 +42,13 @@ def test_invoice_duplicate_is_case_insensitive(client):
 
 def test_invoice_with_reception_bills_only_that_reception(client):
     assert {"700101", "700102"} <= _unbilled_recs(client)
-    client.post("/api/invoices", json=_inv(cNoCommAch="500101", lines=[{"cCodeProduit": "A", "dQuantite": "1", "dCoutUnitaire": "1", "iNoReception": "700101"}]))
+    client.post(
+        "/api/invoices",
+        json=_inv(
+            cNoCommAch="500101",
+            lines=[{"cCodeProduit": "A", "dQuantite": "1", "dCoutUnitaire": "1", "iNoReception": "700101"}],
+        ),
+    )
     recs = _unbilled_recs(client)
     assert "700101" not in recs and "700102" in recs
     assert "500101" in _unbilled_pos(client)  # 700102 is still open
@@ -51,7 +63,10 @@ def test_invoice_with_po_and_no_reception_bills_all_po_receptions(client):
 
 def test_update_and_delete_invoice(client):
     inv = client.post("/api/invoices", json=_inv()).get_json()
-    upd = client.put(f"/api/invoices/{inv['id']}", json=_inv(cStatut="Posted", lines=[{"cCodeProduit": "A", "dQuantite": "1", "dCoutUnitaire": "5"}])).get_json()
+    upd = client.put(
+        f"/api/invoices/{inv['id']}",
+        json=_inv(cStatut="Posted", lines=[{"cCodeProduit": "A", "dQuantite": "1", "dCoutUnitaire": "5"}]),
+    ).get_json()
     assert upd["cStatut"] == "Posted" and upd["dTotalFacture"] == "5.00"
     assert client.delete(f"/api/invoices/{inv['id']}").status_code == 200
     assert client.get(f"/api/invoices/{inv['id']}").status_code == 404

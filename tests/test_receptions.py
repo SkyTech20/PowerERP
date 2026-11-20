@@ -1,4 +1,5 @@
 """Receptions: creation, totals, unbilled list, and amounts typed with "$"."""
+
 from conftest import new_reception
 
 
@@ -10,7 +11,11 @@ def test_create_reception(client):
     assert rec["lines"][0]["QuantiteRecue"] == "5"
     assert rec["MontantTotal"] == "24.15"
     assert rec["lUnbilled"] is True
-    unb = [x for x in client.get("/api/receptions?f_lUnbilled=true&size=500").get_json()["items"] if x["NoReception"] == "990101"]
+    unb = [
+        x
+        for x in client.get("/api/receptions?f_lUnbilled=true&size=500").get_json()["items"]
+        if x["NoReception"] == "990101"
+    ]
     assert unb
 
 
@@ -27,10 +32,16 @@ def test_reception_required_fields_and_duplicate(client):
 
 def test_reception_amounts_typed_with_dollar_sign(client):
     """Regression: "$" in the unit price was saved as typed and the amount became 0."""
-    rec = new_reception(client, Transport="$2", TPS="$1.00", TVQ="1,99 $", lines=[
-        {"CodeArticle": "A", "QuantiteCommandee": "3", "QuantiteRecue": "3", "PrixUnitaire": "$4.50"},
-        {"CodeArticle": "B", "QuantiteCommandee": "1", "QuantiteRecue": "1", "PrixUnitaire": "$1,000.00"},
-    ]).get_json()
+    rec = new_reception(
+        client,
+        Transport="$2",
+        TPS="$1.00",
+        TVQ="1,99 $",
+        lines=[
+            {"CodeArticle": "A", "QuantiteCommandee": "3", "QuantiteRecue": "3", "PrixUnitaire": "$4.50"},
+            {"CodeArticle": "B", "QuantiteCommandee": "1", "QuantiteRecue": "1", "PrixUnitaire": "$1,000.00"},
+        ],
+    ).get_json()
     assert [l["PrixUnitaire"] for l in rec["lines"]] == ["4.50", "1000.00"]
     assert rec["SousTotal"] == "1013.50"
     assert rec["Transport"] == "2.00" and rec["TPS"] == "1.00" and rec["TVQ"] == "1.99"
@@ -39,8 +50,15 @@ def test_reception_amounts_typed_with_dollar_sign(client):
 
 def test_update_and_delete_reception(client):
     new_reception(client)
-    upd = client.put("/api/receptions/990101", json={"NoBonCommande": "500301", "DateReception": "2026-10-03", "lUnbilled": False,
-                                                    "lines": [{"CodeArticle": "A", "QuantiteRecue": "2", "PrixUnitaire": "3"}]}).get_json()
+    upd = client.put(
+        "/api/receptions/990101",
+        json={
+            "NoBonCommande": "500301",
+            "DateReception": "2026-10-03",
+            "lUnbilled": False,
+            "lines": [{"CodeArticle": "A", "QuantiteRecue": "2", "PrixUnitaire": "3"}],
+        },
+    ).get_json()
     assert upd["MontantTotal"] == "6.00" and upd["lUnbilled"] is False
     assert client.delete("/api/receptions/990101").status_code == 200
     assert client.get("/api/receptions/990101").status_code == 404

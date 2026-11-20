@@ -1,4 +1,5 @@
 """Purchase orders: creation, totals, unbilled flag, and amounts typed with "$"."""
+
 from conftest import new_po
 
 
@@ -15,25 +16,42 @@ def test_create_po_computes_totals(client):
 
 
 def test_po_required_and_duplicate(client):
-    assert client.post("/api/purchase-orders", json={"cPO": "990002"}).get_json() == {"error": "required", "field": "cSupplierCode"}
+    assert client.post("/api/purchase-orders", json={"cPO": "990002"}).get_json() == {
+        "error": "required",
+        "field": "cSupplierCode",
+    }
     assert new_po(client, "500101").status_code == 409
 
 
 def test_empty_lines_are_dropped(client):
-    po = new_po(client, lines=[{"cUnique": "1", "dQuantity": "1"}, {"cProductcode": "A", "dQuantity": "1", "dUnitCost": "3"}]).get_json()
+    po = new_po(
+        client, lines=[{"cUnique": "1", "dQuantity": "1"}, {"cProductcode": "A", "dQuantity": "1", "dUnitCost": "3"}]
+    ).get_json()
     assert po["lineCount"] == 1 and po["dSubTotal"] == "3.00"
 
 
 def test_unbilled_flag_moves_po_in_and_out_of_unbilled_list(client):
     new_po(client)
-    assert client.put("/api/purchase-orders/990001", json={"cSupplierCode": "TECBUR", "lUnbilled": False, "lines": []}).get_json()["lUnbilled"] is False
-    assert client.put("/api/purchase-orders/990001", json={"cSupplierCode": "TECBUR", "lUnbilled": True, "lines": []}).get_json()["lUnbilled"] is True
+    assert (
+        client.put(
+            "/api/purchase-orders/990001", json={"cSupplierCode": "TECBUR", "lUnbilled": False, "lines": []}
+        ).get_json()["lUnbilled"]
+        is False
+    )
+    assert (
+        client.put(
+            "/api/purchase-orders/990001", json={"cSupplierCode": "TECBUR", "lUnbilled": True, "lines": []}
+        ).get_json()["lUnbilled"]
+        is True
+    )
 
 
 def test_update_and_delete_po(client):
     new_po(client)
-    upd = client.put("/api/purchase-orders/990001", json={
-        "cSupplierCode": "TECBUR", "lines": [{"cProductcode": "X", "dQuantity": "3", "dUnitCost": "2.5"}]}).get_json()
+    upd = client.put(
+        "/api/purchase-orders/990001",
+        json={"cSupplierCode": "TECBUR", "lines": [{"cProductcode": "X", "dQuantity": "3", "dUnitCost": "2.5"}]},
+    ).get_json()
     assert upd["dTotalAmount"] == "7.50"
     assert client.delete("/api/purchase-orders/990001").status_code == 200
     assert client.get("/api/purchase-orders/990001").status_code == 404
@@ -41,10 +59,16 @@ def test_update_and_delete_po(client):
 
 def test_po_amounts_typed_with_dollar_sign(client):
     """Regression: "$" in the unit cost was saved as typed and the line total became 0."""
-    po = new_po(client, dFreight="$5.00", dGST="1,25 $", dPST="$2.49", lines=[
-        {"cUnique": "1", "cProductcode": "A", "dQuantity": "2", "dUnitCost": "$10.00"},
-        {"cUnique": "2", "cProductcode": "B", "dQuantity": "1", "dUnitCost": "1 234,50 $"},
-    ]).get_json()
+    po = new_po(
+        client,
+        dFreight="$5.00",
+        dGST="1,25 $",
+        dPST="$2.49",
+        lines=[
+            {"cUnique": "1", "cProductcode": "A", "dQuantity": "2", "dUnitCost": "$10.00"},
+            {"cUnique": "2", "cProductcode": "B", "dQuantity": "1", "dUnitCost": "1 234,50 $"},
+        ],
+    ).get_json()
     assert [l["dUnitCost"] for l in po["lines"]] == ["10.00", "1234.50"]
     assert [l["dTotalAmount"] for l in po["lines"]] == ["20.00", "1234.50"]
     assert po["dSubTotal"] == "1254.50"

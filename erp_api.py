@@ -10,8 +10,8 @@ module adds its own with add_stores). add_tables still accepts in-memory lists, 
 to legacy_datasets, for a module that has not moved yet; none uses it today.
 POST /api/reset restores the original demo data.
 """
+
 import copy
-import re
 from datetime import datetime
 from pathlib import Path
 
@@ -23,104 +23,18 @@ from powererp.store import store
 ERP_STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 # ---------------------------------------------------------------------------
-# Helpers
+# Helpers: in powererp.core (the short names stay for the code that still uses them)
 # ---------------------------------------------------------------------------
-
-
-def _s(value):
-    """Normalize any incoming value to a trimmed string."""
-    if value is None:
-        return ""
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    return str(value).strip()
-
-
-def _dec(value, default="0"):
-    """Keep only the number of a typed amount ("$12.50", "12,50 $", "1 234.5") as "12.50"."""
-    s = re.sub(r"[^\d,.\-]", "", _s(value))
-    neg = s.startswith("-")
-    s = s.replace("-", "")
-    if "," in s and "." in s:
-        s = s.replace(".", "").replace(",", ".") if s.rfind(",") > s.rfind(".") else s.replace(",", "")
-    elif "," in s:
-        s = s.replace(",", ".") if s.count(",") == 1 else s.replace(",", "")
-    if s.count(".") > 1:
-        cut = s.rfind(".")
-        s = s[:cut].replace(".", "") + s[cut:]
-    if not re.search(r"\d", s):
-        return default
-    return ("-" if neg else "") + s
-
-
-def _num(value, default=0.0):
-    try:
-        return float(_dec(value, ""))
-    except (TypeError, ValueError, AttributeError):
-        return default
-
-
-def _money(value):
-    return f"{_num(value):.2f}"
-
-
-def _qty(value):
-    q = _num(value)
-    return f"{q:.0f}" if q == int(q) else f"{q:.2f}"
-
-
-def _bool(value):
-    return value in (True, "true", "True", 1, "1", "on", "yes")
-
-
-class ApiError(Exception):
-    def __init__(self, code, field=None, status=400, detail=None):
-        super().__init__(code)
-        self.code = code
-        self.field = field
-        self.status = status
-        self.detail = detail
-
-
-def _require(payload, *fields):
-    for f in fields:
-        if not _s(payload.get(f)):
-            raise ApiError("required", f)
-
-
-def _paginate(rows, search_fields):
-    """Filter (q), sort (sort, dir) and paginate (page, size) a list of dicts."""
-    q = (request.args.get("q") or "").strip().lower()
-    if q:
-        rows = [r for r in rows if any(q in _s(r.get(f)).lower() for f in search_fields)]
-    for key, val in request.args.items():
-        if key.startswith("f_") and val != "":
-            field = key[2:]
-            rows = [r for r in rows if _s(r.get(field)).lower() == val.lower()]
-    sort = request.args.get("sort")
-    if sort:
-        reverse = request.args.get("dir") == "desc"
-
-        def sort_key(r):
-            v = r.get(sort)
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                return (0, v, "")
-            sv = _s(v)
-            try:
-                return (0, float(sv), "")
-            except ValueError:
-                return (1, 0, sv.lower())
-
-        rows = sorted(rows, key=sort_key, reverse=reverse)
-    total = len(rows)
-    try:
-        size = max(1, min(int(request.args.get("size", 25)), 500))
-        page = max(1, int(request.args.get("page", 1)))
-    except ValueError:
-        size, page = 25, 1
-    start = (page - 1) * size
-    return {"total": total, "page": page, "size": size, "items": rows[start:start + size]}
-
+from powererp.core.errors import AppError as ApiError  # noqa: E402
+from powererp.core.http import json_payload as _payload_of_request  # noqa: E402,F401
+from powererp.core.http import require as _require  # noqa: E402
+from powererp.core.pagination import paginate_request as _paginate  # noqa: E402
+from powererp.core.values import boolean as _bool  # noqa: E402
+from powererp.core.values import decimal_text as _dec  # noqa: E402
+from powererp.core.values import money as _money  # noqa: E402
+from powererp.core.values import number as _num  # noqa: E402
+from powererp.core.values import qty_text as _qty  # noqa: E402
+from powererp.core.values import text as _s  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Seed data for invoices
@@ -128,32 +42,85 @@ def _paginate(rows, search_fields):
 
 _SEED_INVOICES = [
     {
-        "cNoFourn": "ZEPMAN", "cNoFacture": "ZM-48812", "dDateFacture": "2026-09-02",
-        "cNoCommAch": "", "cDevise": "CAD", "cStatut": "Posted", "cSource": "ERP",
-        "dTransport": "0.00", "dTotalTPS": "12.50", "dTotalTVP": "24.94",
+        "cNoFourn": "ZEPMAN",
+        "cNoFacture": "ZM-48812",
+        "dDateFacture": "2026-09-02",
+        "cNoCommAch": "",
+        "cDevise": "CAD",
+        "cStatut": "Posted",
+        "cSource": "ERP",
+        "dTransport": "0.00",
+        "dTotalTPS": "12.50",
+        "dTotalTVP": "24.94",
         "lines": [
-            {"cCodeProduit": "CLEAN-01", "cDescription": "Industrial degreaser 20L", "dQuantite": "2",
-             "dCoutUnitaire": "125.00", "cGL": "5960", "cCC1": "100", "cCC2": "215", "iNoReception": ""},
+            {
+                "cCodeProduit": "CLEAN-01",
+                "cDescription": "Industrial degreaser 20L",
+                "dQuantite": "2",
+                "dCoutUnitaire": "125.00",
+                "cGL": "5960",
+                "cCC1": "100",
+                "cCC2": "215",
+                "iNoReception": "",
+            },
         ],
     },
     {
-        "cNoFourn": "MANSCO", "cNoFacture": "SC-2024-0311", "dDateFacture": "2024-03-15",
-        "cNoCommAch": "266009", "cDevise": "CAD", "cStatut": "Approved", "cSource": "ERP",
-        "dTransport": "15.00", "dTotalTPS": "0.00", "dTotalTVP": "0.00",
+        "cNoFourn": "MANSCO",
+        "cNoFacture": "SC-2024-0311",
+        "dDateFacture": "2024-03-15",
+        "cNoCommAch": "266009",
+        "cDevise": "CAD",
+        "cStatut": "Approved",
+        "cSource": "ERP",
+        "dTransport": "15.00",
+        "dTotalTPS": "0.00",
+        "dTotalTVP": "0.00",
         "lines": [
-            {"cCodeProduit": "AIR00276", "cDescription": "MRFCP.08.1/8 Flow regulator", "dQuantite": "10",
-             "dCoutUnitaire": "8.82", "cGL": "", "cCC1": "", "cCC2": "", "iNoReception": "335871"},
-            {"cCodeProduit": "AIR00273", "cDescription": "MRFCP.1/4.1/4 Flow regulator", "dQuantite": "10",
-             "dCoutUnitaire": "8.82", "cGL": "", "cCC1": "", "cCC2": "", "iNoReception": "335871"},
+            {
+                "cCodeProduit": "AIR00276",
+                "cDescription": "MRFCP.08.1/8 Flow regulator",
+                "dQuantite": "10",
+                "dCoutUnitaire": "8.82",
+                "cGL": "",
+                "cCC1": "",
+                "cCC2": "",
+                "iNoReception": "335871",
+            },
+            {
+                "cCodeProduit": "AIR00273",
+                "cDescription": "MRFCP.1/4.1/4 Flow regulator",
+                "dQuantite": "10",
+                "dCoutUnitaire": "8.82",
+                "cGL": "",
+                "cCC1": "",
+                "cCC2": "",
+                "iNoReception": "335871",
+            },
         ],
     },
     {
-        "cNoFourn": "RE3DIS", "cNoFacture": "INV-77120", "dDateFacture": "2026-09-20",
-        "cNoCommAch": "", "cDevise": "CAD", "cStatut": "Draft", "cSource": "ERP",
-        "dTransport": "0.00", "dTotalTPS": "22.50", "dTotalTVP": "44.89",
+        "cNoFourn": "RE3DIS",
+        "cNoFacture": "INV-77120",
+        "dDateFacture": "2026-09-20",
+        "cNoCommAch": "",
+        "cDevise": "CAD",
+        "cStatut": "Draft",
+        "cSource": "ERP",
+        "dTransport": "0.00",
+        "dTotalTPS": "22.50",
+        "dTotalTVP": "44.89",
         "lines": [
-            {"cCodeProduit": "SIGN", "cDescription": "Trade show banners", "dQuantite": "3",
-             "dCoutUnitaire": "150.00", "cGL": "5960", "cCC1": "100", "cCC2": "400", "iNoReception": ""},
+            {
+                "cCodeProduit": "SIGN",
+                "cDescription": "Trade show banners",
+                "dQuantite": "3",
+                "dCoutUnitaire": "150.00",
+                "cGL": "5960",
+                "cCC1": "100",
+                "cCC2": "400",
+                "iNoReception": "",
+            },
         ],
     },
 ]
@@ -171,11 +138,18 @@ def register_erp(app, ns):
     """
     # Relational tables (seeded from these lists, which are not used afterwards)
     gl_db, cc_db, sup_db = store("gl_accounts"), store("cost_centers"), store("suppliers")
-    stores = [(gl_db, "gl", ns["gl_ttGL_data"]), (cc_db, "cc", ns["gl_ttCC_data"]),
-              (sup_db, "suppliers", ns["supplier_terms_data"])]
+    stores = [
+        (gl_db, "gl", ns["gl_ttGL_data"]),
+        (cc_db, "cc", ns["gl_ttCC_data"]),
+        (sup_db, "suppliers", ns["supplier_terms_data"]),
+    ]
     # Seed of the purchasing tables (the lists are not used afterwards)
-    seed_lists = {"po_details": ns["po_details"], "unbilled_po": ns["unbilled_po"],
-                  "receiving_details": ns["receiving_details"], "unbilled_receiving": ns["unbilled_receiving"]}
+    seed_lists = {
+        "po_details": ns["po_details"],
+        "unbilled_po": ns["unbilled_po"],
+        "receiving_details": ns["receiving_details"],
+        "unbilled_receiving": ns["unbilled_receiving"],
+    }
     seed_invoices = []
     # Tables, lookups and dashboard figures added by other modules (inventory_api.py)
     extra = {"tables": [], "stores": [], "lookups": {}, "summary": [], "after_load": [], "on_clear": []}
@@ -194,21 +168,7 @@ def register_erp(app, ns):
     bp = Blueprint("erp", __name__)
     seeding = {"on": False}  # the seed invoices are prepared at start-up, from the seed suppliers
 
-    @bp.errorhandler(ApiError)
-    def _api_error(err):
-        body = {"error": err.code}
-        if err.field:
-            body["field"] = err.field
-        if err.detail:
-            body["detail"] = err.detail
-        return jsonify(body), err.status
-
-    def _payload():
-        data = request.get_json(silent=True)
-        if not isinstance(data, dict):
-            raise ApiError("invalid_body")
-        return data
-
+    _payload = _payload_of_request
 
     def _supplier_name(code):
         if not _s(code):
@@ -235,22 +195,26 @@ def register_erp(app, ns):
     def erp_summary():
         pos, recs, invoices = purch.po_all(), purch.rec_all(), purch.inv_all()
         open_inv = [i for i in invoices if i.get("cStatut") in ("Draft", "Approved")]
-        return jsonify({
-            "glAccounts": gl_db.count(),
-            "costCenters": cc_db.count(),
-            "suppliers": sup_db.count(),
-            "activeSuppliers": sup_db.count(lambda c: [c["iStatutAch"] == 1]),
-            "purchaseOrders": len(pos),
-            "unbilledPOs": sum(1 for _n, _d, u in pos if u is not None),
-            "receptions": len(recs),
-            "unbilledReceptions": sum(1 for _n, _d, u in recs if u is not None),
-            "invoices": len(invoices),
-            "openInvoices": len(open_inv),
-            "openInvoicesAmount": round(sum(_num(i.get("dTotalFacture")) for i in open_inv), 2),
-            "recentInvoices": [{**i, "lineCount": len(i.get("lines", []))}
-                               for i in sorted(invoices, key=lambda i: i["id"], reverse=True)[:5]],
-            **{k: v for fn in extra["summary"] for k, v in fn().items()},
-        })
+        return jsonify(
+            {
+                "glAccounts": gl_db.count(),
+                "costCenters": cc_db.count(),
+                "suppliers": sup_db.count(),
+                "activeSuppliers": sup_db.count(lambda c: [c["iStatutAch"] == 1]),
+                "purchaseOrders": len(pos),
+                "unbilledPOs": sum(1 for _n, _d, u in pos if u is not None),
+                "receptions": len(recs),
+                "unbilledReceptions": sum(1 for _n, _d, u in recs if u is not None),
+                "invoices": len(invoices),
+                "openInvoices": len(open_inv),
+                "openInvoicesAmount": round(sum(_num(i.get("dTotalFacture")) for i in open_inv), 2),
+                "recentInvoices": [
+                    {**i, "lineCount": len(i.get("lines", []))}
+                    for i in sorted(invoices, key=lambda i: i["id"], reverse=True)[:5]
+                ],
+                **{k: v for fn in extra["summary"] for k, v in fn().items()},
+            }
+        )
 
     @bp.route("/api/lookups/<kind>")
     def erp_lookup(kind):
@@ -261,8 +225,10 @@ def register_erp(app, ns):
         elif kind == "gl":
             rows = [{"code": g["cCode"], "label": g["cDesc"]} for g in gl_db.all()]
         elif kind == "cc":
-            rows = [{"code": f'{c["cCC1"]}-{c["cCC2"]}' if c["cCC2"] else c["cCC1"], "label": c["cDesc"]}
-                    for c in cc_db.all()]
+            rows = [
+                {"code": f'{c["cCC1"]}-{c["cCC2"]}' if c["cCC2"] else c["cCC1"], "label": c["cDesc"]}
+                for c in cc_db.all()
+            ]
         elif kind == "po":
             rows = [{"code": p["cPO"], "label": p["cSupplierName"]} for p in _all_pos()]
         elif kind == "terms":
@@ -426,8 +392,22 @@ def register_erp(app, ns):
 
     # ---------------- Suppliers (getSupplierTerm.p) ----------------
 
-    _SUPPLIER_STR = ("cName", "cTermCode", "cTermDesc", "cAddress1", "cAddress2", "cCity", "cProvince",
-                     "cCountry", "cZipCode", "cNoTPS", "cNoTVQ", "cCodeAch", "cDescAch", "cDeptSauv")
+    _SUPPLIER_STR = (
+        "cName",
+        "cTermCode",
+        "cTermDesc",
+        "cAddress1",
+        "cAddress2",
+        "cCity",
+        "cProvince",
+        "cCountry",
+        "cZipCode",
+        "cNoTPS",
+        "cNoTVQ",
+        "cCodeAch",
+        "cDescAch",
+        "cDeptSauv",
+    )
 
     def _supplier_apply(row, p):
         for f in _SUPPLIER_STR:
@@ -478,12 +458,17 @@ def register_erp(app, ns):
         h = (det or {}).get("ttPOheader", {})
         lines = []
         for ln in (det or {}).get("ttPOdetail", []):
-            lines.append({
-                "cUnique": _s(ln.get("cUnique")), "cProductcode": _s(ln.get("cProductcode")),
-                "cProductDesc": _s(ln.get("cProductDesc")), "dQuantity": _s(ln.get("dQuantity")),
-                "dUnitCost": _s(ln.get("dUnitCost")),
-                "dTotalAmount": _s(ln.get("dTotalAmount")) or _money(_num(ln.get("dQuantity")) * _num(ln.get("dUnitCost"))),
-            })
+            lines.append(
+                {
+                    "cUnique": _s(ln.get("cUnique")),
+                    "cProductcode": _s(ln.get("cProductcode")),
+                    "cProductDesc": _s(ln.get("cProductDesc")),
+                    "dQuantity": _s(ln.get("dQuantity")),
+                    "dUnitCost": _s(ln.get("dUnitCost")),
+                    "dTotalAmount": _s(ln.get("dTotalAmount"))
+                    or _money(_num(ln.get("dQuantity")) * _num(ln.get("dUnitCost"))),
+                }
+            )
         sub = _s(h.get("dSubTotal")) or _money(sum(_num(l["dTotalAmount"]) for l in lines))
         return {
             "cPO": cpo,
@@ -491,15 +476,20 @@ def register_erp(app, ns):
             "dCreationDate": _s((unb or {}).get("dCreationDate")) or _s(h.get("dOrderDate")),
             "cSupplierCode": _s(h.get("cSupplierCode")) or _s((unb or {}).get("cSupplierCode")),
             "cSupplierName": _s(h.get("cSupplierName")) or _s((unb or {}).get("cSupplierName")),
-            "cBuyerCode": _s(h.get("cBuyerCode")), "cBuyerName": _s(h.get("cBuyerName")),
+            "cBuyerCode": _s(h.get("cBuyerCode")),
+            "cBuyerName": _s(h.get("cBuyerName")),
             "cApplicantCode": _s(h.get("cApplicantCode")),
-            "dDueDate": _s(h.get("dDueDate")), "cReference": _s(h.get("cReference")), "cSource": _s(h.get("cSource")),
+            "dDueDate": _s(h.get("dDueDate")),
+            "cReference": _s(h.get("cReference")),
+            "cSource": _s(h.get("cSource")),
             "lBlanketOrder": _bool((unb or {}).get("lBlanketOrder")),
             "lUnbilled": unb is not None,
-            "dSubTotal": sub, "dFreight": _s(h.get("dFreight")), "dGST": _s(h.get("dGST")),
+            "dSubTotal": sub,
+            "dFreight": _s(h.get("dFreight")),
+            "dGST": _s(h.get("dGST")),
             "dPST": _s(h.get("dPST")),
-            "dTotalAmount": _s(h.get("dTotalAmount")) or _money(
-                _num(sub) + _num(h.get("dFreight")) + _num(h.get("dGST")) + _num(h.get("dPST"))),
+            "dTotalAmount": _s(h.get("dTotalAmount"))
+            or _money(_num(sub) + _num(h.get("dFreight")) + _num(h.get("dGST")) + _num(h.get("dPST"))),
             "lines": lines,
             "lineCount": len(lines),
         }
@@ -516,17 +506,29 @@ def register_erp(app, ns):
             if not _s(ln.get("cProductcode")) and not _s(ln.get("cProductDesc")):
                 continue
             total = _num(ln.get("dQuantity")) * _num(ln.get("dUnitCost"))
-            lines.append({
-                "cUnique": _s(ln.get("cUnique")) or str(i), "cProductcode": _s(ln.get("cProductcode")),
-                "cProductDesc": _s(ln.get("cProductDesc")), "dQuantity": _qty(ln.get("dQuantity")),
-                "dUnitCost": _dec(ln.get("dUnitCost")), "dTotalAmount": _money(total),
-            })
+            lines.append(
+                {
+                    "cUnique": _s(ln.get("cUnique")) or str(i),
+                    "cProductcode": _s(ln.get("cProductcode")),
+                    "cProductDesc": _s(ln.get("cProductDesc")),
+                    "dQuantity": _qty(ln.get("dQuantity")),
+                    "dUnitCost": _dec(ln.get("dUnitCost")),
+                    "dTotalAmount": _money(total),
+                }
+            )
         sub = sum(_num(l["dTotalAmount"]) for l in lines)
         freight, gst, pst = _num(p.get("dFreight")), _num(p.get("dGST")), _num(p.get("dPST"))
         header = {f: _s(p.get(f)) for f in _PO_HEADER_STR}
         header["dOrderDate"] = header["dOrderDate"] or _s(p.get("dCreationDate"))
-        header.update({"dSubTotal": _money(sub), "dFreight": _money(freight), "dGST": _money(gst),
-                       "dPST": _money(pst), "dTotalAmount": _money(sub + freight + gst + pst)})
+        header.update(
+            {
+                "dSubTotal": _money(sub),
+                "dFreight": _money(freight),
+                "dGST": _money(gst),
+                "dPST": _money(pst),
+                "dTotalAmount": _money(sub + freight + gst + pst),
+            }
+        )
 
         det, unb = purch.po_get(cpo)
         if det is None:
@@ -538,11 +540,15 @@ def register_erp(app, ns):
         if _bool(p.get("lUnbilled", True)):
             if unb is None:
                 unb = {"COMPANY": company, "cPO": cpo}
-            unb.update({
-                "COMPANY": company, "dCreationDate": _s(p.get("dCreationDate")) or datetime.now().strftime("%Y-%m-%d"),
-                "cSupplierName": header["cSupplierName"], "cSupplierCode": header["cSupplierCode"],
-                "lBlanketOrder": _bool(p.get("lBlanketOrder")),
-            })
+            unb.update(
+                {
+                    "COMPANY": company,
+                    "dCreationDate": _s(p.get("dCreationDate")) or datetime.now().strftime("%Y-%m-%d"),
+                    "cSupplierName": header["cSupplierName"],
+                    "cSupplierCode": header["cSupplierCode"],
+                    "lBlanketOrder": _bool(p.get("lBlanketOrder")),
+                }
+            )
         else:
             unb = None
         purch.po_put(cpo, det, unb)
@@ -582,8 +588,16 @@ def register_erp(app, ns):
 
     # ---------------- Receptions (getReceivingDetails.p + getUnbilledReceiving.p) ----------------
 
-    _REC_STR = ("DateReception", "NoBonCommande", "CodeFournisseur", "Fournisseur", "Statut", "Entrepot",
-                "ResponsableReception", "Commentaires")
+    _REC_STR = (
+        "DateReception",
+        "NoBonCommande",
+        "CodeFournisseur",
+        "Fournisseur",
+        "Statut",
+        "Entrepot",
+        "ResponsableReception",
+        "Commentaires",
+    )
 
     def _rec_view(no, records=None):
         det, unb = records if records is not None else purch.rec_get(no)
@@ -593,27 +607,41 @@ def register_erp(app, ns):
         lines = []
         for a in (det or {}).get("Articles", []):
             unit = a.get("PrixUnitaire") or a.get("dUnitCost") or ""
-            lines.append({
-                "CodeArticle": _s(a.get("CodeArticle")), "Description": _s(a.get("Description")),
-                "QuantiteCommandee": _s(a.get("QuantiteCommandee")), "QuantiteRecue": _s(a.get("QuantiteRecue")),
-                "PrixUnitaire": _s(unit), "cGL": _s(a.get("cGL")), "cCC1": _s(a.get("cCC1")),
-                "cCC2": _s(a.get("cCC2")),
-                "Montant": _s(a.get("dTotalAmount")) or _money(_num(a.get("QuantiteRecue")) * _num(unit)),
-            })
+            lines.append(
+                {
+                    "CodeArticle": _s(a.get("CodeArticle")),
+                    "Description": _s(a.get("Description")),
+                    "QuantiteCommandee": _s(a.get("QuantiteCommandee")),
+                    "QuantiteRecue": _s(a.get("QuantiteRecue")),
+                    "PrixUnitaire": _s(unit),
+                    "cGL": _s(a.get("cGL")),
+                    "cCC1": _s(a.get("cCC1")),
+                    "cCC2": _s(a.get("cCC2")),
+                    "Montant": _s(a.get("dTotalAmount")) or _money(_num(a.get("QuantiteRecue")) * _num(unit)),
+                }
+            )
         total = _s((det or {}).get("MontantTotal")) or _s((unb or {}).get("MontantRecu"))
         return {
-            "NoReception": no, "COMPANY": src.get("COMPANY", "MA2"),
-            "DateReception": _s(src.get("DateReception")), "NoBonCommande": _s(src.get("NoBonCommande")),
-            "CodeFournisseur": _s(src.get("CodeFournisseur")), "Fournisseur": _s(src.get("Fournisseur")),
-            "Statut": _s((det or {}).get("Statut")), "Entrepot": _s(src.get("Entrepot")),
+            "NoReception": no,
+            "COMPANY": src.get("COMPANY", "MA2"),
+            "DateReception": _s(src.get("DateReception")),
+            "NoBonCommande": _s(src.get("NoBonCommande")),
+            "CodeFournisseur": _s(src.get("CodeFournisseur")),
+            "Fournisseur": _s(src.get("Fournisseur")),
+            "Statut": _s((det or {}).get("Statut")),
+            "Entrepot": _s(src.get("Entrepot")),
             "ResponsableReception": _s((det or {}).get("ResponsableReception")),
             "Commentaires": _s((det or {}).get("Commentaires")),
-            "Devise": _s((unb or {}).get("Devise")) or next(
-                (_s(a.get("Devise")) for a in (det or {}).get("Articles", []) if a.get("Devise")), "CAD"),
-            "SousTotal": _s((det or {}).get("SousTotal")), "Transport": _s((det or {}).get("Transport")),
-            "TPS": _s((det or {}).get("TPS")), "TVQ": _s((det or {}).get("TVQ")),
-            "MontantTotal": total, "lUnbilled": unb is not None,
-            "lines": lines, "lineCount": len(lines),
+            "Devise": _s((unb or {}).get("Devise"))
+            or next((_s(a.get("Devise")) for a in (det or {}).get("Articles", []) if a.get("Devise")), "CAD"),
+            "SousTotal": _s((det or {}).get("SousTotal")),
+            "Transport": _s((det or {}).get("Transport")),
+            "TPS": _s((det or {}).get("TPS")),
+            "TVQ": _s((det or {}).get("TVQ")),
+            "MontantTotal": total,
+            "lUnbilled": unb is not None,
+            "lines": lines,
+            "lineCount": len(lines),
         }
 
     def _all_recs():
@@ -629,13 +657,20 @@ def register_erp(app, ns):
             if not _s(ln.get("CodeArticle")) and not _s(ln.get("Description")):
                 continue
             amount = _num(ln.get("QuantiteRecue")) * _num(ln.get("PrixUnitaire"))
-            articles.append({
-                "CodeArticle": _s(ln.get("CodeArticle")), "Description": _s(ln.get("Description")),
-                "QuantiteCommandee": _qty(ln.get("QuantiteCommandee")), "QuantiteRecue": _qty(ln.get("QuantiteRecue")),
-                "PrixUnitaire": _dec(ln.get("PrixUnitaire")), "Devise": devise,
-                "dTotalAmount": _money(amount),
-                "cGL": _s(ln.get("cGL")), "cCC1": _s(ln.get("cCC1")), "cCC2": _s(ln.get("cCC2")),
-            })
+            articles.append(
+                {
+                    "CodeArticle": _s(ln.get("CodeArticle")),
+                    "Description": _s(ln.get("Description")),
+                    "QuantiteCommandee": _qty(ln.get("QuantiteCommandee")),
+                    "QuantiteRecue": _qty(ln.get("QuantiteRecue")),
+                    "PrixUnitaire": _dec(ln.get("PrixUnitaire")),
+                    "Devise": devise,
+                    "dTotalAmount": _money(amount),
+                    "cGL": _s(ln.get("cGL")),
+                    "cCC1": _s(ln.get("cCC1")),
+                    "cCC2": _s(ln.get("cCC2")),
+                }
+            )
         sub = sum(_num(a["dTotalAmount"]) for a in articles)
         freight, tps, tvq = _num(p.get("Transport")), _num(p.get("TPS")), _num(p.get("TVQ"))
         total = sub + freight + tps + tvq
@@ -644,19 +679,40 @@ def register_erp(app, ns):
         if det is None:
             det = {"NoReception": no}
         det.update({f: _s(p.get(f)) for f in _REC_STR})
-        det.update({"COMPANY": company, "Articles": articles, "SousTotal": _money(sub),
-                    "Transport": _money(freight), "TPS": _money(tps), "TVQ": _money(tvq),
-                    "MontantTotal": _money(total)})
+        det.update(
+            {
+                "COMPANY": company,
+                "Articles": articles,
+                "SousTotal": _money(sub),
+                "Transport": _money(freight),
+                "TPS": _money(tps),
+                "TVQ": _money(tvq),
+                "MontantTotal": _money(total),
+            }
+        )
 
         if _bool(p.get("lUnbilled", True)):
             if unb is None:
-                unb = {"NoReception": no, "StatutFacturation": "En attente de facture", "JoursEnAttente": "0",
-                       "ResponsableFacturation": "Comptabilité", "PrioriteFacturation": "Normale",
-                       "TypeReception": "Standard"}
-            unb.update({"COMPANY": company, "DateReception": det["DateReception"],
-                        "NoBonCommande": det["NoBonCommande"], "Fournisseur": det["Fournisseur"],
-                        "CodeFournisseur": det["CodeFournisseur"], "MontantRecu": _money(total),
-                        "Devise": devise, "Entrepot": det["Entrepot"]})
+                unb = {
+                    "NoReception": no,
+                    "StatutFacturation": "En attente de facture",
+                    "JoursEnAttente": "0",
+                    "ResponsableFacturation": "Comptabilité",
+                    "PrioriteFacturation": "Normale",
+                    "TypeReception": "Standard",
+                }
+            unb.update(
+                {
+                    "COMPANY": company,
+                    "DateReception": det["DateReception"],
+                    "NoBonCommande": det["NoBonCommande"],
+                    "Fournisseur": det["Fournisseur"],
+                    "CodeFournisseur": det["CodeFournisseur"],
+                    "MontantRecu": _money(total),
+                    "Devise": devise,
+                    "Entrepot": det["Entrepot"],
+                }
+            )
         else:
             unb = None
         purch.rec_put(no, det, unb)
@@ -699,19 +755,28 @@ def register_erp(app, ns):
                 continue
             qty, unit = _num(ln.get("dQuantite"), 1), _num(ln.get("dCoutUnitaire"))
             amount = qty * unit if unit else _num(ln.get("dMontant"))
-            lines.append({
-                "cCodeProduit": _s(ln.get("cCodeProduit")) or "LINE", "cDescription": _s(ln.get("cDescription")),
-                "dQuantite": _qty(qty), "dCoutUnitaire": _money(unit if unit else amount / (qty or 1)),
-                "dMontant": _money(amount), "cGL": _s(ln.get("cGL")), "cCC1": _s(ln.get("cCC1")),
-                "cCC2": _s(ln.get("cCC2")), "iNoReception": _s(ln.get("iNoReception")),
-            })
+            lines.append(
+                {
+                    "cCodeProduit": _s(ln.get("cCodeProduit")) or "LINE",
+                    "cDescription": _s(ln.get("cDescription")),
+                    "dQuantite": _qty(qty),
+                    "dCoutUnitaire": _money(unit if unit else amount / (qty or 1)),
+                    "dMontant": _money(amount),
+                    "cGL": _s(ln.get("cGL")),
+                    "cCC1": _s(ln.get("cCC1")),
+                    "cCC2": _s(ln.get("cCC2")),
+                    "iNoReception": _s(ln.get("iNoReception")),
+                }
+            )
         inv["lines"] = lines
         sub = sum(_num(l["dMontant"]) for l in lines)
         inv["dSousTotal"] = _money(sub)
         for f in ("dTransport", "dTotalTPS", "dTotalTVP"):
             inv[f] = _money(inv.get(f))
         if not inv.get("_keepTotal"):
-            inv["dTotalFacture"] = _money(sub + _num(inv["dTransport"]) + _num(inv["dTotalTPS"]) + _num(inv["dTotalTVP"]))
+            inv["dTotalFacture"] = _money(
+                sub + _num(inv["dTransport"]) + _num(inv["dTotalTPS"]) + _num(inv["dTotalTVP"])
+            )
         inv.pop("_keepTotal", None)
         inv["cNomFourn"] = _supplier_name(inv.get("cNoFourn")) or _s(inv.get("cNomFourn"))
         inv["lineCount"] = len(lines)
@@ -743,12 +808,17 @@ def register_erp(app, ns):
         if not recs:
             return
         pos = {po} if po else set()
-        pos |= {_s(r.get("NoBonCommande")) for _n, d, u in all_recs for r in (d, u)
-                if r is not None and r["NoReception"] in recs}
+        pos |= {
+            _s(r.get("NoBonCommande"))
+            for _n, d, u in all_recs
+            for r in (d, u)
+            if r is not None and r["NoReception"] in recs
+        }
         purch.rec_set_billed(recs)
         still_open = {_s(r.get("NoBonCommande")) for r in unbilled_receiving if r["NoReception"] not in recs}
-        purch.po_set_billed([p["cPO"] for p in purch.unbilled_po_list()
-                             if p["cPO"] in pos - {""} and p["cPO"] not in still_open])
+        purch.po_set_billed(
+            [p["cPO"] for p in purch.unbilled_po_list() if p["cPO"] in pos - {""} and p["cPO"] not in still_open]
+        )
 
     def _inv_duplicate(supplier, number, exclude_id=None):
         return purch.inv_duplicate(supplier, number, exclude_id)
@@ -756,8 +826,10 @@ def register_erp(app, ns):
     @bp.route("/api/invoices", methods=["GET", "POST"])
     def inv_collection():
         if request.method == "GET":
-            rows = [{**{k: v for k, v in i.items() if k != "lines"}, "lineCount": len(i.get("lines", []))}
-                    for i in purch.inv_all()]
+            rows = [
+                {**{k: v for k, v in i.items() if k != "lines"}, "lineCount": len(i.get("lines", []))}
+                for i in purch.inv_all()
+            ]
             return jsonify(_paginate(rows, ("cNoFacture", "cNoFourn", "cNomFourn", "cNoCommAch")))
         p = _payload()
         _require(p, "cNoFourn", "cNoFacture", "dDateFacture")
@@ -794,9 +866,13 @@ def register_erp(app, ns):
         _add_invoice(copy.deepcopy(seed_inv))
     seeding["on"] = False
 
-    snapshot = copy.deepcopy({
-        **{key: rows for _st, key, rows in stores}, **seed_lists, "invoices": seed_invoices,
-    })
+    snapshot = copy.deepcopy(
+        {
+            **{key: rows for _st, key, rows in stores},
+            **seed_lists,
+            "invoices": seed_invoices,
+        }
+    )
 
     app.register_blueprint(bp)
 
@@ -809,12 +885,17 @@ def register_erp(app, ns):
         """Create an ERP invoice from a PowerWARE dsInput (ttInputHD / ttInputDT)."""
         po = header.get("cNoCommAch", "")
         inv = {
-            "cNoFourn": header.get("cNoFourn", ""), "cNoFacture": header.get("cNoFacture", ""),
+            "cNoFourn": header.get("cNoFourn", ""),
+            "cNoFacture": header.get("cNoFacture", ""),
             "dDateFacture": header.get("dDateFacture", "") or datetime.now().strftime("%Y-%m-%d"),
-            "cNoCommAch": po, "cDevise": "CAD",
+            "cNoCommAch": po,
+            "cDevise": "CAD",
             "cStatut": "Draft" if _bool(header.get("lIncomplete")) else "Posted",
-            "cSource": "SkyAI", "dTransport": header.get("dTransport", "0"),
-            "dTotalTPS": header.get("dTotalTPS", "0"), "dTotalTVP": header.get("dTotalTVP", "0"), "lines": [],
+            "cSource": "SkyAI",
+            "dTransport": header.get("dTransport", "0"),
+            "dTotalTPS": header.get("dTotalTPS", "0"),
+            "dTotalTVP": header.get("dTotalTVP", "0"),
+            "lines": [],
         }
         for d in lines:
             rec_no = d.get("iNoReception", "")
@@ -826,13 +907,19 @@ def register_erp(app, ns):
                 art = next((a for a in (rec or {}).get("Articles", []) if a.get("CodeArticle") == code), None)
                 desc = (art or {}).get("Description", "")
                 inv["cDevise"] = (art or {}).get("Devise") or inv["cDevise"]
-            inv["lines"].append({
-                "cCodeProduit": code, "cDescription": desc,
-                "dQuantite": d.get("dQteFacturee") or d.get("dQuantite") or "1",
-                "dCoutUnitaire": d.get("dCoutUnitaire", ""), "dMontant": d.get("dMontant", ""),
-                "cGL": d.get("cGL", ""), "cCC1": d.get("cCC1", ""), "cCC2": d.get("cCC2", ""),
-                "iNoReception": rec_no,
-            })
+            inv["lines"].append(
+                {
+                    "cCodeProduit": code,
+                    "cDescription": desc,
+                    "dQuantite": d.get("dQteFacturee") or d.get("dQuantite") or "1",
+                    "dCoutUnitaire": d.get("dCoutUnitaire", ""),
+                    "dMontant": d.get("dMontant", ""),
+                    "cGL": d.get("cGL", ""),
+                    "cCC1": d.get("cCC1", ""),
+                    "cCC2": d.get("cCC2", ""),
+                    "iNoReception": rec_no,
+                }
+            )
         if header.get("dTotalFacture"):
             inv["dTotalFacture"] = _money(header["dTotalFacture"])
             inv["_keepTotal"] = True
@@ -849,11 +936,27 @@ def register_erp(app, ns):
         nums = [int(no) for no, _d, _u in purch.po_all() if str(no).isdigit()]
         return str(purch.next_number("PO", start=first, minimum=max([first - 1] + nums) + 1))
 
-    return {"invoice_exists": invoice_exists, "record_invoice": record_invoice, "dump": dump, "load": load,
-            "seed": seed, "add_stores": add_stores, "store_keys": store_keys,
-            "after_load": extra["after_load"], "on_clear": extra["on_clear"],
-            "suppliers": sup_db, "gl_accounts": gl_db, "cost_centers": cc_db,
-            "save_po": _po_save, "po_exists": po_exists, "all_pos": _all_pos,
-            "update_po_header": _po_update_header, "next_po_number": next_po_number,
-            "add_tables": add_tables, "lookups": extra["lookups"], "summary": extra["summary"],
-            "api_error": ApiError, "paginate": _paginate}
+    return {
+        "invoice_exists": invoice_exists,
+        "record_invoice": record_invoice,
+        "dump": dump,
+        "load": load,
+        "seed": seed,
+        "add_stores": add_stores,
+        "store_keys": store_keys,
+        "after_load": extra["after_load"],
+        "on_clear": extra["on_clear"],
+        "suppliers": sup_db,
+        "gl_accounts": gl_db,
+        "cost_centers": cc_db,
+        "save_po": _po_save,
+        "po_exists": po_exists,
+        "all_pos": _all_pos,
+        "update_po_header": _po_update_header,
+        "next_po_number": next_po_number,
+        "add_tables": add_tables,
+        "lookups": extra["lookups"],
+        "summary": extra["summary"],
+        "api_error": ApiError,
+        "paginate": _paginate,
+    }

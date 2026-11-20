@@ -9,6 +9,7 @@ writes them in that shape:
   invoice         {"id", "cNoFourn", "cNoFacture", ..., "lines": [...], "lineCount"}
 Every call uses the session of the current request (powererp.database.current()).
 """
+
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
@@ -20,8 +21,8 @@ from .models import DocSequence
 from .models import purchasing as m
 from .store import company_id
 
-
 # ------------------------------------------------------------------ value conversion
+
 
 def _to_db(kind, v):
     if v is None:
@@ -33,7 +34,7 @@ def _to_db(kind, v):
         try:
             return Decimal(sv)
         except InvalidOperation:
-            raise ValueError(f"not a number: {v!r}")
+            raise ValueError(f"not a number: {v!r}") from None
     if kind == "date":
         sv = str(v).strip()[:10]
         return date.fromisoformat(sv) if sv else None
@@ -115,7 +116,7 @@ def _bulk_insert(table, key_col, docs, line_table, line_map):
     cid = company_id()
     ids = {}
     for i in range(0, len(docs), 300):
-        part = docs[i:i + 300]
+        part = docs[i : i + 300]
         q = insert(table).values([{"company_id": cid, key_col: str(k), **vals} for k, vals, _l in part])
         for r in s.execute(q.returning(table.c.id, table.c[key_col])):
             ids[r[1]] = r[0]
@@ -126,7 +127,7 @@ def _bulk_insert(table, key_col, docs, line_table, line_map):
             lc, extra = _split(ln, line_map)
             rows.append({"parent_id": ids[str(k)], "line_no": n, **{c: lc.get(c) for c in cols}, "extra": extra})
     for i in range(0, len(rows), 500):
-        s.execute(insert(line_table).values(rows[i:i + 500]))
+        s.execute(insert(line_table).values(rows[i : i + 500]))
 
 
 # ------------------------------------------------------------------ purchase orders
@@ -138,9 +139,12 @@ def _po_records(r, lines):
     extra = r["extra"] or {}
     det = unb = None
     if r["has_detail"]:
-        det = {**_join(r, m.PO_DOC, extra.get("doc")), "cPO": r["po_no"],
-               "ttPOheader": _join(r, m.PO_HEADER, extra.get("header")),
-               "ttPOdetail": [_join(ln, m.PO_LINE, ln["extra"]) for ln in lines]}
+        det = {
+            **_join(r, m.PO_DOC, extra.get("doc")),
+            "cPO": r["po_no"],
+            "ttPOheader": _join(r, m.PO_HEADER, extra.get("header")),
+            "ttPOdetail": [_join(ln, m.PO_LINE, ln["extra"]) for ln in lines],
+        }
     if r["unbilled"]:
         unb = {**_join(r, m.PO_UNBILLED, extra.get("unbilled")), "cPO": r["po_no"]}
     return det, unb
@@ -151,8 +155,11 @@ def po_all():
     s = _session()
     t = m.purchase_orders
     # PowerWARE order: the POs with a detail first (in creation order), then the unbilled-only ones
-    rows = s.execute(select(t).where(t.c.company_id == company_id())
-                     .order_by(t.c.has_detail.desc(), t.c.id)).mappings().all()
+    rows = (
+        s.execute(select(t).where(t.c.company_id == company_id()).order_by(t.c.has_detail.desc(), t.c.id))
+        .mappings()
+        .all()
+    )
     lines = _lines_of(s, m.purchase_order_lines, [r["id"] for r in rows])
     return [(r["po_no"], *_po_records(r, lines[r["id"]])) for r in rows]
 
@@ -173,8 +180,11 @@ def _po_values(det, unb):
     unb_cols, unb_extra = _split(unb or {}, m.PO_UNBILLED, skip=("cPO",))
     vals = {c: None for c in _PO_COLS}
     vals.update({**doc_cols, **hdr_cols, **unb_cols})
-    vals.update(has_detail=det is not None, unbilled=unb is not None,
-                extra={k: v for k, v in (("doc", doc_extra), ("header", hdr_extra), ("unbilled", unb_extra)) if v})
+    vals.update(
+        has_detail=det is not None,
+        unbilled=unb is not None,
+        extra={k: v for k, v in (("doc", doc_extra), ("header", hdr_extra), ("unbilled", unb_extra)) if v},
+    )
     return vals
 
 
@@ -206,8 +216,13 @@ def po_replace_all(po_details, unbilled_po):
     for det in po_details:
         if det["cPO"] not in seen:
             seen.add(det["cPO"])
-            docs.append((det["cPO"], {**_po_values(det, unb.get(det["cPO"])), "unbilled_order": order.get(det["cPO"])},
-                         det.get("ttPOdetail")))
+            docs.append(
+                (
+                    det["cPO"],
+                    {**_po_values(det, unb.get(det["cPO"])), "unbilled_order": order.get(det["cPO"])},
+                    det.get("ttPOdetail"),
+                )
+            )
     for p in unbilled_po:
         if p["cPO"] not in seen:
             seen.add(p["cPO"])
@@ -232,8 +247,11 @@ def _unbilled_order(s, table, key_col, key, unbilled):
 
 def _unbilled_rows(table, key_col):
     s = _session()
-    q = (select(table.c[key_col]).where(table.c.company_id == company_id(), table.c.unbilled.is_(True))
-         .order_by(table.c.unbilled_order, table.c.id))
+    q = (
+        select(table.c[key_col])
+        .where(table.c.company_id == company_id(), table.c.unbilled.is_(True))
+        .order_by(table.c.unbilled_order, table.c.id)
+    )
     return [r[0] for r in s.execute(q)]
 
 
@@ -256,8 +274,11 @@ def _rec_records(r, lines):
     extra = r["extra"] or {}
     det = unb = None
     if r["has_detail"]:
-        det = {"NoReception": r["reception_no"], **_join(r, m.REC_DOC, extra.get("doc")),
-               "Articles": [_join(ln, m.REC_LINE, ln["extra"]) for ln in lines]}
+        det = {
+            "NoReception": r["reception_no"],
+            **_join(r, m.REC_DOC, extra.get("doc")),
+            "Articles": [_join(ln, m.REC_LINE, ln["extra"]) for ln in lines],
+        }
     if r["unbilled"]:
         unb = {"NoReception": r["reception_no"], **_join(r, m.REC_UNBILLED, extra.get("unbilled"))}
     return det, unb
@@ -267,8 +288,11 @@ def rec_all():
     """[(NoReception, det, unb)] of every reception, in creation order."""
     s = _session()
     t = m.receptions
-    rows = s.execute(select(t).where(t.c.company_id == company_id())
-                     .order_by(t.c.has_detail.desc(), t.c.id)).mappings().all()
+    rows = (
+        s.execute(select(t).where(t.c.company_id == company_id()).order_by(t.c.has_detail.desc(), t.c.id))
+        .mappings()
+        .all()
+    )
     lines = _lines_of(s, m.reception_lines, [r["id"] for r in rows])
     return [(r["reception_no"], *_rec_records(r, lines[r["id"]])) for r in rows]
 
@@ -287,8 +311,11 @@ def _rec_values(det, unb):
     unb_cols, unb_extra = _split(unb or {}, m.REC_UNBILLED, skip=("NoReception",))
     vals = {c: None for c in _REC_COLS}
     vals.update({**doc_cols, **unb_cols})
-    vals.update(has_detail=det is not None, unbilled=unb is not None,
-                extra={k: v for k, v in (("doc", doc_extra), ("unbilled", unb_extra)) if v})
+    vals.update(
+        has_detail=det is not None,
+        unbilled=unb is not None,
+        extra={k: v for k, v in (("doc", doc_extra), ("unbilled", unb_extra)) if v},
+    )
     return vals
 
 
@@ -319,8 +346,11 @@ def rec_set_billed(numbers):
     t = m.receptions
     cid = company_id()
     nums = [str(n) for n in numbers]
-    s.execute(update(t).where(t.c.company_id == cid, t.c.reception_no.in_(nums))
-              .values(unbilled=False, unbilled_order=None, **{c: None for c in _all_cols(m.REC_UNBILLED)}))
+    s.execute(
+        update(t)
+        .where(t.c.company_id == cid, t.c.reception_no.in_(nums))
+        .values(unbilled=False, unbilled_order=None, **{c: None for c in _all_cols(m.REC_UNBILLED)})
+    )
     s.execute(delete(t).where(t.c.company_id == cid, t.c.reception_no.in_(nums), t.c.has_detail.is_(False)))
 
 
@@ -332,8 +362,11 @@ def po_set_billed(numbers):
     t = m.purchase_orders
     cid = company_id()
     nums = [str(n) for n in numbers]
-    s.execute(update(t).where(t.c.company_id == cid, t.c.po_no.in_(nums))
-              .values(unbilled=False, unbilled_order=None, **{c: None for c in _all_cols(m.PO_UNBILLED)}))
+    s.execute(
+        update(t)
+        .where(t.c.company_id == cid, t.c.po_no.in_(nums))
+        .values(unbilled=False, unbilled_order=None, **{c: None for c in _all_cols(m.PO_UNBILLED)})
+    )
     s.execute(delete(t).where(t.c.company_id == cid, t.c.po_no.in_(nums), t.c.has_detail.is_(False)))
 
 
@@ -400,9 +433,11 @@ def inv_get(no):
 def inv_duplicate(supplier, number, exclude_no=None):
     """Another invoice with the same supplier and number (ignoring case)?"""
     t = m.ap_invoices
-    q = select(t.c.id).where(t.c.company_id == company_id(),
-                             func.lower(t.c.supplier_code) == str(supplier).lower(),
-                             func.lower(t.c.invoice_number) == str(number).lower())
+    q = select(t.c.id).where(
+        t.c.company_id == company_id(),
+        func.lower(t.c.supplier_code) == str(supplier).lower(),
+        func.lower(t.c.invoice_number) == str(number).lower(),
+    )
     if exclude_no is not None:
         q = q.where(t.c.invoice_no != int(exclude_no))
     return _session().execute(q.limit(1)).first() is not None
@@ -412,10 +447,12 @@ def next_number(doc_type, start=1, minimum=None):
     """Next number of a document type for the company (row locked until the end of the transaction)."""
     s = _session()
     cid = company_id()
-    s.execute(pg_insert(DocSequence).values(company_id=cid, doc_type=doc_type, next_value=start)
-              .on_conflict_do_nothing())
-    seq = s.execute(select(DocSequence).where(DocSequence.company_id == cid, DocSequence.doc_type == doc_type)
-                    .with_for_update()).scalar_one()
+    s.execute(
+        pg_insert(DocSequence).values(company_id=cid, doc_type=doc_type, next_value=start).on_conflict_do_nothing()
+    )
+    seq = s.execute(
+        select(DocSequence).where(DocSequence.company_id == cid, DocSequence.doc_type == doc_type).with_for_update()
+    ).scalar_one()
     value = max(seq.next_value, minimum or 0)
     seq.next_value = value + 1
     s.flush()
@@ -425,8 +462,11 @@ def next_number(doc_type, start=1, minimum=None):
 def set_next_number(doc_type, value):
     s = _session()
     cid = company_id()
-    s.execute(pg_insert(DocSequence).values(company_id=cid, doc_type=doc_type, next_value=value)
-              .on_conflict_do_update(index_elements=["company_id", "doc_type"], set_={"next_value": value}))
+    s.execute(
+        pg_insert(DocSequence)
+        .values(company_id=cid, doc_type=doc_type, next_value=value)
+        .on_conflict_do_update(index_elements=["company_id", "doc_type"], set_={"next_value": value})
+    )
 
 
 def _inv_values(inv):
@@ -442,8 +482,7 @@ def inv_put(inv):
     vals = _inv_values(inv)
     rid = s.scalar(select(t.c.id).where(t.c.company_id == cid, t.c.invoice_no == int(inv["id"])))
     if rid is None:
-        rid = s.execute(insert(t).values(company_id=cid, invoice_no=int(inv["id"]), **vals)
-                        .returning(t.c.id)).scalar()
+        rid = s.execute(insert(t).values(company_id=cid, invoice_no=int(inv["id"]), **vals).returning(t.c.id)).scalar()
     else:
         s.execute(update(t).where(t.c.id == rid).values(**vals))
     _write_lines(s, m.ap_invoice_lines, m.INV_LINE, rid, inv.get("lines"))
@@ -472,7 +511,7 @@ def inv_replace_all(invoices):
         t = m.ap_invoices
         ids = {}
         for i in range(0, len(docs), 300):
-            part = docs[i:i + 300]
+            part = docs[i : i + 300]
             q = insert(t).values([{"company_id": cid, "invoice_no": int(k), **v} for k, v, _l in part])
             for r in s.execute(q.returning(t.c.id, t.c.invoice_no)):
                 ids[str(r[1])] = r[0]
@@ -483,7 +522,7 @@ def inv_replace_all(invoices):
                 lc, extra = _split(ln, m.INV_LINE)
                 rows.append({"parent_id": ids[k], "line_no": n, **{c: lc.get(c) for c in cols}, "extra": extra})
         for i in range(0, len(rows), 500):
-            s.execute(insert(m.ap_invoice_lines).values(rows[i:i + 500]))
+            s.execute(insert(m.ap_invoice_lines).values(rows[i : i + 500]))
     set_next_number("AP_INVOICE", max((int(i["id"]) for i in invoices), default=0) + 1)
 
 

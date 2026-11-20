@@ -2,6 +2,7 @@
 PowerWARE web services read by SkyAI (same paths, parameters and XML as the real ones).
 These pin the XML contract so SkyAI keeps parsing the ERP the same way.
 """
+
 import xml.etree.ElementTree as ET
 
 from conftest import PW, new_po, new_reception
@@ -29,8 +30,14 @@ def _text(elem, name):
 
 
 def test_company_is_required(client):
-    for svc in ("getReceivingDetails.p?NoReception=700101", "getUnbilledPO.p", "getUnbilledReceiving.p",
-                "getGLaccounts.p", "getPODetails.p?PO=500101", "getSupplierTerm.p"):
+    for svc in (
+        "getReceivingDetails.p?NoReception=700101",
+        "getUnbilledPO.p",
+        "getUnbilledReceiving.p",
+        "getGLaccounts.p",
+        "getPODetails.p?PO=500101",
+        "getSupplierTerm.p",
+    ):
         assert client.get(f"{PW}/{svc}").status_code == 400, svc
 
 
@@ -120,7 +127,9 @@ def _post_invoice(client, svc, body):
 
 def test_ap_invoice_no_po_creates_erp_invoice(client):
     lines = "<ttInputDT><cCodeProduit>SRV</cCodeProduit><dMontant>100</dMontant><cGL>5960</cGL></ttInputDT>"
-    root = _post_invoice(client, "apInvoiceNoPO.p", _dsinput("HORIZN", "H-1", lines=lines, dTotalTPS="5", dTotalTVP="9.98"))
+    root = _post_invoice(
+        client, "apInvoiceNoPO.p", _dsinput("HORIZN", "H-1", lines=lines, dTotalTPS="5", dTotalTVP="9.98")
+    )
     assert _all(root, "ttInvoice") and not _all(root, "ttError")
     inv = [i for i in client.get("/api/invoices?q=H-1").get_json()["items"] if i["cNoFacture"] == "H-1"][0]
     assert inv["cSource"] == "SkyAI" and inv["cStatut"] == "Posted" and inv["dTotalFacture"] == "114.98"
@@ -130,15 +139,21 @@ def test_ap_invoice_with_po_bills_the_reception(client):
     lines = "<ttInputDT><cCodeProduit>LAP-14I7</cCodeProduit><dQteFacturee>4</dQteFacturee><dCoutUnitaire>1250</dCoutUnitaire><iNoReception>700101</iNoReception></ttInputDT>"
     root = _post_invoice(client, "apInvoiceWithPO.p", _dsinput(po="500101", lines=lines, dTotalFacture="5748.75"))
     assert _all(root, "ttInvoice")
-    unb = {_text(r, "iReceiving") for r in _all(_xml(client.get(f"{PW}/getUnbilledReceiving.p?COMPANY=MA2")), "ttReceiving")}
+    unb = {
+        _text(r, "iReceiving")
+        for r in _all(_xml(client.get(f"{PW}/getUnbilledReceiving.p?COMPANY=MA2")), "ttReceiving")
+    }
     assert "700101" not in unb and "700102" in unb
     inv = client.get("/api/invoices?q=SKY-1").get_json()["items"][0]
     assert inv["dTotalFacture"] == "5748.75"
 
 
 def test_ap_invoice_incomplete_is_draft(client):
-    _post_invoice(client, "apInvoiceNoPO.p", _dsinput(number="SKY-D", lIncomplete="true",
-                                                      lines="<ttInputDT><dMontant>1</dMontant></ttInputDT>"))
+    _post_invoice(
+        client,
+        "apInvoiceNoPO.p",
+        _dsinput(number="SKY-D", lIncomplete="true", lines="<ttInputDT><dMontant>1</dMontant></ttInputDT>"),
+    )
     assert client.get("/api/invoices?q=SKY-D").get_json()["items"][0]["cStatut"] == "Draft"
 
 
@@ -159,5 +174,9 @@ def test_ap_invoice_errors(client):
 
 
 def test_simulate_error_flag(client):
-    root = _xml(client.post(f"{PW}/apInvoiceNoPO.p?simulate_error=1", data=_dsinput(number="OK-1"), content_type="application/xml"))
+    root = _xml(
+        client.post(
+            f"{PW}/apInvoiceNoPO.p?simulate_error=1", data=_dsinput(number="OK-1"), content_type="application/xml"
+        )
+    )
     assert _all(root, "ttError")

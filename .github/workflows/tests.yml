@@ -46,6 +46,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
+      - name: Lint and formatting
+        run: |
+          ruff check .
+          black --check .
+          mypy
+
       # tests/conftest.py empties the PostgreSQL test database, migrates it and starts the ERP with the demo dataset.
       - name: Run tests
         run: python -m pytest -q

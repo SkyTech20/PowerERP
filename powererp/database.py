@@ -4,6 +4,7 @@ init() opens the engine and brings the schema up to date (alembic upgrade head),
 database needs nothing else. session_scope() is one transaction: committed at the end of the
 block, rolled back on error.
 """
+
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
@@ -41,6 +42,7 @@ def init(url=None, migrate=True):
 
 def alembic_config():
     from alembic.config import Config
+
     cfg = Config(str(ROOT / "alembic.ini"))
     cfg.set_main_option("script_location", str(MIGRATIONS))
     return cfg
@@ -49,6 +51,7 @@ def alembic_config():
 def upgrade(revision="head"):
     """alembic upgrade on the open engine."""
     from alembic import command
+
     cfg = alembic_config()
     with engine.begin() as con:
         cfg.attributes["connection"] = con
@@ -106,6 +109,7 @@ def unit_of_work():
 
 def init_app(app):
     """Commit the request's session on success (status < 400), roll it back otherwise."""
+
     @app.after_request
     def _commit(response):
         s = g.pop("_db_session", None)

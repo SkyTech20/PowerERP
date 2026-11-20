@@ -1,10 +1,16 @@
 """apCreatePO.p: the PO SkyAI creates for each supplier of an approved requisition."""
+
 from conftest import PW
 
 
 def _create(client, **over):
-    body = {"requisitionNumber": "DA-1", "supplierCode": "TECBUR", "requester": "Cassiano", "requiredDate": "2026-11-01",
-            "lines": [{"productCode": "NEW-1", "description": "Item", "quantity": 2, "unitCost": "10"}]}
+    body = {
+        "requisitionNumber": "DA-1",
+        "supplierCode": "TECBUR",
+        "requester": "Cassiano",
+        "requiredDate": "2026-11-01",
+        "lines": [{"productCode": "NEW-1", "description": "Item", "quantity": 2, "unitCost": "10"}],
+    }
     body.update(over)
     return client.post(f"{PW}/apCreatePO.p", json=body)
 

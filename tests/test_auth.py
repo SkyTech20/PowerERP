@@ -1,4 +1,5 @@
 """Login, access control and user administration."""
+
 import uuid
 
 from conftest import ADMIN_PASSWORD, PW
@@ -62,9 +63,20 @@ def test_admin_creates_user_and_user_cannot_manage_users(admin, app):
 
 def test_user_rules(admin):
     name = _name()
-    assert admin.post("/api/users", json={"username": name, "name": "T", "password": "123"}).get_json()["error"] == "password_short"
-    assert admin.post("/api/users", json={"username": name, "name": "T"}).get_json() == {"error": "required", "field": "password"}
-    assert admin.post("/api/users", json={"username": name, "name": "T", "role": "boss", "password": "secret1"}).status_code == 400
+    assert (
+        admin.post("/api/users", json={"username": name, "name": "T", "password": "123"}).get_json()["error"]
+        == "password_short"
+    )
+    assert admin.post("/api/users", json={"username": name, "name": "T"}).get_json() == {
+        "error": "required",
+        "field": "password",
+    }
+    assert (
+        admin.post(
+            "/api/users", json={"username": name, "name": "T", "role": "boss", "password": "secret1"}
+        ).status_code
+        == 400
+    )
     assert admin.post("/api/users", json={"username": name, "name": "T", "password": "secret1"}).status_code == 201
     dup = admin.post("/api/users", json={"username": name.upper(), "name": "T", "password": "secret1"})
     assert dup.status_code == 409
@@ -90,7 +102,10 @@ def test_change_own_password(admin, app):
     admin.post("/api/users", json={"username": name, "name": "T", "password": "secret1"})
     u = app.test_client()
     u.post("/api/auth/login", json={"username": name, "password": "secret1"})
-    assert u.post("/api/auth/password", json={"current": "bad", "password": "secret2"}).get_json()["error"] == "bad_password"
+    assert (
+        u.post("/api/auth/password", json={"current": "bad", "password": "secret2"}).get_json()["error"]
+        == "bad_password"
+    )
     assert u.post("/api/auth/password", json={"current": "secret1", "password": "secret2"}).status_code == 200
     u.post("/api/auth/logout")
     assert u.post("/api/auth/login", json={"username": name, "password": "secret2"}).status_code == 200

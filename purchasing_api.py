@@ -9,16 +9,16 @@ SkyAI chooses the supplier of each item itself, from its own purchase history: t
 
 JSON in and out. Same protection as the other PowerWARE services (X-API-Key when ERP_API_KEY is set).
 """
+
 import logging
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request
 
 from erp_api import _num  # accepts "$12.50" / "12,50 $" like the ERP screens
-from powerware_api import PW_PREFIX
-
 from powererp import purchasing as purch
 from powererp.store import store
+from powerware_api import PW_PREFIX
 
 logger = logging.getLogger(__name__)
 bp = Blueprint("purchasing", __name__)
@@ -30,8 +30,6 @@ FIRST_PO = 500501
 def _json():
     data = request.get_json(silent=True)
     return data if isinstance(data, dict) else None
-
-
 
 
 def _last_price(supplier, code):
@@ -68,33 +66,69 @@ def ap_create_po():
         for po in purch.po_details_list():
             h = po.get("ttPOheader", {})
             if h.get("cReference") == reference and h.get("cSupplierCode") == supplier_code:
-                return jsonify({"status": "ok", "cPO": po["cPO"], "supplierCode": supplier_code,
-                                "dTotalAmount": h.get("dTotalAmount", ""), "alreadyExisted": True})
+                return jsonify(
+                    {
+                        "status": "ok",
+                        "cPO": po["cPO"],
+                        "supplierCode": supplier_code,
+                        "dTotalAmount": h.get("dTotalAmount", ""),
+                        "alreadyExisted": True,
+                    }
+                )
 
     lines = []
     for i, ln in enumerate(lines_in, 1):
         code = str(ln.get("productCode") or "").strip()
         unit = _num(ln.get("unitCost")) or (_last_price(supplier_code, code) if code else 0.0)
-        lines.append({"cUnique": str(i), "cProductcode": code or f"REQ-{i}",
-                      "cProductDesc": str(ln.get("description") or ""), "dQuantity": ln.get("quantity") or 1,
-                      "dUnitCost": f"{unit:.2f}"})
-    sub = sum(_num(l["dQuantity"]) * _num(l["dUnitCost"]) for l in lines)
+        lines.append(
+            {
+                "cUnique": str(i),
+                "cProductcode": code or f"REQ-{i}",
+                "cProductDesc": str(ln.get("description") or ""),
+                "dQuantity": ln.get("quantity") or 1,
+                "dUnitCost": f"{unit:.2f}",
+            }
+        )
+    sub = sum(_num(ln["dQuantity"]) * _num(ln["dUnitCost"]) for ln in lines)
     gst = round(sub * 0.05 + 1e-9, 2) if supplier.get("cNoTPS") else 0.0
     pst = round(sub * 0.09975 + 1e-9, 2) if supplier.get("cNoTVQ") else 0.0
     today = datetime.now().strftime("%Y-%m-%d")
     buyer = str(p.get("buyerCode") or supplier.get("cCodeAch") or "")
     cpo = _next_po_number()
-    view = _hooks["save_po"](cpo, {
-        "cSupplierCode": supplier_code, "cSupplierName": supplier.get("cName", ""),
-        "cBuyerCode": buyer, "cBuyerName": buyer, "cApplicantCode": str(p.get("requester") or ""),
-        "dOrderDate": today, "dCreationDate": today, "dFreight": 0, "dGST": gst, "dPST": pst,
-        "lines": lines, "lUnbilled": True,
-    }, None)
-    _hooks["update_po_header"](cpo, {"dDueDate": str(p.get("requiredDate") or ""), "cReference": reference,
-                                     "cSource": "SkyAI"})
+    view = _hooks["save_po"](
+        cpo,
+        {
+            "cSupplierCode": supplier_code,
+            "cSupplierName": supplier.get("cName", ""),
+            "cBuyerCode": buyer,
+            "cBuyerName": buyer,
+            "cApplicantCode": str(p.get("requester") or ""),
+            "dOrderDate": today,
+            "dCreationDate": today,
+            "dFreight": 0,
+            "dGST": gst,
+            "dPST": pst,
+            "lines": lines,
+            "lUnbilled": True,
+        },
+        None,
+    )
+    _hooks["update_po_header"](
+        cpo, {"dDueDate": str(p.get("requiredDate") or ""), "cReference": reference, "cSource": "SkyAI"}
+    )
     logger.info("apCreatePO.p: PO %s for %s (requisition %s)", cpo, supplier_code, reference)
-    return jsonify({"status": "ok", "cPO": cpo, "supplierCode": supplier_code,
-                    "dTotalAmount": view["dTotalAmount"], "alreadyExisted": False}), 201
+    return (
+        jsonify(
+            {
+                "status": "ok",
+                "cPO": cpo,
+                "supplierCode": supplier_code,
+                "dTotalAmount": view["dTotalAmount"],
+                "alreadyExisted": False,
+            }
+        ),
+        201,
+    )
 
 
 def register_purchasing(app, ns, hooks):

@@ -1,4 +1,5 @@
 """Stands in for pg_dump in the tests: writes the arguments it got into the --file, or fails on request."""
+
 import os
 import sys
 
