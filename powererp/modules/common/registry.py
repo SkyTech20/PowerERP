@@ -57,13 +57,3 @@ def label_lookup(service, fr_fields: tuple[str, ...], en_fields: tuple[str, ...]
         return rows, limit
 
     return fn
-
-
-class SeedRegistry:
-    """The tables seeded with the demo data, reset by /api/reset and emptied by /api/clear."""
-
-    def __init__(self, add_stores) -> None:
-        self._add = add_stores
-
-    def add(self, repo, key: str, rows: list) -> None:
-        self._add([(repo, key, rows)])

@@ -134,4 +134,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     lookups.register("suppliers", suppliers.lookup)
     lookups.register("terms", suppliers.terms_lookup)
     lookups.register("buyers", suppliers.buyers_lookup)
-    c.get("seeds").add(suppliers.repo, "suppliers", seed.get("supplier_terms_data", []))
+    c.get("dashboard").register(
+        lambda: {"suppliers": suppliers.count(), "activeSuppliers": suppliers.count(active_only=True)}
+    )
+    c.get("lifecycle").add(suppliers.repo, "suppliers", seed.get("supplier_terms_data", []))

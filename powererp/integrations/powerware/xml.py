@@ -1,39 +1,15 @@
-"""
-PowerWARE / SkyAI-compatible endpoints served by PowerERP.
+"""PowerWARE XML: the documents SkyAI reads (dsGLCC, dsSupplier, dsPO, dsPOdetail, dsReceiving...) and the
+dsInput / dsOutput of the invoice services. Same formats as the real PowerWARE web services and the SkyAI mock API
+(copied from mock-apis/skyai-api/app.py so both answer exactly the same way)."""
 
-Same paths, parameters and XML formats as the real PowerWARE web services
-(and the SkyAI mock API), but backed by PowerERP's own data. Point the
-SkyAI "APIs" configuration at this server (e.g. http://erp-sample:5050) and
-SkyAI reads suppliers, GL accounts, POs and receptions from the ERP, and
-creates its invoices in the ERP (apInvoiceNoPO.p / apInvoiceWithPO.p).
-
-The XML builders and read endpoints below are copied from
-mock-apis/skyai-api/app.py so both servers answer exactly the same way.
-"""
-
-import logging
 import xml.etree.ElementTree as ET
-from datetime import datetime
 from xml.dom import minidom
 from xml.sax.saxutils import escape
 
-from flask import Blueprint, Response, jsonify, request
-
-from powererp import purchasing as purch
-from powererp.store import store
-
-logger = logging.getLogger(__name__)
-
-bp = Blueprint("powerware", __name__)
-
-PW_PREFIX = "/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI"
-
-# The data comes from the relational tables: GL accounts, cost centers and suppliers (powererp.store),
-# purchase orders and receptions (powererp.purchasing, which rebuilds the PowerWARE records).
-_invoice_hooks = {}
+from flask import Response
 
 
-def _xml_escape(s):
+def xml_escape(s):
     """Escape &, <, > so XML is well-formed (e.g. 'Santé & Sécurité' -> 'Santé &amp; Sécurité', 'R&D' -> 'R&amp;D')."""
     if s is None:
         return ""
@@ -46,17 +22,17 @@ def create_gl_xml_response(ttgl_list, ttcc_list):
 <dsGLCC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 """
     for item in ttgl_list:
-        c_code = _xml_escape(item.get("cCode", ""))
-        c_desc = _xml_escape(item.get("cDesc", ""))
+        c_code = xml_escape(item.get("cCode", ""))
+        c_desc = xml_escape(item.get("cDesc", ""))
         xml_content += f"""    <ttGL>
         <cCode>{c_code}</cCode>
         <cDesc>{c_desc}</cDesc>
     </ttGL>
 """
     for item in ttcc_list:
-        c1 = _xml_escape(item.get("cCC1", ""))
-        c2 = _xml_escape(item.get("cCC2", ""))
-        desc = _xml_escape(item.get("cDesc", ""))
+        c1 = xml_escape(item.get("cCC1", ""))
+        c2 = xml_escape(item.get("cCC2", ""))
+        desc = xml_escape(item.get("cDesc", ""))
         c2_tag = f"<cCC2>{c2}</cCC2>" if c2 else "<cCC2/>"
         xml_content += f"""    <ttCC>
         <cCC1>{c1}</cCC1>
@@ -75,21 +51,21 @@ def create_supplier_xml_response(data):
 """
 
     for supplier in data:
-        c_code = _xml_escape(supplier.get("cCode", ""))
-        c_name = _xml_escape(supplier.get("cName", ""))
-        c_term_code = _xml_escape(supplier.get("cTermCode", ""))
-        c_term_desc = _xml_escape(supplier.get("cTermDesc", ""))
-        c_address1 = _xml_escape(supplier.get("cAddress1", ""))
-        c_address2 = _xml_escape(supplier.get("cAddress2", ""))
-        c_city = _xml_escape(supplier.get("cCity", ""))
-        c_province = _xml_escape(supplier.get("cProvince", ""))
-        c_country = _xml_escape(supplier.get("cCountry", ""))
-        c_zip_code = _xml_escape(supplier.get("cZipCode", ""))
-        c_no_tps = _xml_escape(supplier.get("cNoTPS", ""))
-        c_no_tvq = _xml_escape(supplier.get("cNoTVQ", ""))
-        c_code_ach = _xml_escape(supplier.get("cCodeAch", ""))
-        c_desc_ach = _xml_escape(supplier.get("cDescAch", ""))
-        c_dept_sauv = _xml_escape(supplier.get("cDeptSauv", ""))
+        c_code = xml_escape(supplier.get("cCode", ""))
+        c_name = xml_escape(supplier.get("cName", ""))
+        c_term_code = xml_escape(supplier.get("cTermCode", ""))
+        c_term_desc = xml_escape(supplier.get("cTermDesc", ""))
+        c_address1 = xml_escape(supplier.get("cAddress1", ""))
+        c_address2 = xml_escape(supplier.get("cAddress2", ""))
+        c_city = xml_escape(supplier.get("cCity", ""))
+        c_province = xml_escape(supplier.get("cProvince", ""))
+        c_country = xml_escape(supplier.get("cCountry", ""))
+        c_zip_code = xml_escape(supplier.get("cZipCode", ""))
+        c_no_tps = xml_escape(supplier.get("cNoTPS", ""))
+        c_no_tvq = xml_escape(supplier.get("cNoTVQ", ""))
+        c_code_ach = xml_escape(supplier.get("cCodeAch", ""))
+        c_desc_ach = xml_escape(supplier.get("cDescAch", ""))
+        c_dept_sauv = xml_escape(supplier.get("cDeptSauv", ""))
         i_type_po = supplier.get("iTypePO", 0)
         i_statut_ach = supplier.get("iStatutAch", 0)
         xml_content += f"""    <ttSupplier>
@@ -219,13 +195,13 @@ def build_dspodetail_xml(ttpoheader, ttpodetail_list):
         "    <ttPOheader>",
     ]
     for key in _PO_HEADER_KEYS:
-        val = _xml_escape(str(h.get(key, "") or ""))
+        val = xml_escape(str(h.get(key, "") or ""))
         lines.append(f"        <{key}>{val}</{key}>")
     lines.append("    </ttPOheader>")
     for item in ttpodetail_list or []:
         lines.append("    <ttPOdetail>")
         for key in _PO_DETAIL_KEYS:
-            val = _xml_escape(str(item.get(key, "") or ""))
+            val = xml_escape(str(item.get(key, "") or ""))
             lines.append(f"        <{key}>{val}</{key}>")
         lines.append("    </ttPOdetail>")
     lines.append("</dsPOdetail>")
@@ -333,8 +309,8 @@ def create_dsreceiving_xml_response(receiving_list):
             i_receiving = int(rec.get("NoReception") or 0)
         except (TypeError, ValueError):
             i_receiving = 0
-        c_po = _xml_escape(rec.get("NoBonCommande", ""))
-        d_receiving_date = _xml_escape(rec.get("DateReception", ""))
+        c_po = xml_escape(rec.get("NoBonCommande", ""))
+        d_receiving_date = xml_escape(rec.get("DateReception", ""))
         xml_content += f"""    <ttReceiving>
         <iReceiving>{i_receiving}</iReceiving>
         <cPO>{c_po}</cPO>
@@ -362,13 +338,13 @@ def create_receiving_details_xml_response(reception):
     # Emit header when a canonical total is present (matches real PowerWARE feed).
     montant_total = reception.get("MontantTotal")
     if montant_total is not None and str(montant_total).strip() != "":
-        c_po = _xml_escape(reception.get("NoBonCommande", "") or "")
-        d_date = _xml_escape(reception.get("DateReception", "") or "")
-        d_sub = _xml_escape(str(reception.get("SousTotal") or ""))
-        d_freight = _xml_escape(str(reception.get("Transport") or "0.00"))
-        d_gst = _xml_escape(str(reception.get("TPS") or ""))
-        d_pst = _xml_escape(str(reception.get("TVQ") or ""))
-        d_total = _xml_escape(str(montant_total))
+        c_po = xml_escape(reception.get("NoBonCommande", "") or "")
+        d_date = xml_escape(reception.get("DateReception", "") or "")
+        d_sub = xml_escape(str(reception.get("SousTotal") or ""))
+        d_freight = xml_escape(str(reception.get("Transport") or "0.00"))
+        d_gst = xml_escape(str(reception.get("TPS") or ""))
+        d_pst = xml_escape(str(reception.get("TVQ") or ""))
+        d_total = xml_escape(str(montant_total))
         xml_content += f"""    <ttRcvHeader>
         <iReceiving>{i_receiving}</iReceiving>
         <cPO>{c_po}</cPO>
@@ -382,8 +358,8 @@ def create_receiving_details_xml_response(reception):
 """
 
     for article in reception.get("Articles", []):
-        c_product_code = _xml_escape(article.get("CodeArticle", ""))
-        c_description = _xml_escape(article.get("Description", ""))
+        c_product_code = xml_escape(article.get("CodeArticle", ""))
+        c_description = xml_escape(article.get("Description", ""))
         try:
             d_qty_received = float(article.get("QuantiteRecue") or 0)
         except (TypeError, ValueError):
@@ -397,9 +373,9 @@ def create_receiving_details_xml_response(reception):
                 d_total_amount = round(qty * unit, 2)
         except (TypeError, ValueError):
             d_total_amount = 0.0
-        c_gl = _xml_escape(article.get("cGL", "") or article.get("CodeGL", "") or "")
-        c_cc1 = _xml_escape(article.get("cCC1", "") or article.get("CC1", "") or "")
-        c_cc2 = _xml_escape(article.get("cCC2", "") or article.get("CC2", "") or "")
+        c_gl = xml_escape(article.get("cGL", "") or article.get("CodeGL", "") or "")
+        c_cc1 = xml_escape(article.get("cCC1", "") or article.get("CC1", "") or "")
+        c_cc2 = xml_escape(article.get("cCC2", "") or article.get("CC2", "") or "")
         d_unit_cost = article.get("dUnitCost") or article.get("PrixUnitaire") or ""
         d_sub_total = article.get("dSubTotal") or ""
         d_freight = article.get("dFreight") or ""
@@ -411,11 +387,11 @@ def create_receiving_details_xml_response(reception):
         <cProductCode>{c_product_code}</cProductCode>
         <cDescription>{c_description}</cDescription>
         <dQtyReceived>{d_qty_received}</dQtyReceived>
-        <dUnitCost>{_xml_escape(str(d_unit_cost))}</dUnitCost>
-        <dSubTotal>{_xml_escape(str(d_sub_total))}</dSubTotal>
-        <dFreight>{_xml_escape(str(d_freight))}</dFreight>
-        <dGST>{_xml_escape(str(d_gst))}</dGST>
-        <dPST>{_xml_escape(str(d_pst))}</dPST>
+        <dUnitCost>{xml_escape(str(d_unit_cost))}</dUnitCost>
+        <dSubTotal>{xml_escape(str(d_sub_total))}</dSubTotal>
+        <dFreight>{xml_escape(str(d_freight))}</dFreight>
+        <dGST>{xml_escape(str(d_gst))}</dGST>
+        <dPST>{xml_escape(str(d_pst))}</dPST>
         <dTotalAmount>{d_total_amount}</dTotalAmount>
         <cGL>{c_gl}</cGL>
         <cCC1>{c_cc1}</cCC1>
@@ -426,227 +402,28 @@ def create_receiving_details_xml_response(reception):
     return Response(xml_content, mimetype="application/xml; charset=utf-8")
 
 
-# API 1: Détails de réception
-@bp.route("/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI/getReceivingDetails.p", methods=["GET"])
-def get_receiving_details():
-    """Récupérer les détails d'une réception spécifique"""
-    try:
-        company = request.args.get("COMPANY", "")
-        no_reception = request.args.get("NoReception", "")
-
-        if not company:
-            return jsonify({"error": "Paramètre COMPANY requis"}), 400
-
-        if not no_reception:
-            return jsonify({"error": "Paramètre NoReception requis"}), 400
-
-        # Rechercher la réception
-        reception = purch.rec_get(no_reception)[0]
-        if reception is not None and reception.get("COMPANY") != company:
-            reception = None
-
-        if not reception:
-            return jsonify({"error": f"Réception {no_reception} non trouvée pour la compagnie {company}"}), 404
-
-        return create_receiving_details_xml_response(reception)
-    except Exception:
-        return jsonify({"error": "Erreur lors de la récupération des détails de réception"}), 500
-
-
-# API 2: Bons de commande non facturés (format réel dsPO / ttPO)
-@bp.route("/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI/getUnbilledPO.p", methods=["GET"])
-def get_unbilled_po():
-    """Unbilled POs (XML dsPO / ttPO). Optional Supplier filters by cSupplierCode. Empty list = 200 empty dsPO."""
-    try:
-        company = request.args.get("COMPANY", "")
-
-        if not company:
-            return jsonify({"error": "Paramètre COMPANY requis"}), 400
-
-        filtered_po = [po for po in purch.unbilled_po_list() if po.get("COMPANY") == company]
-        supplier = (request.args.get("Supplier") or "").strip()
-        if supplier:
-            supplier_upper = supplier.upper()
-            filtered_po = [
-                po for po in filtered_po if (po.get("cSupplierCode") or "").strip().upper() == supplier_upper
-            ]
-
-        xml_content = build_dspo_xml(filtered_po)
-        return Response(xml_content, mimetype="application/xml; charset=utf-8")
-    except Exception:
-        return jsonify({"error": "Erreur lors de la récupération des bons de commande non facturés"}), 500
-
-
-# API 3: Réceptions non facturées
-@bp.route("/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI/getUnbilledReceiving.p", methods=["GET"])
-def get_unbilled_receiving():
-    """Récupérer toutes les réceptions non facturées"""
-    try:
-        company = request.args.get("COMPANY", "")
-
-        if not company:
-            return jsonify({"error": "Paramètre COMPANY requis"}), 400
-
-        # Filtrer par compagnie
-        filtered_receiving = [r for r in purch.unbilled_receiving_list() if r.get("COMPANY") == company]
-
-        if not filtered_receiving:
-            return jsonify({"error": f"Aucune réception non facturée trouvée pour la compagnie {company}"}), 404
-
-        return create_dsreceiving_xml_response(filtered_receiving)
-    except Exception:
-        return jsonify({"error": "Erreur lors de la récupération des réceptions non facturées"}), 500
-
-
-# API 4: Comptes GL (General Ledger) - JSON source, convert to dsGLCC XML or JSON conforme solicitado
-@bp.route("/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI/getGLaccounts.p", methods=["GET"])
-def get_gl_accounts():
-    """Récupérer GL accounts et cost centers. Accept: application/json ou format=json → JSON. Sinon → XML dsGLCC."""
-    try:
-        company = request.args.get("COMPANY", "")
-        cc1_filter = request.args.get("CC1", "")
-        wants_json = request.args.get("format", "").lower() == "json" or "application/json" in (
-            request.headers.get("Accept") or ""
-        )
-
-        if not company:
-            return jsonify({"error": "Paramètre COMPANY requis"}), 400
-
-        gl_ttGL_data = store("gl_accounts").all()
-        filtered_ttcc = store("cost_centers").all()
-        if cc1_filter:
-            filtered_ttcc = [acc for acc in filtered_ttcc if acc.get("cCC1") == cc1_filter]
-
-        if not gl_ttGL_data and not filtered_ttcc:
-            return jsonify({"error": "Aucun compte GL trouvé"}), 404
-
-        if wants_json:
-            return jsonify({"gl_accounts": gl_ttGL_data, "cost_centers": filtered_ttcc})
-        return create_gl_xml_response(gl_ttGL_data, filtered_ttcc)
-    except Exception:
-        return jsonify({"error": "Erreur lors de la récupération des comptes GL"}), 500
-
-
-# API 5: Détails de bon de commande (format réel dsPOdetail / ttPOheader / ttPOdetail)
-@bp.route("/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI/getPODetails.p", methods=["GET"])
-def get_po_details():
-    """Récupérer les détails complets d'un bon de commande (XML dsPOdetail avec ttPOheader et ttPOdetail)."""
-    try:
-        company = request.args.get("COMPANY", "")
-        po_number = request.args.get("PO", "")
-
-        if not company:
-            return jsonify({"error": "Paramètre COMPANY requis"}), 400
-
-        if not po_number:
-            return jsonify({"error": "Paramètre PO requis"}), 400
-
-        po_detail = purch.po_get(po_number)[0]
-        if po_detail is not None and po_detail.get("COMPANY") != company:
-            po_detail = None
-
-        if not po_detail:
-            return jsonify({"error": f"Bon de commande {po_number} non trouvé pour la compagnie {company}"}), 404
-
-        xml_content = build_dspodetail_xml(po_detail.get("ttPOheader", {}), po_detail.get("ttPOdetail", []))
-        return Response(xml_content, mimetype="application/xml; charset=utf-8")
-    except Exception:
-        return jsonify({"error": "Erreur lors de la récupération des détails du bon de commande"}), 500
-
-
-# API 6: Termes des fournisseurs (NOUVELLE API)
-@bp.route("/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI/getSupplierTerm.p", methods=["GET"])
-def get_supplier_term():
-    """Récupérer les informations et termes de paiement des fournisseurs"""
-    try:
-        company = request.args.get("COMPANY", "")
-        supplier_code = request.args.get("SupplierCode", "")
-        term_filter = request.args.get("TermCode", "")
-
-        if not company:
-            return jsonify({"error": "Paramètre COMPANY requis"}), 400
-
-        # Filtrer les fournisseurs
-        filtered_suppliers = store("suppliers").all()
-
-        # Filtrer par code fournisseur si spécifié
-        if supplier_code:
-            filtered_suppliers = [s for s in filtered_suppliers if s["cCode"].upper() == supplier_code.upper()]
-
-        # Filtrer par code de terme si spécifié
-        if term_filter:
-            filtered_suppliers = [s for s in filtered_suppliers if s["cTermCode"].upper() == term_filter.upper()]
-
-        if not filtered_suppliers:
-            error_msg = "Aucun fournisseur trouvé"
-            if supplier_code:
-                error_msg += f" avec le code {supplier_code}"
-            if term_filter:
-                error_msg += f" avec le terme {term_filter}"
-            return jsonify({"error": error_msg}), 404
-
-        return create_supplier_xml_response(filtered_suppliers)
-    except Exception:
-        return jsonify({"error": "Erreur lors de la récupération des termes fournisseurs"}), 500
-
-
-# API de statistiques pour le système
-@bp.route("/cgi-bin/cgiip.exe/WService=wsbroker1/wm/custom/vol100/SkyAI/getStats.p", methods=["GET"])
-def get_skyai_stats():
-    """Récupérer les statistiques du système SkyAI"""
-    try:
-        company = request.args.get("COMPANY", "MA2")
-
-        # Calculer les statistiques (format unbilled_po: cPO, dCreationDate, cSupplierName; pas de MontantEnAttente)
-        total_unbilled_po = len([po for po in purch.unbilled_po_list() if po.get("COMPANY") == company])
-        total_unbilled_receiving = len([r for r in purch.unbilled_receiving_list() if r.get("COMPANY") == company])
-        total_amount_pending = 0.0
-        total_suppliers = store("suppliers").count()
-
-        stats = {
-            "COMPANY": company,
-            "DateGenerationStats": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "TotalBonesCommandeNonFactures": total_unbilled_po,
-            "TotalReceptionsNonFacturees": total_unbilled_receiving,
-            "MontantTotalEnAttente": f"{total_amount_pending:.2f}",
-            "TotalFournisseurs": total_suppliers,
-            "Devise": "CAD",
-            "StatusSysteme": "Opérationnel",
-            "DerniereMAJ": "2025-09-19 10:30:00",
-        }
-
-        return create_xml_response(stats)
-    except Exception:
-        return jsonify({"error": "Erreur lors du calcul des statistiques"}), 500
-
-
-# ---------------------------------------------------------------------------
-# Invoice creation (writes into the ERP)
-# ---------------------------------------------------------------------------
-
-
-def _invoice_response_error(c_no_fourn, c_no_facture, d_date_facture, c_erreur):
+def invoice_error_response(c_no_fourn, c_no_facture, d_date_facture, c_erreur):
     """Build dsOutput XML with ttError (Powerware format)."""
     xml = f"""<?xml version="1.0"?>
 <dsOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ttError>
-        <cNoFourn>{_xml_escape(c_no_fourn)}</cNoFourn>
-        <cNoFacture>{_xml_escape(c_no_facture)}</cNoFacture>
-        <dDateFacture>{_xml_escape(d_date_facture)}</dDateFacture>
-        <cErreur>{_xml_escape(c_erreur)}</cErreur>
+        <cNoFourn>{xml_escape(c_no_fourn)}</cNoFourn>
+        <cNoFacture>{xml_escape(c_no_facture)}</cNoFacture>
+        <dDateFacture>{xml_escape(d_date_facture)}</dDateFacture>
+        <cErreur>{xml_escape(c_erreur)}</cErreur>
     </ttError>
 </dsOutput>"""
     return Response(xml, mimetype="application/xml; charset=utf-8"), 200
 
 
-def _invoice_response_success(c_no_fourn, c_no_facture, d_date_facture):
+def invoice_success_response(c_no_fourn, c_no_facture, d_date_facture):
     """Build dsOutput XML with ttInvoice (Powerware format)."""
     xml = f"""<?xml version="1.0"?>
 <dsOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ttInvoice>
-        <cNoFourn>{_xml_escape(c_no_fourn)}</cNoFourn>
-        <cNoFacture>{_xml_escape(c_no_facture)}</cNoFacture>
-        <dDateFacture>{_xml_escape(d_date_facture)}</dDateFacture>
+        <cNoFourn>{xml_escape(c_no_fourn)}</cNoFourn>
+        <cNoFacture>{xml_escape(c_no_facture)}</cNoFacture>
+        <dDateFacture>{xml_escape(d_date_facture)}</dDateFacture>
     </ttInvoice>
 </dsOutput>"""
     return Response(xml, mimetype="application/xml; charset=utf-8"), 200
@@ -656,7 +433,7 @@ def _local(elem):
     return (elem.tag or "").split("}")[-1]
 
 
-def _parse_dsinput(body):
+def parse_dsinput(body):
     """Parse a dsInput XML body into (header dict, list of line dicts)."""
     root = ET.fromstring(body)
     hd = next((e for e in root.iter() if _local(e) == "ttInputHD"), None)
@@ -665,56 +442,3 @@ def _parse_dsinput(body):
     header = {_local(c): (c.text or "").strip() for c in hd}
     lines = [{_local(c): (c.text or "").strip() for c in dt} for dt in root.iter() if _local(dt) == "ttInputDT"]
     return header, lines
-
-
-def _create_invoice(with_po):
-    today = datetime.now().strftime("%Y-%m-%d")
-    body = request.get_data(as_text=True) or ""
-    if not body.strip():
-        return _invoice_response_error("", "", today, "Corps de la requête vide")
-    try:
-        header, lines = _parse_dsinput(body)
-    except ET.ParseError as e:
-        return _invoice_response_error("", "", today, f"XML invalide: {e}")
-    except ValueError as e:
-        return _invoice_response_error("", "", today, str(e))
-
-    supplier = header.get("cNoFourn", "")
-    number = header.get("cNoFacture", "")
-    date = header.get("dDateFacture", "") or today
-    if not supplier or not number:
-        return _invoice_response_error(supplier, number, date, "Fournisseur et numéro de facture requis")
-
-    # Same error simulation as the SkyAI mock API
-    simulate = request.args.get("simulate_error", "").strip() in ("1", "true", "yes")
-    if simulate or "FAIL" in number.upper() or "ERROR" in number.upper():
-        return _invoice_response_error(supplier, number, date, "Facture existante")
-
-    if _invoice_hooks["exists"](supplier, number):
-        return _invoice_response_error(supplier, number, date, "Facture existante")
-
-    try:
-        _invoice_hooks["record"](header, lines, with_po)
-    except Exception as e:  # keep the PowerWARE contract: errors come back as ttError
-        logger.exception("PowerERP: could not create invoice")
-        return _invoice_response_error(supplier, number, date, str(e))
-    return _invoice_response_success(supplier, number, date)
-
-
-@bp.route(PW_PREFIX + "/apInvoiceNoPO.p", methods=["POST"])
-def ap_invoice_no_po():
-    """Create an invoice without PO in the ERP (dsInput: ttInputHD + ttInputDT with cGL/cCC1/cCC2)."""
-    return _create_invoice(with_po=False)
-
-
-@bp.route(PW_PREFIX + "/apInvoiceWithPO.p", methods=["POST"])
-def ap_invoice_with_po():
-    """Create an invoice with PO in the ERP (dsInput: ttInputHD with cNoCommAch + ttInputDT with iNoReception)."""
-    return _create_invoice(with_po=True)
-
-
-def register_powerware(app, ns, invoice_exists, record_invoice):
-    """Bind the endpoints to the ERP data (ns) and the ERP invoice hooks, then mount them."""
-    _invoice_hooks["exists"] = invoice_exists
-    _invoice_hooks["record"] = record_invoice
-    app.register_blueprint(bp)

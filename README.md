@@ -168,15 +168,22 @@ What happens when SkyAI creates an invoice:
 ## Project structure
 
 ```
-app.py          # Flask entry point: database, login, ERP and PowerWARE services
-db.py           # PostgreSQL storage (users, settings, ERP data)
-powererp/       # core package: config, database (SQLAlchemy), relational models
-migrations/     # Alembic schema migrations (applied when the ERP starts)
-auth.py         # Login, users API (/api/auth/..., /api/users) and access control
-erp_api.py      # JSON API (/api/...) and static file serving
-powerware_api.py # PowerWARE-compatible web services used by SkyAI
-static/         # UI: index.html, app.js, i18n.js (EN/FR), styles.css — no build step
-data/           # Seed data (JSON) for an empty database
+app.py                  # entry point: app = create_app()
+powererp/
+  factory.py            # create_app(): database, modules, seed; services registered in the container
+  container.py          # dependency container
+  core/                 # AppError + error handler, value parsing, pagination, HTTP helpers
+  modules/              # one package per business area: routes -> services -> repository
+    system/             #   screens' files, dashboard, lookups, demo data life cycle (reset / clear)
+    ledger/ suppliers/ taxes/ catalog/ purchasing/
+  integrations/powerware/  # PowerWARE web services used by SkyAI (routes, XML, apCreatePO.p)
+  models/ store.py stock.py backup.py database.py schemas.py seed/
+migrations/             # Alembic schema migrations (applied when the ERP starts)
+inventory_api.py        # products, stock, counts, replenishment (moves into powererp/modules in O4)
+auth.py backup_api.py db.py  # login and users, backups screen, settings storage (O5)
+static/                 # UI: index.html, app.js, i18n*.js (EN/FR), styles.css: no build step
+data/                   # Seed data (JSON) for an empty database
+tests/                  # API tests (the contract) and tests/unit (services, without Flask nor database)
 ```
 
 ## API

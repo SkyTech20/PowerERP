@@ -86,7 +86,7 @@ def apply(m, effects):
 def rebuild(movements, effects_of):
     """Recalculate every balance from the movements (after a reset or a load of older data)."""
     clear()
-    out = {}
+    out: dict[tuple, dict] = {}
     for m in movements:
         for wh, loc, dq, dr in effects_of(m):
             key = (

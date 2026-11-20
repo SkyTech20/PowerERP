@@ -63,5 +63,5 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     app.register_blueprint(bp)
     c.get("lookups").register("uom", label_lookup(units, DESC_FR, DESC_EN))
     c.get("lookups").register("categories", label_lookup(categories, DESC_FR, DESC_EN))
-    c.get("seeds").add(units.repo, "inv_uom", seed.get("uom", []))
-    c.get("seeds").add(categories.repo, "inv_categories", seed.get("categories", []))
+    c.get("lifecycle").add(units.repo, "inv_uom", seed.get("uom", []))
+    c.get("lifecycle").add(categories.repo, "inv_categories", seed.get("categories", []))
