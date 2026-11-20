@@ -1,5 +1,5 @@
 {
-  "_comment": "Production demo data (M0): reference lists shared by a paper mill, a bakery and a metal shop.",
+  "_comment": "Production demo data: a paper mill (PAP), a bakery (BAK) and a metal shop (MET). P1 reference lists, P2 calendars.",
   "capabilities": [
     {
       "cCode": "CUT",
@@ -239,6 +239,490 @@
       "cDescEN": "Handling error",
       "cGroup": "operator",
       "lActive": true
+    }
+  ],
+  "calendars": [
+    {
+      "cCode": "PAP-24-7",
+      "cDescFR": "Papier : 3 équipes, 24 h sur 24, 7 jours",
+      "cDescEN": "Paper: 3 shifts, 24/7",
+      "lActive": true,
+      "lines": [
+        {
+          "iWeekday": 1,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 1,
+          "cShift": "SOIR",
+          "cStart": "15:00",
+          "cEnd": "23:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 1,
+          "cShift": "NUIT",
+          "cStart": "23:00",
+          "cEnd": "07:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 2,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 2,
+          "cShift": "SOIR",
+          "cStart": "15:00",
+          "cEnd": "23:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 2,
+          "cShift": "NUIT",
+          "cStart": "23:00",
+          "cEnd": "07:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 3,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 3,
+          "cShift": "SOIR",
+          "cStart": "15:00",
+          "cEnd": "23:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 3,
+          "cShift": "NUIT",
+          "cStart": "23:00",
+          "cEnd": "07:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 4,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 4,
+          "cShift": "SOIR",
+          "cStart": "15:00",
+          "cEnd": "23:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 4,
+          "cShift": "NUIT",
+          "cStart": "23:00",
+          "cEnd": "07:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 5,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 5,
+          "cShift": "SOIR",
+          "cStart": "15:00",
+          "cEnd": "23:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 5,
+          "cShift": "NUIT",
+          "cStart": "23:00",
+          "cEnd": "07:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 6,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 6,
+          "cShift": "SOIR",
+          "cStart": "15:00",
+          "cEnd": "23:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 6,
+          "cShift": "NUIT",
+          "cStart": "23:00",
+          "cEnd": "07:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 7,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 7,
+          "cShift": "SOIR",
+          "cStart": "15:00",
+          "cEnd": "23:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 7,
+          "cShift": "NUIT",
+          "cStart": "23:00",
+          "cEnd": "07:00",
+          "iBreakMin": 30
+        }
+      ]
+    },
+    {
+      "cCode": "BAK-2X6",
+      "cDescFR": "Boulangerie : 2 équipes, lundi au samedi",
+      "cDescEN": "Bakery: 2 shifts, Monday to Saturday",
+      "lActive": true,
+      "lines": [
+        {
+          "iWeekday": 1,
+          "cShift": "MATIN",
+          "cStart": "06:00",
+          "cEnd": "14:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 1,
+          "cShift": "SOIR",
+          "cStart": "14:00",
+          "cEnd": "22:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 2,
+          "cShift": "MATIN",
+          "cStart": "06:00",
+          "cEnd": "14:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 2,
+          "cShift": "SOIR",
+          "cStart": "14:00",
+          "cEnd": "22:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 3,
+          "cShift": "MATIN",
+          "cStart": "06:00",
+          "cEnd": "14:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 3,
+          "cShift": "SOIR",
+          "cStart": "14:00",
+          "cEnd": "22:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 4,
+          "cShift": "MATIN",
+          "cStart": "06:00",
+          "cEnd": "14:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 4,
+          "cShift": "SOIR",
+          "cStart": "14:00",
+          "cEnd": "22:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 5,
+          "cShift": "MATIN",
+          "cStart": "06:00",
+          "cEnd": "14:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 5,
+          "cShift": "SOIR",
+          "cStart": "14:00",
+          "cEnd": "22:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 6,
+          "cShift": "MATIN",
+          "cStart": "06:00",
+          "cEnd": "14:00",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 6,
+          "cShift": "SOIR",
+          "cStart": "14:00",
+          "cEnd": "22:00",
+          "iBreakMin": 30
+        }
+      ]
+    },
+    {
+      "cCode": "MET-1X5",
+      "cDescFR": "Métal : 1 équipe, lundi au vendredi",
+      "cDescEN": "Metal: 1 shift, Monday to Friday",
+      "lActive": true,
+      "lines": [
+        {
+          "iWeekday": 1,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:30",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 2,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:30",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 3,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:30",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 4,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:30",
+          "iBreakMin": 30
+        },
+        {
+          "iWeekday": 5,
+          "cShift": "JOUR",
+          "cStart": "07:00",
+          "cEnd": "15:30",
+          "iBreakMin": 30
+        }
+      ]
+    }
+  ],
+  "calendar_exceptions": [
+    {
+      "cCalendar": "*",
+      "dDate": "2026-12-25",
+      "cDescFR": "Noël (toute l'usine fermée)",
+      "cDescEN": "Christmas (whole plant closed)",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2027-01-01",
+      "cDescFR": "Jour de l'An",
+      "cDescEN": "New Year's Day",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2027-03-26",
+      "cDescFR": "Vendredi saint",
+      "cDescEN": "Good Friday",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2027-03-29",
+      "cDescFR": "Lundi de Pâques",
+      "cDescEN": "Easter Monday",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2027-05-24",
+      "cDescFR": "Journée nationale des patriotes",
+      "cDescEN": "National Patriots' Day",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2027-06-24",
+      "cDescFR": "Fête nationale du Québec",
+      "cDescEN": "Quebec National Holiday",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2027-07-01",
+      "cDescFR": "Fête du Canada",
+      "cDescEN": "Canada Day",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2027-09-06",
+      "cDescFR": "Fête du Travail",
+      "cDescEN": "Labour Day",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2027-10-11",
+      "cDescFR": "Action de grâce",
+      "cDescEN": "Thanksgiving",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2027-01-01",
+      "cDescFR": "Jour de l'An",
+      "cDescEN": "New Year's Day",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2027-03-26",
+      "cDescFR": "Vendredi saint",
+      "cDescEN": "Good Friday",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2027-03-29",
+      "cDescFR": "Lundi de Pâques",
+      "cDescEN": "Easter Monday",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2027-05-24",
+      "cDescFR": "Journée nationale des patriotes",
+      "cDescEN": "National Patriots' Day",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2027-06-24",
+      "cDescFR": "Fête nationale du Québec",
+      "cDescEN": "Quebec National Holiday",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2027-07-01",
+      "cDescFR": "Fête du Canada",
+      "cDescEN": "Canada Day",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2027-09-06",
+      "cDescFR": "Fête du Travail",
+      "cDescEN": "Labour Day",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2027-10-11",
+      "cDescFR": "Action de grâce",
+      "cDescEN": "Thanksgiving",
+      "lClosed": true,
+      "cStart": "",
+      "cEnd": "",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "MET-1X5",
+      "dDate": "2026-11-28",
+      "cDescFR": "Heures supplémentaires (samedi matin)",
+      "cDescEN": "Overtime (Saturday morning)",
+      "lClosed": false,
+      "cStart": "07:00",
+      "cEnd": "12:00",
+      "iBreakMin": 0
+    },
+    {
+      "cCalendar": "BAK-2X6",
+      "dDate": "2026-12-24",
+      "cDescFR": "Veille de Noël : fermeture à 14 h",
+      "cDescEN": "Christmas Eve: closes at 2 pm",
+      "lClosed": false,
+      "cStart": "06:00",
+      "cEnd": "14:00",
+      "iBreakMin": 30
     }
   ]
 }

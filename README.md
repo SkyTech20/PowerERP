@@ -56,15 +56,20 @@ Not done yet: receptions and invoices do not move the stock automatically, there
 
 ## Production
 
-`powererp/modules/production`, built milestone by milestone (plan: `Docs/PowerERP-Producao-Plano.md` in the Workflow folder). The goal is a generic module for paper, food, metal and other plants: recipes with step-by-step instructions, full lot traceability, shop floor reporting and scheduling ready for operations research.
+`powererp/modules/production`, built step by step, master data first (plan: `Docs/PowerERP-Cadastros-Plano.md` in the Workflow folder). The goal is a generic module for paper, food, metal and other plants: recipes with step-by-step instructions, full lot traceability, shop floor reporting and scheduling ready for operations research.
 
-- **M0 (done): Production → Production setup.** The reference lists of the shop floor, seeded from `data/production.json` with examples from a paper mill, a bakery and a metal shop:
+- **P1 (done): Production → Production setup.** The reference lists of the shop floor, seeded from `data/production.json` with examples from a paper mill, a bakery and a metal shop:
   - **Capabilities:** what a resource can do (cutting, baking, CNC machining...). An operation will ask for a capability, so any resource that has it can run the operation.
   - **Setup families:** products that change over alike. The setup matrix (M1) will give the minutes from one family to another.
   - **Downtime reasons:** grouped by TPM loss. Planned stops (breaks, preventive maintenance) do not count in the OEE.
   - **Scrap reasons:** grouped by cause.
 - Production never changes the stock itself: it posts stock movements (`cDocType` `PROD`) through the stock service, so every stock rule applies.
-- Next: work centers, resources and calendars (M1), recipes (M2), production orders and lots (M3), shop floor (M4), scheduling (M5, M6).
+- **P2 (done): Production → Calendars.** The working time of the plant:
+  - **Shift schedules:** the shifts of each weekday (start, end, break). A shift ending at or before its start ends the next day (22:00 to 06:00) and counts on the day it starts. Shifts cannot overlap, also across midnight.
+  - **Holidays and exceptions:** a date that is closed or has other hours (overtime, short day), for one calendar or for all of them (`*`).
+  - The calendar screen previews the available hours of a week. `GET /api/calendars/<code>/availability?from=&to=` gives the minutes per day. Work centers and resources (P3, P4) will use them, and so will the scheduler.
+  - Demo: a paper mill on 3 shifts, 24/7; a bakery on 2 shifts, Monday to Saturday; a metal shop on 1 shift, Monday to Friday; Québec holidays.
+- Next: work centers (P3), resources (P4), standard operations (P5), setup matrix (P6), product manufacturing tab (P7), then recipes (P8 to P10).
 
 ## Run
 

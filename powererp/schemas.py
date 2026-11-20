@@ -248,6 +248,20 @@ DOWNTIME_REASON = {
     "lActive": "b",
 }
 SCRAP_REASON = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "cGroup": SCRAP_GROUPS, "lActive": "b"}
+# P2: working calendars. Times are "HH:MM"; a shift ending at or before its start ends the next day (22:00-06:00).
+CALENDAR = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "lActive": "b"}
+CALENDAR_SHIFT = {"iWeekday": "i", "cShift": "s", "cStart": "s", "cEnd": "s", "iBreakMin": "i"}  # 1 = Monday
+# A date that differs from the week: closed (holiday) or other hours (overtime). cCalendar "*" = every calendar.
+CALENDAR_EXCEPTION = {
+    "cCalendar": "s",
+    "dDate": "date",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "lClosed": "b",
+    "cStart": "s",
+    "cEnd": "s",
+    "iBreakMin": "i",
+}
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
@@ -278,4 +292,6 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "setup_families": {"lActive": True},
     "downtime_reasons": {"cGroup": "breakdown", "lAffectsOEE": True, "lActive": True},
     "scrap_reasons": {"cGroup": "process", "lActive": True},
+    "calendars": {"lActive": True},
+    "calendar_exceptions": {"cCalendar": "*", "lClosed": True},
 }

@@ -73,3 +73,70 @@ def test_production_uses_the_stock_service(app):
             user="test",
         )
     assert m["cDocType"] == "PROD"
+
+
+# ------------------------------------------------------------------ P2: calendars
+
+WEEK = "from=2026-11-23&to=2026-11-29"  # Monday to Sunday
+
+
+def test_demo_calendars_available_minutes(client):
+    """3 x 450 min x 7 days; 2 x 450 x 6 days; 5 x 480 + Saturday overtime 300."""
+    mins = {
+        c: client.get(f"/api/calendars/{c}/availability?{WEEK}").get_json() for c in ("PAP-24-7", "BAK-2X6", "MET-1X5")
+    }
+    assert {c: m["iMinutes"] for c, m in mins.items()} == {"PAP-24-7": 9450, "BAK-2X6": 5400, "MET-1X5": 2700}
+    sat = mins["MET-1X5"]["days"][5]
+    assert sat["cException"].startswith("Heures supp") and sat["shifts"] == [
+        {"cShift": "*", "cStart": "07:00", "cEnd": "12:00", "iMinutes": 300}
+    ]
+    xmas = client.get("/api/calendars/PAP-24-7/availability?from=2026-12-25&to=2026-12-25").get_json()
+    assert xmas["iMinutes"] == 0 and xmas["days"][0]["lClosed"]  # "*" closes every calendar
+
+
+def test_calendar_list_and_crud(client):
+    rows = client.get("/api/calendars").get_json()["items"]
+    assert {r["cCode"]: r["iWeekMinutes"] for r in rows}["MET-1X5"] == 2400 and "lines" not in rows[0]
+    body = {
+        "cCode": "nuit",
+        "cDescFR": "Nuit",
+        "lines": [{"iWeekday": 5, "cStart": "22:00", "cEnd": "6:00", "iBreakMin": 30}],
+    }
+    r = client.post("/api/calendars", json=body)
+    assert r.status_code == 201 and r.get_json()["lines"][0]["cEnd"] == "06:00"
+    bad = {**body, "cCode": "X", "lines": body["lines"] + [{"iWeekday": 6, "cStart": "05:00", "cEnd": "08:00"}]}
+    r = client.post("/api/calendars", json=bad)
+    assert r.status_code == 400 and r.get_json()["error"] == "shift_overlap"
+    r = client.get("/api/calendars/NUIT/availability?from=2026-11-27&to=2026-11-27").get_json()
+    assert r["iMinutes"] == 450
+    client.post("/api/calendar-exceptions", json={"cCalendar": "NUIT", "dDate": "2026-11-27", "cDescFR": "Fermé"})
+    assert client.delete("/api/calendars/NUIT").status_code == 200
+    assert client.get("/api/calendar-exceptions/NUIT/2026-11-27").status_code == 404  # gone with the calendar
+
+
+def test_calendar_exceptions_api(client):
+    r = client.post(
+        "/api/calendar-exceptions",
+        json={
+            "cCalendar": "MET-1X5",
+            "dDate": "2026-12-31",
+            "cDescFR": "Court",
+            "lClosed": False,
+            "cStart": "07:00",
+            "cEnd": "11:00",
+        },
+    )
+    assert r.status_code == 201
+    assert (
+        client.post(
+            "/api/calendar-exceptions", json={"cCalendar": "met-1x5", "dDate": "2026-12-31", "cDescFR": "x"}
+        ).status_code
+        == 409
+    )
+    r = client.get("/api/calendar-exceptions?f_cCalendar=*").get_json()
+    assert [e["dDate"] for e in r["items"]] == ["2026-12-25"]
+    assert client.get("/api/calendars/MET-1X5/availability?from=2026-12-31&to=2026-12-31").get_json()["iMinutes"] == 240
+    r = client.get("/api/calendars/MET-1X5/availability?from=nope")
+    assert r.status_code == 400 and r.get_json()["field"] == "from"
+    assert client.get("/api/calendars/NOPE/availability").status_code == 404
+    assert any(x["code"] == "PAP-24-7" for x in client.get("/api/lookups/calendars").get_json())
