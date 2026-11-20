@@ -1,5 +1,5 @@
 {
-  "_comment": "Production demo data: a paper mill (PAP), a bakery (BAK) and a metal shop (MET). P1 reference lists, P2 calendars, P3 work centers.",
+  "_comment": "Production demo data: a paper mill (PAP), a bakery (BAK) and a metal shop (MET). P1 reference lists, P2 calendars, P3 work centers, P4 resources.",
   "capabilities": [
     {
       "cCode": "CUT",
@@ -967,6 +967,568 @@
       "cSupplier": "",
       "cNotes": "",
       "lActive": true
+    }
+  ],
+  "resources": [
+    {
+      "cCode": "MP1",
+      "cDescFR": "Machine à papier 1",
+      "cDescEN": "Paper machine 1",
+      "cWorkCenter": "PAP-MP",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "Valmet",
+      "cModel": "Advantage DCT 200",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [],
+      "attributes": [
+        {
+          "cAttribute": "Largeur",
+          "cUOM": "m",
+          "dMin": "",
+          "dMax": "5.4",
+          "cValue": ""
+        },
+        {
+          "cAttribute": "Grammage",
+          "cUOM": "g/m²",
+          "dMin": "14",
+          "dMax": "40",
+          "cValue": ""
+        },
+        {
+          "cAttribute": "Vitesse",
+          "cUOM": "m/min",
+          "dMin": "",
+          "dMax": "2000",
+          "cValue": ""
+        }
+      ],
+      "subresources": [
+        {
+          "cCode": "CAISSE",
+          "cDescFR": "Caisse de tête",
+          "cDescEN": "Headbox"
+        },
+        {
+          "cCode": "TOILE",
+          "cDescFR": "Toile de formation",
+          "cDescEN": "Forming fabric"
+        },
+        {
+          "cCode": "YANKEE",
+          "cDescFR": "Cylindre Yankee (sécheur)",
+          "cDescEN": "Yankee dryer"
+        },
+        {
+          "cCode": "ENROUL",
+          "cDescFR": "Enrouleuse",
+          "cDescEN": "Reel"
+        }
+      ],
+      "downtime": [
+        {
+          "dStart": "2026-11-26",
+          "cStartTime": "06:00",
+          "dEnd": "2026-11-26",
+          "cEndTime": "14:00",
+          "cReason": "PM",
+          "cNotes": "Changement de toile planifié"
+        }
+      ]
+    },
+    {
+      "cCode": "REB1",
+      "cDescFR": "Rebobineuse 1",
+      "cDescEN": "Rewinder 1",
+      "cWorkCenter": "PAP-REBOB",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "Valmet",
+      "cModel": "WinBelt",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "WIND",
+          "iPreference": 1
+        },
+        {
+          "cCapability": "CUT",
+          "iPreference": 2
+        }
+      ],
+      "attributes": [
+        {
+          "cAttribute": "Largeur",
+          "cUOM": "m",
+          "dMin": "",
+          "dMax": "2.8",
+          "cValue": ""
+        },
+        {
+          "cAttribute": "Couteaux",
+          "cUOM": "",
+          "dMin": "",
+          "dMax": "8",
+          "cValue": ""
+        }
+      ],
+      "subresources": [
+        {
+          "cCode": "DEROUL",
+          "cDescFR": "Dérouleur",
+          "cDescEN": "Unwind stand"
+        },
+        {
+          "cCode": "COUT",
+          "cDescFR": "Couteaux",
+          "cDescEN": "Slitter knives"
+        },
+        {
+          "cCode": "ENROUL",
+          "cDescFR": "Enrouleuse",
+          "cDescEN": "Winder"
+        }
+      ],
+      "downtime": []
+    },
+    {
+      "cCode": "REB2",
+      "cDescFR": "Rebobineuse 2 (ancienne)",
+      "cDescEN": "Rewinder 2 (older)",
+      "cWorkCenter": "PAP-REBOB",
+      "cCalendar": "",
+      "dSpeedFactor": "0.8",
+      "iParallel": 1,
+      "cManufacturer": "",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "WIND",
+          "iPreference": 2
+        },
+        {
+          "cCapability": "CUT",
+          "iPreference": 2
+        }
+      ],
+      "attributes": [
+        {
+          "cAttribute": "Largeur",
+          "cUOM": "m",
+          "dMin": "",
+          "dMax": "2.5",
+          "cValue": ""
+        },
+        {
+          "cAttribute": "Couteaux",
+          "cUOM": "",
+          "dMin": "",
+          "dMax": "6",
+          "cValue": ""
+        }
+      ],
+      "subresources": [
+        {
+          "cCode": "DEROUL",
+          "cDescFR": "Dérouleur",
+          "cDescEN": "Unwind stand"
+        },
+        {
+          "cCode": "COUT",
+          "cDescFR": "Couteaux",
+          "cDescEN": "Slitter knives"
+        }
+      ],
+      "downtime": []
+    },
+    {
+      "cCode": "TRF1",
+      "cDescFR": "Ligne de transformation essuie-tout",
+      "cDescEN": "Towel converting line",
+      "cWorkCenter": "PAP-TRANSF",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "Fabio Perini",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "CONVERT",
+          "iPreference": 1
+        },
+        {
+          "cCapability": "PACK",
+          "iPreference": 2
+        }
+      ],
+      "attributes": [],
+      "subresources": [],
+      "downtime": []
+    },
+    {
+      "cCode": "PET1",
+      "cDescFR": "Pétrin spirale 200 kg",
+      "cDescEN": "Spiral mixer 200 kg",
+      "cWorkCenter": "BAK-PETRIN",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "MIX",
+          "iPreference": 1
+        }
+      ],
+      "attributes": [
+        {
+          "cAttribute": "Capacité cuve",
+          "cUOM": "kg",
+          "dMin": "",
+          "dMax": "200",
+          "cValue": ""
+        }
+      ],
+      "subresources": [],
+      "downtime": []
+    },
+    {
+      "cCode": "PET2",
+      "cDescFR": "Pétrin spirale 120 kg",
+      "cDescEN": "Spiral mixer 120 kg",
+      "cWorkCenter": "BAK-PETRIN",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "MIX",
+          "iPreference": 2
+        }
+      ],
+      "attributes": [
+        {
+          "cAttribute": "Capacité cuve",
+          "cUOM": "kg",
+          "dMin": "",
+          "dMax": "120",
+          "cValue": ""
+        }
+      ],
+      "subresources": [],
+      "downtime": []
+    },
+    {
+      "cCode": "FOUR1",
+      "cDescFR": "Four tunnel",
+      "cDescEN": "Tunnel oven",
+      "cWorkCenter": "BAK-FOUR",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 3,
+      "cManufacturer": "",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "3 plaques en même temps dans le tunnel.",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "BAKE",
+          "iPreference": 1
+        }
+      ],
+      "attributes": [
+        {
+          "cAttribute": "Température",
+          "cUOM": "°C",
+          "dMin": "",
+          "dMax": "280",
+          "cValue": ""
+        }
+      ],
+      "subresources": [
+        {
+          "cCode": "BRUL",
+          "cDescFR": "Brûleurs",
+          "cDescEN": "Burners"
+        },
+        {
+          "cCode": "CONV",
+          "cDescFR": "Convoyeur",
+          "cDescEN": "Conveyor"
+        }
+      ],
+      "downtime": [
+        {
+          "dStart": "2026-11-28",
+          "cStartTime": "06:00",
+          "dEnd": "2026-11-28",
+          "cEndTime": "10:00",
+          "cReason": "CLEAN",
+          "cNotes": "Nettoyage hebdomadaire complet"
+        }
+      ]
+    },
+    {
+      "cCode": "EMB1",
+      "cDescFR": "Ensacheuse",
+      "cDescEN": "Bagging machine",
+      "cWorkCenter": "BAK-EMB",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "PACK",
+          "iPreference": 1
+        }
+      ],
+      "attributes": [],
+      "subresources": [],
+      "downtime": []
+    },
+    {
+      "cCode": "CNC1",
+      "cDescFR": "Centre d'usinage Haas VF-4",
+      "cDescEN": "Haas VF-4 machining center",
+      "cWorkCenter": "MET-CNC",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "Haas",
+      "cModel": "VF-4",
+      "cSerialNo": "1157823",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "CNC",
+          "iPreference": 1
+        }
+      ],
+      "attributes": [
+        {
+          "cAttribute": "Course X",
+          "cUOM": "mm",
+          "dMin": "",
+          "dMax": "1270",
+          "cValue": ""
+        },
+        {
+          "cAttribute": "Course Y",
+          "cUOM": "mm",
+          "dMin": "",
+          "dMax": "508",
+          "cValue": ""
+        },
+        {
+          "cAttribute": "Outils",
+          "cUOM": "",
+          "dMin": "",
+          "dMax": "24",
+          "cValue": ""
+        }
+      ],
+      "subresources": [
+        {
+          "cCode": "BROCHE",
+          "cDescFR": "Broche",
+          "cDescEN": "Spindle"
+        },
+        {
+          "cCode": "ATC",
+          "cDescFR": "Changeur d'outils",
+          "cDescEN": "Tool changer"
+        }
+      ],
+      "downtime": [
+        {
+          "dStart": "2026-11-25",
+          "cStartTime": "07:00",
+          "dEnd": "2026-11-25",
+          "cEndTime": "11:00",
+          "cReason": "PM",
+          "cNotes": "Entretien préventif 500 h"
+        }
+      ]
+    },
+    {
+      "cCode": "CNC2",
+      "cDescFR": "Centre d'usinage Haas VF-2",
+      "cDescEN": "Haas VF-2 machining center",
+      "cWorkCenter": "MET-CNC",
+      "cCalendar": "",
+      "dSpeedFactor": "0.85",
+      "iParallel": 1,
+      "cManufacturer": "Haas",
+      "cModel": "VF-2",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "CNC",
+          "iPreference": 2
+        }
+      ],
+      "attributes": [
+        {
+          "cAttribute": "Course X",
+          "cUOM": "mm",
+          "dMin": "",
+          "dMax": "762",
+          "cValue": ""
+        },
+        {
+          "cAttribute": "Course Y",
+          "cUOM": "mm",
+          "dMin": "",
+          "dMax": "406",
+          "cValue": ""
+        },
+        {
+          "cAttribute": "Outils",
+          "cUOM": "",
+          "dMin": "",
+          "dMax": "20",
+          "cValue": ""
+        }
+      ],
+      "subresources": [
+        {
+          "cCode": "BROCHE",
+          "cDescFR": "Broche",
+          "cDescEN": "Spindle"
+        }
+      ],
+      "downtime": []
+    },
+    {
+      "cCode": "SOUD1",
+      "cDescFR": "Poste de soudage MIG 1",
+      "cDescEN": "MIG welding station 1",
+      "cWorkCenter": "MET-SOUD",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "WELD",
+          "iPreference": 1
+        }
+      ],
+      "attributes": [],
+      "subresources": [],
+      "downtime": []
+    },
+    {
+      "cCode": "SOUD2",
+      "cDescFR": "Poste de soudage TIG",
+      "cDescEN": "TIG welding station",
+      "cWorkCenter": "MET-SOUD",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "WELD",
+          "iPreference": 2
+        }
+      ],
+      "attributes": [],
+      "subresources": [],
+      "downtime": []
+    },
+    {
+      "cCode": "CAB1",
+      "cDescFR": "Cabine de peinture",
+      "cDescEN": "Paint booth",
+      "cWorkCenter": "MET-PEINT",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "",
+      "cModel": "",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "PAINT",
+          "iPreference": 1
+        }
+      ],
+      "attributes": [
+        {
+          "cAttribute": "Longueur pièce",
+          "cUOM": "mm",
+          "dMin": "",
+          "dMax": "3000",
+          "cValue": ""
+        }
+      ],
+      "subresources": [],
+      "downtime": []
+    },
+    {
+      "cCode": "MMT1",
+      "cDescFR": "Machine à mesurer tridimensionnelle",
+      "cDescEN": "Coordinate measuring machine",
+      "cWorkCenter": "MET-CQ",
+      "cCalendar": "",
+      "dSpeedFactor": "1",
+      "iParallel": 1,
+      "cManufacturer": "Zeiss",
+      "cModel": "Contura",
+      "cSerialNo": "",
+      "cNotes": "",
+      "lActive": true,
+      "capabilities": [
+        {
+          "cCapability": "INSPECT",
+          "iPreference": 1
+        }
+      ],
+      "attributes": [],
+      "subresources": [],
+      "downtime": []
     }
   ]
 }

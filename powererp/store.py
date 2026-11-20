@@ -71,10 +71,17 @@ class Store:
     def __init__(self, name):
         self.spec = SPECS[name]
         self.t = self.spec.table
-        self.lt = self.spec.lines
         self.fields = self.spec.fields
         self.cols = {f: self.t.c[column_name(f)] for f in self.fields}
-        self.lcols = {f: self.lt.c[column_name(f)] for f in self.spec.line_schema} if self.lt is not None else {}
+        # child lists ("lines", "capabilities"...): key -> (table, {field: column}, schema)
+        self.children = {
+            key: (
+                self.spec.child_tables[key],
+                {f: self.spec.child_tables[key].c[column_name(f)] for f in schema},
+                schema,
+            )
+            for key, schema in self.spec.child_schemas().items()
+        }
 
     # ------------------------------------------------------------ conversion
 
@@ -99,8 +106,9 @@ class Store:
             if full or f in row
         }
 
-    def _line_values(self, ln):
-        return {self.lcols[f].name: _to_db(k, ln.get(f, self._default(k))) for f, k in self.spec.line_schema.items()}
+    def _line_values(self, key, ln):
+        _t, cols, schema = self.children[key]
+        return {cols[f].name: _to_db(k, ln.get(f, self._default(k))) for f, k in schema.items()}
 
     # ------------------------------------------------------------ queries
 
@@ -118,22 +126,15 @@ class Store:
         return [self.cols[f] for f in self.spec.order] + [self.t.c.id] if self.spec.order else [self.t.c.id]
 
     def _attach_lines(self, rows_by_id, s):
-        if self.lt is None:
-            return
-        for r in rows_by_id.values():
-            r["lines"] = []
-        if not rows_by_id:
-            return
-        q = (
-            select(self.lt)
-            .where(self.lt.c.parent_id.in_(list(rows_by_id)))
-            .order_by(self.lt.c.parent_id, self.lt.c.line_no)
-        )
-        for ln in s.execute(q):
-            m = ln._mapping
-            rows_by_id[m["parent_id"]]["lines"].append(
-                {f: _from_db(k, m[self.lcols[f]]) for f, k in self.spec.line_schema.items()}
-            )
+        for key, (lt, cols, schema) in self.children.items():
+            for r in rows_by_id.values():
+                r[key] = []
+            if not rows_by_id:
+                continue
+            q = select(lt).where(lt.c.parent_id.in_(list(rows_by_id))).order_by(lt.c.parent_id, lt.c.line_no)
+            for ln in s.execute(q):
+                m = ln._mapping
+                rows_by_id[m["parent_id"]][key].append({f: _from_db(k, m[cols[f]]) for f, k in schema.items()})
 
     def all(self, lines=True, where=None):
         """Every row of the company, in the table's default order."""
@@ -176,19 +177,26 @@ class Store:
         s = database.current()
         return s.scalar(select(self.t.c.id).where(*self._where_key([row.get(k) for k in self.spec.keys], ci)))
 
-    def _write_lines(self, s, parent_id, lines):
-        s.execute(delete(self.lt).where(self.lt.c.parent_id == parent_id))
-        rows = [{"parent_id": parent_id, "line_no": i, **self._line_values(ln)} for i, ln in enumerate(lines, 1)]
-        if rows:
-            s.execute(insert(self.lt).values(rows))
+    def _write_lines(self, s, parent_id, row, replace=True):
+        """Write the child lists present in `row` (all of them on an insert)."""
+        for key, (lt, _cols, _schema) in self.children.items():
+            if key not in row and replace:
+                continue
+            if replace:
+                s.execute(delete(lt).where(lt.c.parent_id == parent_id))
+            lines = [
+                {"parent_id": parent_id, "line_no": i, **self._line_values(key, ln)}
+                for i, ln in enumerate(row.get(key) or [], 1)
+            ]
+            if lines:
+                s.execute(insert(lt).values(lines))
 
     def insert(self, row):
         s = database.current()
         new_id = s.execute(
             insert(self.t).values(company_id=company_id(), **self._values(row, full=True)).returning(self.t.c.id)
         ).scalar()
-        if self.lt is not None:
-            self._write_lines(s, new_id, row.get("lines") or [])
+        self._write_lines(s, new_id, row, replace=False)
         return row
 
     def update(self, row, key_values=None):
@@ -199,8 +207,7 @@ class Store:
         if rid is None:
             raise KeyError(keys)
         s.execute(update(self.t).where(self.t.c.id == rid).values(**self._values(row)))
-        if self.lt is not None and "lines" in row:
-            self._write_lines(s, rid, row["lines"])
+        self._write_lines(s, rid, row)
         return row
 
     def delete(self, row):
@@ -229,24 +236,23 @@ class Store:
         ids = {}
         for chunk in range(0, len(params), 500):
             part = params[chunk : chunk + 500]
-            if self.lt is None:
+            if not self.children:
                 s.execute(insert(self.t).values(part))
                 continue
             for r in s.execute(insert(self.t).values(part).returning(self.t.c.id, *key_cols)):
                 ids[tuple(str(v).lower() for v in r[1:])] = r[0]
-        if self.lt is None:
-            return
-        lines = [
-            {
-                "parent_id": ids[tuple(str(r.get(k) or "").lower() for k in self.spec.keys)],
-                "line_no": i,
-                **self._line_values(ln),
-            }
-            for r in rows
-            for i, ln in enumerate(r.get("lines") or [], 1)
-        ]
-        for chunk in range(0, len(lines), 500):
-            s.execute(insert(self.lt).values(lines[chunk : chunk + 500]))
+        for key, (lt, _cols, _schema) in self.children.items():
+            lines = [
+                {
+                    "parent_id": ids[tuple(str(r.get(k) or "").lower() for k in self.spec.keys)],
+                    "line_no": i,
+                    **self._line_values(key, ln),
+                }
+                for r in rows
+                for i, ln in enumerate(r.get(key) or [], 1)
+            ]
+            for chunk in range(0, len(lines), 500):
+                s.execute(insert(lt).values(lines[chunk : chunk + 500]))
 
 
 _stores = {}

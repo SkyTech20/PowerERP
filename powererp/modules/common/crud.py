@@ -5,11 +5,13 @@ A module subclasses CrudService and fills in only what is specific to it:
     view(row, full)         what the API returns (full=False in lists)
     before_delete(row)      e.g. references.check(...) -> 409 in_use
     keep_line(line)         which (almost) empty lines of a document are kept
+    keep_child(key, line)   the same for the other child lists (children = {key: schema})
 """
 
 from __future__ import annotations
 
 import copy
+import functools
 from collections.abc import Iterable
 from typing import Any
 
@@ -28,12 +30,14 @@ class CrudService:
     keys: tuple[str, ...] = ("cCode",)
     readonly: tuple[str, ...] = ()
     line_schema: dict[str, Any] | None = None
+    children: dict[str, dict[str, Any]] = {}  # other child lists of a record: key -> field schema
     full_view_on_create: bool = True  # False: the record created is returned with the list's (short) view
 
     def __init__(self, repo: Store, schema: dict[str, Any], defaults: Row | None = None):
         self.repo = repo
         self.form = RecordForm(schema, defaults)
         self.line_form = RecordForm(self.line_schema) if self.line_schema else None
+        self.child_forms = {key: RecordForm(schema) for key, schema in self.children.items()}
 
     # ---------------------------------------------------------- hooks for the subclasses
     def validate(self, row: Row, is_new: bool) -> None:
@@ -46,6 +50,9 @@ class CrudService:
         """Refuse the deletion (AppError) while the record is used."""
 
     def keep_line(self, line: Row) -> bool:
+        return True
+
+    def keep_child(self, key: str, line: Row) -> bool:
         return True
 
     # ---------------------------------------------------------- operations
@@ -65,6 +72,9 @@ class CrudService:
         self.form.apply(row, payload, skip=(() if is_new else self.keys) + self.readonly)
         if self.line_form is not None and "lines" in payload:
             row["lines"] = self.line_form.lines(payload, self.keep_line)
+        for key, form in self.child_forms.items():
+            if key in payload:
+                row[key] = form.lines(payload, functools.partial(self.keep_child, key), key)
         self.validate(row, is_new)
         return row
 
@@ -72,6 +82,8 @@ class CrudService:
         row = self.form.blank()
         if self.line_form is not None:
             row["lines"] = []
+        for key in self.child_forms:
+            row[key] = []
         self._fill(row, payload, True)
         for k in self.keys:
             if not text(row.get(k)):
@@ -98,7 +110,8 @@ def register_crud_routes(bp: Blueprint, url: str, name: str, service: CrudServic
 
     def collection():
         if request.method == "GET":
-            rows = [{k: v for k, v in service.view(r, full=False).items() if k != "lines"} for r in service.list()]
+            children = {"lines", *service.child_forms}
+            rows = [{k: v for k, v in service.view(r, full=False).items() if k not in children} for r in service.list()]
             return jsonify(paginate_request(rows, search))
         row = service.create(json_payload())
         return jsonify(service.view(row, full=service.full_view_on_create)), 201

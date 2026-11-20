@@ -286,6 +286,39 @@ WORK_CENTER = {
     "cNotes": "s",
     "lActive": "b",
 }
+# P4: resources, the machines / stations / teams that do the work, and their child lists
+RESOURCE = {
+    "cCode": "s",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "cWorkCenter": "s",
+    "cCalendar": "s",  # empty = the work center's
+    "dSpeedFactor": "d",  # 1 = the standard times; 1.2 = 20 % faster
+    "iParallel": "i",  # how many orders it runs at the same time
+    "cManufacturer": "s",
+    "cModel": "s",
+    "cSerialNo": "s",
+    "cNotes": "s",
+    "lActive": "b",
+}
+RESOURCE_CAPABILITY = {"cCapability": "s", "iPreference": "i"}  # 1 = preferred
+RESOURCE_ATTRIBUTE = {
+    "cAttribute": "s",
+    "cUOM": "s",
+    "dMin": "d",
+    "dMax": "d",
+    "cValue": "s",
+}  # e.g. width 2.5 to 5.4 m
+RESOURCE_SUBRESOURCE = {"cCode": "s", "cDescFR": "s", "cDescEN": "s"}  # parts of the machine, to say where a stop was
+# planned downtime (preventive maintenance...): from date + time to date + time
+RESOURCE_DOWNTIME = {
+    "dStart": "date",
+    "cStartTime": "s",
+    "dEnd": "date",
+    "cEndTime": "s",
+    "cReason": "s",
+    "cNotes": "s",
+}
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
@@ -325,4 +358,5 @@ DEFAULTS: dict[str, dict[str, Any]] = {
         "dUtilizationPct": "100",
         "lActive": True,
     },
+    "resources": {"dSpeedFactor": "1", "iParallel": 1, "lActive": True},
 }

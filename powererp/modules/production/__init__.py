@@ -3,6 +3,8 @@
 P1: the reference lists /api/capabilities, /api/setup-families, /api/downtime-reasons, /api/scrap-reasons.
 P2: working calendars /api/calendars (+ /<code>/availability?from=&to=) and /api/calendar-exceptions.
 P3: work centers /api/work-centers (+ /<code>/availability?from=&to=: the calendar time and the capacity).
+P4: resources /api/resources (+ /<code>/availability: calendar - planned downtime, capacity), and
+    /api/capabilities/<code>/resources: the resources able to do it, preferred first.
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -21,6 +23,7 @@ from powererp.modules.common.registry import label_lookup
 from powererp.store import store
 
 from .calendar import CalendarExceptionService, CalendarService
+from .resources import ResourceService
 from .service import (
     CapabilityService,
     DowntimeReasonService,
@@ -51,7 +54,8 @@ def register(app: Flask, c: Container, seed: dict) -> None:
         c.get("lookups").register(key, label_lookup(service, DESC_FR, DESC_EN, keep=lambda r: r.get("lActive")))
         c.get("lifecycle").add(service.repo, "prod_" + key, seed.get(key, []))
     calendars = _register_calendars(bp, c, seed)
-    _register_work_centers(bp, c, seed, calendars)
+    centers = _register_work_centers(bp, c, seed, calendars)
+    _register_resources(bp, c, seed, calendars, centers)
     app.register_blueprint(bp)
 
 
@@ -94,7 +98,7 @@ def _register_calendars(bp: Blueprint, c: Container, seed: dict) -> CalendarServ
     return calendars
 
 
-def _register_work_centers(bp: Blueprint, c: Container, seed: dict, calendars: CalendarService) -> None:
+def _register_work_centers(bp: Blueprint, c: Container, seed: dict, calendars: CalendarService) -> WorkCenterService:
     locations = c.get("locations")
     refs = {
         "calendars": calendars.find,
@@ -119,3 +123,34 @@ def _register_work_centers(bp: Blueprint, c: Container, seed: dict, calendars: C
 
     c.get("lookups").register("work_centers", label_lookup(centers, DESC_FR, DESC_EN, keep=lambda r: r.get("lActive")))
     c.get("lifecycle").add(centers.repo, "prod_work_centers", seed.get("work_centers", []))
+    return centers
+
+
+def _register_resources(
+    bp: Blueprint, c: Container, seed: dict, calendars: CalendarService, centers: WorkCenterService
+) -> None:
+    refs = {
+        "work_centers": centers.find,
+        "capabilities": c.get("capabilities").find,
+        "downtime_reasons": c.get("downtime_reasons").find,
+    }
+    resources = c.register("resources", ResourceService(store("resources"), refs, calendars, c.get("references")))
+    register_crud_routes(bp, "resources", "resources", resources, SEARCH + ("cWorkCenter", "cManufacturer", "cModel"))
+
+    @bp.route("/api/resources/<code>/availability")
+    def resource_availability(code):
+        return jsonify(resources.availability(code, *_week()))
+
+    @bp.route("/api/capabilities/<code>/resources")
+    def capability_resources(code):
+        c.get("capabilities").get(code)  # 404 when unknown
+        rows = resources.with_capability(code)
+        return jsonify(
+            [
+                {"cCode": r["cCode"], "cDescFR": r["cDescFR"], "cDescEN": r["cDescEN"], "cWorkCenter": r["cWorkCenter"]}
+                for r in rows
+            ]
+        )
+
+    c.get("lookups").register("resources", label_lookup(resources, DESC_FR, DESC_EN, keep=lambda r: r.get("lActive")))
+    c.get("lifecycle").add(resources.repo, "prod_resources", seed.get("resources", []))

@@ -76,7 +76,13 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - default queue and move times.
   - A subcontractor needs a supplier and no calendar. A calendar used by a work center cannot be deleted.
   - The screen previews the hours and the capacity of a week (`GET /api/work-centers/<code>/availability`).
-- Next: resources (P4), standard operations (P5), setup matrix (P6), product manufacturing tab (P7), then recipes (P8 to P10).
+- **P4 (done): Production → Resources.** The machines, lines, stations and teams that do the work, in a work center:
+  - own calendar (or the work center's), speed factor (1.2 = 20 % faster), parallel orders (trays in an oven);
+  - **capabilities** with a preference: `GET /api/capabilities/<code>/resources` gives the resources able to run an operation, preferred first;
+  - **attributes** with limits (width, knives, temperature), the **parts of the machine** (to say where a stop was), and the **planned downtime** (preventive maintenance);
+  - available time = calendar − planned downtime; capacity = available × utilization of the work center × parallel orders (`GET /api/resources/<code>/availability`);
+  - the work center screen lists its resources. What a resource uses (work center, calendar, capabilities, downtime reasons) cannot be deleted.
+- Next: standard operations (P5), setup matrix (P6), product manufacturing tab (P7), then recipes (P8 to P10).
 
 ## Run
 
