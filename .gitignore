@@ -9,3 +9,5 @@ db/
 *.db
 .pytest_cache/
 backups/
+.coverage
+htmlcov/

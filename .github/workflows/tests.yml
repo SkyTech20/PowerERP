@@ -54,4 +54,4 @@ jobs:
 
       # tests/conftest.py empties the PostgreSQL test database, migrates it and starts the ERP with the demo dataset.
       - name: Run tests
-        run: python -m pytest -q
+        run: python -m pytest -q --cov=powererp --cov-report=term

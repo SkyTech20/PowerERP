@@ -118,7 +118,12 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-The tests (`tests/`) empty the PostgreSQL test database (`TEST_DATABASE_URL`, default `powererp_test` on localhost:5433; its name must contain `test`), migrate it, start the ERP with the demo dataset and reset the data before each test. They cover the value helpers (amounts typed with `$`, spaces or a comma), login and users, GL accounts / cost centers / suppliers, purchase orders, receptions, invoices, the PowerWARE XML services read by SkyAI, `apCreatePO.p`, products / taxes / inventory and the database save. Run them before every change to the ERP.
+There are two kinds of tests:
+
+- **API tests** (`tests/*.py`): the contract of the screens and of SkyAI. They empty the PostgreSQL test database (`TEST_DATABASE_URL`, default `powererp_test` on localhost:5433; its name must contain `test`), migrate it, start the ERP with the demo dataset and reset the data before each test. They cover login and users, GL accounts / cost centers / suppliers, purchase orders, receptions, invoices, the PowerWARE XML services read by SkyAI, `apCreatePO.p`, products / taxes / inventory, backups, the UI modules and the database save.
+- **Unit tests** (`tests/unit/`): the business rules of each service on memory repositories, without Flask nor the database (a few seconds: `python -m pytest tests/unit`). Fixtures and stand-ins are in `tests/unit/conftest.py` and `tests/unit/helpers.py`.
+
+`python -m pytest --cov=powererp` adds the coverage report (the CI prints it). Run the tests before every change to the ERP.
 
 ## Security and SkyAI
 
@@ -166,6 +171,20 @@ What happens when SkyAI creates an invoice:
 - **Dashboard → Reset demo data** puts everything back for the next demo.
 
 ## Project structure
+
+Each business area is a module with the same layers. A module talks to another one only through a service
+given by the container (or a registry), never through its tables:
+
+```mermaid
+flowchart LR
+    UI["Screens<br/>static/js"] -->|JSON| API
+    SkyAI["SkyAI<br/>PowerWARE XML"] --> INT["integrations/powerware"] --> SVC
+    subgraph module["powererp/modules/&lt;area&gt;"]
+        API["api<br/>Flask routes"] --> SVC["service<br/>business rules"] --> REPO["repository<br/>SQLAlchemy Core"]
+    end
+    REPO --> DB[("PostgreSQL<br/>Alembic migrations")]
+    SVC -.->|"references, lookups, dashboard"| REG["registries<br/>(container)"]
+```
 
 ```
 app.py                  # entry point: app = create_app()
