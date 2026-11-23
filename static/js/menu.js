@@ -12,7 +12,7 @@ export const MENU = [
   { k: "ap", icon: "💳", items: [{ k: "ap.suppliers", route: "/suppliers" }, { k: "ap.invoices", route: "/invoices" }, "ap.payments", "ap.chequeRun", "ap.recurring", "ap.aging"] },
   { k: "pur", icon: "🛒", items: [{ k: "pur.po", route: "/po" }, { k: "pur.receptions", route: "/receptions" }, "pur.requisitions", "pur.returns", "pur.pricelists"] },
   { k: "ar", icon: "💰", items: ["ar.invoices", "ar.receipts", "ar.credits", "ar.collections"] },
-  { k: "sales", icon: "📈", items: [{ k: "sales.customers", route: "/sales/customers" }, "sales.quotes", "sales.orders", "sales.shipping", "sales.pricing", "sales.commissions"] },
+  { k: "sales", icon: "📈", items: [{ k: "sales.customers", route: "/sales/customers" }, { k: "sales.priceLists", route: "/sales/price-lists" }, "sales.quotes", "sales.orders", "sales.shipping", "sales.commissions"] },
   { k: "inv", icon: "📦", items: [
     { k: "inv.items", route: "/inv/items" }, { k: "inv.stock", route: "/inv/stock" }, { k: "inv.movements", route: "/inv/movements" },
     { k: "inv.replenishment", route: "/inv/replenishment" }, { k: "inv.count", route: "/inv/counts" }, { k: "inv.valuation", route: "/inv/valuation" },

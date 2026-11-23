@@ -512,7 +512,8 @@ CUSTOMER = {
     "cTaxExemptNo": "s",
     "cTermCode": "s",
     "cTermDesc": "s",
-    "dDiscountPct": "d",  # discount on every line, unless a price rule gives another one (V2)
+    "cPriceList": "s",  # its prices (V2); empty = the list price of the products
+    "dDiscountPct": "d",  # discount on every line, unless its price list gives another one (V2)
     "cWarehouse": "s",  # warehouse its orders are shipped from
     "cNotes": "s",
     "lActive": "b",
@@ -532,6 +533,24 @@ CUSTOMER_ADDRESS = {  # ship-to addresses
     "lDefault": "b",
 }
 CUSTOMER_CONTACT = {"cName": "s", "cTitle": "s", "cPhone": "s", "cEmail": "s", "lInvoices": "b"}
+# ---------------------------------------------------------------- sales (V2): price lists and discounts
+PRICE_LIST = {
+    "cCode": "s",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "dStartDate": "date",  # valid from / to (empty = no limit); outside, its customers pay the list price
+    "dEndDate": "date",
+    "cNotes": "s",
+    "lActive": "b",
+}
+PRICE_LIST_LINE = {  # the price of a product from a quantity (quantity breaks: one line per minimum quantity)
+    "cProduct": "s",
+    "cUOM": "s",  # empty = the sales unit of the product
+    "dMinQty": "d",
+    "dPrice": "d",
+    "dDiscountPct": "d",  # replaces the category / customer discount for this product
+}
+PRICE_LIST_DISCOUNT = {"cCategory": "s", "dDiscountPct": "d"}  # also on the subcategories
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
@@ -578,6 +597,7 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "setup_matrices": {"cScope": "work_center", "lActive": True},
     "product_mfg": {"cMakeBuy": "make", "cTraceLevel": "lot"},
     "company_profile": {"cCode": "MAIN", "cProvince": "QC", "cCountry": "CA"},
+    "price_lists": {"lActive": True},
     "customers": {"cLang": "fr", "cProvince": "QC", "cCountry": "CA", "cTaxGroup": "QC", "lActive": True},
     "recipes": {"cRevision": "A", "cProcessType": "discrete", "dBaseQty": "1", "dYieldPct": "100", "cStatus": "draft"},
 }

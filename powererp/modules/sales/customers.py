@@ -4,8 +4,8 @@ What a customer gives the rest of Sales:
 - the language of its invoices (FR / EN) and its billing address;
 - its tax group (QC = GST + QST), unless the ship-to address of the invoice has its own: the taxes follow the
   place of delivery; a tax exemption number is printed on the invoice;
-- its payment terms (printed; no receivables in this phase), its default discount and the warehouse its orders
-  are shipped from;
+- its price list (V2: its prices and discounts) and its default discount;
+- its payment terms (printed; no receivables in this phase) and the warehouse its orders are shipped from;
 - its ship-to addresses (one is the default) and its contacts (those flagged "invoices" receive them).
 """
 
@@ -39,15 +39,20 @@ class CustomerService(CrudService):
     children = {"addresses": S.CUSTOMER_ADDRESS, "contacts": S.CUSTOMER_CONTACT}
 
     def __init__(self, repo: Store, refs: dict[str, Any], references: ReferenceRegistry):
-        """refs: finders given by the container: tax_groups, warehouses."""
+        """refs: finders given by the container: tax_groups, warehouses, price_lists."""
         super().__init__(repo, S.CUSTOMER, S.DEFAULTS["customers"])
         self.refs = refs
         self.references = references
         references.register("tax_group", self.uses_tax_group)
+        references.register("price_list", lambda code: bool(self.using_price_list(code)))
 
     # ---------------------------------------------------------- references
     def _uses(self, field: str, code: str) -> bool:
         return any(r[field].upper() == code.upper() for r in self.repo.all(lines=False))
+
+    def using_price_list(self, code: str) -> list[str]:
+        """The customers paying the prices of a price list."""
+        return [r["cCode"] for r in self.repo.all(lines=False) if r["cPriceList"].upper() == code.upper()]
 
     def uses_tax_group(self, code: str) -> bool:
         return self._uses("cTaxGroup", code) or any(
@@ -75,6 +80,11 @@ class CustomerService(CrudService):
             if wh is None:
                 raise AppError("unknown_ref", "cWarehouse")
             row["cWarehouse"] = wh["cCode"]
+        if row["cPriceList"]:
+            plist = self.refs["price_lists"](row["cPriceList"])
+            if plist is None:
+                raise AppError("unknown_ref", "cPriceList")
+            row["cPriceList"] = plist["cCode"]
         if text(row["dDiscountPct"]) and not 0 <= number(row["dDiscountPct"]) <= 100:
             raise AppError("out_of_range", "dDiscountPct", detail="0-100")
         row["cEmail"] = check_email(row["cEmail"], "cEmail")

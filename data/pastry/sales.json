@@ -1,5 +1,5 @@
 {
- "_about": "Pastry shop scenario: the company profile and the cafés and caterers buying the pastels (fictitious).",
+ "_about": "Pastry shop scenario: the company profile, the cafés and caterers buying the pastels, and their price lists (fictitious).",
  "company_profile": [
   {
    "cCode": "MAIN",
@@ -17,6 +17,116 @@
    "cNEQ": "1170000002",
    "cInvoiceNoteFR": "Produits frais : à conserver au réfrigérateur (0 à 4 °C). Merci !",
    "cInvoiceNoteEN": "Fresh products: keep refrigerated (0 to 4 °C). Thank you!"
+  }
+ ],
+ "price_lists": [
+  {
+   "cCode": "CAFES",
+   "cDescFR": "Cafés",
+   "cDescEN": "Cafés",
+   "dStartDate": "",
+   "dEndDate": "",
+   "cNotes": "",
+   "lActive": true,
+   "lines": [
+    {
+     "cProduct": "PASTEL-BEEF",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "5.50",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-BEEF",
+     "cUOM": "UN",
+     "dMinQty": "48",
+     "dPrice": "5.10",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-CHICKEN",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "5.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-CHICKEN",
+     "cUOM": "UN",
+     "dMinQty": "48",
+     "dPrice": "4.65",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-HAM-CHEESE",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "5.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-HAM-CHEESE",
+     "cUOM": "UN",
+     "dMinQty": "48",
+     "dPrice": "4.65",
+     "dDiscountPct": ""
+    }
+   ],
+   "discounts": []
+  },
+  {
+   "cCode": "CATERERS",
+   "cDescFR": "Traiteurs",
+   "cDescEN": "Caterers",
+   "dStartDate": "",
+   "dEndDate": "",
+   "cNotes": "Grandes quantités pour événements ; l'escompte du client s'ajoute.",
+   "lActive": true,
+   "lines": [
+    {
+     "cProduct": "PASTEL-BEEF",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "5.25",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-BEEF",
+     "cUOM": "UN",
+     "dMinQty": "200",
+     "dPrice": "4.85",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-CHICKEN",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "4.75",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-CHICKEN",
+     "cUOM": "UN",
+     "dMinQty": "200",
+     "dPrice": "4.40",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-HAM-CHEESE",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "4.75",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PASTEL-HAM-CHEESE",
+     "cUOM": "UN",
+     "dMinQty": "200",
+     "dPrice": "4.40",
+     "dDiscountPct": ""
+    }
+   ],
+   "discounts": []
   }
  ],
  "customers": [
@@ -37,6 +147,7 @@
    "cTaxExemptNo": "",
    "cTermCode": "n15",
    "cTermDesc": "net 15 jours",
+   "cPriceList": "CAFES",
    "dDiscountPct": "",
    "cWarehouse": "KITCHEN",
    "cNotes": "",
@@ -91,6 +202,7 @@
    "cTaxExemptNo": "",
    "cTermCode": "n30",
    "cTermDesc": "net 30 jours",
+   "cPriceList": "CATERERS",
    "dDiscountPct": "5",
    "cWarehouse": "KITCHEN",
    "cNotes": "",
@@ -138,6 +250,7 @@
    "cTaxExemptNo": "",
    "cTermCode": "n30",
    "cTermDesc": "net 30 jours",
+   "cPriceList": "CAFES",
    "dDiscountPct": "",
    "cWarehouse": "KITCHEN",
    "cNotes": "",
@@ -170,6 +283,7 @@
    "cTaxExemptNo": "",
    "cTermCode": "n30",
    "cTermDesc": "net 30 days",
+   "cPriceList": "",
    "dDiscountPct": "",
    "cWarehouse": "KITCHEN",
    "cNotes": "",
