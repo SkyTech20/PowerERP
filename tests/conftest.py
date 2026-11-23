@@ -56,6 +56,7 @@ os.environ.update(
     }
 )
 os.environ.pop("ERP_COOKIE_SECURE", None)
+os.environ.pop("ERP_SCENARIO", None)  # the tests start with the manufacturing demo
 
 
 @pytest.fixture(scope="session")

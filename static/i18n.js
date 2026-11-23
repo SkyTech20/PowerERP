@@ -93,7 +93,10 @@ window.ERP_I18N = {
     "dash.clear": "Clear all data",
     "dash.clearConfirm": "Delete ALL the data (GL accounts, cost centers, suppliers, POs, receptions and invoices)? Use \"Reset demo data\" to bring the demo data back.",
     "dash.clearDone": "All data cleared.",
-    "dash.resetConfirm": "Restore all the original demo data? Every change made since will be lost.",
+    "dash.resetConfirm": "Load the demo data \"{s}\"? Every change made since will be lost.",
+    "dash.scenario": "Demo data",
+    "dash.scenario.purchasing": "SkyAI (purchasing, no production)",
+    "dash.scenario.manufacturing": "Manufacturing (paper, bakery, metal)",
     "dash.resetDone": "Demo data restored.",
 
     "common.new": "New",
@@ -393,7 +396,10 @@ window.ERP_I18N = {
     "dash.clear": "Vider toutes les données",
     "dash.clearConfirm": "Supprimer TOUTES les données (comptes GL, centres de coûts, fournisseurs, BC, réceptions et factures)? Utilisez « Réinitialiser les données » pour récupérer les données de démonstration.",
     "dash.clearDone": "Toutes les données ont été supprimées.",
-    "dash.resetConfirm": "Restaurer toutes les données de démonstration d'origine? Toutes les modifications faites depuis seront perdues.",
+    "dash.resetConfirm": "Charger les données de démonstration « {s} »? Toutes les modifications faites depuis seront perdues.",
+    "dash.scenario": "Données de démonstration",
+    "dash.scenario.purchasing": "SkyAI (achats, sans production)",
+    "dash.scenario.manufacturing": "Fabrication (papier, boulangerie, métal)",
     "dash.resetDone": "Données de démonstration restaurées.",
 
     "common.new": "Nouveau",
