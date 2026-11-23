@@ -6,6 +6,8 @@ Scenario (chosen on the dashboard when the demo data is reset, ERP_SCENARIO for 
     pastry          a pastry shop that makes 3 pastels (data/pastry, tools/make_pastry_data.py): its own suppliers,
                     items, recipes and shop floor; the stock is the raw material received and invoiced
 
+Every scenario has a company profile and customers (data/sales.json; the pastry shop: data/pastry/sales.json).
+
 Same shapes as the PowerWARE / SkyAI feeds. data/demo/history.json (tools/make_history_data.py) adds suppliers and
 closed POs / receptions / invoices for the supplier selection of SkyAI requisitions.
 """
@@ -42,6 +44,7 @@ class DemoData:
         dict  # data/inventory.json: taxes, units, categories, warehouses, products, opening stock (both datasets)
     )
     production: dict  # data/production.json: shop floor reference lists of a paper, a food and a metal plant
+    sales: dict  # data/sales.json (data/pastry/sales.json): company profile and customers
     scenario: str = DEFAULT_SCENARIO
 
     @property
@@ -88,9 +91,11 @@ class DemoData:
         # the items of the production demo (paper, bakery, metal) join the item master
         for key, rows in production.get("inventory", {}).items():
             inventory[key] = inventory.get(key, []) + rows
+        sales_file = (PASTRY if scenario == "pastry" else DATA_ROOT) / "sales.json"
+        sales = json.loads(sales_file.read_text(encoding="utf-8")) if sales_file.exists() else {}
         if scenario == "pastry":
             lists, inventory, production = cls._pastry(lists, inventory)
-        return cls(folder, lists, inventory, production, scenario)
+        return cls(folder, lists, inventory, production, sales, scenario)
 
     @staticmethod
     def _pastry(lists: dict, inventory: dict) -> tuple[dict, dict, dict]:

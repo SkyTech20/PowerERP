@@ -476,6 +476,63 @@ RECIPE_STEP = {
     "cCondition": "s",  # done only when an earlier value matches: "TEMP_PATE < 24"
 }
 
+# ---------------------------------------------------------------- sales (V1): company profile and customers
+LANGS = ("fr", "en")
+COMPANY_PROFILE = {  # one row (cCode MAIN): the header of the invoices; the GST / QST numbers are on the tax codes
+    "cCode": "s",
+    "cName": "s",
+    "cLegalName": "s",
+    "cAddress1": "s",
+    "cAddress2": "s",
+    "cCity": "s",
+    "cProvince": "s",
+    "cZipCode": "s",
+    "cCountry": "s",
+    "cPhone": "s",
+    "cEmail": "s",
+    "cWebsite": "s",
+    "cNEQ": "s",  # Quebec enterprise number
+    "cInvoiceNoteFR": "s",  # printed at the bottom of the invoices
+    "cInvoiceNoteEN": "s",
+}
+CUSTOMER = {
+    "cCode": "s",
+    "cName": "s",
+    "cLegalName": "s",
+    "cLang": LANGS,  # language of its invoices
+    "cAddress1": "s",  # billing address
+    "cAddress2": "s",
+    "cCity": "s",
+    "cProvince": "s",
+    "cZipCode": "s",
+    "cCountry": "s",
+    "cPhone": "s",
+    "cEmail": "s",  # where the invoices are sent
+    "cTaxGroup": "s",  # taxes charged when its ship-to address has none
+    "cTaxExemptNo": "s",
+    "cTermCode": "s",
+    "cTermDesc": "s",
+    "dDiscountPct": "d",  # discount on every line, unless a price rule gives another one (V2)
+    "cWarehouse": "s",  # warehouse its orders are shipped from
+    "cNotes": "s",
+    "lActive": "b",
+}
+CUSTOMER_ADDRESS = {  # ship-to addresses
+    "cCode": "s",
+    "cName": "s",
+    "cAddress1": "s",
+    "cAddress2": "s",
+    "cCity": "s",
+    "cProvince": "s",
+    "cZipCode": "s",
+    "cCountry": "s",
+    "cContact": "s",
+    "cPhone": "s",
+    "cTaxGroup": "s",  # taxes of the place of delivery (empty = the customer's)
+    "lDefault": "b",
+}
+CUSTOMER_CONTACT = {"cName": "s", "cTitle": "s", "cPhone": "s", "cEmail": "s", "lInvoices": "b"}
+
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
     "tax_groups": {"cTreatment": "taxable", "lActive": True},
@@ -520,5 +577,7 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "operations": {"cRunFormat": "min_per_unit", "iCrew": 1, "lReportingPoint": True, "lActive": True},
     "setup_matrices": {"cScope": "work_center", "lActive": True},
     "product_mfg": {"cMakeBuy": "make", "cTraceLevel": "lot"},
+    "company_profile": {"cCode": "MAIN", "cProvince": "QC", "cCountry": "CA"},
+    "customers": {"cLang": "fr", "cProvince": "QC", "cCountry": "CA", "cTaxGroup": "QC", "lActive": True},
     "recipes": {"cRevision": "A", "cProcessType": "discrete", "dBaseQty": "1", "dYieldPct": "100", "cStatus": "draft"},
 }
