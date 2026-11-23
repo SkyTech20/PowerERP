@@ -42,6 +42,7 @@ _OVERRIDES = {
     "cGLRecoverable": "gl_recoverable",
     "cGroup": "reason_group",  # "group" is an SQL keyword
     "lDefault": "is_default",  # "default" too
+    "cClass": "item_class",  # "class" too
 }
 
 

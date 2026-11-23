@@ -84,22 +84,28 @@ def test_product_crud_and_validation(client):
     r = client.post("/api/products", json=body)
     assert r.status_code == 201, r.get_json()
     p = r.get_json()
-    assert p["dPrice1"] == "10.00" and p["lines"][0]["cSupplierCode"] == "PAPCEN" and p["cType"] == "stock"
+    assert (
+        p["dPrice1"] == "10.00"
+        and p["lines"][0]["cSupplierCode"] == "PAPCEN"
+        and (p["cStockType"], p["cNature"], p["cClass"]) == ("physical", "product", "")
+    )
     assert client.post("/api/products", json=body).status_code == 409
     assert client.post("/api/products", json={**body, "cCode": "N2", "cCategory": "ZZZ"}).get_json() == {
         "error": "unknown_ref",
         "field": "cCategory",
     }
     assert (
-        client.post("/api/products", json={**body, "cCode": "N3", "cType": "bogus"}).get_json()["error"]
+        client.post("/api/products", json={**body, "cCode": "N3", "cClass": "bogus"}).get_json()["error"]
         == "invalid_choice"
     )
     assert client.post("/api/products", json={"cCode": "N4", "cStockUOM": "UN"}).get_json() == {
         "error": "required",
         "field": "cDescFR",
     }
-    r = client.put("/api/products/NEW-1", json={"cDescFR": "Renommé", "cType": "service"})
-    assert r.get_json()["cDescFR"] == "Renommé" and r.get_json()["lStocked"] is False
+    r = client.put("/api/products/NEW-1", json={"cDescFR": "Renommé", "cNature": "service", "cClass": "raw"})
+    p = r.get_json()
+    assert p["cDescFR"] == "Renommé" and p["lStocked"] is False
+    assert (p["cStockType"], p["cClass"]) == ("nonphysical", "")  # a service is not physical and has no class
     assert client.delete("/api/products/NEW-1").status_code == 200
     assert client.delete("/api/products/CLAV-SF").status_code == 409  # has movements
 

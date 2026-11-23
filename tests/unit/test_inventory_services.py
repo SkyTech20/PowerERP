@@ -79,8 +79,20 @@ def test_product_references_and_factors(products):
 
 
 def test_a_service_is_never_stocked(products):
-    row = products.create({"cCode": "S1", "cDescFR": "Pose", "cType": "service", "cStockUOM": "EA", "lStocked": True})
-    assert row["lStocked"] is False
+    row = products.create({"cCode": "S1", "cDescFR": "Pose", "cNature": "service", "cStockUOM": "EA", "lStocked": True})
+    assert (row["lStocked"], row["cStockType"], row["cClass"]) == (False, "nonphysical", "")
+
+
+def test_only_a_physical_product_is_stocked(products):
+    base = {"cDescFR": "Licence", "cStockUOM": "EA", "lStocked": True}
+    licence = products.create({**base, "cCode": "LIC1", "cStockType": "nonphysical", "cClass": "consumable"})
+    assert (licence["lStocked"], licence["cNature"], licence["cClass"]) == (False, "product", "consumable")
+    chair = products.create({**base, "cCode": "CHAIR", "cDescFR": "Chaise", "cClass": "asset"})
+    assert (chair["lStocked"], chair["cStockType"], chair["cClass"]) == (True, "physical", "asset")
+    assert code_of(products.create, {**base, "cCode": "X", "cStockType": "digital"})[:2] == (
+        "invalid_choice",
+        "cStockType",
+    )
 
 
 def test_stock_parameters(inventory):

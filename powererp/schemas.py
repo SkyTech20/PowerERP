@@ -32,8 +32,11 @@ SUPPLIER = {
 
 # --------------------------------------------------------------------------- choices
 
-PRODUCT_TYPES = ("stock", "nonstock", "service", "kit", "raw")
-STOCKED_TYPES = ("stock", "kit", "raw")
+# a product is classified on three axes: physical or not (a software licence is not), product or service, and its
+# class (empty for an item bought for resale, and for a service); only a physical product can have its stock controlled
+PRODUCT_STOCK_TYPES = ("physical", "nonphysical")
+PRODUCT_NATURES = ("product", "service")
+PRODUCT_CLASSES = ("", "raw", "kit", "finished", "consumable", "asset")
 PRODUCT_STATUS = ("active", "inactive", "discontinued")
 COST_METHODS = ("avg", "std")
 TAX_KINDS = ("gst", "pst", "hst", "other")
@@ -106,7 +109,9 @@ PRODUCT = {
     # identification
     "cCode": "s",
     "cStatus": PRODUCT_STATUS,
-    "cType": PRODUCT_TYPES,
+    "cStockType": PRODUCT_STOCK_TYPES,
+    "cNature": PRODUCT_NATURES,
+    "cClass": PRODUCT_CLASSES,
     "cDescFR": "s",
     "cDescEN": "s",
     "cLongDescFR": "s",
@@ -479,7 +484,8 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "categories": {"lActive": True},
     "products": {
         "cStatus": "active",
-        "cType": "stock",
+        "cStockType": "physical",
+        "cNature": "product",
         "cCostMethod": "avg",
         "cCurrency": "CAD",
         "cStockUOM": "UN",
