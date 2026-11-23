@@ -81,8 +81,8 @@ def test_scheduler_thread_makes_the_backup(admin, folder, monkeypatch):
     monkeypatch.setenv("BACKUP_SCHEDULER", "1")
     stop = backup.start_scheduler(every=0.2)
     try:
-        for _ in range(50):
-            if any(f.suffix == ".dump" for f in folder.iterdir()):
+        for _ in range(50):  # the file is renamed before the status is saved: wait for both
+            if any(f.suffix == ".dump" for f in folder.iterdir()) and backup.get_status().get("lastTrigger"):
                 break
             time.sleep(0.1)
     finally:
