@@ -1,6 +1,6 @@
 /* PowerERP: Generic form screen of a resource (create / edit). */
 import { $, $$, TAX_RATES, api, enc, esc, money, num, numOnly, round2, sourceBadge, t, toast } from "../core.js";
-import { bindLookup, lookupOptions } from "../lookups.js";
+import { bindLookup, lookupOptions, lookupRows } from "../lookups.js";
 import { RES } from "../registry.js";
 import { clearLookups, prefill, setPrefill } from "../state.js";
 import { pageHead, tabLabel } from "../views.js";
@@ -337,11 +337,25 @@ export function formView(key, id) {
     } catch (e) { showError(e); }
   }
 
+  // A default of a new record that is not in its list (e.g. the tax group QC after "Clear all data") is left
+  // empty, rather than shown and refused on save. Values given by the screen that opened the form are kept.
+  async function dropUnknownDefaults(given) {
+    const fields = R.sections.flatMap((s) => s.fields).filter((fd) => fd.lookup && !fd.lookupParams && !(fd.f in given));
+    await Promise.all(fields.map(async (fd) => {
+      const v = model[fd.f] == null ? "" : String(model[fd.f]);
+      if (!v) return;
+      const rows = await lookupRows(fd.lookup);
+      if (!rows.some((r) => r.code === v)) model[fd.f] = "";
+    }));
+  }
+
   return {
     async load() {
       if (isNew) {
         model = Object.assign({}, typeof R.defaults === "function" ? R.defaults() : R.defaults || {});
+        const given = prefill && prefill.key === key ? prefill.values : {};
         if (prefill && prefill.key === key) { Object.assign(model, prefill.values); setPrefill(null); }
+        await dropUnknownDefaults(given);
         return;
       }
       try { model = await api(apiPath()); } catch (e) { if (e.status === 404) missing = true; else throw e; }
