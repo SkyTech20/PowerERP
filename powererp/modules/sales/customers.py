@@ -151,6 +151,15 @@ class CustomerService(CrudService):
         emails = [c["cEmail"] for c in customer.get("contacts", []) if c["lInvoices"] and c["cEmail"]]
         return emails or ([customer["cEmail"]] if customer["cEmail"] else [])
 
+    def addresses_lookup(self, code: str) -> tuple[list[dict], int]:
+        """The ship-to addresses of a customer (code + name, city)."""
+        customer = self.find(code) if text(code) else None
+        rows = [
+            {"code": a["cCode"], "label": ", ".join(x for x in (a["cName"], a["cCity"]) if x)}
+            for a in (customer or {}).get("addresses", [])
+        ]
+        return rows, 200
+
     def terms_lookup(self) -> tuple[list[dict], int]:
         """The payment terms already typed on customers (code + description)."""
         seen: dict[str, str] = {}

@@ -6,6 +6,8 @@ V1: /api/customers (ship-to addresses and contacts as child lists), lookups cust
     PUT /api/admin/company (administrators).
 V2: /api/price-lists (prices by product, unit and quantity as lines; discounts by category), lookup price_lists;
     lookup sellable_products; GET /api/pricing?customer=&product=&qty=&uom=&date=: the price, the discount and the rule that gave them.
+V3: /api/sales-invoices (drafts: GET/POST, GET/PUT/DELETE /<no>; a posted one is 409),
+    POST /api/sales-invoices/calc (and /<no>/calc): the draft calculated without saving it (prices, taxes, totals).
 
 Sales never changes the stock directly: the invoices will post movements through the stock service of the
 container (c.get("stock").add(...) with cDocType "SO"), so every stock rule applies to them.
@@ -20,12 +22,15 @@ from flask import Blueprint, Flask, jsonify, request
 from powererp.container import Container
 from powererp.core.errors import AppError
 from powererp.core.http import json_payload
+from powererp.core.pagination import paginate_request
+from powererp.core.security import current_username
 from powererp.modules.common.crud import register_crud_routes
 from powererp.modules.common.registry import label_lookup
 from powererp.store import store
 
 from .company import CompanyProfileService
 from .customers import CustomerService
+from .invoices import DRAFT_SEQUENCE, SalesInvoiceService
 from .pricing import PriceListService, PriceResolver
 
 SEARCH = ("cCode", "cName", "cLegalName", "cCity", "cEmail")
@@ -73,9 +78,12 @@ def register(app: Flask, c: Container, seed: dict) -> None:
         company.save(json_payload())
         return jsonify(company.view())
 
+    _register_invoices(bp, c, customers, pricing)
+
     lookups = c.get("lookups")
     lookups.register("customers", label_lookup(customers, ("cName",), keep=lambda r: r.get("lActive")))
     lookups.register("customer_terms", customers.terms_lookup)
+    lookups.register("customer_addresses", lambda: customers.addresses_lookup(request.args.get("customer", "")))
     lookups.register(
         "sellable_products",
         label_lookup(products, DESC_FR, DESC_EN, keep=lambda r: r.get("lSellable") and r.get("cStatus") == "active"),
@@ -86,3 +94,54 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     lifecycle.add(price_lists.repo, "price_lists", seed.get("price_lists", []))
     lifecycle.add(customers.repo, "customers", seed.get("customers", []))
     app.register_blueprint(bp)
+
+
+INVOICE_SEARCH = ("iNo", "cInvoiceNo", "cCustomer", "cCustomerName", "cCustomerPO", "dDate")
+
+
+def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, pricing: PriceResolver) -> None:
+    refs = {
+        "customers": customers,
+        "products": c.get("products"),
+        "warehouses": c.get("warehouses"),
+        "tax_groups": c.get("tax_groups"),
+        "pricing": pricing,
+        "tax_calculator": c.get("tax_calculator"),
+    }
+    numbering = c.get("numbering")
+    invoices = c.register(
+        "sales_invoices",
+        SalesInvoiceService(store("sales_invoices"), refs, numbering, current_username, c.get("references")),
+    )
+
+    @bp.route("/api/sales-invoices", methods=["GET", "POST"])
+    def sales_invoices():
+        if request.method == "GET":
+            return jsonify(paginate_request([invoices.view(i, full=False) for i in invoices.list()], INVOICE_SEARCH))
+        return jsonify(invoices.create(json_payload())), 201
+
+    @bp.route("/api/sales-invoices/<int:no>", methods=["GET", "PUT", "DELETE"])
+    def sales_invoice(no):
+        inv = invoices.get(no)
+        if request.method == "GET":
+            return jsonify(inv)
+        if request.method == "DELETE":
+            invoices.delete(no)
+            return jsonify({"ok": True})
+        return jsonify(invoices.update(no, json_payload()))
+
+    @bp.route("/api/sales-invoices/calc", methods=["POST"])
+    @bp.route("/api/sales-invoices/<int:no>/calc", methods=["POST"])
+    def sales_invoice_calc(no=None):
+        return jsonify(invoices.preview(json_payload(), no))
+
+    lifecycle = c.get("lifecycle")
+    lifecycle.add(invoices.repo, "sales_invoices", [])
+
+    def renumber(data: dict) -> None:
+        """The drafts go on from the last number loaded."""
+        if "sales_invoices" in data:
+            last = max((int(i.get("iNo") or 0) for i in data["sales_invoices"]), default=0)
+            numbering.set_next(DRAFT_SEQUENCE, last + 1)
+
+    lifecycle.after_load(renumber)

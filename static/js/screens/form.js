@@ -9,7 +9,9 @@ import { pageHead, tabLabel } from "../views.js";
 // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
 // textarea | password | email), lookup (+ fill, lookupParams, onPick), show(model, isNew), rerender (redraw on change).
 // Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
-// locked(model, isNew), actions, panel { html(model), bind(model), tab } and panels (more of them).
+// locked(model, isNew), actions, panel { html(model), bind(model), tab, onNew } and panels (more of them).
+// recalc(model, { path, field, line }) -> Promise of the model calculated by the server: called when a field or a
+// line column marked recalc: true changes (e.g. the prices and taxes of a sales invoice); its errors are shown.
 // A grid with a detail (G.detail) is shown as a list of its lines (G.cols: what a line shows, with fmt) and a panel
 // to edit the selected one: detail { sections(line, model) -> [{ t, help, fields }], order(lines) -> indexes,
 // group(line, model) -> heading, errorAt(detail, lines, code) -> { i, f }, focus }; fields are field options
@@ -256,7 +258,8 @@ export function formView(key, id) {
     const lines = (R.lines && (!R.lines.show || R.lines.show(model, isNew)) ? wrap(tabOf(R.lines), linesHtml()) : "")
       + (R.grids || []).filter((G) => !G.show || G.show(model, isNew)).map((G) => wrap(tabOf(G), linesHtml(G, G.key))).join("");
     const panelList = [R.panel, ...(R.panels || [])].filter(Boolean);
-    const panel = isNew ? "" : panelList.map((P) => wrap(tabOf(P), P.html(model))).join("");
+    const shownPanels = panelList.filter((P) => !isNew || P.onNew);
+    const panel = shownPanels.map((P) => wrap(tabOf(P), P.html(model))).join("");
     const present = (sections + lines + panel).match(/data-tab="[^"]+"/g) || [];
     if (R.formTabs && present.length && !present.includes(`data-tab="${activeTab}"`)) activeTab = R.formTabs[0][0];
     const tabBar = R.formTabs ? `<div class="tabs form-tabs" role="tablist">${R.formTabs.filter(([k]) => present.includes(`data-tab="${k}"`))
@@ -271,7 +274,7 @@ export function formView(key, id) {
     }));
     if ($("#totals")) { $("#totals").innerHTML = totalsHtml(); bindTotals(); }
     bind();
-    if (!isNew) panelList.forEach((P) => P.bind && P.bind(model));
+    shownPanels.forEach((P) => P.bind && P.bind(model));
     if (R.tax && model[R.tax.supplier]) loadSupplierTax(model[R.tax.supplier]);
   }
 
@@ -289,6 +292,7 @@ export function formView(key, id) {
         if (fd.rerender) render(); else refresh();
       };
       el.addEventListener(fd.type === "check" || el.tagName === "SELECT" ? "change" : "input", update);
+      if (fd.recalc && !(fd.lookup && !fd.free && el.tagName === "SELECT")) el.addEventListener("change", () => recalc(fd.f, null));
       if (fd.lookup && fd.free) {
         let rows = [];
         lookupRows(fd.lookup).then((r) => {
@@ -311,6 +315,7 @@ export function formView(key, id) {
             if (target) target.value = label;
           }
           if (fd.onPick === "fillFromPo") fillFromPo(code);
+          if (fd.recalc) recalc(fd.f, null);
           if (R.tax && fd.f === R.tax.supplier) { taxLive = true; loadSupplierTax(code); }
         }, fd.lookupParams ? () => fd.lookupParams(model) : null);
         if (fd.lookupParams) refreshers.push(fill);
@@ -400,6 +405,7 @@ export function formView(key, id) {
         } else {
           el.addEventListener("input", () => { ln[el.dataset.lf] = el.dataset.num ? numOnly(el) : el.value; taxLive = true; refreshAmounts(); });
         }
+        if (col.recalc && !el.dataset.lookup) el.addEventListener("change", () => recalc(el.dataset.lf, ln));
         if (el.dataset.lookup) {
           const fill = bindLookup(el, el.dataset.lookup, (code, label) => {
             ln[el.dataset.lf] = code;
@@ -408,6 +414,7 @@ export function formView(key, id) {
               const target = $(`[data-lf="${col.fill}"]`, tr);
               if (target) target.value = label;
             }
+            if (col.recalc) recalc(el.dataset.lf, ln);
           }, col.lookupParams ? () => col.lookupParams(model) : null);
           if (col.lookupParams) refreshers.push(fill);
         }
@@ -424,6 +431,23 @@ export function formView(key, id) {
         const first = rows.length && $("input[data-lf]:not([data-lf=cUnique]):not([readonly])", rows[rows.length - 1]);
         if (first) first.focus();
       });
+    }
+  }
+
+  // The server recalculates the record (R.recalc) after a change of a field or line column marked recalc
+  let recalcToken = 0;
+  async function recalc(field, line) {
+    if (!R.recalc || locked) return;
+    const token = ++recalcToken;
+    try {
+      const res = await R.recalc(model, { path: isNew ? null : apiPath(), field, line });
+      if (token !== recalcToken || !res) return;
+      model = res;
+      errors = {};
+      lineError = null;
+      render();
+    } catch (e) {
+      if (token === recalcToken) showError(e);
     }
   }
 
