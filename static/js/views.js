@@ -15,7 +15,7 @@ export const TABSETS = {
   gl: [["gl", "gl.tab.accounts"], ["cc", "gl.tab.cc"]],
   tax: [["taxcodes", "tax.tab.codes"], ["taxgroups", "tax.tab.groups"]],
   wh: [["warehouses", "wh.tab.warehouses"], ["locations", "wh.tab.locations"]],
-  setup: [["categories", "setup.tab.categories"], ["uom", "setup.tab.uom"]],
+  setup: [["categories", "setup.tab.categories"], ["uom", "setup.tab.uom"], ["uomconv", "setup.tab.conv"]],
   mfgcal: [["calendars", "mfg.tab.cal"], ["calexceptions", "mfg.tab.exc"]],
   mfgsetup: [["capabilities", "mfg.tab.cap"], ["setupfamilies", "mfg.tab.fam"], ["downtimereasons", "mfg.tab.down"], ["scrapreasons", "mfg.tab.scrap"]],
 };

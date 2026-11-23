@@ -97,6 +97,10 @@ TAX_GROUP = {
 }
 TAX_GROUP_LINE = {"iSeq": "i", "cTaxCode": "s", "lCompound": "b"}
 UOM = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "cType": UOM_TYPES, "lActive": "b"}
+# general conversions between units, for every product: 1 cFromUOM = dFactor cToUOM (1 KG = 1000 G)
+UOM_CONVERSION = {"cFromUOM": "s", "cToUOM": "s", "dFactor": "d", "cNotes": "s", "lActive": "b"}
+# conversions of one product (its packaging): 1 cUOM = dFactor stock units (flour: 1 BAG = 25 KG)
+PRODUCT_UOM = {"cUOM": "s", "dFactor": "d", "cNotes": "s"}
 CATEGORY = {"cCode": "s", "cDescFR": "s", "cDescEN": "s", "cParent": "s", "lActive": "b"}
 PRODUCT = {
     # identification
@@ -471,6 +475,7 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
     "tax_groups": {"cTreatment": "taxable", "lActive": True},
     "uom": {"cType": "count", "lActive": True},
+    "uom_conversions": {"lActive": True},
     "categories": {"lActive": True},
     "products": {
         "cStatus": "active",

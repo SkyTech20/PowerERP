@@ -100,6 +100,7 @@ class ProductService(CrudService):
     """The item master. The full view (one product) adds its stock by warehouse, value, quantity on order, margin."""
 
     line_schema = S.PRODUCT_SUPPLIER
+    children = {"conversions": S.PRODUCT_UOM}  # its own units: 1 BAG = 25 KG (the stock unit)
     readonly = ("dAvgCost", "dLastCost")
 
     def __init__(self, repo, refs: dict[str, Any], stock=None):
@@ -113,6 +114,9 @@ class ProductService(CrudService):
 
     def keep_line(self, line: Row) -> bool:
         return bool(line["cSupplierCode"])
+
+    def keep_child(self, key: str, line: Row) -> bool:
+        return bool(text(line["cUOM"]))
 
     def validate(self, row: Row, is_new: bool) -> None:
         require(row, "cDescFR")
@@ -136,6 +140,19 @@ class ProductService(CrudService):
                 raise AppError("unknown_ref", "lines", detail=f"line {i}: {ln['cSupplierCode']}")
             ln["cSupplierCode"] = codes[ln["cSupplierCode"].upper()]
             ln["cCurrency"] = ln["cCurrency"] or row.get("cCurrency") or "CAD"
+        seen = set()
+        for i, cv in enumerate(row.get("conversions", []), 1):
+            unit = self.refs["uom"](cv["cUOM"])
+            if unit is None:
+                raise AppError("unknown_ref", "conversions", detail=f"line {i}: {cv['cUOM']}")
+            cv["cUOM"] = unit["cCode"]
+            if cv["cUOM"].upper() == text(row["cStockUOM"]).upper():
+                raise AppError("same_unit", "conversions", detail=f"line {i}")
+            if cv["cUOM"].upper() in seen:
+                raise AppError("duplicate", "conversions", detail=f"line {i}: {cv['cUOM']}")
+            seen.add(cv["cUOM"].upper())
+            if number(cv["dFactor"]) <= 0:
+                raise AppError("positive", "conversions", detail=f"line {i}")
         for f in ("dAvgCost", "dLastCost"):
             row.setdefault(f, "")
 
@@ -159,6 +176,14 @@ class ProductService(CrudService):
         """Is `code` in one of these fields of a product (tax group, unit, category)?"""
         cu = code.upper()
         return any(text(p.get(f)).upper() == cu for p in self.repo.all(lines=False) for f in fields)
+
+    def uses_unit(self, code: str) -> bool:
+        """Is the unit a stock, purchase or sales unit, or a conversion, of a product?"""
+        cu = code.upper()
+        fields = ("cStockUOM", "cPurchaseUOM", "cSalesUOM")
+        return self.uses(fields, code) or any(
+            c["cUOM"].upper() == cu for p in self.repo.all() for c in p.get("conversions", [])
+        )
 
 
 class StockParamService(CrudService):

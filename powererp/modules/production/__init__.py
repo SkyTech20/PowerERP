@@ -270,6 +270,7 @@ def _register_recipes(bp: Blueprint, c: Container, seed: dict) -> None:
         "capabilities": c.get("capabilities").find,
         "suppliers": c.get("suppliers").find,
         "with_capability": c.get("resources").with_capability,
+        "unit_factor": c.get("unit_converter").factor,
     }
     recipes = c.register("recipes", RecipeService(store("recipes"), refs, c.get("references")))
     register_crud_routes(bp, "recipes", "recipes", recipes, ("cProduct", "cRevision", "cDescFR", "cDescEN", "cStatus"))

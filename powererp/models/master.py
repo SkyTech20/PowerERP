@@ -156,6 +156,7 @@ SPECS = {
         TableSpec("tax_codes", S.TAX_CODE, order=("cCode",), line_schema=S.TAX_RATE),
         TableSpec("tax_groups", S.TAX_GROUP, order=("cCode",), line_schema=S.TAX_GROUP_LINE),
         TableSpec("uoms", S.UOM, order=("cCode",)),
+        TableSpec("uom_conversions", S.UOM_CONVERSION, keys=("cFromUOM", "cToUOM"), order=("cFromUOM", "cToUOM")),
         TableSpec("product_categories", S.CATEGORY, order=("cCode",)),
         TableSpec(
             "products",
@@ -163,6 +164,7 @@ SPECS = {
             order=("cCode",),
             extra={"dAvgCost": "d", "dLastCost": "d"},
             line_schema=S.PRODUCT_SUPPLIER,
+            children={"conversions": S.PRODUCT_UOM},
         ),
         TableSpec("warehouses", S.WAREHOUSE, order=("cCode",)),
         TableSpec("locations", S.LOCATION, keys=("cWarehouse", "cCode"), order=("cWarehouse", "iPickSeq", "cCode")),

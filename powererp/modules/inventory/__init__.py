@@ -206,7 +206,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     # The products tell taxes, units and categories when a code is still used
     references = c.get("references")
     references.register("tax_group", lambda code: products.uses(("cSalesTaxGroup", "cPurchaseTaxGroup"), code))
-    references.register("uom", lambda code: products.uses(("cStockUOM", "cPurchaseUOM", "cSalesUOM"), code))
+    references.register("uom", products.uses_unit)
     references.register("category", lambda code: products.uses(("cCategory",), code))
 
     lookups = c.get("lookups")

@@ -1,5 +1,5 @@
 /* PowerERP: Generic list screen of a resource. */
-import { $, $$, api, enc, esc, fmtInt, lang, t } from "../core.js";
+import { $, $$, api, enc, esc, fmtInt, lang, t, toast } from "../core.js";
 import { RES } from "../registry.js";
 import { listState, pageHead, tabsHtml } from "../views.js";
 
@@ -35,7 +35,9 @@ export function listView(key) {
           <option value="">${esc(t(f.l))}: ${esc(t("common.all"))}</option>
           ${f.options.map(([v, l]) => `<option value="${esc(v)}" ${st.filters[f.f] === v ? "selected" : ""}>${esc(f.raw ? l : t(l))}</option>`).join("")}
         </select>`).join("");
-      $("#view").innerHTML = pageHead(t(R.title), t(R.sub), R.noNew ? "" : `<a class="btn primary" href="#${R.route}/new">＋ ${esc(t("common.new"))}</a>`)
+      // R.listActions: buttons of the list (e.g. add the standard conversions), next to "New"
+      const listActions = (R.listActions || []).map((a) => `<button class="btn" data-list-action="${a.id}">${esc(t(a.l))}</button>`).join("");
+      $("#view").innerHTML = pageHead(t(R.title), t(R.sub), listActions + (R.noNew ? "" : `<a class="btn primary" href="#${R.route}/new">＋ ${esc(t("common.new"))}</a>`))
         + (R.tabset ? tabsHtml(R) : "")
         + `<div class="card"><div class="toolbar"><input type="search" id="q" placeholder="${esc(t("common.search"))}" value="${esc(st.q)}">${filters}
             <span class="count">${esc(t("common.records", { n: fmtInt(data.total) }))}</span></div>
@@ -63,6 +65,18 @@ export function listView(key) {
         reload();
       }));
       $$("tr[data-href]").forEach((tr) => { if (tr.dataset.href) tr.addEventListener("click", () => { location.hash = "#" + tr.dataset.href; }); });
+      $$("[data-list-action]").forEach((b) => b.addEventListener("click", async () => {
+        const a = R.listActions.find((x) => x.id === b.dataset.listAction);
+        b.disabled = true;
+        try {
+          const msg = await a.run();
+          if (msg) toast(msg, "success");
+          await reload();
+        } catch (e) {
+          toast(t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic"), "error");
+          b.disabled = false;
+        }
+      }));
       $("#prev").addEventListener("click", () => { st.page--; reload(); });
       $("#next").addEventListener("click", () => { st.page++; reload(); });
     },
