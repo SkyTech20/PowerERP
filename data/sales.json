@@ -1,5 +1,5 @@
 {
- "_about": "Sales demo data (V1): the company profile printed on the invoices and B2B customers. Codes in English, fictitious companies.",
+ "_about": "Sales demo data (V1, V2): the company profile printed on the invoices, B2B customers and their price lists. Codes in English, fictitious companies.",
  "company_profile": [
   {
    "cCode": "MAIN",
@@ -17,6 +17,213 @@
    "cNEQ": "1170000001",
    "cInvoiceNoteFR": "Merci de votre confiance. Paiement selon les conditions indiquées.",
    "cInvoiceNoteEN": "Thank you for your business. Payment according to the terms shown."
+  }
+ ],
+ "price_lists": [
+  {
+   "cCode": "HORECA",
+   "cDescFR": "Hôtels, restaurants et institutions",
+   "cDescEN": "Hotels, restaurants and institutions",
+   "dStartDate": "",
+   "dEndDate": "",
+   "cNotes": "",
+   "lActive": true,
+   "lines": [
+    {
+     "cProduct": "PAP-8511",
+     "cUOM": "CS",
+     "dMinQty": "0",
+     "dPrice": "69.90",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "PAP-8511",
+     "cUOM": "CS",
+     "dMinQty": "10",
+     "dPrice": "64.90",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "ENV-10",
+     "cUOM": "BTE",
+     "dMinQty": "0",
+     "dPrice": "41.50",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "CRAY-HB",
+     "cUOM": "BTE",
+     "dMinQty": "0",
+     "dPrice": "7.95",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "TUBE-T8",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "15.75",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "TUBE-T8",
+     "cUOM": "UN",
+     "dMinQty": "50",
+     "dPrice": "13.95",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "LED-2X4",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "109.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "EXT-5LB",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "89.00",
+     "dDiscountPct": ""
+    }
+   ],
+   "discounts": [
+    {
+     "cCategory": "PAP",
+     "dDiscountPct": "5"
+    },
+    {
+     "cCategory": "SEC",
+     "dDiscountPct": "10"
+    }
+   ]
+  },
+  {
+   "cCode": "DIST",
+   "cDescFR": "Distributeurs",
+   "cDescEN": "Distributors",
+   "dStartDate": "2026-01-01",
+   "dEndDate": "2027-12-31",
+   "cNotes": "Prix 2026-2027 ; le toner est à prix net (sans escompte).",
+   "lActive": true,
+   "lines": [
+    {
+     "cProduct": "LAP-14I7",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "1499.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "LAP-14I7",
+     "cUOM": "UN",
+     "dMinQty": "10",
+     "dPrice": "1449.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MON-27Q",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "389.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "DOCK-USBC",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "249.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "CLAV-SF",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "69.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "LED-2X4",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "99.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "LED-2X4",
+     "cUOM": "UN",
+     "dMinQty": "24",
+     "dPrice": "94.00",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "TUBE-T8",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "14.50",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "TON-26A",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "155.00",
+     "dDiscountPct": "0"
+    }
+   ],
+   "discounts": [
+    {
+     "cCategory": "INFO",
+     "dDiscountPct": "4"
+    },
+    {
+     "cCategory": "PAP",
+     "dDiscountPct": "6"
+    },
+    {
+     "cCategory": "FIX",
+     "dDiscountPct": "12"
+    }
+   ]
+  },
+  {
+   "cCode": "EPICERIE-QC",
+   "cDescFR": "Prix de l'Épicerie Fine de Québec",
+   "cDescEN": "Épicerie Fine de Québec prices",
+   "dStartDate": "",
+   "dEndDate": "",
+   "cNotes": "Entente négociée avec le client.",
+   "lActive": true,
+   "lines": [
+    {
+     "cProduct": "PAP-8511",
+     "cUOM": "CS",
+     "dMinQty": "0",
+     "dPrice": "67.50",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "ENV-10",
+     "cUOM": "BTE",
+     "dMinQty": "0",
+     "dPrice": "39.90",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "CRAY-HB",
+     "cUOM": "BTE",
+     "dMinQty": "0",
+     "dPrice": "7.50",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "CRAY-HB",
+     "cUOM": "BTE",
+     "dMinQty": "20",
+     "dPrice": "6.95",
+     "dDiscountPct": ""
+    }
+   ],
+   "discounts": []
   }
  ],
  "customers": [
@@ -37,6 +244,7 @@
    "cTaxExemptNo": "",
    "cTermCode": "n30",
    "cTermDesc": "net 30 jours",
+   "cPriceList": "HORECA",
    "dDiscountPct": "5",
    "cWarehouse": "ENT-01",
    "cNotes": "",
@@ -105,6 +313,7 @@
    "cTaxExemptNo": "",
    "cTermCode": "n15",
    "cTermDesc": "net 15 jours",
+   "cPriceList": "EPICERIE-QC",
    "dDiscountPct": "",
    "cWarehouse": "ENT-02",
    "cNotes": "",
@@ -152,6 +361,7 @@
    "cTaxExemptNo": "",
    "cTermCode": "n30",
    "cTermDesc": "net 30 jours",
+   "cPriceList": "HORECA",
    "dDiscountPct": "3",
    "cWarehouse": "ENT-01",
    "cNotes": "",
@@ -220,6 +430,7 @@
    "cTaxExemptNo": "",
    "cTermCode": "n45",
    "cTermDesc": "net 45 days",
+   "cPriceList": "DIST",
    "dDiscountPct": "",
    "cWarehouse": "ENT-01",
    "cNotes": "",
@@ -274,6 +485,7 @@
    "cTaxExemptNo": "EXO-QC-2026-0457",
    "cTermCode": "n30",
    "cTermDesc": "net 30 jours",
+   "cPriceList": "HORECA",
    "dDiscountPct": "",
    "cWarehouse": "",
    "cNotes": "Centre de la petite enfance : exonéré (certificat au dossier).",

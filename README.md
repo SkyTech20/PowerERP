@@ -121,8 +121,13 @@ Not done yet: receptions and invoices do not move the stock automatically, there
 B2B sales, Quebec first (GST 5 % + QST 9.975 %), in CAD, built step by step, one PR each: V1 customers and company profile, V2 price lists and discounts, V3 invoices (draft), V4 posting (the stock goes out only then, after every check), V5 printing FR / EN, V6 credit notes. No receivables in this phase: the invoice is the end of the flow. Production orders made from sales come after M3.
 
 - **V1 (done): Sales → Customers** (`/api/customers/<code>`): name and legal name, invoice language (FR / EN), billing address, e-mail, tax group (QC by default; EXO with an exemption number), payment terms, default discount %, shipping warehouse, notes; **ship-to addresses** (one default; an address can have its own tax group, since the taxes follow the place of delivery: ON for a delivery in Ontario) and **contacts** (those marked *Invoices* receive them). A tax group used by a customer or one of its addresses cannot be deleted.
+- **V2 (done): Sales → Price lists** (`/api/price-lists/<code>`): prices by product, unit and quantity (one line per quantity break; empty unit = the sales unit), an optional discount % per line (0 = net price), discounts by product category (also on the subcategories), validity dates. A list is shared by several customers (HORECA, DIST) or belongs to one customer (its negotiated prices); each customer points to its price list (*Price list* field). The **Price check** tab of a customer shows what it pays and why: `GET /api/pricing?customer=&product=&qty=&uom=&date=`:
+  1. price: the line of the customer's price list (active and valid that day) with the highest quantity reached, converted to the unit asked for; else the list price of the product (Price 1, per sales unit);
+  2. discount: the line's; else the category's (or a parent category's) in the price list; else the customer's discount %;
+  3. net price = price × (1 − discount); below the product's minimum price it is flagged (the invoice will refuse it).
+  A price list used by a customer, a product in a price list and a category with a discount cannot be deleted.
 - **Administration → System settings → Company profile** (`GET /api/company`, `PUT /api/admin/company` for administrators): the name, legal name, address, phone, e-mail, website, NEQ and the FR / EN note printed on the invoices. The GST / HST and QST numbers are not typed twice: they are the registration numbers of the active tax codes, returned with the profile.
-- Demo: 5 customers (Montréal, Québec, Gatineau with a ship-to in Ottawa, an exempt daycare, an Ontario distributor invoiced in English); the pastry shop has its own profile and 4 customers (`data/sales.json`, `data/pastry/sales.json`).
+- Demo: 5 customers (Montréal, Québec, Gatineau with a ship-to in Ottawa, an exempt daycare, an Ontario distributor invoiced in English) and 3 price lists (HORECA, DIST valid 2026-2027, EPICERIE-QC for one customer); the pastry shop has its own profile, 4 customers and 2 price lists (cafés, caterers) (`data/sales.json`, `data/pastry/sales.json`).
 
 ## Run
 
@@ -304,7 +309,8 @@ All endpoints return JSON. Lists accept `q` (search), `page`, `size`, `sort`, `d
 | Inventory | `GET /api/inventory/stock`, `GET /api/inventory/valuation`, `GET /api/inventory/replenishment`, `POST /api/inventory/replenishment/po` |
 | Physical counts | `GET/POST /api/stock-counts`, `GET/PUT/DELETE /api/stock-counts/<no>`, `POST .../<no>/generate`, `POST .../<no>/post` |
 | Customers | `GET/POST /api/customers`, `GET/PUT/DELETE /api/customers/<code>` |
+| Price lists / pricing | `GET/POST /api/price-lists`, `GET/PUT/DELETE /api/price-lists/<code>`; `GET /api/pricing?customer=&product=&qty=&uom=&date=` |
 | Company profile | `GET /api/company`, `PUT /api/admin/company` (administrators) |
-| Other | `GET /api/health`, `GET /api/summary`, `GET /api/lookups/<suppliers\|gl\|cc\|po\|terms\|buyers\|taxcodes\|taxgroups\|uom\|categories\|products\|stockproducts\|warehouses\|locations\|customers\|customer_terms>?q=`, `POST /api/reset`, `POST /api/clear` |
+| Other | `GET /api/health`, `GET /api/summary`, `GET /api/lookups/<suppliers\|gl\|cc\|po\|terms\|buyers\|taxcodes\|taxgroups\|uom\|categories\|products\|stockproducts\|warehouses\|locations\|customers\|customer_terms\|price_lists\|sellable_products>?q=`, `POST /api/reset`, `POST /api/clear` |
 
 Errors come back as `{"error": "required" | "duplicate" | "numeric" | "not_found", "field": "..."}`.
