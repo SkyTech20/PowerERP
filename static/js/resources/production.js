@@ -559,7 +559,7 @@ const explosion = {
           `<div>⚠ ${esc(t("mfg.rc.warn", { op: w.iOpSeq, res: w.cResource, attr: w.cAttribute, v: fmtNum(w.dValue), min: w.dMin || "—", max: w.dMax || "—" }))}</div>`).join("")}</div></div>` : "";
         $("#rcExplode").innerHTML = warn + `<h3>${esc(t("mfg.rc.materials"))}</h3><div class="table-wrap"><table class="grid"><thead><tr>
             <th>${esc(t("mfg.f.cComponent"))}</th><th>${esc(t("f.cDescription"))}</th><th class="num">${esc(t("mfg.f.iOpSeq"))}</th><th class="num">${esc(t("mfg.op.qty"))}</th><th class="num">${esc(t("mfg.rc.unitCost"))}</th><th class="num">${esc(t("mfg.rc.cost"))}</th></tr></thead><tbody>
-          ${e.materials.map((x) => `<tr><td>${esc(x.cComponent)}</td><td>${esc(dl(x, "cDesc"))}</td><td class="num">${esc(x.iOpSeq || "")}</td><td class="num">${esc(fmtNum(x.dQty))} ${esc(x.cUOM)}</td><td class="num">${esc(money2(x.dUnitCost))}</td><td class="num">${esc(money2(x.dCost))}</td></tr>`).join("")}
+          ${e.materials.map((x) => `<tr><td>${esc(x.cComponent)}</td><td>${esc(dl(x, "cDesc"))}</td><td class="num">${esc(x.iOpSeq || "")}</td><td class="num">${esc(fmtNum(x.dQty))} ${esc(x.cUOM)}${x.cStockUOM && x.cStockUOM !== x.cUOM ? `<div class="muted">= ${esc(fmtNum(x.dStockQty))} ${esc(x.cStockUOM)}</div>` : ""}</td><td class="num">${x.cStockUOM && x.cStockUOM !== x.cUOM ? `${esc(money2(x.dStockUnitCost))} <span class="muted">/ ${esc(x.cStockUOM)}</span>` : esc(money2(x.dUnitCost))}</td><td class="num">${esc(money2(x.dCost))}</td></tr>`).join("")}
           </tbody></table></div>
           <h3>${esc(t("mfg.rc.operations"))}</h3><div class="table-wrap"><table class="grid"><thead><tr>
             <th class="num">${esc(t("mfg.f.iOpSeq"))}</th><th>${esc(t("mfg.op.one"))}</th><th>${esc(t("mfg.op.where"))}</th><th class="num">${esc(t("mfg.f.dSetupMin"))}</th><th class="num">${esc(t("mfg.op.run"))}</th><th class="num">${esc(t("mfg.f.dMinWaitMin"))}</th><th class="num">${esc(t("mfg.rc.cost"))}</th></tr></thead><tbody>
@@ -652,7 +652,7 @@ Object.assign(RES, {
       { key: "materials", tab: "mat", title: "mfg.rc.materials", help: "mfg.rc.materials.help",
         cols: [
           { f: "iSeq", l: "mfg.f.iSeq", w: "w-xs", n: true }, { f: "cComponent", l: "mfg.f.cComponent", w: "w-lg", lookup: "products" },
-          { f: "dQtyPer", l: "mfg.f.dQtyPer", w: "w-sm", n: true }, { f: "cUOM", l: "mfg.f.cUOM", w: "w-xs" },
+          { f: "dQtyPer", l: "mfg.f.dQtyPer", w: "w-sm", n: true }, { f: "cUOM", l: "mfg.f.cUOM", w: "w-sm", lookup: "uom" },
           { f: "dScrapPct", l: "mfg.f.dScrapPct", w: "w-xs", n: true }, { f: "lFixedQty", l: "mfg.f.lFixedQty", w: "w-xs", type: "check" },
           { f: "iOpSeq", l: "mfg.f.iOpSeq", w: "w-xs", n: true },
           { f: "cIssueMethod", l: "mfg.f.cIssueMethod", w: "w-md", type: "select", options: opts("mfg.o.issue.", ISSUE_METHODS) },
@@ -686,7 +686,7 @@ Object.assign(RES, {
         cols: [
           { f: "cProduct", l: "mfg.f.cProduct", w: "w-lg", lookup: "products" },
           { f: "cKind", l: "mfg.f.cKind", w: "w-md", type: "select", options: opts("mfg.o.out.", OUTPUT_KINDS) },
-          { f: "dQtyPer", l: "mfg.f.dQtyPer", w: "w-sm", n: true }, { f: "cUOM", l: "mfg.f.cUOM", w: "w-xs" }, { f: "dCostPct", l: "mfg.f.dCostPct", w: "w-sm", n: true },
+          { f: "dQtyPer", l: "mfg.f.dQtyPer", w: "w-sm", n: true }, { f: "cUOM", l: "mfg.f.cUOM", w: "w-sm", lookup: "uom" }, { f: "dCostPct", l: "mfg.f.dCostPct", w: "w-sm", n: true },
         ],
         newLine: () => ({ cProduct: "", cKind: "byproduct", dQtyPer: "", cUOM: "", dCostPct: "" }) },
     ],

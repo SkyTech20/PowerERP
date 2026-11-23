@@ -105,6 +105,20 @@ class RecipeService(CrudService):
         first = {"materials": "cComponent", "outputs": "cProduct", "operations": "iOpSeq"}[key]
         return bool(text(line[first])) and line[first] != 0
 
+    # ---------------------------------------------------------- units
+    def _factor(self, uom: str, prod: Row) -> float | None:
+        """Stock units of the product in one `uom` (G of a product stocked in KG: 0.001); None: no conversion."""
+        stock = text(prod.get("cStockUOM"))
+        if text(uom).upper() == stock.upper():
+            return 1.0
+        convert = self.refs.get("unit_factor")
+        return convert(uom, stock, prod) if convert else None
+
+    def _check_unit(self, uom: str, prod: Row, field: str, where: str = "") -> None:
+        if self._factor(uom, prod) is None:
+            detail = f"{uom} -> {prod.get('cStockUOM', '')}"
+            raise AppError("no_conversion", field, detail=f"{where}: {detail}" if where else detail)
+
     # ---------------------------------------------------------- rules
     def validate(self, row: Row, is_new: bool) -> None:
         prod = self.refs["products"](row["cProduct"]) if text(row["cProduct"]) else None
@@ -123,6 +137,7 @@ class RecipeService(CrudService):
         row["cDescFR"] = row["cDescFR"] or prod.get("cDescFR", "")
         row["cDescEN"] = row["cDescEN"] or prod.get("cDescEN", "")
         row["cUOM"] = row["cUOM"] or prod.get("cStockUOM", "")
+        self._check_unit(row["cUOM"], prod, "cUOM")
         if number(row["dBaseQty"]) <= 0:
             raise AppError("positive", "dBaseQty")
         lo, hi = number(row["dMinBatch"]), number(row["dMaxBatch"])
@@ -258,6 +273,7 @@ class RecipeService(CrudService):
                 raise AppError("component_is_product", "materials", detail=where)
             m["cComponent"] = comp["cCode"]
             m["cUOM"] = m["cUOM"] or comp.get("cStockUOM", "")
+            self._check_unit(m["cUOM"], comp, "materials", where)  # 500 G of flour stocked in KG: 0.5 KG
             if number(m["dQtyPer"]) <= 0:
                 raise AppError("positive", "materials", detail=f"{where}: dQtyPer")
             if text(m["dScrapPct"]) and not 0 <= number(m["dScrapPct"]) < 100:
@@ -277,6 +293,7 @@ class RecipeService(CrudService):
                 raise AppError("component_is_product", "outputs", detail=f"line {i}")
             o["cProduct"] = prod["cCode"]
             o["cUOM"] = o["cUOM"] or prod.get("cStockUOM", "")
+            self._check_unit(o["cUOM"], prod, "outputs", f"line {i}")
             if number(o["dQtyPer"]) <= 0:
                 raise AppError("positive", "outputs", detail=f"line {i}: dQtyPer")
             total += number(o["dCostPct"])
@@ -336,7 +353,9 @@ class RecipeService(CrudService):
             comp = self.refs["products"](m["cComponent"]) or {}
             per = number(m["dQtyPer"])
             need = (per * batches if m["lFixedQty"] else per * factor) * (1 + number(m["dScrapPct"]) / 100)
-            cost = need * product_cost(comp)
+            to_stock = self._factor(m["cUOM"], comp) or 1.0  # the cost is per stock unit
+            unit_cost = product_cost(comp) * to_stock
+            cost = need * unit_cost
             mat_cost += cost
             materials.append(
                 {
@@ -347,7 +366,10 @@ class RecipeService(CrudService):
                     "cUOM": m["cUOM"],
                     "iOpSeq": m["iOpSeq"],
                     "dQty": round(need, 4),
-                    "dUnitCost": product_cost(comp),
+                    "dStockQty": round(need * to_stock, 6),  # what leaves the stock
+                    "cStockUOM": comp.get("cStockUOM", ""),
+                    "dUnitCost": round(unit_cost, 6),
+                    "dStockUnitCost": product_cost(comp),
                     "dCost": round(cost, 2),
                 }
             )

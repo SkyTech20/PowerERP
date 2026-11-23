@@ -1,5 +1,7 @@
 """Products, taxes and inventory management (powererp/modules/inventory), on the seed in data/inventory.json."""
 
+import pytest
+
 
 def mv(client, **over):
     body = {"cType": "IN", "cProduct": "CLAV-SF", "dQty": "1", "cWarehouse": "ENT-01", "cLocation": "A-01-02-A"}
@@ -312,3 +314,35 @@ def test_replenishment_in_purchase_units(client):
     ).get_json()["purchaseOrders"][0]
     line = client.get("/api/purchase-orders/" + po["cPO"]).get_json()["lines"][0]
     assert line["dQuantity"] == "100" and line["dUnitCost"] == "12.50" and "(4 CS)" in line["cProductDesc"]
+
+
+def test_unit_conversions(client):
+    # the demo data has the general conversions; the reverse is deduced, through a chain if needed
+    assert client.get("/api/uom-conversions/KG/G").get_json()["dFactor"] == "1000"
+    assert client.get("/api/uom-conversions/factor?from=LB&to=G").get_json()["dFactor"] == pytest.approx(453.59237)
+    assert client.get("/api/uom-conversions/factor?from=G&to=UN").get_json() == {
+        "error": "no_conversion",
+        "field": "to",
+    }
+    assert (
+        client.post("/api/uom-conversions", json={"cFromUOM": "G", "cToUOM": "KG", "dFactor": "0.001"}).status_code
+        == 400
+    )
+    assert client.delete("/api/uom/G").status_code == 409  # used by a conversion
+    # the units of one product: its packaging, in stock units
+    prod = client.get("/api/products").get_json()["items"][0]
+    stock = prod["cStockUOM"]
+    other = "PQT" if stock != "PQT" else "CS"
+    r = client.put(f"/api/products/{prod['cCode']}", json={"conversions": [{"cUOM": other.lower(), "dFactor": "12"}]})
+    assert r.status_code == 200 and r.get_json()["conversions"][0]["cUOM"] == other
+    f = client.get(f"/api/uom-conversions/factor?from={other}&to={stock}&product={prod['cCode']}").get_json()
+    assert f["dFactor"] == 12
+    assert client.delete(f"/api/uom/{other}").status_code == 409  # used by the product
+    bad = client.put(f"/api/products/{prod['cCode']}", json={"conversions": [{"cUOM": stock, "dFactor": "2"}]})
+    assert bad.get_json()["error"] == "same_unit"
+    # after "Clear all data", the standard units and conversions can be added again in one click
+    client.post("/api/clear")
+    assert client.get("/api/uom-conversions").get_json()["total"] == 0
+    added = client.post("/api/uom-conversions/standard").get_json()
+    assert added["iUnits"] >= 10 and added["iConversions"] >= 8
+    assert client.get("/api/uom-conversions/factor?from=DZ&to=UN").get_json()["dFactor"] == 12

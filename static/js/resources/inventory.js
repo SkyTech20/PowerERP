@@ -120,6 +120,26 @@ Object.assign(RES, {
       { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
     ] }],
   },
+  uomconv: {
+    api: "uom-conversions", route: "/inv/uom-conversions", menu: "/inv/categories", tabset: "setup", title: "setup.title", sub: "setup.subtitle",
+    one: "conv.one", newTitle: "conv.new", id: (r) => `${r.cFromUOM}/${r.cToUOM}`, label: (r) => `1 ${r.cFromUOM} = ${qtyFmt(r.dFactor)} ${r.cToUOM}`, sort: "cFromUOM",
+    columns: [
+      { f: "cFromUOM", l: "f.conv.cFromUOM", fmt: (v) => esc("1 " + v) }, { f: "dFactor", l: "f.conv.dFactor", num: true, fmt: (v) => esc(qtyFmt(v)) },
+      { f: "cToUOM", l: "f.conv.cToUOM" }, { f: "cNotes", l: "f.conv.cNotes", wrap: true }, { f: "lActive", l: "opt.active", fmt: yesNo },
+    ],
+    listActions: [{ id: "standard", l: "conv.standard", run: async () => {
+      const r = await api("uom-conversions/standard", { method: "POST" });
+      return t("conv.standard.done", { u: r.iUnits, c: r.iConversions });
+    } }],
+    defaults: { lActive: true },
+    sections: [{ t: "common.general", help: "conv.help", fields: [
+      { f: "cFromUOM", l: "f.conv.cFromUOM", req: true, key: true, lookup: "uom" },
+      { f: "dFactor", l: "f.conv.dFactor", type: "number", req: true, help: "f.conv.dFactor.help" },
+      { f: "cToUOM", l: "f.conv.cToUOM", req: true, key: true, lookup: "uom" },
+      { f: "lActive", l: "opt.active", type: "check" },
+      { f: "cNotes", l: "f.conv.cNotes", span: 4 },
+    ] }],
+  },
   products: {
     api: "products", route: "/inv/items", title: "prod.title", sub: "prod.subtitle", one: "prod.one", newTitle: "prod.new",
     id: (r) => r.cCode, label: (r) => `${r.cCode} — ${dl(r, "cDesc")}`, sort: "cCode",
@@ -140,7 +160,7 @@ Object.assign(RES, {
     ],
     defaults: () => ({ cStatus: "active", cType: "stock", cCostMethod: "avg", cCurrency: "CAD", cStockUOM: "UN", cPurchaseUOM: "UN",
       dPurchaseFactor: "1", cSalesUOM: "UN", dSalesFactor: "1", cSalesTaxGroup: "QC", cPurchaseTaxGroup: "QC", lStocked: true,
-      lSellable: true, lPurchasable: true, lPORequired: true, cWeightUOM: "kg", cDimUOM: "cm", cCountryOrigin: "CA", cABCClass: "", lines: [] }),
+      lSellable: true, lPurchasable: true, lPORequired: true, cWeightUOM: "kg", cDimUOM: "cm", cCountryOrigin: "CA", cABCClass: "", lines: [], conversions: [] }),
     sections: [
       { t: "prod.ident", fields: [
         { f: "cCode", l: "f.prod.cCode", req: true, key: true },
@@ -201,6 +221,12 @@ Object.assign(RES, {
         { f: "cHSCode", l: "f.prod.cHSCode", help: "f.prod.cHSCode.help" }, { f: "cFreightClass", l: "f.prod.cFreightClass" },
         { f: "cNotes", l: "f.prod.cNotes", type: "textarea", span: 4 },
       ] },
+    ],
+    grids: [
+      { key: "conversions", tab: "units", title: "prod.conversions", help: "prod.conversions.help",
+        cols: [{ f: "cUOM", l: "f.prod.convUOM", w: "w-md", lookup: "uom" }, { f: "dFactor", l: "f.prod.convFactor", w: "w-sm", n: true },
+          { f: "cNotes", l: "f.conv.cNotes", w: "w-lg" }],
+        newLine: () => ({ cUOM: "", dFactor: "", cNotes: "" }) },
     ],
     lines: {
       tab: "sup", title: "prod.suppliers", help: "prod.suppliers.help",

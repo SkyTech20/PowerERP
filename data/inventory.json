@@ -243,6 +243,50 @@
    "cDescEN": "Hour",
    "cType": "time",
    "lActive": true
+  },
+  {
+   "cCode": "G",
+   "cDescFR": "Gramme",
+   "cDescEN": "Gram",
+   "cType": "weight",
+   "lActive": true
+  },
+  {
+   "cCode": "ML",
+   "cDescFR": "Millilitre",
+   "cDescEN": "Millilitre",
+   "cType": "volume",
+   "lActive": true
+  }
+ ],
+ "uom_conversions": [
+  {
+   "cFromUOM": "KG",
+   "cToUOM": "G",
+   "dFactor": "1000",
+   "cNotes": "",
+   "lActive": true
+  },
+  {
+   "cFromUOM": "LB",
+   "cToUOM": "KG",
+   "dFactor": "0.45359237",
+   "cNotes": "",
+   "lActive": true
+  },
+  {
+   "cFromUOM": "L",
+   "cToUOM": "ML",
+   "dFactor": "1000",
+   "cNotes": "",
+   "lActive": true
+  },
+  {
+   "cFromUOM": "PI",
+   "cToUOM": "M",
+   "dFactor": "0.3048",
+   "cNotes": "Pied / foot",
+   "lActive": true
   }
  ],
  "categories": [
