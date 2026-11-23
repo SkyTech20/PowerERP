@@ -2,6 +2,7 @@
 import "./resources/erp.js";
 import "./resources/inventory.js";
 import "./resources/production.js";
+import "./resources/sales.js";
 import { $, $$, api } from "./core.js";
 import { enterApp, setLang, setLangPicked, showLogin } from "./login.js";
 import { applyStaticI18n } from "./menu.js";

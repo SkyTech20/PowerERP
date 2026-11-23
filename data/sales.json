@@ -1,0 +1,293 @@
+{
+ "_about": "Sales demo data (V1): the company profile printed on the invoices and B2B customers. Codes in English, fictitious companies.",
+ "company_profile": [
+  {
+   "cCode": "MAIN",
+   "cName": "Industries Démo PowerERP",
+   "cLegalName": "Industries Démo PowerERP inc.",
+   "cAddress1": "1250, rue Notre-Dame Ouest",
+   "cAddress2": "",
+   "cCity": "Montréal",
+   "cProvince": "QC",
+   "cZipCode": "H3C 1K3",
+   "cCountry": "CA",
+   "cPhone": "514 555-0100",
+   "cEmail": "facturation@demo-powererp.ca",
+   "cWebsite": "www.demo-powererp.ca",
+   "cNEQ": "1170000001",
+   "cInvoiceNoteFR": "Merci de votre confiance. Paiement selon les conditions indiquées.",
+   "cInvoiceNoteEN": "Thank you for your business. Payment according to the terms shown."
+  }
+ ],
+ "customers": [
+  {
+   "cCode": "BOUL-ST-DENIS",
+   "cName": "Boulangerie Saint-Denis",
+   "cLegalName": "Boulangerie Saint-Denis",
+   "cLang": "fr",
+   "cAddress1": "4321, rue Saint-Denis",
+   "cAddress2": "",
+   "cCity": "Montréal",
+   "cProvince": "QC",
+   "cZipCode": "H2J 2L1",
+   "cCountry": "CA",
+   "cPhone": "514 555-0142",
+   "cEmail": "compta@boul-st-denis.ca",
+   "cTaxGroup": "QC",
+   "cTaxExemptNo": "",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "dDiscountPct": "5",
+   "cWarehouse": "ENT-01",
+   "cNotes": "",
+   "lActive": true,
+   "addresses": [
+    {
+     "cCode": "STORE-1",
+     "cName": "Boulangerie Saint-Denis - Plateau",
+     "cAddress1": "4321, rue Saint-Denis",
+     "cAddress2": "",
+     "cCity": "Montréal",
+     "cProvince": "QC",
+     "cZipCode": "H2J 2L1",
+     "cCountry": "CA",
+     "cContact": "Julie Tremblay",
+     "cPhone": "514 555-0142",
+     "cTaxGroup": "",
+     "lDefault": true
+    },
+    {
+     "cCode": "STORE-2",
+     "cName": "Boulangerie Saint-Denis - Rosemont",
+     "cAddress1": "2890, rue Masson",
+     "cAddress2": "",
+     "cCity": "Montréal",
+     "cProvince": "QC",
+     "cZipCode": "H1Y 1X2",
+     "cCountry": "CA",
+     "cContact": "Marc Gagnon",
+     "cPhone": "514 555-0177",
+     "cTaxGroup": "",
+     "lDefault": false
+    }
+   ],
+   "contacts": [
+    {
+     "cName": "Julie Tremblay",
+     "cTitle": "Propriétaire",
+     "cPhone": "514 555-0142",
+     "cEmail": "julie@boul-st-denis.ca",
+     "lInvoices": false
+    },
+    {
+     "cName": "Service comptable",
+     "cTitle": "Comptes fournisseurs",
+     "cPhone": "514 555-0140",
+     "cEmail": "compta@boul-st-denis.ca",
+     "lInvoices": true
+    }
+   ]
+  },
+  {
+   "cCode": "EPICERIE-QC",
+   "cName": "Épicerie Fine de Québec",
+   "cLegalName": "Épicerie Fine de Québec",
+   "cLang": "fr",
+   "cAddress1": "875, rue Saint-Jean",
+   "cAddress2": "",
+   "cCity": "Québec",
+   "cProvince": "QC",
+   "cZipCode": "G1R 1R2",
+   "cCountry": "CA",
+   "cPhone": "418 555-0123",
+   "cEmail": "factures@epiceriefine-qc.ca",
+   "cTaxGroup": "QC",
+   "cTaxExemptNo": "",
+   "cTermCode": "n15",
+   "cTermDesc": "net 15 jours",
+   "dDiscountPct": "",
+   "cWarehouse": "ENT-02",
+   "cNotes": "",
+   "lActive": true,
+   "addresses": [
+    {
+     "cCode": "MAIN",
+     "cName": "Épicerie Fine de Québec",
+     "cAddress1": "875, rue Saint-Jean",
+     "cAddress2": "",
+     "cCity": "Québec",
+     "cProvince": "QC",
+     "cZipCode": "G1R 1R2",
+     "cCountry": "CA",
+     "cContact": "Sylvie Côté",
+     "cPhone": "418 555-0123",
+     "cTaxGroup": "",
+     "lDefault": true
+    }
+   ],
+   "contacts": [
+    {
+     "cName": "Sylvie Côté",
+     "cTitle": "Gérante",
+     "cPhone": "418 555-0123",
+     "cEmail": "sylvie@epiceriefine-qc.ca",
+     "lInvoices": true
+    }
+   ]
+  },
+  {
+   "cCode": "HOTEL-LAURIER",
+   "cName": "Hôtel Laurier Gatineau",
+   "cLegalName": "Hôtel Laurier Gatineau",
+   "cLang": "fr",
+   "cAddress1": "120, rue Laurier",
+   "cAddress2": "",
+   "cCity": "Gatineau",
+   "cProvince": "QC",
+   "cZipCode": "J8X 3W3",
+   "cCountry": "CA",
+   "cPhone": "819 555-0199",
+   "cEmail": "ap@hotel-laurier.ca",
+   "cTaxGroup": "QC",
+   "cTaxExemptNo": "",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "dDiscountPct": "3",
+   "cWarehouse": "ENT-01",
+   "cNotes": "",
+   "lActive": true,
+   "addresses": [
+    {
+     "cCode": "HOTEL",
+     "cName": "Hôtel Laurier - Cuisine",
+     "cAddress1": "120, rue Laurier",
+     "cAddress2": "Quai de livraison",
+     "cCity": "Gatineau",
+     "cProvince": "QC",
+     "cZipCode": "J8X 3W3",
+     "cCountry": "CA",
+     "cContact": "Chef Paul Roy",
+     "cPhone": "819 555-0198",
+     "cTaxGroup": "",
+     "lDefault": true
+    },
+    {
+     "cCode": "OTTAWA",
+     "cName": "Laurier Catering Ottawa",
+     "cAddress1": "55 Metcalfe Street",
+     "cAddress2": "",
+     "cCity": "Ottawa",
+     "cProvince": "ON",
+     "cZipCode": "K1P 6L5",
+     "cCountry": "CA",
+     "cContact": "Anne Smith",
+     "cPhone": "613 555-0110",
+     "cTaxGroup": "ON",
+     "lDefault": false
+    }
+   ],
+   "contacts": [
+    {
+     "cName": "Paul Roy",
+     "cTitle": "Chef exécutif",
+     "cPhone": "819 555-0198",
+     "cEmail": "chef@hotel-laurier.ca",
+     "lInvoices": false
+    },
+    {
+     "cName": "Accounts payable",
+     "cTitle": "",
+     "cPhone": "819 555-0199",
+     "cEmail": "ap@hotel-laurier.ca",
+     "lInvoices": true
+    }
+   ]
+  },
+  {
+   "cCode": "MAPLE-FOODS",
+   "cName": "Maple Foods Distribution Ltd.",
+   "cLegalName": "Maple Foods Distribution Ltd.",
+   "cLang": "en",
+   "cAddress1": "300 Industrial Avenue",
+   "cAddress2": "",
+   "cCity": "Toronto",
+   "cProvince": "ON",
+   "cZipCode": "M9W 5L8",
+   "cCountry": "CA",
+   "cPhone": "416 555-0150",
+   "cEmail": "invoices@maplefoods.example",
+   "cTaxGroup": "ON",
+   "cTaxExemptNo": "",
+   "cTermCode": "n45",
+   "cTermDesc": "net 45 days",
+   "dDiscountPct": "",
+   "cWarehouse": "ENT-01",
+   "cNotes": "",
+   "lActive": true,
+   "addresses": [
+    {
+     "cCode": "DC-TORONTO",
+     "cName": "Maple Foods - Distribution centre",
+     "cAddress1": "300 Industrial Avenue",
+     "cAddress2": "Dock 4",
+     "cCity": "Toronto",
+     "cProvince": "ON",
+     "cZipCode": "M9W 5L8",
+     "cCountry": "CA",
+     "cContact": "Receiving",
+     "cPhone": "416 555-0151",
+     "cTaxGroup": "",
+     "lDefault": true
+    }
+   ],
+   "contacts": [
+    {
+     "cName": "Brian Walsh",
+     "cTitle": "Buyer",
+     "cPhone": "416 555-0152",
+     "cEmail": "bwalsh@maplefoods.example",
+     "lInvoices": false
+    },
+    {
+     "cName": "Accounts payable",
+     "cTitle": "",
+     "cPhone": "416 555-0150",
+     "cEmail": "invoices@maplefoods.example",
+     "lInvoices": true
+    }
+   ]
+  },
+  {
+   "cCode": "CPE-SOLEIL",
+   "cName": "CPE Les Petits Soleils",
+   "cLegalName": "CPE Les Petits Soleils",
+   "cLang": "fr",
+   "cAddress1": "45, rue des Érables",
+   "cAddress2": "",
+   "cCity": "Laval",
+   "cProvince": "QC",
+   "cZipCode": "H7N 2B4",
+   "cCountry": "CA",
+   "cPhone": "450 555-0133",
+   "cEmail": "direction@cpe-soleils.ca",
+   "cTaxGroup": "EXO",
+   "cTaxExemptNo": "EXO-QC-2026-0457",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "dDiscountPct": "",
+   "cWarehouse": "",
+   "cNotes": "Centre de la petite enfance : exonéré (certificat au dossier).",
+   "lActive": true,
+   "addresses": [],
+   "contacts": [
+    {
+     "cName": "Nathalie Bérubé",
+     "cTitle": "Directrice",
+     "cPhone": "450 555-0133",
+     "cEmail": "direction@cpe-soleils.ca",
+     "lInvoices": true
+    }
+   ]
+  }
+ ]
+}

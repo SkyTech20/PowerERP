@@ -10,6 +10,7 @@ A small PowerERP-like ERP for demos and tests.
   - **Receptions** (with lines; picking a PO pre-fills the supplier and the lines)
   - **Inventory** (see [Products, taxes and inventory](#products-taxes-and-inventory))
   - **Administration → Taxes** (tax codes and tax groups)
+  - **Sales → Customers** (see [Sales](#sales))
 - Each working module has a maintenance screen: list, search, sort, filter, create, edit, delete.
 - **English / French** toggle in the top bar (remembered in the browser and per user).
 - **Login and users:** every screen needs a login. **Administration → Users** (administrators only) creates, edits, deactivates and deletes users (username, name, email, role *Administrator* / *User*, language, password). Each user changes their own password by clicking their name in the top bar.
@@ -114,6 +115,14 @@ Not done yet: receptions and invoices do not move the stock automatically, there
   - **new version from** any version (next revision letter, reason), **history** of every change (who, when, comment), **comparison** of two versions (`GET /api/recipes/<product>/compare?a=&b=`: header, materials, operations, steps, outputs).
   - Demo: every recipe approved; a revision B of the white bread (less salt) waits for approval.
 - The master data of Production (P1 to P10) is complete. Next, when Mohamed decides: operators and skills (P11), then production orders, shop floor and scheduling.
+
+## Sales
+
+B2B sales, Quebec first (GST 5 % + QST 9.975 %), in CAD, built step by step, one PR each: V1 customers and company profile, V2 price lists and discounts, V3 invoices (draft), V4 posting (the stock goes out only then, after every check), V5 printing FR / EN, V6 credit notes. No receivables in this phase: the invoice is the end of the flow. Production orders made from sales come after M3.
+
+- **V1 (done): Sales → Customers** (`/api/customers/<code>`): name and legal name, invoice language (FR / EN), billing address, e-mail, tax group (QC by default; EXO with an exemption number), payment terms, default discount %, shipping warehouse, notes; **ship-to addresses** (one default; an address can have its own tax group, since the taxes follow the place of delivery: ON for a delivery in Ontario) and **contacts** (those marked *Invoices* receive them). A tax group used by a customer or one of its addresses cannot be deleted.
+- **Administration → System settings → Company profile** (`GET /api/company`, `PUT /api/admin/company` for administrators): the name, legal name, address, phone, e-mail, website, NEQ and the FR / EN note printed on the invoices. The GST / HST and QST numbers are not typed twice: they are the registration numbers of the active tax codes, returned with the profile.
+- Demo: 5 customers (Montréal, Québec, Gatineau with a ship-to in Ottawa, an exempt daycare, an Ontario distributor invoiced in English); the pastry shop has its own profile and 4 customers (`data/sales.json`, `data/pastry/sales.json`).
 
 ## Run
 
@@ -294,6 +303,8 @@ All endpoints return JSON. Lists accept `q` (search), `page`, `size`, `sort`, `d
 | Stock movements | `GET/POST /api/stock-movements`, `GET /api/stock-movements/<no>` (no change or delete once posted) |
 | Inventory | `GET /api/inventory/stock`, `GET /api/inventory/valuation`, `GET /api/inventory/replenishment`, `POST /api/inventory/replenishment/po` |
 | Physical counts | `GET/POST /api/stock-counts`, `GET/PUT/DELETE /api/stock-counts/<no>`, `POST .../<no>/generate`, `POST .../<no>/post` |
-| Other | `GET /api/health`, `GET /api/summary`, `GET /api/lookups/<suppliers\|gl\|cc\|po\|terms\|buyers\|taxcodes\|taxgroups\|uom\|categories\|products\|stockproducts\|warehouses\|locations>?q=`, `POST /api/reset`, `POST /api/clear` |
+| Customers | `GET/POST /api/customers`, `GET/PUT/DELETE /api/customers/<code>` |
+| Company profile | `GET /api/company`, `PUT /api/admin/company` (administrators) |
+| Other | `GET /api/health`, `GET /api/summary`, `GET /api/lookups/<suppliers\|gl\|cc\|po\|terms\|buyers\|taxcodes\|taxgroups\|uom\|categories\|products\|stockproducts\|warehouses\|locations\|customers\|customer_terms>?q=`, `POST /api/reset`, `POST /api/clear` |
 
 Errors come back as `{"error": "required" | "duplicate" | "numeric" | "not_found", "field": "..."}`.

@@ -17,7 +17,19 @@ from . import database, settings
 from .container import Container
 from .core.errors import register_error_handlers
 from .integrations import powerware
-from .modules import admin, auth, catalog, inventory, ledger, production, purchasing, suppliers, system, taxes
+from .modules import (
+    admin,
+    auth,
+    catalog,
+    inventory,
+    ledger,
+    production,
+    purchasing,
+    sales,
+    suppliers,
+    system,
+    taxes,
+)
 from .modules.common.registry import ReferenceRegistry
 from .seed.demo import SCENARIOS, DemoData
 
@@ -55,6 +67,7 @@ def _register_modules(app: Flask, c: Container, demo: DemoData) -> None:
     powerware.register(app, c)  # the web services SkyAI calls
     inventory.register(app, c, demo.inventory)
     production.register(app, c, demo.production)  # reference lists of the shop floor (M0)
+    sales.register(app, c, demo.sales)  # customers and company profile (V1)
 
 
 def demo_snapshot(dataset: str | None, scenario: str) -> dict:

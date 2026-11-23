@@ -11,8 +11,8 @@ export const MENU = [
   { k: "gl", icon: "📒", items: [{ k: "gl.accounts", route: "/gl" }, "gl.journal", "gl.periods", "gl.statements", "gl.budgets", "gl.bankrec"] },
   { k: "ap", icon: "💳", items: [{ k: "ap.suppliers", route: "/suppliers" }, { k: "ap.invoices", route: "/invoices" }, "ap.payments", "ap.chequeRun", "ap.recurring", "ap.aging"] },
   { k: "pur", icon: "🛒", items: [{ k: "pur.po", route: "/po" }, { k: "pur.receptions", route: "/receptions" }, "pur.requisitions", "pur.returns", "pur.pricelists"] },
-  { k: "ar", icon: "💰", items: ["ar.customers", "ar.invoices", "ar.receipts", "ar.credits", "ar.collections"] },
-  { k: "sales", icon: "📈", items: ["sales.quotes", "sales.orders", "sales.shipping", "sales.pricing", "sales.commissions"] },
+  { k: "ar", icon: "💰", items: ["ar.invoices", "ar.receipts", "ar.credits", "ar.collections"] },
+  { k: "sales", icon: "📈", items: [{ k: "sales.customers", route: "/sales/customers" }, "sales.quotes", "sales.orders", "sales.shipping", "sales.pricing", "sales.commissions"] },
   { k: "inv", icon: "📦", items: [
     { k: "inv.items", route: "/inv/items" }, { k: "inv.stock", route: "/inv/stock" }, { k: "inv.movements", route: "/inv/movements" },
     { k: "inv.replenishment", route: "/inv/replenishment" }, { k: "inv.count", route: "/inv/counts" }, { k: "inv.valuation", route: "/inv/valuation" },
@@ -30,7 +30,7 @@ export const MENU = [
   { k: "rep", icon: "📊", items: ["rep.designer", "rep.bi"] },
   { k: "admin", icon: "⚙️", items: ["admin.companies", { k: "admin.users", route: "/admin/users", admin: true }, { k: "admin.taxes", route: "/admin/taxes" }, "admin.currencies", { k: "admin.backups", route: "/admin/backups", admin: true }, { k: "admin.settings", route: "/admin/settings", admin: true }] },
 ];
-export const openGroups = new Set(["gl", "ap", "pur", "inv"]);
+export const openGroups = new Set(["gl", "ap", "pur", "sales", "inv"]);
 // Menu items flagged admin: true are links for administrators only.
 export const usable = (i) => typeof i === "object" && (!i.admin || isAdmin());
 
