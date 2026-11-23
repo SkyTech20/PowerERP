@@ -1,0 +1,281 @@
+{
+ "po_details": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "800101",
+   "ttPOheader": {
+    "cSupplierCode": "KITCHEQ",
+    "cSupplierName": "Équipements de Cuisine Pro",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-02",
+    "dSubTotal": "2890.00",
+    "dFreight": "0.00",
+    "dGST": "144.50",
+    "dPST": "288.28",
+    "dTotalAmount": "3322.78"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "FRYER-2T",
+     "cProductDesc": "Friteuse électrique 2 bacs",
+     "dQuantity": "1",
+     "dUnitCost": "2890.00",
+     "dSubTotal": "2890.00",
+     "dTotalAmount": "2890.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "800102",
+   "ttPOheader": {
+    "cSupplierCode": "MEATCO",
+    "cSupplierName": "Boucherie Centrale Laval inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-09",
+    "dSubTotal": "920.00",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "920.00"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "BEEF-RAW",
+     "cProductDesc": "Bœuf en pièce, cru congelé",
+     "dQuantity": "40",
+     "dUnitCost": "14.50",
+     "dSubTotal": "580.00",
+     "dTotalAmount": "580.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "CHICKEN-RAW",
+     "cProductDesc": "Poulet entier, cru congelé",
+     "dQuantity": "50",
+     "dUnitCost": "6.80",
+     "dSubTotal": "340.00",
+     "dTotalAmount": "340.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "800103",
+   "ttPOheader": {
+    "cSupplierCode": "FARMEGG",
+    "cSupplierName": "Ferme Avicole Saint-Hyacinthe",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-09",
+    "dSubTotal": "126.00",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "126.00"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "EGG",
+     "cProductDesc": "Œuf frais calibre gros",
+     "dQuantity": "360",
+     "dUnitCost": "0.35",
+     "dSubTotal": "126.00",
+     "dTotalAmount": "126.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "800104",
+   "ttPOheader": {
+    "cSupplierCode": "DELIQC",
+    "cSupplierName": "Distribution Fromages et Charcuteries QC",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-10",
+    "dSubTotal": "364.50",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "364.50"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "HAM",
+     "cProductDesc": "Jambon cuit tranché",
+     "dQuantity": "15",
+     "dUnitCost": "11.50",
+     "dSubTotal": "172.50",
+     "dTotalAmount": "172.50"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "CHEESE",
+     "cProductDesc": "Fromage mozzarella",
+     "dQuantity": "15",
+     "dUnitCost": "12.80",
+     "dSubTotal": "192.00",
+     "dTotalAmount": "192.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "800105",
+   "ttPOheader": {
+    "cSupplierCode": "FOODWH",
+    "cSupplierName": "Grossiste Alimentaire Montréal",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-10",
+    "dSubTotal": "416.00",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "416.00"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "FLOUR",
+     "cProductDesc": "Farine de blé tout usage",
+     "dQuantity": "100",
+     "dUnitCost": "1.10",
+     "dSubTotal": "110.00",
+     "dTotalAmount": "110.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "OIL-FRY",
+     "cProductDesc": "Huile de canola pour friture",
+     "dQuantity": "60",
+     "dUnitCost": "3.20",
+     "dSubTotal": "192.00",
+     "dTotalAmount": "192.00"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "SALT",
+     "cProductDesc": "Sel fin",
+     "dQuantity": "10",
+     "dUnitCost": "1.20",
+     "dSubTotal": "12.00",
+     "dTotalAmount": "12.00"
+    },
+    {
+     "cUnique": "4",
+     "cProductcode": "ONION",
+     "cProductDesc": "Oignon jaune",
+     "dQuantity": "20",
+     "dUnitCost": "2.40",
+     "dSubTotal": "48.00",
+     "dTotalAmount": "48.00"
+    },
+    {
+     "cUnique": "5",
+     "cProductcode": "SEASONING",
+     "cProductDesc": "Assaisonnement (ail, poivre, paprika)",
+     "dQuantity": "3",
+     "dUnitCost": "18.00",
+     "dSubTotal": "54.00",
+     "dTotalAmount": "54.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "800106",
+   "ttPOheader": {
+    "cSupplierCode": "PACKPRO",
+    "cSupplierName": "Emballages Pro inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-11",
+    "dSubTotal": "255.00",
+    "dFreight": "0.00",
+    "dGST": "12.75",
+    "dPST": "25.44",
+    "dTotalAmount": "293.19"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "PAPER-BAG",
+     "cProductDesc": "Sac en papier pour pastel",
+     "dQuantity": "2000",
+     "dUnitCost": "0.08",
+     "dSubTotal": "160.00",
+     "dTotalAmount": "160.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "GLOVES",
+     "cProductDesc": "Gants jetables en nitrile (boîte de 100)",
+     "dQuantity": "10",
+     "dUnitCost": "9.50",
+     "dSubTotal": "95.00",
+     "dTotalAmount": "95.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "800107",
+   "ttPOheader": {
+    "cSupplierCode": "MEATCO",
+    "cSupplierName": "Boucherie Centrale Laval inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-20",
+    "dSubTotal": "920.00",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "920.00"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "BEEF-RAW",
+     "cProductDesc": "Bœuf en pièce, cru congelé",
+     "dQuantity": "40",
+     "dUnitCost": "14.50",
+     "dSubTotal": "580.00",
+     "dTotalAmount": "580.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "CHICKEN-RAW",
+     "cProductDesc": "Poulet entier, cru congelé",
+     "dQuantity": "50",
+     "dUnitCost": "6.80",
+     "dSubTotal": "340.00",
+     "dTotalAmount": "340.00"
+    }
+   ]
+  }
+ ],
+ "unbilled_po": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "800107",
+   "dCreationDate": "2026-11-20",
+   "cSupplierName": "Boucherie Centrale Laval inc.",
+   "cSupplierCode": "MEATCO"
+  }
+ ]
+}

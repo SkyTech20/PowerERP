@@ -3,6 +3,8 @@
 Scenario (chosen on the dashboard when the demo data is reset, ERP_SCENARIO for the first start):
     purchasing      SkyAI: GL, suppliers, products, POs, receptions, invoices and stock, nothing of production
     manufacturing   the same, plus the shop floor of a paper, a food and a metal plant (data/production.json)
+    pastry          a pastry shop that makes 3 pastels (data/pastry, tools/make_pastry_data.py): its own suppliers,
+                    items, recipes and shop floor; the stock is the raw material received and invoiced
 
 Same shapes as the PowerWARE / SkyAI feeds. data/demo/history.json (tools/make_history_data.py) adds suppliers and
 closed POs / receptions / invoices for the supplier selection of SkyAI requisitions.
@@ -16,7 +18,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 DATA_ROOT = Path(__file__).resolve().parent.parent.parent / "data"
-SCENARIOS = ("purchasing", "manufacturing")
+SCENARIOS = ("purchasing", "manufacturing", "pastry")
+PASTRY = DATA_ROOT / "pastry"
+# what the pastry shop keeps from data/inventory.json: taxes and units
+SHARED_INVENTORY = ("tax_codes", "tax_groups", "uom", "uom_conversions")
 DEFAULT_SCENARIO = "manufacturing"
 
 
@@ -83,4 +88,28 @@ class DemoData:
         # the items of the production demo (paper, bakery, metal) join the item master
         for key, rows in production.get("inventory", {}).items():
             inventory[key] = inventory.get(key, []) + rows
+        if scenario == "pastry":
+            lists, inventory, production = cls._pastry(lists, inventory)
         return cls(folder, lists, inventory, production, scenario)
+
+    @staticmethod
+    def _pastry(lists: dict, inventory: dict) -> tuple[dict, dict, dict]:
+        """GL and cost centres of the dataset; suppliers, purchases, items, stock and shop floor of the pastry shop."""
+
+        def read(name):
+            return json.loads((PASTRY / name).read_text(encoding="utf-8"))
+
+        po, rec = read("purchase_orders.json"), read("receptions.json")
+        lists = {
+            "gl_ttGL_data": lists["gl_ttGL_data"],
+            "gl_ttCC_data": lists["gl_ttCC_data"],
+            "supplier_terms_data": read("suppliers.json"),
+            "po_details": po["po_details"],
+            "unbilled_po": po["unbilled_po"],
+            "receiving_details": rec["receiving_details"],
+            "unbilled_receiving": rec["unbilled_receiving"],
+            "seed_invoices": read("invoices.json"),
+        }
+        own = read("inventory.json")
+        inventory = {k: v for k, v in inventory.items() if k in SHARED_INVENTORY} | own
+        return lists, inventory, read("production.json")
