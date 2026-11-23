@@ -1,5 +1,5 @@
 /* PowerERP: Dashboard. */
-import { $, $$, api, esc, fmtInt, money, sourceBadge, statusBadge, t, toast } from "../core.js";
+import { $, $$, api, esc, fmtInt, money, sourceBadge, statusBadge, t } from "../core.js";
 import { pageHead } from "../views.js";
 
 // ---------- Dashboard
@@ -14,7 +14,7 @@ export function dashboardView() {
           ${data.recentInvoices.map((i) => `<tr class="clickable" data-href="#/invoices/${i.id}"><td>${esc(i.cNoFacture)}</td><td>${esc(i.cNomFourn || i.cNoFourn)}</td><td>${esc(i.dDateFacture)}</td><td class="num">${esc(money(i.dTotalFacture, i.cDevise))}</td><td>${statusBadge(i.cStatut)} ${i.cSource === "SkyAI" ? sourceBadge(i.cSource) : ""}</td></tr>`).join("")}
           </tbody></table></div>`
         : `<div class="empty">${esc(t("common.empty"))}</div>`;
-      $("#view").innerHTML = pageHead(t("dash.title"), t("dash.subtitle"), `<button class="btn danger" id="clearBtn">🗑 ${esc(t("dash.clear"))}</button><button class="btn" id="resetBtn">↺ ${esc(t("dash.reset"))}</button>`) + `
+      $("#view").innerHTML = pageHead(t("dash.title"), t("dash.subtitle")) + `
         <div class="kpis">
           ${kpi("/suppliers", t("dash.suppliers"), fmtInt(data.suppliers), t("dash.activeSuppliers", { n: fmtInt(data.activeSuppliers) }))}
           ${kpi("/gl/accounts", t("dash.gl"), fmtInt(data.glAccounts), t("dash.cc", { n: fmtInt(data.costCenters) }))}
@@ -25,20 +25,6 @@ export function dashboardView() {
         </div>
         <div class="card"><div class="card-head"><h2>${esc(t("dash.recent"))}</h2><a class="btn small" style="margin-left:auto" href="#/invoices">${esc(t("menu.ap.invoices"))} →</a></div>${recent}</div>`;
       $$("tr[data-href]").forEach((tr) => tr.addEventListener("click", () => { location.hash = tr.dataset.href; }));
-      $("#clearBtn").addEventListener("click", async () => {
-        if (!confirm(t("dash.clearConfirm"))) return;
-        await api("clear", { method: "POST" });
-        toast(t("dash.clearDone"), "success");
-        await this.load();
-        this.render();
-      });
-      $("#resetBtn").addEventListener("click", async () => {
-        if (!confirm(t("dash.resetConfirm"))) return;
-        await api("reset", { method: "POST" });
-        toast(t("dash.resetDone"), "success");
-        await this.load();
-        this.render();
-      });
     },
   };
 }

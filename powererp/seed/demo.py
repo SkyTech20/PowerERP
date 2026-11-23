@@ -1,5 +1,9 @@
 """The demonstration dataset: data/*.json (full) or data/demo/*.json (ERP_DATASET=demo, fictitious data).
 
+Scenario (chosen on the dashboard when the demo data is reset, ERP_SCENARIO for the first start):
+    purchasing      SkyAI: GL, suppliers, products, POs, receptions, invoices and stock, nothing of production
+    manufacturing   the same, plus the shop floor of a paper, a food and a metal plant (data/production.json)
+
 Same shapes as the PowerWARE / SkyAI feeds. data/demo/history.json (tools/make_history_data.py) adds suppliers and
 closed POs / receptions / invoices for the supplier selection of SkyAI requisitions.
 """
@@ -12,6 +16,17 @@ from dataclasses import dataclass
 from pathlib import Path
 
 DATA_ROOT = Path(__file__).resolve().parent.parent.parent / "data"
+SCENARIOS = ("purchasing", "manufacturing")
+DEFAULT_SCENARIO = "manufacturing"
+
+
+def scenario_or_default(scenario: str | None) -> str:
+    """The scenario asked for, else ERP_SCENARIO, else manufacturing (an unknown value falls back too)."""
+    for value in (scenario, os.environ.get("ERP_SCENARIO")):
+        value = (value or "").strip().lower()
+        if value in SCENARIOS:
+            return value
+    return DEFAULT_SCENARIO
 
 
 @dataclass
@@ -22,14 +37,17 @@ class DemoData:
         dict  # data/inventory.json: taxes, units, categories, warehouses, products, opening stock (both datasets)
     )
     production: dict  # data/production.json: shop floor reference lists of a paper, a food and a metal plant
+    scenario: str = DEFAULT_SCENARIO
 
     @property
     def name(self) -> str:
         """Name of the dataset, saved in the settings: the database is re-seeded when it changes."""
-        return self.folder.name + ("+history" if (self.folder / "history.json").exists() else "")
+        history = "+history" if (self.folder / "history.json").exists() else ""
+        return f"{self.folder.name}{history}:{self.scenario}"
 
     @classmethod
-    def load(cls, dataset: str | None = None) -> DemoData:
+    def load(cls, dataset: str | None = None, scenario: str | None = None) -> DemoData:
+        scenario = scenario_or_default(scenario)
         dataset = (dataset if dataset is not None else os.environ.get("ERP_DATASET", "")).strip().lower()
         demo = dataset == "demo"
         folder = DATA_ROOT / "demo" if demo else DATA_ROOT
@@ -59,8 +77,10 @@ class DemoData:
         inv_file = DATA_ROOT / "inventory.json"
         inventory = json.loads(inv_file.read_text(encoding="utf-8")) if inv_file.exists() else {}
         prod_file = DATA_ROOT / "production.json"
-        production = json.loads(prod_file.read_text(encoding="utf-8")) if prod_file.exists() else {}
+        production = {}
+        if scenario == "manufacturing" and prod_file.exists():
+            production = json.loads(prod_file.read_text(encoding="utf-8"))
         # the items of the production demo (paper, bakery, metal) join the item master
         for key, rows in production.get("inventory", {}).items():
             inventory[key] = inventory.get(key, []) + rows
-        return cls(folder, lists, inventory, production)
+        return cls(folder, lists, inventory, production, scenario)

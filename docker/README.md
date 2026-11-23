@@ -44,7 +44,7 @@ docker compose up -d --build        # rebuilds the image; the migrations run whe
 docker image prune -f               # removes the old images
 ```
 
-New tables start empty on an existing database. On a demo, **Dashboard → Reset demo data** fills them.
+New tables start empty on an existing database. On a demo, **Administration → System settings → Reset demo data** fills them.
 
 ## Backups
 

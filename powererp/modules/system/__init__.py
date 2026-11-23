@@ -14,7 +14,7 @@ from typing import Any
 from flask import Blueprint, Flask, jsonify, request, send_from_directory
 
 from powererp.container import Container
-from powererp.core.errors import NotFound
+from powererp.core.errors import AppError, NotFound
 from powererp.modules.common.registry import LookupRegistry
 
 STATIC_DIR = Path(__file__).resolve().parent.parent.parent.parent / "static"
@@ -36,6 +36,9 @@ class DataLifecycle:
         self._after_load: list[Loader] = []
         self._on_clear: list[Callable[[], None]] = []
         self._snapshot: dict[str, Any] = {}
+        self.scenario = ""
+        self._scenarios: tuple[str, ...] = ()
+        self._switch: Callable[[str], None] | None = None
 
     def add(self, repo: Any, key: str, rows: list) -> None:
         self._repos.append((repo, key))
@@ -72,6 +75,29 @@ class DataLifecycle:
 
     def seed(self) -> None:
         self.load(copy.deepcopy(self._snapshot))
+
+    def snapshot(self) -> dict[str, Any]:
+        return copy.deepcopy(self._snapshot)
+
+    def replace_snapshot(self, snapshot: dict[str, Any]) -> None:
+        self._snapshot = copy.deepcopy(snapshot)
+
+    def scenarios(self, current: str, choices: tuple[str, ...], switch: Callable[[str], None]) -> None:
+        """The demo scenarios, the current one, and how to switch (it replaces the snapshot)."""
+        self.scenario, self._scenarios, self._switch = current, tuple(choices), switch
+
+    @property
+    def choices(self) -> tuple[str, ...]:
+        return self._scenarios
+
+    def reset(self, scenario: str = "") -> None:
+        """Load the demo data again, of another scenario when one is given."""
+        if scenario and scenario != self.scenario:
+            if scenario not in self._scenarios or self._switch is None:
+                raise AppError("invalid_choice", "scenario")
+            self._switch(scenario)
+            self.scenario = scenario
+        self.seed()
 
     def clear(self) -> None:
         for fn in self._on_clear:
@@ -119,10 +145,16 @@ def _blueprint(lifecycle: DataLifecycle, dashboard: DashboardRegistry, lookups: 
             rows = [r for r in rows if q in r["code"].lower() or q in (r["label"] or "").lower()]
         return jsonify(rows if request.args.get("all") else rows[:limit])
 
+    @bp.route("/api/demo")
+    def demo():
+        return jsonify({"scenario": lifecycle.scenario, "scenarios": list(lifecycle.choices)})
+
     @bp.route("/api/reset", methods=["POST"])
     def reset():
-        lifecycle.seed()
-        return jsonify({"ok": True})
+        """Load the demo data again; {"scenario": "purchasing" | "manufacturing"} switches to another one."""
+        body = request.get_json(silent=True) or {}
+        lifecycle.reset(str(body.get("scenario") or "").strip().lower())
+        return jsonify({"ok": True, "scenario": lifecycle.scenario})
 
     @bp.route("/api/clear", methods=["POST"])
     def clear():

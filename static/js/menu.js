@@ -28,7 +28,7 @@ export const MENU = [
   { k: "proj", icon: "📁", items: ["proj.projects", "proj.jobcost"] },
   { k: "crm", icon: "🤝", items: ["crm.contacts", "crm.opportunities"] },
   { k: "rep", icon: "📊", items: ["rep.designer", "rep.bi"] },
-  { k: "admin", icon: "⚙️", items: ["admin.companies", { k: "admin.users", route: "/admin/users", admin: true }, { k: "admin.taxes", route: "/admin/taxes" }, "admin.currencies", { k: "admin.backups", route: "/admin/backups", admin: true }, "admin.settings"] },
+  { k: "admin", icon: "⚙️", items: ["admin.companies", { k: "admin.users", route: "/admin/users", admin: true }, { k: "admin.taxes", route: "/admin/taxes" }, "admin.currencies", { k: "admin.backups", route: "/admin/backups", admin: true }, { k: "admin.settings", route: "/admin/settings", admin: true }] },
 ];
 export const openGroups = new Set(["gl", "ap", "pur", "inv"]);
 // Menu items flagged admin: true are links for administrators only.
