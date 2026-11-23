@@ -32,7 +32,7 @@ Object.assign(RES, {
       { f: "cProvince", l: "f.cProvince" }, { f: "cTermCode", l: "f.cTermCode" }, { f: "cDescAch", l: "f.cDescAch" },
       { f: "iStatutAch", l: "f.iStatutAch", fmt: (v) => `<span class="badge ${v === 1 ? "yes" : "no"}">${esc(t(v === 1 ? "opt.active" : "opt.inactive"))}</span>` },
     ],
-    defaults: { cCountry: "CA", cProvince: "qc", cTermCode: "n30", cTermDesc: "net 30 jours", iTypePO: 1, iStatutAch: 1 },
+    defaults: { cCountry: "CA", cProvince: "QC", cTermCode: "n30", cTermDesc: "net 30 jours", iTypePO: 1, iStatutAch: 1 },
     sections: [
       { t: "common.general", fields: [
         { f: "cCode", l: "f.sup.cCode", req: true, key: true },
@@ -43,11 +43,11 @@ Object.assign(RES, {
         { f: "cCity", l: "f.cCity" }, { f: "cProvince", l: "f.cProvince" }, { f: "cCountry", l: "f.cCountry" }, { f: "cZipCode", l: "f.cZipCode" },
       ] },
       { t: "sup.terms", fields: [
-        { f: "cTermCode", l: "f.cTermCode", lookup: "terms", fill: "cTermDesc" }, { f: "cTermDesc", l: "f.cTermDesc" },
+        { f: "cTermCode", l: "f.cTermCode", lookup: "terms", free: true, fill: "cTermDesc" }, { f: "cTermDesc", l: "f.cTermDesc" },
         { f: "cNoTPS", l: "f.cNoTPS" }, { f: "cNoTVQ", l: "f.cNoTVQ" },
       ] },
       { t: "sup.purchasing", fields: [
-        { f: "cCodeAch", l: "f.cCodeAch", lookup: "buyers", fill: "cDescAch" }, { f: "cDescAch", l: "f.cDescAch" },
+        { f: "cCodeAch", l: "f.cCodeAch", lookup: "buyers", free: true, fill: "cDescAch" }, { f: "cDescAch", l: "f.cDescAch" },
         { f: "cDeptSauv", l: "f.cDeptSauv" },
         { f: "iStatutAch", l: "f.iStatutAch", type: "select", int: true, options: [["1", "opt.active"], ["0", "opt.inactive"]] },
         { f: "iTypePO", l: "f.iTypePO", type: "select", int: true, options: [["1", "opt.poType1"], ["2", "opt.poType2"], ["3", "opt.poType3"]] },
@@ -106,7 +106,7 @@ Object.assign(RES, {
       { f: "dCreationDate", l: "f.dCreationDate", type: "date" },
       { f: "cSupplierCode", l: "f.cSupplierCode", req: true, lookup: "suppliers", fill: "cSupplierName" },
       { f: "cSupplierName", l: "f.cSupplierName" },
-      { f: "cBuyerCode", l: "f.cBuyerCode", lookup: "buyers", fill: "cBuyerName" },
+      { f: "cBuyerCode", l: "f.cBuyerCode", lookup: "buyers", free: true, fill: "cBuyerName" },
       { f: "cBuyerName", l: "f.cBuyerName" },
       { f: "cApplicantCode", l: "f.cApplicantCode" },
       { f: "COMPANY", l: "f.COMPANY", readonly: true },
