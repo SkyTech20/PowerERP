@@ -61,3 +61,68 @@ test("every label, title and help of the forms has an English and a French text"
   }
   assert.deepEqual([...missing].sort(), []);
 });
+
+// The steps of a recipe: a panel with the fields of the kind of the selected step (instead of a grid of 23 columns)
+const { stepSections, STEP_KINDS, STEP_DATA_TYPES } = await import(pathToFileURL(join(STATIC, "js", "resources", "production.js")).href);
+const recipe = { operations: [{ iOpSeq: 10, cOperation: "MIX" }, { iOpSeq: 20, cOperation: "BAKE" }], materials: [{ iSeq: 10, cComponent: "FLOUR", dQtyPer: "0.5", cUOM: "KG", iOpSeq: 10 }, { iSeq: 20, cComponent: "SALT", dQtyPer: "0.01", cUOM: "KG", iOpSeq: 20 }] };
+const step = (over) => ({ iOpSeq: 10, iStep: 10, cKind: "instruction", cDataType: "number", cFrequency: "once", lCritical: false, ...over });
+const shown = (s) => stepSections(s, recipe).flatMap((x) => x.fields).map((f) => f.f);
+
+test("each step kind shows only the fields it uses", () => {
+  const common = ["iOpSeq", "iStep", "cKind", "cTitleFR", "cTitleEN", "cInstructionFR", "cInstructionEN", "cAttachmentUrl", "cFrequency", "cCondition"];
+  const own = (s) => shown(s).filter((f) => !common.includes(f));
+  assert.deepEqual(own(step({ cKind: "instruction" })), ["lSecondSignature"]);
+  assert.deepEqual(own(step({ cKind: "output" })), ["lSecondSignature"]);
+  assert.deepEqual(own(step({ cKind: "material_add" })), ["iMaterialSeq", "lSecondSignature"]);
+  assert.deepEqual(own(step({ cKind: "timer" })), ["dDurationMin", "lSecondSignature"]);
+  assert.deepEqual(own(step({ cKind: "signature" })), ["cRequiredRole"]); // the second signature is the step itself
+  assert.deepEqual(own(step({ cKind: "check" })), ["cParam", "lRequired", "lCritical", "lSecondSignature"]);
+  assert.deepEqual(own(step({ cKind: "measure" })), ["cParam", "cDataType", "lRequired", "cUOM", "dMin", "dTarget", "dMax", "lCritical", "lSecondSignature"]);
+  assert.deepEqual(own(step({ cKind: "parameter", cDataType: "list" })), ["cParam", "cDataType", "lRequired", "cOptions", "lCritical", "lSecondSignature"]);
+  assert.deepEqual(own(step({ cKind: "measure", cDataType: "text", lCritical: true })), ["cParam", "cDataType", "lRequired", "lCritical", "cOnFail", "lSecondSignature"]);
+  assert.ok(shown(step({ cFrequency: "every_n_units" })).includes("dFrequencyValue"));
+  assert.ok(!shown(step({ cFrequency: "per_lot" })).includes("dFrequencyValue"));
+});
+
+test("every field of a step is shown for some kind", () => {
+  const all = new Set();
+  for (const cKind of STEP_KINDS) {
+    for (const cDataType of STEP_DATA_TYPES) {
+      for (const cFrequency of ["once", "every_n_min"]) shown(step({ cKind, cDataType, cFrequency, lCritical: true })).forEach((f) => all.add(f));
+    }
+  }
+  const fields = ["iOpSeq", "iStep", "cKind", "cTitleFR", "cTitleEN", "cInstructionFR", "cInstructionEN", "cAttachmentUrl", "dDurationMin", "cParam", "cDataType", "cUOM",
+    "dTarget", "dMin", "dMax", "cOptions", "lRequired", "lCritical", "cOnFail", "cFrequency", "dFrequencyValue", "iMaterialSeq", "cRequiredRole", "lSecondSignature", "cCondition"];
+  assert.deepEqual(fields.filter((f) => !all.has(f)), []);
+});
+
+test("an added material lists the materials of the operation of the step", () => {
+  const mat = (s) => stepSections(s, recipe).flatMap((x) => x.fields).find((f) => f.f === "iMaterialSeq").options.map(([v]) => v);
+  assert.deepEqual(mat(step({ cKind: "material_add", iOpSeq: 10 })), ["0", "10"]);
+  assert.deepEqual(mat(step({ cKind: "material_add", iOpSeq: 20 })), ["0", "20"]);
+});
+
+test("a step refused on save opens on its field", () => {
+  const { detail } = RES.recipes.grids.find((G) => G.key === "steps");
+  const rows = [step({ iOpSeq: 20, iStep: 10 }), step({ iOpSeq: 10, iStep: 20 })];
+  assert.deepEqual(detail.errorAt("op 10 step 20: cParam", rows, "required"), { i: 1, f: "cParam" });
+  assert.deepEqual(detail.errorAt("op 20 step 10", rows, "max_below_min"), { i: 0, f: "dMax" });
+  assert.deepEqual(detail.errorAt("op 10 step 20: TEMP", rows, "invalid_condition"), { i: 1, f: "cCondition" });
+  assert.deepEqual(detail.errorAt("op 10 step 20: material 30", rows, "unknown_ref"), { i: 1, f: "iMaterialSeq" });
+  assert.deepEqual(detail.errorAt("op 10 step 20: TEMP", rows, "duplicate"), { i: 1, f: "cParam" });
+  assert.equal(detail.errorAt("something else", rows, "required"), null);
+  assert.deepEqual(detail.order(rows), [1, 0]);
+});
+
+test("the labels and helps of the step panel have an English and a French text", () => {
+  const missing = new Set();
+  for (const cKind of STEP_KINDS) {
+    for (const cFrequency of ["once", "every_n_units", "every_n_min"]) {
+      for (const s of stepSections(step({ cKind, cFrequency, cDataType: "list", lCritical: true }), recipe)) {
+        const keys = [s.t, s.help, ...s.fields.flatMap((f) => [f.l, f.help, ...(f.options && !f.raw ? f.options.map(([, l]) => l) : [])])];
+        keys.filter(Boolean).forEach((k) => ["en", "fr"].forEach((l) => { if (!(k in I18N[l])) missing.add(`${l}: ${k}`); }));
+      }
+    }
+  }
+  assert.deepEqual([...missing].sort(), []);
+});

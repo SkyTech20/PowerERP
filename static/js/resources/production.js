@@ -457,6 +457,71 @@ export const STEP_ON_FAIL = ["block", "warn", "hold_lot"];
 export const STEP_FREQUENCIES = ["once", "every_n_units", "every_n_min", "per_lot"];
 const STEP_ICON = { instruction: "📄", material_add: "⚖️", parameter: "🎛️", measure: "📏", check: "☑️", timer: "⏱️", output: "🏷️", signature: "✍️" };
 
+// The steps tab: a list of the steps (by operation) and a panel with the fields of the kind of the selected step.
+// The fields a kind does not use are hidden (the server clears the material and the critical flag where unused).
+const VALUED_KINDS = ["parameter", "measure", "check"];
+const stepOps = (m) => (m.operations || []).map((o) => [String(o.iOpSeq), `${o.iOpSeq} — ${dl(o, "cDesc") || o.cOperation || ""}`]);
+const stepMaterials = (s, m) => {
+  const ops = (m.operations || []).map((o) => Number(o.iOpSeq) || 0);
+  const first = ops.length ? Math.min(...ops) : 0;
+  return [["0", ""], ...(m.materials || []).filter((x) => String(Number(x.iOpSeq) || first) === String(s.iOpSeq))
+    .map((x) => [String(x.iSeq), `${x.iSeq} · ${x.cComponent} ${fmtNum(x.dQtyPer)} ${x.cUOM || ""}`.trim()])];
+};
+export const stepSections = (s, m) => {
+  const kind = s.cKind;
+  const valued = VALUED_KINDS.includes(kind);
+  const dtype = kind === "check" ? "yes_no" : s.cDataType;
+  const sections = [{ t: "common.general", fields: [
+    { f: "iOpSeq", l: "mfg.st.op", type: "select", raw: true, options: stepOps(m), int: true, rerender: true, span: 2 },
+    { f: "iStep", l: "mfg.f.iStep", type: "number", rerender: true },
+    { f: "cKind", l: "mfg.f.cStepKind", type: "select", options: opts("mfg.o.sk.", STEP_KINDS), rerender: true },
+    { f: "cTitleFR", l: "mfg.f.cTitleFR", req: true, span: 2 }, { f: "cTitleEN", l: "mfg.f.cTitleEN", span: 2 },
+    { f: "cInstructionFR", l: "mfg.f.cInstructionFR", type: "textarea", span: 2 }, { f: "cInstructionEN", l: "mfg.f.cInstructionEN", type: "textarea", span: 2 },
+    { f: "cAttachmentUrl", l: "mfg.f.cAttachmentUrl", span: 4, help: "mfg.f.cAttachmentUrl.help" },
+  ] }];
+  const own = [];
+  if (kind === "material_add") own.push({ f: "iMaterialSeq", l: "mfg.f.iMaterialSeq", type: "select", raw: true, options: stepMaterials(s, m), req: true, span: 2, help: "mfg.f.iMaterialSeq.help" });
+  if (valued) {
+    // rows of 4: code, type, required / unit, min, target, max (number) or the list values / critical, if out
+    own.push({ f: "cParam", l: "mfg.f.cParam", req: kind !== "check", span: 2, help: "mfg.f.cParam.help" });
+    if (kind !== "check") own.push({ f: "cDataType", l: "mfg.f.cDataType", type: "select", options: opts("mfg.o.dt.", STEP_DATA_TYPES), rerender: true });
+    own.push({ f: "lRequired", l: "mfg.f.lRequired", type: "check" });
+    if (kind !== "check" && dtype === "number") {
+      own.push({ f: "cUOM", l: "mfg.f.cUOM" }, { f: "dMin", l: "mfg.f.dMin", type: "number" }, { f: "dTarget", l: "mfg.f.dTarget", type: "number" }, { f: "dMax", l: "mfg.f.dMax", type: "number" });
+    }
+    if (kind !== "check" && dtype === "list") own.push({ f: "cOptions", l: "mfg.f.cOptions", req: true, span: 2, help: "mfg.f.cOptions.help" });
+    own.push({ f: "lCritical", l: "mfg.f.lCritical", type: "check", rerender: true, help: "mfg.f.lCritical.help" });
+    if (s.lCritical) own.push({ f: "cOnFail", l: "mfg.f.cOnFail", type: "select", options: opts("mfg.o.of.", STEP_ON_FAIL) });
+  }
+  if (kind === "timer") own.push({ f: "dDurationMin", l: "mfg.f.dDurationMin", type: "number", req: true });
+  if (kind === "signature") own.push({ f: "cRequiredRole", l: "mfg.f.cRequiredRole", span: 2, help: "mfg.f.cRequiredRole.help" });
+  sections.push({ t: "mfg.o.sk." + kind, help: "mfg.st.k." + kind, fields: own });
+  const every = ["every_n_units", "every_n_min"].includes(s.cFrequency);
+  sections.push({ t: "mfg.st.when", fields: [
+    { f: "cFrequency", l: "mfg.f.cFrequency", type: "select", options: opts("mfg.o.fq.", STEP_FREQUENCIES), rerender: true },
+    ...(every ? [{ f: "dFrequencyValue", l: s.cFrequency === "every_n_min" ? "mfg.f.dFrequencyValue.min" : "mfg.f.dFrequencyValue.units", type: "number", req: true }] : []),
+    { f: "cCondition", l: "mfg.f.cCondition", span: 2, help: "mfg.f.cCondition.help" },
+    ...(kind === "signature" ? [] : [{ f: "lSecondSignature", l: "mfg.f.lSecondSignature", type: "check" }]),
+  ] });
+  return sections;
+};
+const stepDetail = {
+  sections: stepSections,
+  addLabel: "mfg.st.add",
+  focus: "cTitleFR",
+  order: (rows) => rows.map((_, i) => i).sort((a, b) => (Number(rows[a].iOpSeq) - Number(rows[b].iOpSeq)) || (Number(rows[a].iStep) - Number(rows[b].iStep)) || a - b),
+  group: (s, m) => { const o = (m.operations || []).find((x) => String(x.iOpSeq) === String(s.iOpSeq)); return `${t("mfg.st.op")} ${s.iOpSeq}${o ? " — " + (dl(o, "cDesc") || o.cOperation || "") : ""}`; },
+  // "op 10 step 20: cParam" (a message of the server) -> the step and its field
+  errorAt: (detail, rows, code) => {
+    const x = /^op (\d+) step (\d+)(?::\s*(\w+))?/.exec(detail);
+    if (!x) return null;
+    const i = rows.findIndex((s) => String(Number(s.iOpSeq)) === x[1] && String(Number(s.iStep)) === x[2]);
+    const byCode = { max_below_min: "dMax", target_out_of_limits: "dTarget", material_other_operation: "iMaterialSeq", duplicate: "iStep", invalid_condition: "cCondition" };
+    const f = !x[3] ? byCode[code] || null : /^[cdil][A-Z]/.test(x[3]) ? x[3] : x[3] === "material" ? "iMaterialSeq" : x[3] === "op" ? "iOpSeq" : code === "invalid_condition" ? "cCondition" : "cParam";
+    return { i, f };
+  },
+};
+
 // How the operator will see the steps of an operation (the shop floor screen, M4), with a value test
 const operatorPreview = {
   tab: "preview",
@@ -660,25 +725,13 @@ Object.assign(RES, {
         newLine: (m) => ({ iSeq: ((m.materials || []).length + 1) * 10, cComponent: "", dQtyPer: "", cUOM: "", dScrapPct: "", lFixedQty: false, iOpSeq: (m.operations || [])[0] ? m.operations[0].iOpSeq : 0, cIssueMethod: "manual" }) },
       { key: "steps", tab: "steps", title: "mfg.st.tab", help: "mfg.st.help",
         cols: [
-          { f: "iOpSeq", l: "mfg.f.iOpSeq", w: "w-xs", n: true }, { f: "iStep", l: "mfg.f.iStep", w: "w-xs", n: true },
-          { f: "cKind", l: "mfg.f.cStepKind", w: "w-md", type: "select", options: opts("mfg.o.sk.", STEP_KINDS) },
-          { f: "cTitleFR", l: "mfg.f.cTitleFR", w: "w-lg" }, { f: "cTitleEN", l: "mfg.f.cTitleEN", w: "w-lg" },
-          { f: "cInstructionFR", l: "mfg.f.cInstructionFR", w: "w-lg" },
-          { f: "cParam", l: "mfg.f.cParam", w: "w-sm" },
-          { f: "cDataType", l: "mfg.f.cDataType", w: "w-sm", type: "select", options: opts("mfg.o.dt.", STEP_DATA_TYPES) },
-          { f: "cUOM", l: "mfg.f.cUOM", w: "w-xs" },
-          { f: "dMin", l: "mfg.f.dMin", w: "w-xs", n: true }, { f: "dTarget", l: "mfg.f.dTarget", w: "w-xs", n: true }, { f: "dMax", l: "mfg.f.dMax", w: "w-xs", n: true },
-          { f: "cOptions", l: "mfg.f.cOptions", w: "w-md" },
-          { f: "lRequired", l: "mfg.f.lRequired", w: "w-xs", type: "check" }, { f: "lCritical", l: "mfg.f.lCritical", w: "w-xs", type: "check" },
-          { f: "cOnFail", l: "mfg.f.cOnFail", w: "w-sm", type: "select", options: opts("mfg.o.of.", STEP_ON_FAIL) },
-          { f: "cFrequency", l: "mfg.f.cFrequency", w: "w-md", type: "select", options: opts("mfg.o.fq.", STEP_FREQUENCIES) },
-          { f: "dFrequencyValue", l: "mfg.f.dFrequencyValue", w: "w-xs", n: true },
-          { f: "iMaterialSeq", l: "mfg.f.iMaterialSeq", w: "w-xs", n: true }, { f: "dDurationMin", l: "mfg.f.dDurationMin", w: "w-xs", n: true },
-          { f: "lSecondSignature", l: "mfg.f.lSecondSignature", w: "w-xs", type: "check" }, { f: "cCondition", l: "mfg.f.cCondition", w: "w-md" },
+          { f: "iStep", l: "mfg.f.iStep", n: true },
+          { f: "cKind", l: "mfg.f.cStepKind", type: "select", options: opts("mfg.o.sk.", STEP_KINDS), fmt: (v) => STEP_ICON[v] || "" },
+          { f: "cTitleFR", l: "mfg.f.cTitleFR", fmt: (v, s) => (lang === "fr" ? s.cTitleFR : s.cTitleEN || s.cTitleFR) || t("mfg.o.sk." + s.cKind) },
         ],
-        newLine: (m) => {
-          const last = (m.steps || [])[(m.steps || []).length - 1];
-          const op = last ? last.iOpSeq : ((m.operations || [])[0] || {}).iOpSeq || 10;
+        detail: stepDetail,
+        newLine: (m, after) => {
+          const op = after ? after.iOpSeq : ((m.operations || [])[0] || {}).iOpSeq || 10;
           const next = (m.steps || []).filter((x) => String(x.iOpSeq) === String(op)).reduce((a, x) => Math.max(a, Number(x.iStep) || 0), 0) + 10;
           return { iOpSeq: op, iStep: next, cKind: "instruction", cTitleFR: "", cDataType: "number", cOnFail: "block", cFrequency: "once", lRequired: false, lCritical: false, lSecondSignature: false };
         } },
