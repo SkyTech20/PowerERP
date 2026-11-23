@@ -6,7 +6,7 @@
 #
 # Guide: docker/README.md (update, backups and restore, several clients, HTTPS).
 # The PostgreSQL for development and the tests stays in ../docker-compose.yml (port 5433).
-name: ${COMPOSE_PROJECT_NAME:-powererp}
+name: ${COMPOSE_PROJECT_NAME:-powererp-server}
 
 services:
   db:
