@@ -1,0 +1,223 @@
+{
+ "receiving_details": [
+  {
+   "NoReception": "900101",
+   "COMPANY": "MA2",
+   "DateReception": "2026-11-05",
+   "Fournisseur": "Équipements de Cuisine Pro",
+   "CodeFournisseur": "KITCHEQ",
+   "NoBonCommande": "800101",
+   "Statut": "Reçu",
+   "Entrepot": "KITCHEN",
+   "Articles": [
+    {
+     "CodeArticle": "FRYER-2T",
+     "Description": "Friteuse électrique 2 bacs",
+     "QuantiteCommandee": "1",
+     "QuantiteRecue": "1",
+     "PrixUnitaire": "2890.00",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "3322.78",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "2890.00",
+   "Transport": "0.00",
+   "TPS": "144.50",
+   "TVQ": "288.28"
+  },
+  {
+   "NoReception": "900102",
+   "COMPANY": "MA2",
+   "DateReception": "2026-11-10",
+   "Fournisseur": "Boucherie Centrale Laval inc.",
+   "CodeFournisseur": "MEATCO",
+   "NoBonCommande": "800102",
+   "Statut": "Reçu",
+   "Entrepot": "KITCHEN",
+   "Articles": [
+    {
+     "CodeArticle": "BEEF-RAW",
+     "Description": "Bœuf en pièce, cru congelé",
+     "QuantiteCommandee": "40",
+     "QuantiteRecue": "40",
+     "PrixUnitaire": "14.50",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "CHICKEN-RAW",
+     "Description": "Poulet entier, cru congelé",
+     "QuantiteCommandee": "50",
+     "QuantiteRecue": "50",
+     "PrixUnitaire": "6.80",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "920.00",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "920.00",
+   "Transport": "0.00",
+   "TPS": "0.00",
+   "TVQ": "0.00"
+  },
+  {
+   "NoReception": "900103",
+   "COMPANY": "MA2",
+   "DateReception": "2026-11-10",
+   "Fournisseur": "Ferme Avicole Saint-Hyacinthe",
+   "CodeFournisseur": "FARMEGG",
+   "NoBonCommande": "800103",
+   "Statut": "Reçu",
+   "Entrepot": "KITCHEN",
+   "Articles": [
+    {
+     "CodeArticle": "EGG",
+     "Description": "Œuf frais calibre gros",
+     "QuantiteCommandee": "360",
+     "QuantiteRecue": "360",
+     "PrixUnitaire": "0.35",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "126.00",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "126.00",
+   "Transport": "0.00",
+   "TPS": "0.00",
+   "TVQ": "0.00"
+  },
+  {
+   "NoReception": "900104",
+   "COMPANY": "MA2",
+   "DateReception": "2026-11-12",
+   "Fournisseur": "Distribution Fromages et Charcuteries QC",
+   "CodeFournisseur": "DELIQC",
+   "NoBonCommande": "800104",
+   "Statut": "Reçu",
+   "Entrepot": "KITCHEN",
+   "Articles": [
+    {
+     "CodeArticle": "HAM",
+     "Description": "Jambon cuit tranché",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "15",
+     "PrixUnitaire": "11.50",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "CHEESE",
+     "Description": "Fromage mozzarella",
+     "QuantiteCommandee": "15",
+     "QuantiteRecue": "15",
+     "PrixUnitaire": "12.80",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "364.50",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "364.50",
+   "Transport": "0.00",
+   "TPS": "0.00",
+   "TVQ": "0.00"
+  },
+  {
+   "NoReception": "900105",
+   "COMPANY": "MA2",
+   "DateReception": "2026-11-12",
+   "Fournisseur": "Grossiste Alimentaire Montréal",
+   "CodeFournisseur": "FOODWH",
+   "NoBonCommande": "800105",
+   "Statut": "Reçu",
+   "Entrepot": "KITCHEN",
+   "Articles": [
+    {
+     "CodeArticle": "FLOUR",
+     "Description": "Farine de blé tout usage",
+     "QuantiteCommandee": "100",
+     "QuantiteRecue": "100",
+     "PrixUnitaire": "1.10",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "OIL-FRY",
+     "Description": "Huile de canola pour friture",
+     "QuantiteCommandee": "60",
+     "QuantiteRecue": "60",
+     "PrixUnitaire": "3.20",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "SALT",
+     "Description": "Sel fin",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "1.20",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "ONION",
+     "Description": "Oignon jaune",
+     "QuantiteCommandee": "20",
+     "QuantiteRecue": "20",
+     "PrixUnitaire": "2.40",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "SEASONING",
+     "Description": "Assaisonnement (ail, poivre, paprika)",
+     "QuantiteCommandee": "3",
+     "QuantiteRecue": "3",
+     "PrixUnitaire": "18.00",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "416.00",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "416.00",
+   "Transport": "0.00",
+   "TPS": "0.00",
+   "TVQ": "0.00"
+  },
+  {
+   "NoReception": "900106",
+   "COMPANY": "MA2",
+   "DateReception": "2026-11-13",
+   "Fournisseur": "Emballages Pro inc.",
+   "CodeFournisseur": "PACKPRO",
+   "NoBonCommande": "800106",
+   "Statut": "Reçu",
+   "Entrepot": "KITCHEN",
+   "Articles": [
+    {
+     "CodeArticle": "PAPER-BAG",
+     "Description": "Sac en papier pour pastel",
+     "QuantiteCommandee": "2000",
+     "QuantiteRecue": "2000",
+     "PrixUnitaire": "0.08",
+     "Devise": "CAD"
+    },
+    {
+     "CodeArticle": "GLOVES",
+     "Description": "Gants jetables en nitrile (boîte de 100)",
+     "QuantiteCommandee": "10",
+     "QuantiteRecue": "10",
+     "PrixUnitaire": "9.50",
+     "Devise": "CAD"
+    }
+   ],
+   "MontantTotal": "293.19",
+   "ResponsableReception": "Cassiano",
+   "Commentaires": "",
+   "SousTotal": "255.00",
+   "Transport": "0.00",
+   "TPS": "12.75",
+   "TVQ": "25.44"
+  }
+ ],
+ "unbilled_receiving": []
+}
