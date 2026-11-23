@@ -31,7 +31,7 @@ __all__ = ["AuthError", "AuthService", "UserRepository", "UserService", "current
 
 PW_PREFIX = "/cgi-bin/"
 OPEN_PATHS = {"/", "/api/health", "/api/auth/login", "/api/auth/logout", "/api/auth/me"}
-ADMIN_PREFIXES = ("/api/users", "/api/admin/")
+ADMIN_PREFIXES = ("/api/users", "/api/admin/", "/api/demo", "/api/reset", "/api/clear")
 
 _users = UserRepository()
 

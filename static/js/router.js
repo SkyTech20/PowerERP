@@ -8,6 +8,7 @@ import { dashboardView } from "./screens/dashboard.js";
 import { formView } from "./screens/form.js";
 import { listView } from "./screens/list.js";
 import { replenishmentView } from "./screens/replenishment.js";
+import { settingsView } from "./screens/settings.js";
 import { isAdmin, setView } from "./state.js";
 import { TABSETS } from "./views.js";
 
@@ -38,6 +39,7 @@ export function resolve(path) {
   if (!parts.length) return dashboardView();
   if (parts[0] === "account") return accountView();
   if (parts.join("/") === "admin/backups") return isAdmin() ? backupView() : dashboardView();
+  if (parts.join("/") === "admin/settings") return isAdmin() ? settingsView() : dashboardView();
   if (parts.join("/") === "inv/replenishment") return replenishmentView();
   const hit = routeOf(parts.join("/"));
   if (!hit) return dashboardView();

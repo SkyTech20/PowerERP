@@ -41,3 +41,14 @@ def test_reset_switches_the_scenario(admin):
     finally:
         admin.post("/api/reset", json={"scenario": "manufacturing"})
     assert _count(admin, "/api/recipes") == recipes and _count(admin, "/api/products") == products
+
+
+def test_only_administrators(app, admin):
+    """Administration > System settings: a user cannot reset nor clear the data."""
+    admin.post("/api/users", json={"username": "ann", "name": "Ann", "password": "secret1", "role": "user"})
+    c = app.test_client()
+    assert c.post("/api/auth/login", json={"username": "ann", "password": "secret1"}).status_code == 200
+    assert c.get("/api/demo").status_code == 403
+    assert c.post("/api/reset").status_code == 403
+    assert c.post("/api/clear").status_code == 403
+    assert c.get("/api/summary").status_code == 200  # the dashboard stays open to every user

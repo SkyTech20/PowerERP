@@ -5,7 +5,7 @@ window.ERP_I18N = {
     "app.tagline": "Demo environment",
     "app.company": "Company",
     "app.user": "Demo user",
-    "app.demoBanner": "Demo ERP. Changes are saved in the database; \"Reset demo data\" on the dashboard restores the original data.",
+    "app.demoBanner": "Demo ERP. Changes are saved in the database; Administration > System settings restores the demo data.",
     "app.unavailable": "This module is not available in the demo.",
     "app.menuUnavailable": "Not available in the demo",
 
@@ -97,6 +97,11 @@ window.ERP_I18N = {
     "dash.scenario": "Demo data",
     "dash.scenario.purchasing": "SkyAI (purchasing, no production)",
     "dash.scenario.manufacturing": "Manufacturing (paper, bakery, metal)",
+    "sys.title": "System settings",
+    "sys.subtitle": "Demo data and maintenance (administrators only)",
+    "sys.scenario": "Data set",
+    "sys.scenario.help": "Loads the demo data again: every change made since is lost. The data set chosen is kept when the ERP restarts.",
+    "sys.clear.help": "Deletes all the data (GL accounts, cost centers, suppliers, products, stock, POs, receptions, invoices, production). Users and settings are kept.",
     "dash.resetDone": "Demo data restored.",
 
     "common.new": "New",
@@ -308,7 +313,7 @@ window.ERP_I18N = {
     "app.tagline": "Environnement de démonstration",
     "app.company": "Compagnie",
     "app.user": "Utilisateur démo",
-    "app.demoBanner": "ERP de démonstration. Les modifications sont enregistrées dans la base de données; « Réinitialiser les données » sur le tableau de bord restaure les données d'origine.",
+    "app.demoBanner": "ERP de démonstration. Les modifications sont enregistrées dans la base de données; Administration > Paramètres système restaure les données de démonstration.",
     "app.unavailable": "Ce module n'est pas disponible dans la démo.",
     "app.menuUnavailable": "Non disponible dans la démo",
 
@@ -400,6 +405,11 @@ window.ERP_I18N = {
     "dash.scenario": "Données de démonstration",
     "dash.scenario.purchasing": "SkyAI (achats, sans production)",
     "dash.scenario.manufacturing": "Fabrication (papier, boulangerie, métal)",
+    "sys.title": "Paramètres système",
+    "sys.subtitle": "Données de démonstration et maintenance (administrateurs seulement)",
+    "sys.scenario": "Jeu de données",
+    "sys.scenario.help": "Recharge les données de démonstration : toutes les modifications faites depuis sont perdues. Le jeu choisi est conservé au redémarrage de l'ERP.",
+    "sys.clear.help": "Supprime toutes les données (comptes GL, centres de coûts, fournisseurs, produits, stock, BC, réceptions, factures, production). Les utilisateurs et les paramètres sont conservés.",
     "dash.resetDone": "Données de démonstration restaurées.",
 
     "common.new": "Nouveau",
