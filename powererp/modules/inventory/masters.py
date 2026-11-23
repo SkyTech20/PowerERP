@@ -12,8 +12,6 @@ from powererp.core.values import number, quantity, text
 from powererp.modules.common.crud import CrudService
 from powererp.modules.common.forms import Row
 
-STOCKED_TYPES = S.STOCKED_TYPES
-
 
 def must_exist(finder, row: Row, field: str, required: bool = False) -> Row | None:
     """A reference to another master file must exist (empty is fine unless required)."""
@@ -130,7 +128,9 @@ class ProductService(CrudService):
             if text(row.get(f)) and number(row[f]) <= 0:
                 raise AppError("positive", f)
             row[f] = row[f] or "1"
-        if row["cType"] not in STOCKED_TYPES:
+        if row["cNature"] == "service":  # a service is never physical and has no class
+            row["cStockType"], row["cClass"] = "nonphysical", ""
+        if row["cStockType"] != "physical":  # only a physical product can have its stock controlled
             row["lStocked"] = False
         if not is_new and not row["lStocked"] and self.stock is not None:
             in_use(abs(self.stock.product_totals(row["cCode"])[0]) > 1e-9)  # still has stock

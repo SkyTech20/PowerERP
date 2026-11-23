@@ -14,10 +14,13 @@ export const optBadge = (prefix, cls) => (v) => (v ? `<span class="badge ${cls ?
 export const descCol = (base) => ({ f: base + "FR", l: "f.cDescription", wrap: true, fmt: (v, r) => esc(dl(r, base)) });
 export const productLink = (r) => "/inv/items/" + enc(r.cProduct);
 export const whFilter = { f: "cWarehouse", l: "f.inv.cWarehouse", lookup: "warehouses" };
-export const isStockType = (m) => ["stock", "kit", "raw"].includes(m.cType);
+export const isPhysical = (m) => m.cNature !== "service" && m.cStockType === "physical";
+export const isProduct = (m) => m.cNature !== "service";
 export function newWith(key, values) { setPrefill({ key, values }); location.hash = "#" + RES[key].route + "/new"; }
 
-export const PRODUCT_TYPES = ["stock", "nonstock", "service", "kit", "raw"];
+export const PRODUCT_STOCK_TYPES = ["physical", "nonphysical"];
+export const PRODUCT_NATURES = ["product", "service"];
+export const PRODUCT_CLASSES = ["", "raw", "kit", "finished", "consumable", "asset"];
 export const MOVE_TYPES = ["IN", "OUT", "TRF", "ADJ", "CNT", "RSV"];
 export const DOC_TYPES = ["MAN", "PO", "REC", "INV", "SO", "CNT", "PROD"];
 export const LOCATION_TYPES = ["picking", "reserve", "receiving", "shipping", "quarantine", "staging"];
@@ -147,26 +150,31 @@ Object.assign(RES, {
       ["inv", "prod.inventory"], ["log", "prod.tab.logistics"], ["sup", "prod.suppliers"], ["stock", "prod.stock"]],
     filters: [
       { f: "cStatus", l: "f.prod.cStatus", options: opts("o.status.", ["active", "inactive", "discontinued"]) },
-      { f: "cType", l: "f.prod.cType", options: opts("o.ptype.", PRODUCT_TYPES) },
+      { f: "cNature", l: "f.prod.cNature", options: opts("o.pnature.", PRODUCT_NATURES) },
+      { f: "cStockType", l: "f.prod.cStockType", options: opts("o.pstock.", PRODUCT_STOCK_TYPES) },
+      { f: "cClass", l: "f.prod.cClass", options: opts("o.pclass.", PRODUCT_CLASSES.slice(1)) },
       { f: "cCategory", l: "f.prod.cCategory", lookup: "categories" },
     ],
     columns: [
       { f: "cCode", l: "f.prod.cCode" }, descCol("cDesc"), { f: "cCategory", l: "f.prod.cCategory" },
-      { f: "cType", l: "f.prod.cType", fmt: (v) => esc(t("o.ptype." + v)) }, { f: "cStockUOM", l: "f.prod.unit" },
+      { f: "cNature", l: "f.prod.cNature", fmt: (v) => esc(t("o.pnature." + v)) },
+      { f: "cClass", l: "f.prod.cClass", fmt: (v) => (v ? esc(t("o.pclass." + v)) : "") }, { f: "cStockUOM", l: "f.prod.unit" },
       { f: "dQtyOnHand", l: "f.inv.dQtyOnHand", num: true, fmt: (v, r) => (r.lStocked ? esc(qtyFmt(v)) : "—") },
       { f: "dQtyAvailable", l: "f.inv.dQtyAvailable", num: true, fmt: (v, r) => (r.lStocked ? esc(qtyFmt(v)) : "—") },
       { f: "dPrice1", l: "f.prod.dPrice1", num: true, fmt: (v, r) => (v ? esc(money(v, r.cCurrency)) : "") },
       { f: "cStatus", l: "f.prod.cStatus", fmt: optBadge("o.status.", (v) => (v === "active" ? "yes" : "no")) },
     ],
-    defaults: () => ({ cStatus: "active", cType: "stock", cCostMethod: "avg", cCurrency: "CAD", cStockUOM: "UN", cPurchaseUOM: "UN",
+    defaults: () => ({ cStatus: "active", cStockType: "physical", cNature: "product", cClass: "", cCostMethod: "avg", cCurrency: "CAD", cStockUOM: "UN", cPurchaseUOM: "UN",
       dPurchaseFactor: "1", cSalesUOM: "UN", dSalesFactor: "1", cSalesTaxGroup: "QC", cPurchaseTaxGroup: "QC", lStocked: true,
       lSellable: true, lPurchasable: true, lPORequired: true, cWeightUOM: "kg", cDimUOM: "cm", cCountryOrigin: "CA", cABCClass: "", lines: [], conversions: [] }),
     sections: [
       { t: "prod.ident", fields: [
         { f: "cCode", l: "f.prod.cCode", req: true, key: true },
-        { f: "cType", l: "f.prod.cType", type: "select", options: opts("o.ptype.", PRODUCT_TYPES), rerender: true },
         { f: "cStatus", l: "f.prod.cStatus", type: "select", options: opts("o.status.", ["active", "inactive", "discontinued"]) },
-        { f: "cCategory", l: "f.prod.cCategory", lookup: "categories" },
+        { f: "cCategory", l: "f.prod.cCategory", lookup: "categories", span: 2 },
+        { f: "cNature", l: "f.prod.cNature", type: "select", options: opts("o.pnature.", PRODUCT_NATURES), rerender: true },
+        { f: "cStockType", l: "f.prod.cStockType", type: "select", options: opts("o.pstock.", PRODUCT_STOCK_TYPES), rerender: true, show: isProduct, help: "f.prod.cStockType.help" },
+        { f: "cClass", l: "f.prod.cClass", type: "select", options: opts("o.pclass.", PRODUCT_CLASSES), show: isProduct, help: "f.prod.cClass.help" },
         { f: "cDescFR", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
         { f: "cLongDescFR", l: "f.prod.cLongDescFR", type: "textarea", span: 2 }, { f: "cLongDescEN", l: "f.prod.cLongDescEN", type: "textarea", span: 2 },
         { f: "cBrand", l: "f.prod.cBrand" }, { f: "cModel", l: "f.prod.cModel" },
@@ -206,13 +214,13 @@ Object.assign(RES, {
         { f: "cCostCenter", l: "f.prod.cCostCenter", lookup: "cc" }, { f: "cProject", l: "f.prod.cProject" },
       ] },
       { tab: "inv", t: "prod.inventory", fields: [
-        { f: "lStocked", l: "f.prod.lStocked", type: "check", show: isStockType, help: "f.prod.lStocked.help" },
-        { f: "cDefaultWarehouse", l: "f.prod.cDefaultWarehouse", lookup: "warehouses", show: isStockType },
-        { f: "cABCClass", l: "f.prod.cABCClass", type: "select", options: [["", "—"], ["A", "A"], ["B", "B"], ["C", "C"]], raw: true, show: isStockType },
-        { f: "iShelfLifeDays", l: "f.prod.iShelfLifeDays", type: "number", show: isStockType },
-        { f: "lLotControl", l: "f.prod.lLotControl", type: "check", show: isStockType },
-        { f: "lSerialControl", l: "f.prod.lSerialControl", type: "check", show: isStockType },
-        { f: "lExpiryControl", l: "f.prod.lExpiryControl", type: "check", show: isStockType },
+        { f: "lStocked", l: "f.prod.lStocked", type: "check", show: isPhysical, help: "f.prod.lStocked.help" },
+        { f: "cDefaultWarehouse", l: "f.prod.cDefaultWarehouse", lookup: "warehouses", show: isPhysical },
+        { f: "cABCClass", l: "f.prod.cABCClass", type: "select", options: [["", "—"], ["A", "A"], ["B", "B"], ["C", "C"]], raw: true, show: isPhysical },
+        { f: "iShelfLifeDays", l: "f.prod.iShelfLifeDays", type: "number", show: isPhysical },
+        { f: "lLotControl", l: "f.prod.lLotControl", type: "check", show: isPhysical },
+        { f: "lSerialControl", l: "f.prod.lSerialControl", type: "check", show: isPhysical },
+        { f: "lExpiryControl", l: "f.prod.lExpiryControl", type: "check", show: isPhysical },
       ] },
       { tab: "log", t: "prod.logistics", fields: [
         { f: "lSellable", l: "f.prod.lSellable", type: "check" }, { f: "lPurchasable", l: "f.prod.lPurchasable", type: "check" },
