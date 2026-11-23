@@ -104,3 +104,20 @@ def test_reload_from_old_json_dataset(app, client):
         container_of(erp_app.app).get("lifecycle").load({"gl": [{"cCode": "7777", "cDesc": "Kept"}]})
     assert client.get("/api/gl-accounts/7777").get_json()["cDesc"] == "Kept"
     assert client.get("/api/summary").get_json()["glAccounts"] == 1
+
+
+def test_restart_keeps_the_changes(client, app):
+    """A restart on a database seeded with the same dataset keeps the data; another dataset re-seeds it."""
+    from powererp.factory import _seed_or_migrate
+    from powererp.seed.demo import DemoData
+
+    c = container_of(app)
+    demo = DemoData.load("demo", db.get_setting("demo_scenario"))
+    assert db.get_setting("dataset") == demo.name
+    client.post("/api/gl-accounts", json={"cCode": "7777", "cDesc": "Kept"})
+    _seed_or_migrate(c, demo)  # what create_app does when the ERP starts again
+    assert _sql("SELECT description FROM gl_accounts WHERE code = '7777'") == [("Kept",)]
+    db.set_setting("dataset", "older-dataset")
+    _seed_or_migrate(c, demo)
+    assert _sql("SELECT description FROM gl_accounts WHERE code = '7777'") == []
+    assert db.get_setting("dataset") == demo.name

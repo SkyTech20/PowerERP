@@ -74,11 +74,15 @@ def _switch(c: Container, dataset: str | None, scenario: str) -> None:
 
 def _seed_or_migrate(c: Container, demo: DemoData) -> None:
     """An empty database (or another dataset) gets the demo data; data of an older database kept as JSON
-    (legacy_datasets) is moved into the tables once."""
+    (legacy_datasets) is moved into the tables once. A database already seeded with this dataset keeps its data
+    on restart (changes made in the ERP are not lost; System settings > Reset demo data restores the demo)."""
     lifecycle = c.get("lifecycle")
     stored = settings.load_datasets()
+    same = settings.get_setting("dataset") == demo.name
+    if same and not stored:
+        return
     with database.unit_of_work():
-        if stored and settings.get_setting("dataset") == demo.name:
+        if stored and same:
             lifecycle.load(stored)
             moved = [k for k in lifecycle.keys() if k in stored]
         else:
