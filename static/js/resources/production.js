@@ -237,7 +237,7 @@ Object.assign(RES, {
         cols: [{ f: "dStart", l: "mfg.f.dStart", w: "w-md", type: "date" }, { f: "cStartTime", l: "mfg.f.cStart", w: "w-sm", type: "time" },
           { f: "dEnd", l: "mfg.f.dEnd", w: "w-md", type: "date" }, { f: "cEndTime", l: "mfg.f.cEnd", w: "w-sm", type: "time" },
           { f: "cReason", l: "mfg.f.cReason", w: "w-md", lookup: "downtime_reasons" }, { f: "cNotes", l: "mfg.f.cNotes", w: "w-lg" }],
-        newLine: () => ({ dStart: today(), cStartTime: "07:00", dEnd: today(), cEndTime: "11:00", cReason: "PM", cNotes: "" }) },
+        newLine: () => ({ dStart: today(), cStartTime: "07:00", dEnd: today(), cEndTime: "11:00", cReason: "", cNotes: "" }) },
     ],
     panel: { tab: "time", ...weekPreview((m) => `resources/${enc(m.cCode)}/availability`, (r) => `
       <tr><td colspan="2">${esc(t("mfg.res.plannedStops"))}</td><td class="num">− ${esc(hours(r.iDowntimeMinutes))}</td></tr>

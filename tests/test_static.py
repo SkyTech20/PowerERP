@@ -30,3 +30,28 @@ def test_every_import_points_to_an_existing_export():
             assert module in exports, (path.name, target)
             missing = {n.strip() for n in names.split(",")} - exports[module]
             assert not missing, (path.name, target, missing)
+
+
+def _messages():
+    """The keys of the English and French texts, from every translation file."""
+    keys = {"en": set(), "fr": set()}
+    for path in sorted(STATIC.glob("i18n*.js")):
+        text = path.read_text(encoding="utf-8")
+        split = re.search(r"^\s*(?:Object\.assign\(I\.fr, \{|fr: \{)", text, re.M)
+        assert split, path.name
+        keys["en"] |= set(re.findall(r'^\s*"([\w.]+)":', text[: split.start()], re.M))
+        keys["fr"] |= set(re.findall(r'^\s*"([\w.]+)":', text[split.start() :], re.M))
+    return keys
+
+
+def test_every_server_error_has_a_message_in_both_languages():
+    # without one, the user only sees "Something went wrong" and cannot tell which field to fix
+    root = STATIC.parent / "powererp"
+    codes = set()
+    for path in root.rglob("*.py"):
+        codes |= set(re.findall(r'AppError\(\s*"([a-z0-9_]+)"', path.read_text(encoding="utf-8")))
+    assert len(codes) > 40
+    keys = _messages()
+    for lang in ("en", "fr"):
+        missing = sorted(c for c in codes if "err." + c not in keys[lang])
+        assert not missing, (lang, missing)

@@ -61,7 +61,10 @@ export function formView(key, id) {
     }
     let input;
     const blank = (x) => (x == null ? "" : String(x));
-    if (fd.lookup && !ro) {
+    if (fd.lookup && fd.free && !ro) {
+      // a code typed freely, with the codes already used as suggestions (e.g. payment terms)
+      input = `<input type="text" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" list="dl-${fd.f}" autocomplete="off"><datalist id="dl-${fd.f}"></datalist>`;
+    } else if (fd.lookup && !ro) {
       input = `<select id="f-${fd.f}" data-f="${fd.f}">${lookupOptions([], v)}</select>`;
     } else if (fd.suggestions && !ro) {
       const opts = ["", ...fd.suggestions, ...(blank(v) && !fd.suggestions.includes(blank(v)) ? [blank(v)] : [])];
@@ -220,7 +223,20 @@ export function formView(key, id) {
         if (fd.rerender) render(); else refresh();
       };
       el.addEventListener(fd.type === "check" || el.tagName === "SELECT" ? "change" : "input", update);
-      if (fd.lookup && el.tagName === "SELECT") {
+      if (fd.lookup && fd.free) {
+        let rows = [];
+        lookupRows(fd.lookup).then((r) => {
+          rows = r;
+          const dl = $(`#dl-${fd.f}`);
+          if (dl) dl.innerHTML = rows.map((x) => `<option value="${esc(x.code)}">${esc(x.label || "")}</option>`).join("");
+        });
+        el.addEventListener("input", () => {
+          const r = rows.find((x) => x.code === el.value);
+          const target = fd.fill && $(`[data-f="${fd.fill}"]`);
+          if (r && r.label && target) { model[fd.fill] = r.label; target.value = r.label; }
+        });
+      }
+      if (fd.lookup && !fd.free && el.tagName === "SELECT") {
         const fill = bindLookup(el, fd.lookup, (code, label) => {
           model[fd.f] = code;
           if (fd.fill && label) {
@@ -340,7 +356,7 @@ export function formView(key, id) {
   // A default of a new record that is not in its list (e.g. the tax group QC after "Clear all data") is left
   // empty, rather than shown and refused on save. Values given by the screen that opened the form are kept.
   async function dropUnknownDefaults(given) {
-    const fields = R.sections.flatMap((s) => s.fields).filter((fd) => fd.lookup && !fd.lookupParams && !(fd.f in given));
+    const fields = R.sections.flatMap((s) => s.fields).filter((fd) => fd.lookup && !fd.free && !fd.lookupParams && !(fd.f in given));
     await Promise.all(fields.map(async (fd) => {
       const v = model[fd.f] == null ? "" : String(model[fd.f]);
       if (!v) return;
