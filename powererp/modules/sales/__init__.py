@@ -8,6 +8,7 @@ V2: /api/price-lists (prices by product, unit and quantity as lines; discounts b
     lookup sellable_products; GET /api/pricing?customer=&product=&qty=&uom=&date=: the price, the discount and the rule that gave them.
 V3: /api/sales-invoices (drafts: GET/POST, GET/PUT/DELETE /<no>; a posted one is 409),
     POST /api/sales-invoices/calc (and /<no>/calc): the draft calculated without saving it (prices, taxes, totals).
+V4: POST /api/sales-invoices/<no>/check (what posting would do: problems, stock taken), POST /<no>/post.
 
 Sales never changes the stock directly: the invoices will post movements through the stock service of the
 container (c.get("stock").add(...) with cDocType "SO"), so every stock rule applies to them.
@@ -30,7 +31,7 @@ from powererp.store import store
 
 from .company import CompanyProfileService
 from .customers import CustomerService
-from .invoices import DRAFT_SEQUENCE, SalesInvoiceService
+from .invoices import DRAFT_SEQUENCE, INVOICE_SEQUENCE, SalesInvoiceService
 from .pricing import PriceListService, PriceResolver
 
 SEARCH = ("cCode", "cName", "cLegalName", "cCity", "cEmail")
@@ -107,6 +108,9 @@ def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, 
         "tax_groups": c.get("tax_groups"),
         "pricing": pricing,
         "tax_calculator": c.get("tax_calculator"),
+        "stock": c.get("stock"),
+        "unit_factor": c.get("unit_converter").factor,
+        "invoice_start": lambda: c.get("company_profile").get().get("iInvoiceStart") or 0,
     }
     numbering = c.get("numbering")
     invoices = c.register(
@@ -135,6 +139,14 @@ def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, 
     def sales_invoice_calc(no=None):
         return jsonify(invoices.preview(json_payload(), no))
 
+    @bp.route("/api/sales-invoices/<int:no>/check", methods=["POST"])
+    def sales_invoice_check(no):
+        return jsonify(invoices.check(no))
+
+    @bp.route("/api/sales-invoices/<int:no>/post", methods=["POST"])
+    def sales_invoice_post(no):
+        return jsonify(invoices.post(no))
+
     lifecycle = c.get("lifecycle")
     lifecycle.add(invoices.repo, "sales_invoices", [])
 
@@ -143,5 +155,7 @@ def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, 
         if "sales_invoices" in data:
             last = max((int(i.get("iNo") or 0) for i in data["sales_invoices"]), default=0)
             numbering.set_next(DRAFT_SEQUENCE, last + 1)
+            posted = [int(i["cInvoiceNo"]) for i in data["sales_invoices"] if str(i.get("cInvoiceNo", "")).isdigit()]
+            numbering.set_next(INVOICE_SEQUENCE, max(posted, default=0) + 1)
 
     lifecycle.after_load(renumber)

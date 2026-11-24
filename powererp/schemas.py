@@ -44,6 +44,7 @@ TAX_TREATMENTS = ("taxable", "zero", "exempt")
 UOM_TYPES = ("count", "weight", "length", "area", "volume", "time")
 WAREHOUSE_TYPES = ("main", "transit", "consignment", "quarantine", "virtual")
 LOCATION_TYPES = ("picking", "reserve", "receiving", "shipping", "quarantine", "staging")
+PICK_POLICIES = ("", "FEFO", "FIFO", "LIFO")  # first expired / first in / last in first out
 MOVE_TYPES = ("IN", "OUT", "TRF", "ADJ", "CNT", "RSV")
 DOC_TYPES = ("MAN", "PO", "REC", "INV", "SO", "CNT", "PROD")
 COUNT_STATUS = ("Draft", "Posted")
@@ -165,6 +166,7 @@ PRODUCT = {
     "lLotControl": "b",
     "lSerialControl": "b",
     "lExpiryControl": "b",
+    "cPickPolicy": PICK_POLICIES,  # which stock goes out first (a sale): "" = FEFO with an expiry date, else FIFO
     "iShelfLifeDays": "i",
     "cDefaultWarehouse": "s",
     "cABCClass": ("", "A", "B", "C"),
@@ -494,6 +496,7 @@ COMPANY_PROFILE = {  # one row (cCode MAIN): the header of the invoices; the GST
     "cNEQ": "s",  # Quebec enterprise number
     "cInvoiceNoteFR": "s",  # printed at the bottom of the invoices
     "cInvoiceNoteEN": "s",
+    "iInvoiceStart": "i",  # the invoice numbers start at (V4: never below it; 0 = 1)
 }
 CUSTOMER = {
     "cCode": "s",
@@ -576,6 +579,9 @@ SALES_INVOICE_EXTRA = {
     "dTotal": "d",
     "cUser": "s",
     "dCreated": "ts",
+    "dPosted": "ts",  # V4: posted (the stock went out, the invoice number given, no more changes)
+    "cPostedBy": "s",
+    "dCost": "d",  # cost of the goods sold (the value of the stock movements)
 }
 SALES_INVOICE_LINE = {
     "cProduct": "s",
@@ -590,6 +596,19 @@ SALES_INVOICE_LINE = {
     "cPriceSource": "s",  # price_list / product / manual
 }
 SALES_INVOICE_TAX = {"cTaxGroup": "s", "cTaxCode": "s", "cKind": "s", "dRate": "d", "dBase": "d", "dTax": "d"}
+SALES_INVOICE_ALLOC = {  # V4: what went out of the stock for each line (lots first expiring first), in stock units
+    "iLine": "i",
+    "cProduct": "s",
+    "cWarehouse": "s",
+    "cLocation": "s",
+    "cLot": "s",
+    "cSerial": "s",
+    "dExpiry": "date",
+    "dQty": "d",
+    "cUOM": "s",
+    "iMovement": "i",
+    "dValue": "d",
+}
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},

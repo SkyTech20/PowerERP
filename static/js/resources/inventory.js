@@ -221,6 +221,8 @@ Object.assign(RES, {
         { f: "lLotControl", l: "f.prod.lLotControl", type: "check", show: isPhysical },
         { f: "lSerialControl", l: "f.prod.lSerialControl", type: "check", show: isPhysical },
         { f: "lExpiryControl", l: "f.prod.lExpiryControl", type: "check", show: isPhysical },
+        { f: "cPickPolicy", l: "f.prod.cPickPolicy", type: "select", show: isPhysical, help: "f.prod.cPickPolicy.help",
+          options: [["", "o.pick.auto"], ["FEFO", "o.pick.FEFO"], ["FIFO", "o.pick.FIFO"], ["LIFO", "o.pick.LIFO"]] },
       ] },
       { tab: "log", t: "prod.logistics", fields: [
         { f: "lSellable", l: "f.prod.lSellable", type: "check" }, { f: "lPurchasable", l: "f.prod.lPurchasable", type: "check" },

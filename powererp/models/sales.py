@@ -5,6 +5,8 @@ contacts (child tables customers_addresses, customers_contacts).
 V2: the price lists, with their prices by product and quantity (price_lists_lines) and their discounts by
 product category (price_lists_discounts); a customer points to its price list.
 V3: the sales invoices (drafts), with their lines and their taxes by tax code (sales_invoices_taxes).
+V4: posting: what went out of the stock for each line (sales_invoices_allocations); the first invoice number
+(company_profile.iInvoiceStart).
 """
 
 from .. import schemas as S
@@ -26,7 +28,7 @@ register_specs(
         order=("iNo",),
         extra=S.SALES_INVOICE_EXTRA,
         line_schema=S.SALES_INVOICE_LINE,
-        children={"taxes": S.SALES_INVOICE_TAX},
+        children={"taxes": S.SALES_INVOICE_TAX, "allocations": S.SALES_INVOICE_ALLOC},
     ),
     TableSpec(
         "customers",
