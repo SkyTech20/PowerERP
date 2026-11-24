@@ -5,6 +5,9 @@ import { lookupOptions, lookupRows } from "../lookups.js";
 import { RES } from "../registry.js";
 import { dl, opts, today } from "./inventory.js";
 
+// The units a line can use: those of its product (its sales unit first), not every unit
+const unitsOf = (m, ln) => ({ product: (ln && ln.cProduct) || "" });
+
 export const LANGS = ["fr", "en"];
 const price = (v) => (v === "" || v == null ? "" : new Intl.NumberFormat(lang === "fr" ? "fr-CA" : "en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(num(v)));
 
@@ -145,7 +148,7 @@ Object.assign(RES, {
       tab: "prices", title: "sales.pl.tab.prices", help: "sales.pl.prices.help",
         cols: [
           { f: "cProduct", l: "sales.f.cProduct", w: "w-lg", lookup: "sellable_products" },
-          { f: "cUOM", l: "sales.f.cUOM", w: "w-md", lookup: "uom" },
+          { f: "cUOM", l: "sales.f.cUOM", w: "w-md", lookup: "product_uoms", lookupParams: unitsOf },
           { f: "dMinQty", l: "sales.f.dMinQty", w: "w-sm", n: true },
           { f: "dPrice", l: "sales.f.dPrice", w: "w-sm", n: true },
           { f: "dDiscountPct", l: "sales.f.dLineDiscountPct", w: "w-sm", n: true },
@@ -292,7 +295,7 @@ Object.assign(RES, {
         { f: "cProduct", l: "sales.f.cProduct", w: "w-lg", lookup: "sellable_products", recalc: true },
         { f: "cDescription", l: "f.cDescription", w: "w-lg" },
         { f: "dQty", l: "sales.check.qty", w: "w-sm", n: true, recalc: true },
-        { f: "cUOM", l: "sales.f.cUOM", w: "w-sm", lookup: "uom", recalc: true },
+        { f: "cUOM", l: "sales.f.cUOM", w: "w-sm", lookup: "product_uoms", lookupParams: unitsOf, recalc: true },
         { f: "dPrice", l: "sales.f.dPrice", w: "w-sm", n: true, recalc: true },
         { f: "dDiscountPct", l: "sales.f.dLineDiscountPct", w: "w-xs", n: true, recalc: true },
         { f: "dNetPrice", l: "sales.check.net", w: "w-sm", n: true, ro: true },

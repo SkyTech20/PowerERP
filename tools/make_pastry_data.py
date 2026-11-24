@@ -478,7 +478,7 @@ def build_purchases(prods: dict[str, dict]):
 
 CALENDAR = {
     "cCode": "PST-1X6",
-    "cDescFR": "Pastelaria : 1 équipe, lundi au samedi",
+    "cDescFR": "Pâtisserie : 1 équipe, lundi au samedi",
     "cDescEN": "Pastry shop: 1 shift, Monday to Saturday",
     "lActive": True,
     "lines": [
@@ -917,7 +917,7 @@ def main() -> None:
                 S.WAREHOUSE,
                 {
                     "cCode": WH,
-                    "cNameFR": "Cuisine centrale - Pastelaria",
+                    "cNameFR": "Cuisine centrale - Pâtisserie",
                     "cNameEN": "Central kitchen - Pastry shop",
                     "cType": "main",
                     "cAddress1": "4520, rue Saint-Denis",
