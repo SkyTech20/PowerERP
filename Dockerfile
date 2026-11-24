@@ -17,6 +17,7 @@ COPY app.py alembic.ini ./
 COPY powererp/ ./powererp/
 COPY migrations/ ./migrations/
 COPY static/ ./static/
+COPY help/ ./help/
 COPY data/ ./data/
 
 # Database: PostgreSQL, set DATABASE_URL (postgresql://user:password@host:5432/powererp).
