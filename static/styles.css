@@ -394,3 +394,14 @@ button.link { background: none; border: 0; padding: 0; color: var(--primary); fo
   .help-toc { position: static; max-height: none; }
 }
 .help-layout > .card { margin: 0; }
+
+/* Help inside the screens: "?" of the page head, ⓘ of a field, side panel */
+.btn.help-btn { min-width: 34px; font-weight: 700; color: var(--primary); }
+.help-i { border: 0; background: none; padding: 0 2px; margin: 0; cursor: pointer; color: var(--primary); font-size: 12px; line-height: 1; vertical-align: baseline; opacity: .7; }
+.help-i:hover, .help-i:focus-visible { opacity: 1; }
+.help-panel { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); background: var(--surface); border-left: 1px solid var(--border);
+  box-shadow: -4px 0 16px rgba(16, 24, 40, .12); z-index: 60; display: flex; flex-direction: column; }
+.help-panel-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.help-panel-head b { flex: 1; font-size: 15px; }
+.help-panel-body { padding: 4px 16px 24px; overflow: auto; flex: 1; }
+.help-panel .help-item.level-2 > :first-child { font-size: 15px; }

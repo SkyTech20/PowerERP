@@ -19,7 +19,7 @@ from powererp.container import Container
 from powererp.core.errors import NotFound
 from powererp.core.security import current_can, current_is_admin
 
-from .content import DEFAULT_LANG, LANGS, HelpIndex, Item, load, snippet
+from .content import DEFAULT_LANG, LANGS, HelpIndex, Item, load, snippet, summary
 
 HELP_DIR = Path(__file__).resolve().parent.parent.parent.parent / "help"
 
@@ -39,6 +39,7 @@ def _item(it: Item, fallback: bool) -> dict:
         "title": it.title,
         "path": it.path,
         "html": it.html,
+        "summary": summary(it.text),
         "lang": it.lang,
         "untranslated": fallback,
     }

@@ -4,6 +4,7 @@ import "./resources/inventory.js";
 import "./resources/production.js";
 import "./resources/sales.js";
 import { $, $$, api } from "./core.js";
+import { bindHelpUi } from "./helpui.js";
 import { enterApp, setLang, setLangPicked, showLogin } from "./login.js";
 import { applyStaticI18n } from "./menu.js";
 import { route } from "./router.js";
@@ -17,4 +18,5 @@ $$(".lang-switch button").forEach((b) => b.addEventListener("click", () => {
 $("#menuToggle").addEventListener("click", () => document.body.classList.toggle("nav-open"));
 window.addEventListener("hashchange", () => { if (user) route(); });
 applyStaticI18n();
+bindHelpUi();
 api("auth/me", { noAuthRedirect: true }).then(enterApp).catch(showLogin);

@@ -5,7 +5,10 @@ Each heading carries the fixed code of its item, the same in every language:
     # Invoices {#sales.invoices}                 the screen (the file name, = the menu / permission key)
     ## Post {#sales.invoices.post}               an action (an action of the screen in permissions.py)
     ### Customer {#sales.invoices.cCustomer}     a field (its name in the form, data-f)
+    ### Quantity {#sales.invoices.lines.dQty}    a column of a grid (<screen>.<grid>.<field>)
     ## Lines {#sales.invoices.lines}             any other section
+
+Another tab of a tab set puts the resource in its codes: admin.taxes.taxgroups.cCode (static/js/helpui.js).
 
 The text under a heading, down to the next heading, is the body of the item. A link to another item is written
 [Post](#sales.invoices.post); it opens that item in the Help screen.
@@ -156,6 +159,13 @@ def snippet(text: str, query: str, size: int = 160) -> str:
     start = max(0, at - size // 3)
     cut = text[start : start + size].strip()
     return ("… " if start else "") + cut + (" …" if start + size < len(text) else "")
+
+
+def summary(text: str, size: int = 200) -> str:
+    """The first sentence of a text (the tip of the ⓘ of a field)."""
+    m = re.match(r"(.+?[.!?])(\s|$)", text)
+    first = m.group(1) if m else text
+    return first if len(first) <= size else first[: size - 2].rstrip() + " …"
 
 
 def render(body: str) -> tuple[str, str]:

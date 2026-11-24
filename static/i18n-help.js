@@ -11,6 +11,10 @@
     "help.untranslated": "Not yet translated",
     "help.linkTitle": "Link to this item",
     "help.notFound": "This help page does not exist or is not part of your role.",
+    "help.open": "Help on this screen",
+    "help.openFull": "Open in Help",
+    "help.close": "Close",
+    "help.aboutField": "Help on {f}",
   });
   Object.assign(I.fr, {
     "menu.help": "Aide",
@@ -23,5 +27,9 @@
     "help.untranslated": "Pas encore traduit",
     "help.linkTitle": "Lien vers cet élément",
     "help.notFound": "Cette page d'aide n'existe pas ou ne fait pas partie de votre rôle.",
+    "help.open": "Aide sur cet écran",
+    "help.openFull": "Ouvrir dans l'Aide",
+    "help.close": "Fermer",
+    "help.aboutField": "Aide sur {f}",
   });
 })(window.ERP_I18N);

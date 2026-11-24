@@ -1,6 +1,7 @@
 /* PowerERP: Generic form screen of a resource (create / edit). */
 import { $, $$, TAX_RATES, api, enc, esc, money, num, numOnly, round2, sourceBadge, t, toast } from "../core.js";
 import { bindLookup, lookupOptions, lookupRows } from "../lookups.js";
+import { decorateHelp, helpButton } from "../helpui.js";
 import { canOn } from "../menu.js";
 import { RES } from "../registry.js";
 import { clearLookups, prefill, setPrefill } from "../state.js";
@@ -185,7 +186,7 @@ export function formView(key, id) {
     const rows = model[key] || [];
     const amount = key === "lines" && L.amount;
     const cols = L.cols.filter((c) => !c.show || c.show(model)); // a column can depend on the record (show)
-    const head = cols.map((c) => `<th class="${c.n ? "num" : ""}">${esc(c.raw ? c.l : t(c.l))}</th>`).join("")
+    const head = cols.map((c) => `<th class="${c.n ? "num" : ""}" data-col="${c.f}">${esc(c.raw ? c.l : t(c.l))}</th>`).join("")
       + (amount ? `<th class="num">${esc(t(L.amountLabel))}</th>` : "") + (locked ? "" : "<th></th>");
     const body = rows.map((ln, i) => `<tr data-line="${i}" class="${L.rowClass ? L.rowClass(ln) : ""}">${cols.map((c) => `<td class="${c.w}">${lineCell(c, ln)}</td>`).join("")}
       ${amount ? `<td class="num" data-amount>${esc(money(L.amount(ln), cur()))}</td>` : ""}
@@ -257,11 +258,11 @@ export function formView(key, id) {
     // a.perm: the action of the role it needs (post, print, approve…); without it the button is not shown
     const extra = (R.actions || []).filter((a) => (!a.show || a.show(model, isNew)) && (!a.perm || canOn(R, a.perm)))
       .map((a) => `<button class="btn ${a.primary ? "primary" : ""}" data-action="${a.id}">${esc(t(a.l))}</button>`).join("");
-    const actions = locked
+    const actions = helpButton(R) + (locked
       ? `<a class="btn" href="#${R.route}">← ${esc(t("common.back"))}</a>${extra}`
       : `<a class="btn" href="#${R.route}">${esc(t("common.cancel"))}</a>
       ${isNew || R.noDelete || !canOn(R, "delete") ? "" : `<button class="btn danger" id="deleteBtn">${esc(t("common.delete"))}</button>`}
-      ${extra}<button class="btn primary" id="saveBtn">${esc(t("common.save"))}</button>`;
+      ${extra}<button class="btn primary" id="saveBtn">${esc(t("common.save"))}</button>`);
     const badge = R.badge ? R.badge(model, isNew) : (!isNew && model.cSource ? sourceBadge(model.cSource) : "");
     // Tabs: each section / the lines / the panel says its tab; the tab with an error is opened
     const tabOf = (x) => (R.formTabs ? x.tab || R.formTabs[0][0] : null);
@@ -298,6 +299,7 @@ export function formView(key, id) {
     if ($("#totals")) { $("#totals").innerHTML = totalsHtml(); bindTotals(); }
     bind();
     shownPanels.forEach((P) => P.bind && P.bind(model));
+    decorateHelp(R);
     if (R.tax && model[R.tax.supplier]) loadSupplierTax(model[R.tax.supplier]);
   }
 

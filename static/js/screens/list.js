@@ -1,5 +1,6 @@
 /* PowerERP: Generic list screen of a resource. */
 import { $, $$, api, enc, esc, fmtInt, lang, t, toast } from "../core.js";
+import { decorateHelp, helpButton } from "../helpui.js";
 import { canOn } from "../menu.js";
 import { RES } from "../registry.js";
 import { canOpen } from "../router.js";
@@ -40,7 +41,7 @@ export function listView(key) {
         </select>`).join("");
       // R.listActions: buttons of the list (e.g. add the standard conversions), next to "New"
       const listActions = (R.listActions || []).filter((a) => canOn(R, a.perm || "create")).map((a) => `<button class="btn" data-list-action="${a.id}">${esc(t(a.l))}</button>`).join("");
-      $("#view").innerHTML = pageHead(t(R.title), t(R.sub), listActions + (R.noNew || !canOn(R, "create") ? "" : `<a class="btn primary" href="#${R.route}/new">＋ ${esc(t("common.new"))}</a>`))
+      $("#view").innerHTML = pageHead(t(R.title), t(R.sub), helpButton(R) + listActions + (R.noNew || !canOn(R, "create") ? "" : `<a class="btn primary" href="#${R.route}/new">＋ ${esc(t("common.new"))}</a>`))
         + (R.tabset ? tabsHtml(R) : "")
         + `<div class="card"><div class="toolbar"><input type="search" id="q" placeholder="${esc(t("common.search"))}" value="${esc(st.q)}">${filters}
             <span class="count">${esc(t("common.records", { n: fmtInt(data.total) }))}</span></div>
@@ -81,6 +82,7 @@ export function listView(key) {
         }
       }));
       $("#prev").addEventListener("click", () => { st.page--; reload(); });
+      decorateHelp(R);
       $("#next").addEventListener("click", () => { st.page++; reload(); });
     },
   };
