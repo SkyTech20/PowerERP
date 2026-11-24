@@ -322,6 +322,18 @@ def test_replenishment_in_purchase_units(client):
     assert line["dQuantity"] == "100" and line["dUnitCost"] == "12.50" and "(4 CS)" in line["cProductDesc"]
 
 
+def test_purchase_and_sales_units_need_a_conversion(client):
+    """The purchase / sales units convert to the stock unit with the conversions (no factor on the product)."""
+    prod = client.get("/api/products/TUBE-T8").get_json()
+    assert "dPurchaseFactor" not in prod and prod["conversions"][0]["cUOM"] == "CS"
+    check = {"cStockUOM": "UN", "cPurchaseUOM": "BTE", "cSalesUOM": "KG", "conversions": []}
+    assert client.post("/api/products/unit-check", json=check).get_json() == {"missing": ["cPurchaseUOM", "cSalesUOM"]}
+    check["conversions"] = [{"cUOM": "BTE", "dFactor": "12"}]
+    assert client.post("/api/products/unit-check", json={**check, "cSalesUOM": "UN"}).get_json() == {"missing": []}
+    r = client.put("/api/products/TUBE-T8", json={**prod, "cPurchaseUOM": "BTE"})
+    assert r.status_code == 400 and r.get_json()["error"] == "no_conversion" and r.get_json()["field"] == "cPurchaseUOM"
+
+
 def test_unit_conversions(client):
     # the demo data has the general conversions; the reverse is deduced, through a chain if needed
     assert client.get("/api/uom-conversions/KG/G").get_json()["dFactor"] == "1000"

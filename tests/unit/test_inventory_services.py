@@ -3,6 +3,8 @@
 import pytest
 
 from powererp.core.errors import AppError
+from powererp.modules.catalog import UnitConversionService, UnitConverter, UnitService
+from powererp.modules.common.registry import ReferenceRegistry
 from powererp.modules.inventory.counts import CountService
 from powererp.modules.inventory.masters import ProductService
 from powererp.modules.inventory.replenishment import ReplenishmentService, preferred_supplier
@@ -56,7 +58,7 @@ def products():
     return ProductService(memory([]), refs)
 
 
-def test_product_references_and_factors(products):
+def test_product_references(products):
     row = products.create(
         {
             "cCode": "P9",
@@ -64,17 +66,15 @@ def test_product_references_and_factors(products):
             "cType": "stock",
             "cStockUOM": "EA",
             "cPurchaseUOM": "BX",
-            "dPurchaseFactor": "12",
             "lines": [{"cSupplierCode": "lum", "dPurchasePrice": "3"}, {"cSupplierCode": ""}],
         }
     )
-    assert row["dSalesFactor"] == "1" and row["cSalesUOM"] == "UN" and row["lines"][0]["cSupplierCode"] == "LUM"
+    assert "dPurchaseFactor" not in row and row["cSalesUOM"] == "UN" and row["lines"][0]["cSupplierCode"] == "LUM"
     assert row["lines"][0]["cCurrency"] == "CAD" and len(row["lines"]) == 1
     base = {"cCode": "P8", "cDescFR": "x", "cStockUOM": "EA"}
     assert code_of(products.create, {**base, "cStockUOM": ""}) == ("required", "cStockUOM", 400)
     assert code_of(products.create, {**base, "cCategory": "NOPE"}) == ("unknown_ref", "cCategory", 400)
     assert code_of(products.create, {**base, "cSalesTaxGroup": "ON"}) == ("unknown_ref", "cSalesTaxGroup", 400)
-    assert code_of(products.create, {**base, "dPurchaseFactor": "0"}) == ("positive", "dPurchaseFactor", 400)
     assert code_of(products.create, {**base, "lines": [{"cSupplierCode": "ZZ"}]})[:2] == ("unknown_ref", "lines")
 
 
@@ -167,9 +167,37 @@ class PurchaseOrders:
         return self.on_order
 
 
+def converter(conversions=()):
+    units = UnitService(memory([{"cCode": c} for c in ("UN", "EA", "BX", "CS", "DZ")]), ReferenceRegistry())
+    return UnitConverter(UnitConversionService(memory(list(conversions), keys=("cFromUOM", "cToUOM")), units))
+
+
+def test_purchase_and_sales_units_must_convert_to_the_stock_unit(products):
+    general = {"cFromUOM": "DZ", "cToUOM": "EA", "dFactor": "12", "cNotes": "", "lActive": True}
+    products.refs["unit_factor"] = converter([general]).factor
+    base = {"cCode": "P7", "cDescFR": "x", "cStockUOM": "EA", "cPurchaseUOM": "BX", "cSalesUOM": "EA"}
+    assert code_of(products.create, base) == ("no_conversion", "cPurchaseUOM", 400)
+    assert code_of(products.create, {**base, "cPurchaseUOM": "EA", "cSalesUOM": "UN"})[:2] == (
+        "no_conversion",
+        "cSalesUOM",
+    )
+    # the product's own conversion (1 BX = 12 EA) or a general one (1 DZ = 12 EA) is enough
+    assert products.missing_conversions({**base, "conversions": [{"cUOM": "BX", "dFactor": "12"}]}) == []
+    assert products.missing_conversions({**base, "cPurchaseUOM": "DZ"}) == []
+    assert products.missing_conversions({**base, "cSalesUOM": "BX"}) == ["cPurchaseUOM", "cSalesUOM"]
+    row = products.create({**base, "conversions": [{"cUOM": "BX", "dFactor": "12", "cNotes": ""}]})
+    assert row["conversions"][0]["cUOM"] == "BX"
+
+
 def replenishment(inventory, on_order=0.0):
     return ReplenishmentService(
-        inventory["stock"], inventory["repos"]["stock_params"], Suppliers(), PurchaseOrders(on_order), None, lambda: "t"
+        inventory["stock"],
+        inventory["repos"]["stock_params"],
+        Suppliers(),
+        PurchaseOrders(on_order),
+        None,
+        lambda: "t",
+        converter().factor,
     )
 
 
@@ -181,7 +209,9 @@ def stocked(inventory):
         {
             "cStatus": "active",
             "cDefaultWarehouse": "W1",
-            "dPurchaseFactor": "6",
+            "cStockUOM": "UN",
+            "cPurchaseUOM": "CS",
+            "conversions": [{"cUOM": "CS", "dFactor": "6", "cNotes": ""}],  # a case of 6, bought by the case
             "lines": [
                 {"cSupplierCode": "OTHER", "dPurchasePrice": "50"},
                 {"cSupplierCode": "LUM", "lPreferred": True, "dPurchasePrice": "30", "dMinOrderQty": ""},

@@ -10,6 +10,8 @@ import { pageHead, tabLabel } from "../views.js";
 // textarea | password | email), lookup (+ fill, lookupParams(model, line), onPick), show(model, isNew), rerender (redraw on change).
 // Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
 // locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model), tab, onNew } and panels (more of them).
+// warnings(model) -> Promise of { field: message }: shown under those fields (not errors: saving still decides),
+// checked again on every change of the form (e.g. a product unit with no conversion to its stock unit).
 // recalc(model, { path, field, line }) -> Promise of the model calculated by the server: called when a field or a
 // line column marked recalc: true changes (e.g. the prices and taxes of a sales invoice); its errors are shown.
 // A grid with a detail (G.detail) is shown as a list of its lines (G.cols: what a line shows, with fmt) and a panel
@@ -87,7 +89,23 @@ export function formView(key, id) {
       const mode = fd.type === "number" ? 'inputmode="decimal" style="text-align:right"' : fd.inputmode ? `inputmode="${fd.inputmode}"` : "";
       input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${auto} ${mode}>`;
     }
-    return `<div class="${cls}">${label}${input}${help}${err}</div>`;
+    const warn = R.warnings ? `<span class="warn" data-warn="${fd.f}" hidden></span>` : "";
+    return `<div class="${cls}">${label}${input}${help}${warn}${err}</div>`;
+  }
+
+  // The warnings of the resource, under their fields; an older answer that comes back late is ignored
+  let warnSeq = 0;
+  function showWarnings() {
+    if (!R.warnings || locked) return;
+    const seq = ++warnSeq;
+    Promise.resolve(R.warnings(model)).then((w) => {
+      if (seq !== warnSeq) return;
+      $$("[data-warn]").forEach((el) => {
+        const msg = (w || {})[el.dataset.warn] || "";
+        el.textContent = msg ? "⚠ " + msg : "";
+        el.hidden = !msg;
+      });
+    }).catch(() => {});
   }
 
   function lineCell(c, ln) {
@@ -325,6 +343,7 @@ export function formView(key, id) {
     });
     if (R.lines) bindGrid(R.lines, "lines");
     (R.grids || []).forEach((G) => bindGrid(G, G.key));
+    if (R.warnings) { $("#form").addEventListener("change", showWarnings); showWarnings(); }
     $("#form").addEventListener("submit", (e) => { e.preventDefault(); if (!locked) save(); });
     const sv = $("#saveBtn");
     if (sv) sv.addEventListener("click", save);
