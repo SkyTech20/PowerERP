@@ -481,7 +481,7 @@ def test_approval_flow(client):
     assert client.post(f"{url}/B/fly", json={}).status_code == 404
 
 
-def test_only_administrators_approve(app, client):
+def test_only_roles_with_approve_approve(app, client):
     c = app.test_client()
     client.post(
         "/api/users", json={"username": "op1", "name": "Op", "role": "user", "password": "secret1", "active": True}

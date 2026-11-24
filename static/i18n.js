@@ -157,8 +157,8 @@ window.ERP_I18N = {
     "f.active": "Status",
     "f.lastLogin": "Last sign-in",
     "f.password": "New password",
-    "role.admin": "Administrator",
-    "role.user": "User",
+    "role.ADMIN": "Administrator",
+    "role.USER": "User",
 
     "acc.title": "My account",
     "acc.changePassword": "Change my password",
@@ -466,8 +466,8 @@ window.ERP_I18N = {
     "f.active": "Statut",
     "f.lastLogin": "Dernière connexion",
     "f.password": "Nouveau mot de passe",
-    "role.admin": "Administrateur",
-    "role.user": "Utilisateur",
+    "role.ADMIN": "Administrateur",
+    "role.USER": "Utilisateur",
 
     "acc.title": "Mon compte",
     "acc.changePassword": "Changer mon mot de passe",

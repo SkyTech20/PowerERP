@@ -30,7 +30,7 @@ from flask import Blueprint, Flask, jsonify, request
 from powererp.container import Container
 from powererp.core.errors import AppError
 from powererp.core.http import json_payload
-from powererp.core.security import current_is_admin, current_username
+from powererp.core.security import current_can, current_username
 from powererp.core.values import text
 from powererp.modules.common.crud import register_crud_routes
 from powererp.modules.common.registry import label_lookup
@@ -300,7 +300,7 @@ def _register_recipes(bp: Blueprint, c: Container, seed: dict) -> None:
             raise AppError("unknown_ref", "iStep")
         return jsonify(check_value(step, body.get("value")))
 
-    flow = c.register("recipe_flow", RecipeFlow(recipes, current_username, current_is_admin))
+    flow = c.register("recipe_flow", RecipeFlow(recipes, current_username, lambda: current_can("prod.recipes:approve")))
 
     @bp.route("/api/recipes/<product>/<revision>/<action>", methods=["POST"])
     def recipe_action(product, revision, action):

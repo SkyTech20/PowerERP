@@ -4,8 +4,9 @@ draft --submit--> in_review --approve--> approved --obsolete--> obsolete
                        \\--reject (comment)--> draft
 - Only a draft can be edited or deleted; an approved version is frozen: a change is a new version
   ("new version from", any status), which starts as a draft with the next revision letter.
-- Approving needs administrator rights and at least one operation. The approved version becomes the product's
-  default (the one new production orders take); the previous default stays approved but is no longer the default.
+- Approving (also rejecting, making obsolete, making default) needs the "Approve" permission of Recipes
+  (prod.recipes:approve) and at least one operation. The approved version becomes the product's default (the one
+  new production orders take); the previous default stays approved but is no longer the default.
 - current(product, day): the default approved version valid that day (effective from / to), else the latest
   approved one valid that day.
 - Every change of status is kept in the history: when, who, from, to, comment.
@@ -69,10 +70,10 @@ def next_revision(existing: list[str]) -> str:
 class RecipeFlow:
     """The approval flow on top of RecipeService (the rules of a recipe stay there)."""
 
-    def __init__(self, recipes: RecipeService, username: Callable[[], str], is_admin: Callable[[], bool]):
+    def __init__(self, recipes: RecipeService, username: Callable[[], str], can_approve: Callable[[], bool]):
         self.recipes = recipes
         self.username = username
-        self.is_admin = is_admin
+        self.can_approve = can_approve  # the role's prod.recipes:approve
 
     # ---------------------------------------------------------- status changes
     def _move(
@@ -94,8 +95,8 @@ class RecipeFlow:
         row["cStatus"] = to
         return row
 
-    def _need_admin(self) -> None:
-        if not self.is_admin():
+    def _need_approver(self) -> None:
+        if not self.can_approve():
             raise AppError("forbidden", status=403)
 
     def submit(self, product: str, revision: str, comment: str = "") -> Row:
@@ -107,7 +108,7 @@ class RecipeFlow:
         return row
 
     def reject(self, product: str, revision: str, comment: str) -> Row:
-        self._need_admin()
+        self._need_approver()
         if not text(comment):
             raise AppError("required", "cComment")  # say what to fix
         row = self._move(product, revision, ("in_review",), "draft", "reject", comment)
@@ -115,7 +116,7 @@ class RecipeFlow:
         return row
 
     def approve(self, product: str, revision: str, comment: str = "") -> Row:
-        self._need_admin()
+        self._need_approver()
         row = self._move(product, revision, ("in_review",), "approved", "approve", comment)
         row["cApprovedBy"] = self.username()
         row["dApprovedAt"] = datetime.now().isoformat(timespec="seconds")
@@ -128,14 +129,14 @@ class RecipeFlow:
         return row
 
     def obsolete(self, product: str, revision: str, comment: str = "") -> Row:
-        self._need_admin()
+        self._need_approver()
         row = self._move(product, revision, ("approved",), "obsolete", "obsolete", comment)
         row["lDefault"] = False
         self.recipes.repo.update(row)
         return row
 
     def make_default(self, product: str, revision: str) -> Row:
-        self._need_admin()
+        self._need_approver()
         row = self.recipes.get(product, revision)
         if row["cStatus"] != "approved":
             raise AppError("invalid_status", "cStatus", status=409)

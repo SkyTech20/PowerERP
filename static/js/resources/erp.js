@@ -1,5 +1,5 @@
 /* PowerERP: General ledger, suppliers, purchasing, invoices and users: list / form definitions. */
-import { CURRENCIES, api, esc, fmtDateTime, lang, money, num, sourceBadge, statusBadge, t, yesNo } from "../core.js";
+import { CURRENCIES, api, esc, fmtDateTime, lang, money, num, roleName, sourceBadge, statusBadge, t, yesNo } from "../core.js";
 import { RES } from "../registry.js";
 import { route } from "../router.js";
 
@@ -169,23 +169,23 @@ RES.users = {
   api: "users", route: "/admin/users", admin: true, title: "usr.title", sub: "usr.subtitle", one: "usr.one", newTitle: "usr.new",
   id: (r) => r.id, label: (r) => `${r.username} — ${r.name}`, sort: "username",
   filters: [
-    { f: "role", l: "f.role", options: [["admin", "role.admin"], ["user", "role.user"]] },
+    { f: "role", l: "f.role", options: [["ADMIN", "role.ADMIN"], ["USER", "role.USER"]] },
     { f: "active", l: "f.active", options: [["true", "opt.active"], ["false", "opt.inactive"]] },
   ],
   columns: [
     { f: "username", l: "f.username" }, { f: "name", l: "f.userName", wrap: true }, { f: "email", l: "f.email" },
-    { f: "role", l: "f.role", fmt: (v) => esc(t("role." + v)) },
+    { f: "role", l: "f.role", fmt: (v) => esc(roleName(v)) },
     { f: "lang", l: "f.lang", fmt: (v) => esc(String(v || "").toUpperCase()) },
     { f: "active", l: "f.active", fmt: (v) => `<span class="badge ${v ? "yes" : "no"}">${esc(t(v ? "opt.active" : "opt.inactive"))}</span>` },
     { f: "last_login", l: "f.lastLogin", fmt: (v) => esc(fmtDateTime(v)) },
   ],
-  defaults: () => ({ role: "user", lang, active: true }),
+  defaults: () => ({ role: "USER", lang, active: true }),
   sections: [
     { t: "common.general", fields: [
       { f: "username", l: "f.username", req: true, key: true, autocomplete: "off" },
       { f: "name", l: "f.userName", req: true, span: 2 },
       { f: "email", l: "f.email", type: "email" },
-      { f: "role", l: "f.role", type: "select", options: [["user", "role.user"], ["admin", "role.admin"]] },
+      { f: "role", l: "f.role", type: "select", options: [["USER", "role.USER"], ["ADMIN", "role.ADMIN"]] },
       { f: "lang", l: "f.lang", type: "select", options: [["en", "English"], ["fr", "Français"]], raw: true },
       { f: "active", l: "opt.active", type: "check" },
     ] },
