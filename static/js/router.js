@@ -8,6 +8,7 @@ import { dashboardView } from "./screens/dashboard.js";
 import { formView } from "./screens/form.js";
 import { listView } from "./screens/list.js";
 import { replenishmentView } from "./screens/replenishment.js";
+import { roleFormView, rolesListView } from "./screens/roles.js";
 import { settingsView } from "./screens/settings.js";
 import { isAdmin, setView } from "./state.js";
 import { TABSETS } from "./views.js";
@@ -41,6 +42,11 @@ export function resolve(path) {
   if (parts.join("/") === "admin/backups") return isAdmin() ? backupView() : dashboardView();
   if (parts.join("/") === "admin/settings") return isAdmin() ? settingsView() : dashboardView();
   if (parts.join("/") === "inv/replenishment") return replenishmentView();
+  if (parts[0] === "admin" && parts[1] === "roles") {
+    if (!isAdmin()) return dashboardView();
+    if (parts.length === 2) return rolesListView();
+    return roleFormView(parts[2] === "new" ? null : parts[2]);
+  }
   const hit = routeOf(parts.join("/"));
   if (!hit) return dashboardView();
   const R = RES[hit.key];

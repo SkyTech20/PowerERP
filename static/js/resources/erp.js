@@ -169,7 +169,7 @@ RES.users = {
   api: "users", route: "/admin/users", admin: true, title: "usr.title", sub: "usr.subtitle", one: "usr.one", newTitle: "usr.new",
   id: (r) => r.id, label: (r) => `${r.username} — ${r.name}`, sort: "username",
   filters: [
-    { f: "role", l: "f.role", options: [["ADMIN", "role.ADMIN"], ["USER", "role.USER"]] },
+    { f: "role", l: "f.role", lookup: "roles" },
     { f: "active", l: "f.active", options: [["true", "opt.active"], ["false", "opt.inactive"]] },
   ],
   columns: [
@@ -185,7 +185,7 @@ RES.users = {
       { f: "username", l: "f.username", req: true, key: true, autocomplete: "off" },
       { f: "name", l: "f.userName", req: true, span: 2 },
       { f: "email", l: "f.email", type: "email" },
-      { f: "role", l: "f.role", type: "select", options: [["USER", "role.USER"], ["ADMIN", "role.ADMIN"]] },
+      { f: "role", l: "f.role", req: true, lookup: "roles" },
       { f: "lang", l: "f.lang", type: "select", options: [["en", "English"], ["fr", "Français"]], raw: true },
       { f: "active", l: "opt.active", type: "check" },
     ] },

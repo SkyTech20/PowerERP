@@ -47,6 +47,8 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     # the scenario chosen when the demo data was last reset (dashboard), else ERP_SCENARIO
     demo = DemoData.load(dataset, settings.get_setting("demo_scenario"))
     _register_modules(app, c, demo)
+    c.get("lookups").register("roles", auth.role_lookup(c.get("roles")))
+    c.get("lifecycle").after_load(c.get("roles").load_demo)  # the example roles of the demo
     admin.register(app)  # Administration > Backups
     database.init_app(app)  # one transaction per request
     c.get("lifecycle").scenarios(demo.scenario, SCENARIOS, lambda scenario: _switch(c, dataset, scenario))
