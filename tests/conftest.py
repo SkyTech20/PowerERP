@@ -4,8 +4,10 @@ PowerERP test setup.
 The app is imported once per test session, on an empty PostgreSQL test database
 (TEST_DATABASE_URL; its tables are dropped and re-created by the migrations at the
 start of the session) and the fictitious demo dataset (data/demo/). Every test
-starts from the original demo data (POST /api/reset), so tests do not depend on
-each other.
+starts from the original demo data, so tests do not depend on each other: the demo is
+loaded once (POST /api/reset) and copied to the schema test_snapshot; before each test
+the tables are emptied and filled again from that copy (a few SQL statements instead of
+reloading the demo through the ERP, which took most of the time of the suite).
 
 Run from the PowerERP folder:
   docker compose up -d db                    (PostgreSQL on localhost:5433, with the powererp_test database)
@@ -90,11 +92,59 @@ def admin(app):
     return c
 
 
-@pytest.fixture(autouse=True)
-def _fresh_data(app):
+SNAPSHOT = "test_snapshot"
+
+
+class DemoSnapshot:
+    """A copy of every table of the demo data (schema test_snapshot), put back before each test."""
+
+    def __init__(self, url):
+        from sqlalchemy import MetaData
+
+        from powererp.config import database_url
+
+        self.engine = create_engine(database_url(url))
+        meta = MetaData()
+        meta.reflect(self.engine, schema="public")
+        # parents before children (foreign keys); alembic_version is not data
+        self.tables = [t.name for t in meta.sorted_tables if t.name != "alembic_version"]
+        self.serials = [t.name for t in meta.sorted_tables if "id" in t.c and t.c.id.autoincrement is not False]
+        # DELETE, not TRUNCATE: the tables are small and TRUNCATE rewrites the files of every table (10x slower)
+        empty = "; ".join(f"DELETE FROM public.{n}" for n in reversed(self.tables))
+        copies = "; ".join(f"INSERT INTO public.{n} SELECT * FROM {SNAPSHOT}.{n}" for n in self.tables)
+        sequences = ", ".join(
+            f"setval(pg_get_serial_sequence('public.{n}', 'id'), "
+            f"COALESCE((SELECT max(id) FROM public.{n}), 0) + 1, false)"
+            for n in self.serials
+        )
+        self.restore_sql = f"{empty}; {copies}; SELECT {sequences}"
+
+    def take(self):
+        with self.engine.begin() as con:
+            con.execute(text(f"DROP SCHEMA IF EXISTS {SNAPSHOT} CASCADE"))
+            con.execute(text(f"CREATE SCHEMA {SNAPSHOT}"))
+            for n in self.tables:
+                con.execute(text(f"CREATE TABLE {SNAPSHOT}.{n} AS TABLE public.{n}"))
+
+    def restore(self):
+        with self.engine.begin() as con:
+            con.exec_driver_sql(self.restore_sql)
+
+
+@pytest.fixture(scope="session")
+def demo_snapshot(app):
     c = app.test_client()
     c.environ_base["HTTP_X_API_KEY"] = API_KEY
     assert c.post("/api/reset").status_code == 200
+    snap = DemoSnapshot(TEST_DATABASE_URL)
+    snap.take()
+    yield snap
+    snap.engine.dispose()
+
+
+@pytest.fixture(autouse=True)
+def _fresh_data(demo_snapshot):
+    demo_snapshot.restore()
     yield
 
 
