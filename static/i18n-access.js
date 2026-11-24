@@ -2,6 +2,7 @@
 (function (I) {
   Object.assign(I.en, {
     "menu.admin.roles": "Roles",
+    "dash.none": "Your role shows no figures here: open your screens from the menu.",
     "rl.title": "Roles",
     "rl.subtitle": "Who can open each screen and what they can do there",
     "rl.new": "New role",
@@ -64,6 +65,7 @@
   });
   Object.assign(I.fr, {
     "menu.admin.roles": "Rôles",
+    "dash.none": "Votre rôle n'affiche aucun indicateur ici : ouvrez vos écrans depuis le menu.",
     "rl.title": "Rôles",
     "rl.subtitle": "Qui peut ouvrir chaque écran et ce qu'il peut y faire",
     "rl.new": "Nouveau rôle",

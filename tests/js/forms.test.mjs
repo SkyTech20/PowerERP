@@ -126,3 +126,15 @@ test("the labels and helps of the step panel have an English and a French text",
   }
   assert.deepEqual([...missing].sort(), []);
 });
+
+test("every screen opens from a menu entry (its permissions are the entry's)", async () => {
+  const { menuItemOf } = await import(pathToFileURL(join(STATIC, "js", "menu.js")).href);
+  for (const [key, R] of Object.entries(RES)) {
+    const item = menuItemOf(R);
+    assert.ok(item, `${key}: no menu entry for ${R.menu || R.route}`);
+  }
+  assert.equal(menuItemOf(RES.taxgroups).k, "admin.taxes");
+  assert.equal(menuItemOf(RES.locations).k, "inv.warehouses");
+  assert.equal(menuItemOf(RES.calexceptions).k, "prod.calendars");
+  assert.equal(menuItemOf(RES.users).admin, true);
+});

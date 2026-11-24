@@ -5,6 +5,8 @@ export let view = null; // the screen shown (an object with load() and render())
 export let prefill = null; // { key, values }: defaults for the next "new" form (e.g. a movement for this product)
 export const lookupCache = {};
 export const isAdmin = () => !!user && !!user.isAdmin;
+// A permission of the user's role ("<screen>:<action>", powererp/core/permissions.py); the server checks it again.
+export const can = (screen, action = "view") => isAdmin() || (!!user && (user.permissions || []).includes(`${screen}:${action}`));
 export function setUser(u) { user = u; }
 export function setView(v) { view = v; }
 export function setPrefill(p) { prefill = p; }

@@ -212,6 +212,32 @@ ADMIN_ENDPOINTS = frozenset(
 )
 
 
+# The figures of the dashboard (/api/summary): the screen whose view shows each one.
+DASHBOARD_KEYS = {
+    "glAccounts": "gl.accounts",
+    "costCenters": "gl.accounts",
+    "suppliers": "ap.suppliers",
+    "activeSuppliers": "ap.suppliers",
+    "invoices": "ap.invoices",
+    "openInvoices": "ap.invoices",
+    "openInvoicesAmount": "ap.invoices",
+    "recentInvoices": "ap.invoices",
+    "purchaseOrders": "pur.po",
+    "unbilledPOs": "pur.po",
+    "receptions": "pur.receptions",
+    "unbilledReceptions": "pur.receptions",
+    "products": "inv.valuation",
+    "warehouses": "inv.valuation",
+    "stockValue": "inv.valuation",
+    "reorderItems": "inv.valuation",
+}
+
+
+def dashboard_for(summary: Mapping[str, object], can: Callable[[str], bool]) -> dict[str, object]:
+    """The figures of the dashboard the user may see (a figure no screen claims is left out)."""
+    return {k: v for k, v in summary.items() if k in DASHBOARD_KEYS and can(DASHBOARD_KEYS[k] + ":view")}
+
+
 def all_permissions() -> list[str]:
     """Every permission a role can be given, in menu order."""
     return [f"{s.key}:{a}" for s in SCREENS for a in s.actions]
