@@ -6,6 +6,7 @@ import { accountView } from "./screens/account.js";
 import { backupView } from "./screens/backups.js";
 import { dashboardView } from "./screens/dashboard.js";
 import { formView } from "./screens/form.js";
+import { helpView } from "./screens/help.js";
 import { listView } from "./screens/list.js";
 import { replenishmentView } from "./screens/replenishment.js";
 import { roleFormView, rolesListView } from "./screens/roles.js";
@@ -46,6 +47,7 @@ export function resolve(path) {
   const parts = path.split("/").filter(Boolean).map(decodeURIComponent);
   if (!parts.length) return dashboardView();
   if (parts[0] === "account") return accountView();
+  if (parts[0] === "help") return helpView(parts[1] || "");
   if (parts.join("/") === "admin/backups") return isAdmin() ? backupView() : dashboardView();
   if (parts.join("/") === "admin/settings") return isAdmin() ? settingsView() : dashboardView();
   if (parts.join("/") === "inv/replenishment") return can("inv.replenishment") ? replenishmentView() : dashboardView();

@@ -188,6 +188,10 @@ OPEN_ENDPOINTS = frozenset(
         "system.lookup",  # code + description lists of the form fields
         "system.summary",  # dashboard
         "sales.company_profile",  # header of the documents
+        "help.help_toc",  # the help: each route answers with the items the role may see
+        "help.help_page",
+        "help.help_item",
+        "help.help_search",
         "static",
     }
 )

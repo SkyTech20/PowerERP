@@ -9,6 +9,7 @@ import { TABSETS } from "./views.js";
 // Items given as plain strings are visible but disabled.
 export const MENU = [
   { k: "dashboard", icon: "🏠", route: "/" },
+  { k: "help", icon: "❓", route: "/help" },
   { sep: true },
   { k: "gl", icon: "📒", items: [{ k: "gl.accounts", route: "/gl" }, "gl.journal", "gl.periods", "gl.statements", "gl.budgets", "gl.bankrec"] },
   { k: "ap", icon: "💳", items: [{ k: "ap.suppliers", route: "/suppliers" }, { k: "ap.invoices", route: "/invoices" }, "ap.payments", "ap.chequeRun", "ap.recurring", "ap.aging"] },
