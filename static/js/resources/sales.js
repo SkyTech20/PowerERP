@@ -1,6 +1,6 @@
 /* PowerERP: Sales: list / form definitions. V1: the customers (ship-to addresses and contacts); V2: the price lists,
-   and the price check of a customer. */
-import { $, api, enc, esc, lang, num, t, yesNo } from "../core.js";
+   and the price check of a customer; V3: the invoices (drafts, calculated by the server as they are typed). */
+import { $, api, enc, esc, lang, money, num, t, yesNo } from "../core.js";
 import { lookupOptions, lookupRows } from "../lookups.js";
 import { RES } from "../registry.js";
 import { dl, opts, today } from "./inventory.js";
@@ -162,5 +162,86 @@ Object.assign(RES, {
       html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("sales.pl.customers"))}</h2><span class="help muted">${esc(t("sales.pl.customers.help"))}</span></div>
         <div class="card-body">${(m.customers || []).length ? (m.customers || []).map((c) => `<a class="badge" href="#/sales/customers/${enc(c)}">${esc(c)}</a>`).join(" ") : `<p class="help">${esc(t("sales.pl.noCustomers"))}</p>`}</div></div>`,
     },
+  },
+});
+
+// ------------------------------------------------------------------ V3: invoices
+export const INVOICE_STATUS = ["draft", "posted"];
+const statusBadge = (v) => (v ? `<span class="badge ${v === "posted" ? "yes" : ""}">${esc(t("sales.inv.status." + v))}</span>` : "");
+
+// What the server recalculates after a change: a new customer takes its own defaults; a new product, quantity or
+// unit takes the customer's price and discount again (a price or discount typed by hand is kept otherwise).
+export function prepareRecalc(m, field, line) {
+  if (field === "cCustomer") Object.assign(m, { cShipTo: "", cWarehouse: "", cLang: "", cTermCode: "", cTermDesc: "" });
+  if (line && ["cProduct", "dQty", "cUOM"].includes(field)) {
+    line.dPrice = "";
+    line.dDiscountPct = "";
+    if (field === "cProduct") { line.cDescription = ""; line.cUOM = ""; }
+  }
+  return m;
+}
+
+const invoiceTotals = {
+  onNew: true,
+  html: (m) => {
+    const taxes = (m.taxes || []).map((x) => `<tr><td>${esc(x.cTaxCode)} ${esc(x.dRate)} %${x.cTaxGroup !== m.cTaxGroup ? ` (${esc(x.cTaxGroup)})` : ""}</td><td class="num">${esc(money(x.dTax))}</td></tr>`).join("");
+    return `<div class="card"><div class="card-head"><h2>${esc(t("sales.inv.totals"))}</h2><span class="help muted">${esc(t("sales.inv.totals.help"))}</span></div>
+      <div class="card-body"><div class="totals"><table>
+        <tr><td>${esc(t("sales.inv.discountTotal"))}</td><td class="num">${esc(money(m.dDiscountTotal || 0))}</td></tr>
+        <tr><td>${esc(t("sales.inv.subTotal"))}</td><td class="num">${esc(money(m.dSubTotal || 0))}</td></tr>
+        ${taxes || `<tr><td>${esc(t("sales.inv.noTax"))}</td><td class="num">${esc(money(0))}</td></tr>`}
+        <tr class="grand"><td>${esc(t("sales.inv.total"))}</td><td class="num">${esc(money(m.dTotal || 0))}</td></tr>
+      </table></div></div></div>`;
+  },
+};
+
+Object.assign(RES, {
+  salesinvoices: {
+    api: "sales-invoices", route: "/sales/invoices", title: "sales.inv.title", sub: "sales.inv.subtitle",
+    one: "sales.inv.one", newTitle: "sales.inv.new", id: (r) => r.iNo,
+    label: (r) => `${r.cInvoiceNo || "#" + r.iNo} — ${r.cCustomerName || r.cCustomer}`, sort: "iNo", dir: "desc",
+    columns: [
+      { f: "iNo", l: "sales.inv.iNo", n: true }, { f: "cInvoiceNo", l: "sales.inv.cInvoiceNo" }, { f: "dDate", l: "sales.inv.dDate" },
+      { f: "cCustomer", l: "sales.inv.cCustomer" }, { f: "cCustomerName", l: "f.cName", wrap: true },
+      { f: "cCustomerPO", l: "sales.inv.cCustomerPO" }, { f: "iLines", l: "common.lineCount", n: true },
+      { f: "dTotal", l: "sales.inv.total", num: true, fmt: (v) => esc(money(v)) }, { f: "cStatus", l: "sales.inv.cStatus", fmt: statusBadge },
+    ],
+    filters: [
+      { f: "cStatus", l: "sales.inv.cStatus", options: INVOICE_STATUS.map((s) => [s, "sales.inv.status." + s]) },
+      { f: "cCustomer", l: "sales.inv.cCustomer", lookup: "customers" },
+    ],
+    defaults: () => ({ cStatus: "draft", dDate: today(), lines: [], taxes: [] }),
+    locked: (m) => m.cStatus === "posted",
+    badge: (m, isNew) => (isNew ? "" : statusBadge(m.cStatus)),
+    recalc: (m, { path, field, line }) => (m.cCustomer ? api((path || "sales-invoices") + "/calc", { method: "POST", body: prepareRecalc(m, field, line) }) : Promise.resolve(null)),
+    sections: [
+      { t: "common.general", help: "sales.inv.help", fields: [
+        { f: "cCustomer", l: "sales.inv.cCustomer", req: true, lookup: "customers", recalc: true, span: 2 },
+        { f: "dDate", l: "sales.inv.dDate", type: "date", recalc: true },
+        { f: "cCustomerPO", l: "sales.inv.cCustomerPO" },
+        { f: "cShipTo", l: "sales.inv.cShipTo", lookup: "customer_addresses", lookupParams: (m) => ({ customer: m.cCustomer }), recalc: true, help: "sales.inv.cShipTo.help" },
+        { f: "cTaxGroup", l: "sales.f.cTaxGroup", readonly: true, help: "sales.inv.cTaxGroup.help" },
+        { f: "cWarehouse", l: "sales.f.cWarehouse", lookup: "warehouses" },
+        { f: "cLang", l: "sales.f.cLang", type: "select", options: [["", "sales.inv.langCustomer"], ...opts("sales.o.lang.", LANGS)], recalc: true },
+        { f: "cTermCode", l: "f.cTermCode", lookup: "customer_terms", free: true, fill: "cTermDesc" }, { f: "cTermDesc", l: "f.cTermDesc" },
+        { f: "cNotes", l: "sales.f.cNotes", type: "textarea", span: 2 },
+      ] },
+    ],
+    lines: {
+      title: "common.lines", help: "sales.inv.lines.help",
+      cols: [
+        { f: "cProduct", l: "sales.f.cProduct", w: "w-lg", lookup: "sellable_products", recalc: true },
+        { f: "cDescription", l: "f.cDescription", w: "w-lg" },
+        { f: "dQty", l: "sales.check.qty", w: "w-sm", n: true, recalc: true },
+        { f: "cUOM", l: "sales.f.cUOM", w: "w-sm", lookup: "uom", recalc: true },
+        { f: "dPrice", l: "sales.f.dPrice", w: "w-sm", n: true, recalc: true },
+        { f: "dDiscountPct", l: "sales.f.dLineDiscountPct", w: "w-xs", n: true, recalc: true },
+        { f: "dNetPrice", l: "sales.check.net", w: "w-sm", n: true, ro: true },
+        { f: "dAmount", l: "sales.inv.dAmount", w: "w-sm", n: true, ro: true },
+        { f: "cTaxGroup", l: "sales.inv.lineTax", w: "w-sm", ro: true },
+      ],
+      newLine: () => ({ cProduct: "", cDescription: "", dQty: "1", cUOM: "", dPrice: "", dDiscountPct: "", dNetPrice: "", dAmount: "", cTaxGroup: "" }),
+    },
+    panel: invoiceTotals,
   },
 });

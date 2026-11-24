@@ -10,7 +10,7 @@ A small PowerERP-like ERP for demos and tests.
   - **Receptions** (with lines; picking a PO pre-fills the supplier and the lines)
   - **Inventory** (see [Products, taxes and inventory](#products-taxes-and-inventory))
   - **Administration → Taxes** (tax codes and tax groups)
-  - **Sales → Customers** (see [Sales](#sales))
+  - **Sales → Customers, Price lists, Invoices** (see [Sales](#sales))
 - Each working module has a maintenance screen: list, search, sort, filter, create, edit, delete.
 - **English / French** toggle in the top bar (remembered in the browser and per user).
 - **Login and users:** every screen needs a login. **Administration → Users** (administrators only) creates, edits, deactivates and deletes users (username, name, email, role *Administrator* / *User*, language, password). Each user changes their own password by clicking their name in the top bar.
@@ -126,6 +126,11 @@ B2B sales, Quebec first (GST 5 % + QST 9.975 %), in CAD, built step by step, one
   2. discount: the line's; else the category's (or a parent category's) in the price list; else the customer's discount %;
   3. net price = price × (1 − discount); below the product's minimum price it is flagged (the invoice will refuse it).
   A price list used by a customer, a product in a price list and a category with a discount cannot be deleted.
+- **V3 (done): Sales → Invoices** (`/api/sales-invoices/<no>`, drafts numbered 1, 2, 3...; the definitive invoice number comes with the posting in V4). Pick the customer: its default ship-to address, warehouse, language and payment terms are proposed. Then the lines, product and quantity: the screen asks the server to calculate the draft as you type (`POST /api/sales-invoices/calc`, nothing saved):
+  1. each line takes the customer's price and discount (V2); a price or discount typed by hand is kept (source *manual*); net price = price × (1 − discount), refused below the product's minimum price; amount = quantity × net price, to the cent; the description is in the invoice language;
+  2. the taxes follow the place of delivery: the tax group of the ship-to address, else the customer's (EXO: none); a zero-rated or exempt product (bread, PAIN-BL-675) keeps its own group on its line;
+  3. the taxes are calculated on the total of the lines of each tax group, at the invoice date (e.g. QC: GST 5 % + QST 9.975 %; ON: HST 13 %), then subtotal, discounts given, taxes and total.
+  The stock does not move with a draft. A customer or product used by an invoice cannot be deleted.
 - **Administration → System settings → Company profile** (`GET /api/company`, `PUT /api/admin/company` for administrators): the name, legal name, address, phone, e-mail, website, NEQ and the FR / EN note printed on the invoices. The GST / HST and QST numbers are not typed twice: they are the registration numbers of the active tax codes, returned with the profile.
 - Demo: 5 customers (Montréal, Québec, Gatineau with a ship-to in Ottawa, an exempt daycare, an Ontario distributor invoiced in English) and 3 price lists (HORECA, DIST valid 2026-2027, EPICERIE-QC for one customer); the pastry shop has its own profile, 4 customers and 2 price lists (cafés, caterers) (`data/sales.json`, `data/pastry/sales.json`).
 
@@ -310,6 +315,7 @@ All endpoints return JSON. Lists accept `q` (search), `page`, `size`, `sort`, `d
 | Physical counts | `GET/POST /api/stock-counts`, `GET/PUT/DELETE /api/stock-counts/<no>`, `POST .../<no>/generate`, `POST .../<no>/post` |
 | Customers | `GET/POST /api/customers`, `GET/PUT/DELETE /api/customers/<code>` |
 | Price lists / pricing | `GET/POST /api/price-lists`, `GET/PUT/DELETE /api/price-lists/<code>`; `GET /api/pricing?customer=&product=&qty=&uom=&date=` |
+| Sales invoices | `GET/POST /api/sales-invoices`, `GET/PUT/DELETE /api/sales-invoices/<no>`; `POST /api/sales-invoices/calc` and `/<no>/calc` (calculated, not saved) |
 | Company profile | `GET /api/company`, `PUT /api/admin/company` (administrators) |
 | Other | `GET /api/health`, `GET /api/summary`, `GET /api/lookups/<suppliers\|gl\|cc\|po\|terms\|buyers\|taxcodes\|taxgroups\|uom\|categories\|products\|stockproducts\|warehouses\|locations\|customers\|customer_terms\|price_lists\|sellable_products>?q=`, `POST /api/reset`, `POST /api/clear` |
 

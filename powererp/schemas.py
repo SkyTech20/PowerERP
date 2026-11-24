@@ -551,6 +551,45 @@ PRICE_LIST_LINE = {  # the price of a product from a quantity (quantity breaks: 
     "dDiscountPct": "d",  # replaces the category / customer discount for this product
 }
 PRICE_LIST_DISCOUNT = {"cCategory": "s", "dDiscountPct": "d"}  # also on the subcategories
+# ---------------------------------------------------------------- sales (V3): invoices
+INVOICE_STATUS = ("draft", "posted")
+SALES_INVOICE = {  # what the screen sends; the rest is calculated (SALES_INVOICE_EXTRA)
+    "cCustomer": "s",
+    "cShipTo": "s",  # code of a ship-to address of the customer (empty = its default one)
+    "dDate": "date",
+    "cWarehouse": "s",  # where the goods leave from (empty = the customer's)
+    "cCustomerPO": "s",  # the customer's purchase order number
+    "cLang": "s",  # fr / en (empty = the customer's)
+    "cTermCode": "s",
+    "cTermDesc": "s",
+    "cNotes": "s",
+}
+SALES_INVOICE_EXTRA = {
+    "iNo": "i",  # internal number (the drafts); the invoice number is given when it is posted (V4)
+    "cStatus": INVOICE_STATUS,
+    "cInvoiceNo": "s",
+    "cCustomerName": "s",
+    "cTaxGroup": "s",  # of the place of delivery: the ship-to address's, else the customer's
+    "dSubTotal": "d",  # the lines after their discounts
+    "dDiscountTotal": "d",
+    "dTaxTotal": "d",
+    "dTotal": "d",
+    "cUser": "s",
+    "dCreated": "ts",
+}
+SALES_INVOICE_LINE = {
+    "cProduct": "s",
+    "cDescription": "s",
+    "dQty": "d",
+    "cUOM": "s",  # empty = the sales unit of the product
+    "dPrice": "d",  # empty = the customer's price (V2)
+    "dDiscountPct": "d",  # empty = the customer's discount (V2)
+    "dNetPrice": "d",  # calculated from here on
+    "dAmount": "d",
+    "cTaxGroup": "s",
+    "cPriceSource": "s",  # price_list / product / manual
+}
+SALES_INVOICE_TAX = {"cTaxGroup": "s", "cTaxCode": "s", "cKind": "s", "dRate": "d", "dBase": "d", "dTax": "d"}
 
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
