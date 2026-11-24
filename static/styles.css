@@ -311,3 +311,7 @@ table.grid.lines tr.diff td { background: #fff8e6; }
 }
 .dl-row .link-btn { visibility: hidden; }
 .dl-row:hover .link-btn, .dl-row.active .link-btn, .dl-row .link-btn:focus-visible { visibility: visible; }
+.alert { border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; border: 1px solid; }
+.alert ul { margin: 6px 0 0 18px; padding: 0; }
+.alert.error { background: #fdf0ee; border-color: #efc6c1; color: var(--danger); }
+.alert.success { background: #e7f6ee; border-color: #b9e2ca; color: var(--success); }

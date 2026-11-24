@@ -195,6 +195,35 @@ const invoiceTotals = {
   },
 };
 
+// The stock taken by each line: what a check would take (m._check), or what went out (a posted invoice)
+const invoiceStock = {
+  html: (m) => {
+    const check = m._check;
+    const rows = check ? check.allocations : m.allocations || [];
+    if (!check && m.cStatus !== "posted") return "";
+    const problems = check && check.problems.length
+      ? `<div class="alert error"><b>${esc(t("sales.post.problems"))}</b><ul>${check.problems.map((p) =>
+        `<li>${esc(t("err." + p.code))}${p.detail ? " — " + esc(p.detail) : p.field && p.field !== "lines" ? " — " + esc(p.field) : ""}</li>`).join("")}</ul></div>`
+      : check ? `<div class="alert success">${esc(t("sales.post.ready"))}</div>` : "";
+    const body = rows.length
+      ? `<div class="table-wrap"><table class="grid"><thead><tr><th>${esc(t("sales.post.line"))}</th><th>${esc(t("sales.f.cProduct"))}</th>
+        <th>${esc(t("f.mv.cLocation"))}</th><th>${esc(t("f.mv.cLot"))}</th><th>${esc(t("f.mv.cSerial"))}</th><th>${esc(t("f.mv.dExpiry"))}</th>
+        <th class="num">${esc(t("sales.check.qty"))}</th><th>${esc(t("sales.f.cUOM"))}</th>${check ? "" : `<th class="num">${esc(t("sales.post.cost"))}</th>`}</tr></thead>
+        <tbody>${rows.map((a) => `<tr><td>${esc(a.iLine)}</td><td>${esc(a.cProduct)}</td><td>${esc(a.cLocation)}</td><td>${esc(a.cLot)}</td>
+        <td>${esc(a.cSerial)}</td><td>${esc(a.dExpiry || "")}</td><td class="num">${esc(a.dQty)}</td><td>${esc(a.cUOM)}</td>
+        ${check ? "" : `<td class="num">${esc(money(a.dValue || 0))}</td>`}</tr>`).join("")}</tbody></table></div>`
+      : `<p class="help">${esc(t("sales.post.none"))}</p>`;
+    return `<div class="card"><div class="card-head"><h2>${esc(t(check ? "sales.post.plan" : "sales.post.taken"))}</h2>
+      <span class="help muted">${esc(t("sales.post.help"))}</span></div><div class="card-body">${problems}${body}</div></div>`;
+  },
+};
+
+const saveThen = async (m, ctx, step) => {
+  const saved = await api(ctx.path, { method: "PUT", body: m });
+  const res = await api(ctx.path + "/" + step, { method: "POST" });
+  return step === "check" ? { ...saved, _check: res } : res;
+};
+
 Object.assign(RES, {
   salesinvoices: {
     api: "sales-invoices", route: "/sales/invoices", title: "sales.inv.title", sub: "sales.inv.subtitle",
@@ -225,7 +254,16 @@ Object.assign(RES, {
         { f: "cLang", l: "sales.f.cLang", type: "select", options: [["", "sales.inv.langCustomer"], ...opts("sales.o.lang.", LANGS)], recalc: true },
         { f: "cTermCode", l: "f.cTermCode", lookup: "customer_terms", free: true, fill: "cTermDesc" }, { f: "cTermDesc", l: "f.cTermDesc" },
         { f: "cNotes", l: "sales.f.cNotes", type: "textarea", span: 2 },
+        { f: "dPosted", l: "sales.inv.dPosted", readonly: true, show: (m) => m.cStatus === "posted" },
+        { f: "cPostedBy", l: "sales.inv.cPostedBy", readonly: true, show: (m) => m.cStatus === "posted" },
+        { f: "dCost", l: "sales.inv.dCost", readonly: true, show: (m) => m.cStatus === "posted" },
       ] },
+    ],
+    actions: [
+      { id: "check", l: "sales.post.check", show: (m, isNew) => !isNew && m.cStatus === "draft",
+        run: (m, ctx) => saveThen(m, ctx, "check") },
+      { id: "post", l: "sales.post.post", show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "sales.post.confirm", done: "sales.post.done",
+        run: (m, ctx) => saveThen(m, ctx, "post") },
     ],
     lines: {
       title: "common.lines", help: "sales.inv.lines.help",
@@ -243,5 +281,6 @@ Object.assign(RES, {
       newLine: () => ({ cProduct: "", cDescription: "", dQty: "1", cUOM: "", dPrice: "", dDiscountPct: "", dNetPrice: "", dAmount: "", cTaxGroup: "" }),
     },
     panel: invoiceTotals,
+    panels: [invoiceStock],
   },
 });

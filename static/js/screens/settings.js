@@ -7,7 +7,7 @@ export const COMPANY_FIELDS = [
   ["cName", "sys.company.cName", 2], ["cLegalName", "sys.company.cLegalName", 2],
   ["cAddress1", "f.cAddress1", 2], ["cAddress2", "f.cAddress2", 2],
   ["cCity", "f.cCity", 1], ["cProvince", "f.cProvince", 1], ["cZipCode", "f.cZipCode", 1], ["cCountry", "f.cCountry", 1],
-  ["cPhone", "sys.company.cPhone", 1], ["cEmail", "sys.company.cEmail", 1], ["cWebsite", "sys.company.cWebsite", 1], ["cNEQ", "sys.company.cNEQ", 1],
+  ["cPhone", "sys.company.cPhone", 1], ["cEmail", "sys.company.cEmail", 1], ["cWebsite", "sys.company.cWebsite", 1], ["cNEQ", "sys.company.cNEQ", 1], ["iInvoiceStart", "sys.company.iInvoiceStart", 1],
   ["cInvoiceNoteFR", "sys.company.cInvoiceNoteFR", 2], ["cInvoiceNoteEN", "sys.company.cInvoiceNoteEN", 2],
 ];
 
