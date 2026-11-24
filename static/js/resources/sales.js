@@ -167,6 +167,8 @@ Object.assign(RES, {
 
 // ------------------------------------------------------------------ V3: invoices
 export const INVOICE_STATUS = ["draft", "posted"];
+const isCredit = (m) => m.cType === "credit";
+const typeBadge = (v) => (v === "credit" ? `<span class="badge no">${esc(t("sales.inv.type.credit"))}</span>` : esc(t("sales.inv.type.invoice")));
 const statusBadge = (v) => (v ? `<span class="badge ${v === "posted" ? "yes" : ""}">${esc(t("sales.inv.status." + v))}</span>` : "");
 
 // What the server recalculates after a change: a new customer takes its own defaults; a new product, quantity or
@@ -213,8 +215,9 @@ const invoiceStock = {
         <td>${esc(a.cSerial)}</td><td>${esc(a.dExpiry || "")}</td><td class="num">${esc(a.dQty)}</td><td>${esc(a.cUOM)}</td>
         ${check ? "" : `<td class="num">${esc(money(a.dValue || 0))}</td>`}</tr>`).join("")}</tbody></table></div>`
       : `<p class="help">${esc(t("sales.post.none"))}</p>`;
-    return `<div class="card"><div class="card-head"><h2>${esc(t(check ? "sales.post.plan" : "sales.post.taken"))}</h2>
-      <span class="help muted">${esc(t("sales.post.help"))}</span></div><div class="card-body">${problems}${body}</div></div>`;
+    const back = m.cType === "credit" ? "Back" : "";
+    return `<div class="card"><div class="card-head"><h2>${esc(t((check ? "sales.post.plan" : "sales.post.taken") + back))}</h2>
+      <span class="help muted">${esc(t("sales.post.help" + back))}</span></div><div class="card-body">${problems}${body}</div></div>`;
   },
 };
 
@@ -229,30 +232,35 @@ Object.assign(RES, {
     api: "sales-invoices", route: "/sales/invoices", title: "sales.inv.title", sub: "sales.inv.subtitle",
     one: "sales.inv.one", newTitle: "sales.inv.new", id: (r) => r.iNo,
     label: (r) => `${r.cInvoiceNo || "#" + r.iNo} — ${r.cCustomerName || r.cCustomer}`, sort: "iNo", dir: "desc",
+    oneOf: (m) => (isCredit(m) ? "sales.cn.one" : "sales.inv.one"),
     columns: [
-      { f: "iNo", l: "sales.inv.iNo", n: true }, { f: "cInvoiceNo", l: "sales.inv.cInvoiceNo" }, { f: "dDate", l: "sales.inv.dDate" },
+      { f: "iNo", l: "sales.inv.iNo", n: true }, { f: "cType", l: "sales.inv.cType", fmt: typeBadge },
+      { f: "cInvoiceNo", l: "sales.inv.cInvoiceNo" }, { f: "cOrigInvoice", l: "sales.cn.cOrigInvoice" }, { f: "dDate", l: "sales.inv.dDate" },
       { f: "cCustomer", l: "sales.inv.cCustomer" }, { f: "cCustomerName", l: "f.cName", wrap: true },
       { f: "cCustomerPO", l: "sales.inv.cCustomerPO" }, { f: "iLines", l: "common.lineCount", n: true },
       { f: "dTotal", l: "sales.inv.total", num: true, fmt: (v) => esc(money(v)) }, { f: "cStatus", l: "sales.inv.cStatus", fmt: statusBadge },
     ],
     filters: [
       { f: "cStatus", l: "sales.inv.cStatus", options: INVOICE_STATUS.map((s) => [s, "sales.inv.status." + s]) },
+      { f: "cType", l: "sales.inv.cType", options: [["invoice", "sales.inv.type.invoice"], ["credit", "sales.inv.type.credit"]] },
       { f: "cCustomer", l: "sales.inv.cCustomer", lookup: "customers" },
     ],
-    defaults: () => ({ cStatus: "draft", dDate: today(), lines: [], taxes: [] }),
+    defaults: () => ({ cType: "invoice", cStatus: "draft", dDate: today(), lines: [], taxes: [] }),
     locked: (m) => m.cStatus === "posted",
-    badge: (m, isNew) => (isNew ? "" : statusBadge(m.cStatus)),
+    badge: (m, isNew) => (isNew ? "" : (isCredit(m) ? typeBadge(m.cType) + " " : "") + statusBadge(m.cStatus)),
     recalc: (m, { path, field, line }) => (m.cCustomer ? api((path || "sales-invoices") + "/calc", { method: "POST", body: prepareRecalc(m, field, line) }) : Promise.resolve(null)),
     sections: [
       { t: "common.general", help: "sales.inv.help", fields: [
-        { f: "cCustomer", l: "sales.inv.cCustomer", req: true, lookup: "customers", recalc: true, span: 2 },
+        { f: "cOrigInvoice", l: "sales.cn.cOrigInvoice", readonly: true, show: isCredit, help: "sales.cn.cOrigInvoice.help" },
+        { f: "cCustomer", l: "sales.inv.cCustomer", req: true, lookup: "customers", recalc: true, span: 2, readonly: isCredit },
         { f: "dDate", l: "sales.inv.dDate", type: "date", recalc: true },
         { f: "cCustomerPO", l: "sales.inv.cCustomerPO" },
-        { f: "cShipTo", l: "sales.inv.cShipTo", lookup: "customer_addresses", lookupParams: (m) => ({ customer: m.cCustomer }), recalc: true, help: "sales.inv.cShipTo.help" },
+        { f: "cShipTo", l: "sales.inv.cShipTo", lookup: "customer_addresses", lookupParams: (m) => ({ customer: m.cCustomer }), recalc: true, help: "sales.inv.cShipTo.help", readonly: isCredit },
         { f: "cTaxGroup", l: "sales.f.cTaxGroup", readonly: true, help: "sales.inv.cTaxGroup.help" },
-        { f: "cWarehouse", l: "sales.f.cWarehouse", lookup: "warehouses" },
+        { f: "cWarehouse", l: "sales.f.cWarehouse", lookup: "warehouses", readonly: isCredit },
         { f: "cLang", l: "sales.f.cLang", type: "select", options: [["", "sales.inv.langCustomer"], ...opts("sales.o.lang.", LANGS)], recalc: true },
-        { f: "cTermCode", l: "f.cTermCode", lookup: "customer_terms", free: true, fill: "cTermDesc" }, { f: "cTermDesc", l: "f.cTermDesc" },
+        { f: "cTermCode", l: "f.cTermCode", lookup: "customer_terms", free: true, fill: "cTermDesc", show: (m) => !isCredit(m) },
+        { f: "cTermDesc", l: "f.cTermDesc", show: (m) => !isCredit(m) },
         { f: "cNotes", l: "sales.f.cNotes", type: "textarea", span: 2 },
         { f: "dPosted", l: "sales.inv.dPosted", readonly: true, show: (m) => m.cStatus === "posted" },
         { f: "cPostedBy", l: "sales.inv.cPostedBy", readonly: true, show: (m) => m.cStatus === "posted" },
@@ -266,6 +274,12 @@ Object.assign(RES, {
           window.open(`api/${ctx.path}/print`, "_blank");
           return null;
         } },
+      { id: "credit", l: "sales.cn.make", show: (m, isNew) => !isNew && m.cStatus === "posted" && !isCredit(m), confirm: "sales.cn.makeConfirm",
+        run: async (m, ctx) => {
+          const cn = await api(ctx.path + "/credit", { method: "POST" });
+          location.hash = `#/sales/invoices/${cn.iNo}`;
+          return null;
+        } },
       { id: "check", l: "sales.post.check", show: (m, isNew) => !isNew && m.cStatus === "draft",
         run: (m, ctx) => saveThen(m, ctx, "check") },
       { id: "post", l: "sales.post.post", show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "sales.post.confirm", done: "sales.post.done",
@@ -273,6 +287,7 @@ Object.assign(RES, {
     ],
     lines: {
       title: "common.lines", help: "sales.inv.lines.help",
+      helpOf: (m) => (isCredit(m) ? "sales.cn.lines.help" : "sales.inv.lines.help"),
       cols: [
         { f: "cProduct", l: "sales.f.cProduct", w: "w-lg", lookup: "sellable_products", recalc: true },
         { f: "cDescription", l: "f.cDescription", w: "w-lg" },
@@ -283,6 +298,7 @@ Object.assign(RES, {
         { f: "dNetPrice", l: "sales.check.net", w: "w-sm", n: true, ro: true },
         { f: "dAmount", l: "sales.inv.dAmount", w: "w-sm", n: true, ro: true },
         { f: "cTaxGroup", l: "sales.inv.lineTax", w: "w-sm", ro: true },
+        { f: "lReturn", l: "sales.cn.lReturn", w: "w-xs", type: "check", show: isCredit },
       ],
       newLine: () => ({ cProduct: "", cDescription: "", dQty: "1", cUOM: "", dPrice: "", dDiscountPct: "", dNetPrice: "", dAmount: "", cTaxGroup: "" }),
     },

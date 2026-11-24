@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ t.invoice }} {{ number }} — {{ customerName }}</title>
+<title>{{ title }} {{ number }} — {{ customerName }}</title>
 <style>
   @page { size: letter; margin: 14mm 12mm; }
   * { box-sizing: border-box; }
@@ -55,9 +55,10 @@
       </div>
     </div>
     <div class="title">
-      <h2>{{ t.invoice }}{% if not posted %} — {{ t.draft }}{% endif %}</h2>
+      <h2>{{ title }}{% if not posted %} — {{ t.draft }}{% endif %}</h2>
       <table>
-        <tr><td>{{ t.invoiceNo if posted else t.draftNo }}</td><td><b>{{ number }}</b></td></tr>
+        <tr><td>{{ (t.creditNo if credit else t.invoiceNo) if posted else t.draftNo }}</td><td><b>{{ number }}</b></td></tr>
+        {% if credit %}<tr><td>{{ t.credits }}</td><td><b>{{ inv.cOrigInvoice }}</b></td></tr>{% endif %}
         <tr><td>{{ t.date }}</td><td>{{ inv.dDate }}</td></tr>
         {% if inv.cTermDesc or inv.cTermCode %}<tr><td>{{ t.terms }}</td><td>{{ inv.cTermDesc or inv.cTermCode }}</td></tr>{% endif %}
         {% if due %}<tr><td>{{ t.due }}</td><td>{{ due }}</td></tr>{% endif %}

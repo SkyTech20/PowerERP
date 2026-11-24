@@ -84,7 +84,8 @@ def test_pastry_shop(admin):
         }
         assert {"BEEF-RAW", "CHICKEN-RAW", "EGG", "HAM", "CHEESE", "GROUND-BEEF", "BOILED-EGG"} <= uses
 
-        # the stock on hand is the raw material received and invoiced (the fryer is a fixed asset, not stocked)
+        # the stock on hand is the raw material received and invoiced (the fryer is a fixed asset, not stocked),
+        # plus the pastels made before the demo, for the sales invoices (tools/make_pastry_data.py MADE_BEFORE)
         invoiced = 0.0
         for inv in admin.get("/api/invoices?limit=1000").get_json()["items"]:
             assert inv["cStatut"] == "Posted"
@@ -92,7 +93,8 @@ def test_pastry_shop(admin):
                 if products[line["cCodeProduit"]]["lStocked"]:
                     invoiced += float(line["dQuantite"]) * float(line["dCoutUnitaire"])
         valuation = admin.get("/api/inventory/valuation?limit=1000").get_json()
-        assert invoiced > 0 and float(valuation["totalValue"]) == round(invoiced, 2)
+        made = 120 * 2.10 + 120 * 1.85 + 90 * 1.95
+        assert invoiced > 0 and float(valuation["totalValue"]) == round(invoiced + made, 2)
         assert _count(admin, "/api/purchase-orders") == 7  # the last meat order is still open
     finally:
         admin.post("/api/reset", json={"scenario": "manufacturing"})

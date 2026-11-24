@@ -556,7 +556,10 @@ PRICE_LIST_LINE = {  # the price of a product from a quantity (quantity breaks: 
 PRICE_LIST_DISCOUNT = {"cCategory": "s", "dDiscountPct": "d"}  # also on the subcategories
 # ---------------------------------------------------------------- sales (V3): invoices
 INVOICE_STATUS = ("draft", "posted")
+INVOICE_TYPES = ("invoice", "credit")  # V6: a credit note credits a posted invoice
 SALES_INVOICE = {  # what the screen sends; the rest is calculated (SALES_INVOICE_EXTRA)
+    "cType": INVOICE_TYPES,  # given when created, never changed
+    "cOrigInvoice": "s",  # a credit note: the number of the invoice it credits
     "cCustomer": "s",
     "cShipTo": "s",  # code of a ship-to address of the customer (empty = its default one)
     "dDate": "date",
@@ -594,6 +597,8 @@ SALES_INVOICE_LINE = {
     "dAmount": "d",
     "cTaxGroup": "s",
     "cPriceSource": "s",  # price_list / product / manual
+    "iOrigLine": "i",  # a credit note: the line of the invoice it credits (0 = the first one of the product)
+    "lReturn": "b",  # a credit note: the goods come back to the stock (else: a price adjustment)
 }
 SALES_INVOICE_TAX = {"cTaxGroup": "s", "cTaxCode": "s", "cKind": "s", "dRate": "d", "dBase": "d", "dTax": "d"}
 SALES_INVOICE_ALLOC = {  # V4: what went out of the stock for each line (lots first expiring first), in stock units

@@ -1,5 +1,5 @@
 {
- "_about": "Pastry shop scenario: the company profile, the cafés and caterers buying the pastels, and their price lists (fictitious).",
+ "_about": "Pastry shop scenario: the company profile, the cafés and caterers buying the pastels, their price lists and 3 draft invoices (fictitious).",
  "company_profile": [
   {
    "cCode": "MAIN",
@@ -296,6 +296,214 @@
      "cPhone": "613 555-0344",
      "cEmail": "orders@ottawadeli.example",
      "lInvoices": true
+    }
+   ]
+  }
+ ],
+ "sales_invoices": [
+  {
+   "allocations": [],
+   "cCustomer": "CAFE-BRASIL",
+   "cCustomerName": "Café Brasil Montréal",
+   "cCustomerPO": "",
+   "cInvoiceNo": "",
+   "cLang": "fr",
+   "cNotes": "",
+   "cOrigInvoice": "",
+   "cPostedBy": "",
+   "cShipTo": "CAFE",
+   "cStatus": "draft",
+   "cTaxGroup": "QC",
+   "cTermCode": "n15",
+   "cTermDesc": "net 15 jours",
+   "cType": "invoice",
+   "cUser": "demo",
+   "cWarehouse": "KITCHEN",
+   "dCost": "0.00",
+   "dCreated": "2026-11-19T09:00:00",
+   "dDate": "2026-11-19",
+   "dDiscountTotal": "0.00",
+   "dPosted": "",
+   "dSubTotal": "252.00",
+   "dTaxTotal": "37.74",
+   "dTotal": "289.74",
+   "iNo": 1,
+   "lines": [
+    {
+     "cDescription": "Pastel bœuf et œuf",
+     "cPriceSource": "price_list",
+     "cProduct": "PASTEL-BEEF",
+     "cTaxGroup": "QC",
+     "cUOM": "UN",
+     "dAmount": "132.00",
+     "dDiscountPct": "0",
+     "dNetPrice": "5.50",
+     "dPrice": "5.50",
+     "dQty": "24",
+     "iOrigLine": 0,
+     "lReturn": false
+    },
+    {
+     "cDescription": "Pastel au poulet",
+     "cPriceSource": "price_list",
+     "cProduct": "PASTEL-CHICKEN",
+     "cTaxGroup": "QC",
+     "cUOM": "UN",
+     "dAmount": "120.00",
+     "dDiscountPct": "0",
+     "dNetPrice": "5.00",
+     "dPrice": "5.00",
+     "dQty": "24",
+     "iOrigLine": 0,
+     "lReturn": false
+    }
+   ],
+   "taxes": [
+    {
+     "cKind": "gst",
+     "cTaxCode": "TPS",
+     "cTaxGroup": "QC",
+     "dBase": "252.00",
+     "dRate": "5",
+     "dTax": "12.60"
+    },
+    {
+     "cKind": "pst",
+     "cTaxCode": "TVQ",
+     "cTaxGroup": "QC",
+     "dBase": "252.00",
+     "dRate": "9.975",
+     "dTax": "25.14"
+    }
+   ]
+  },
+  {
+   "allocations": [],
+   "cCustomer": "TRAITEUR-ROYAL",
+   "cCustomerName": "Traiteur Royal",
+   "cCustomerPO": "TR-118",
+   "cInvoiceNo": "",
+   "cLang": "fr",
+   "cNotes": "",
+   "cOrigInvoice": "",
+   "cPostedBy": "",
+   "cShipTo": "CUISINE",
+   "cStatus": "draft",
+   "cTaxGroup": "QC",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cType": "invoice",
+   "cUser": "demo",
+   "cWarehouse": "KITCHEN",
+   "dCost": "0.00",
+   "dCreated": "2026-11-20T09:00:00",
+   "dDate": "2026-11-20",
+   "dDiscountTotal": "30.00",
+   "dPosted": "",
+   "dSubTotal": "570.00",
+   "dTaxTotal": "85.36",
+   "dTotal": "655.36",
+   "iNo": 2,
+   "lines": [
+    {
+     "cDescription": "Pastel jambon et fromage",
+     "cPriceSource": "price_list",
+     "cProduct": "PASTEL-HAM-CHEESE",
+     "cTaxGroup": "QC",
+     "cUOM": "UN",
+     "dAmount": "270.75",
+     "dDiscountPct": "5",
+     "dNetPrice": "4.5125",
+     "dPrice": "4.75",
+     "dQty": "60",
+     "iOrigLine": 0,
+     "lReturn": false
+    },
+    {
+     "cDescription": "Pastel bœuf et œuf",
+     "cPriceSource": "price_list",
+     "cProduct": "PASTEL-BEEF",
+     "cTaxGroup": "QC",
+     "cUOM": "UN",
+     "dAmount": "299.25",
+     "dDiscountPct": "5",
+     "dNetPrice": "4.9875",
+     "dPrice": "5.25",
+     "dQty": "60",
+     "iOrigLine": 0,
+     "lReturn": false
+    }
+   ],
+   "taxes": [
+    {
+     "cKind": "gst",
+     "cTaxCode": "TPS",
+     "cTaxGroup": "QC",
+     "dBase": "570.00",
+     "dRate": "5",
+     "dTax": "28.50"
+    },
+    {
+     "cKind": "pst",
+     "cTaxCode": "TVQ",
+     "cTaxGroup": "QC",
+     "dBase": "570.00",
+     "dRate": "9.975",
+     "dTax": "56.86"
+    }
+   ]
+  },
+  {
+   "allocations": [],
+   "cCustomer": "OTTAWA-DELI",
+   "cCustomerName": "Ottawa Market Deli",
+   "cCustomerPO": "",
+   "cInvoiceNo": "",
+   "cLang": "en",
+   "cNotes": "",
+   "cOrigInvoice": "",
+   "cPostedBy": "",
+   "cShipTo": "",
+   "cStatus": "draft",
+   "cTaxGroup": "ON",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 days",
+   "cType": "invoice",
+   "cUser": "demo",
+   "cWarehouse": "KITCHEN",
+   "dCost": "0.00",
+   "dCreated": "2026-11-20T09:00:00",
+   "dDate": "2026-11-20",
+   "dDiscountTotal": "0.00",
+   "dPosted": "",
+   "dSubTotal": "216.00",
+   "dTaxTotal": "28.08",
+   "dTotal": "244.08",
+   "iNo": 3,
+   "lines": [
+    {
+     "cDescription": "Chicken pastel",
+     "cPriceSource": "product",
+     "cProduct": "PASTEL-CHICKEN",
+     "cTaxGroup": "ON",
+     "cUOM": "UN",
+     "dAmount": "216.00",
+     "dDiscountPct": "0",
+     "dNetPrice": "6.00",
+     "dPrice": "6.00",
+     "dQty": "36",
+     "iOrigLine": 0,
+     "lReturn": false
+    }
+   ],
+   "taxes": [
+    {
+     "cKind": "hst",
+     "cTaxCode": "TVH-ON",
+     "cTaxGroup": "ON",
+     "dBase": "216.00",
+     "dRate": "13",
+     "dTax": "28.08"
     }
    ]
   }

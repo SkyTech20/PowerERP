@@ -9,7 +9,8 @@ What is printed:
 - the lines: product, description, quantity, unit, price, discount, net price, amount, and under each line the lots /
   serial numbers that went out of the stock (a posted invoice);
 - the totals: subtotal, each tax (code, rate, registration number), total; the note of the company in the language.
-A draft prints as such ("DRAFT", its draft number), never with an invoice number.
+A draft prints as such ("DRAFT", its draft number), never with an invoice number. A credit note (V6) prints with
+its own title and number and the number of the invoice it credits; its amounts are what is credited.
 """
 
 from __future__ import annotations
@@ -25,6 +26,9 @@ Row = dict[str, Any]
 TEXTS: dict[str, dict[str, str]] = {
     "fr": {
         "invoice": "Facture",
+        "credit": "Note de crédit",
+        "credits": "Facture créditée",
+        "creditNo": "No de note de crédit",
         "draft": "BROUILLON",
         "draftNo": "Brouillon no",
         "invoiceNo": "No de facture",
@@ -56,6 +60,9 @@ TEXTS: dict[str, dict[str, str]] = {
     },
     "en": {
         "invoice": "Invoice",
+        "credit": "Credit note",
+        "credits": "Invoice credited",
+        "creditNo": "Credit note no.",
         "draft": "DRAFT",
         "draftNo": "Draft no.",
         "invoiceNo": "Invoice no.",
@@ -180,6 +187,8 @@ def context(
         "lang": lang,
         "t": tx,
         "posted": posted,
+        "credit": inv.get("cType") == "credit",
+        "title": tx["credit"] if inv.get("cType") == "credit" else tx["invoice"],
         "number": inv.get("cInvoiceNo") if posted else str(inv.get("iNo", "")),
         "inv": inv,
         "due": due_date(inv.get("cTermCode", ""), inv.get("dDate", "")),
