@@ -13,9 +13,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from powererp import database, settings
 from powererp.core.errors import AppError, NotFound
 from powererp.core.values import text
-from powererp.models import User
+from powererp.models import Role, RolePermission, User
+from powererp.models.core import ADMIN_ROLE, USER_ROLE
 
-ROLES = ("admin", "user")
 LANGS = ("en", "fr")
 MIN_PASSWORD = 6
 Row = dict[str, Any]
@@ -59,6 +59,7 @@ def public(row: Row) -> Row:
         "name": row["name"],
         "email": row["email"],
         "role": row["role"],
+        "isAdmin": bool(row.get("is_admin")),
         "lang": row["lang"],
         "active": bool(row["active"]),
         "created_at": row["created_at"],
@@ -75,22 +76,48 @@ class UserRepository:
     """The users table (own transaction per call: a login must be saved even if the request fails later)."""
 
     def get(self, user_id: int) -> Row | None:
+        """The user with the access of their role: is_admin and permissions (a set)."""
         with database.session_scope() as s:
-            return as_row(s.get(User, user_id))
+            row = as_row(s.get(User, user_id))
+            if row is None:
+                return None
+            role = s.get(Role, row["role"])
+            # an inactive role gives no access (the administrator role cannot be deactivated)
+            row["is_admin"] = bool(role and role.active and role.is_admin)
+            row["permissions"] = (
+                set(s.scalars(select(RolePermission.permission).where(RolePermission.role_code == role.code)))
+                if role is not None and role.active
+                else set()
+            )
+            return row
 
     def by_username(self, s, username: str) -> User | None:
         return s.scalar(select(User).where(func.lower(User.username) == username.lower()))
 
     def all(self) -> list[Row]:
         with database.session_scope() as s:
-            return [r for u in s.scalars(select(User).order_by(User.username)) if (r := as_row(u)) is not None]
+            admins = set(s.scalars(select(Role.code).where(Role.is_admin, Role.active)))
+            rows = [r for u in s.scalars(select(User).order_by(User.username)) if (r := as_row(u)) is not None]
+            for r in rows:
+                r["is_admin"] = r["role"] in admins
+            return rows
+
+    @staticmethod
+    def role_code(s, code: str) -> str | None:
+        """The code of an active role, written as stored ("user" finds USER); None when there is none."""
+        return s.scalar(select(Role.code).where(func.upper(Role.code) == code.upper(), Role.active.is_(True)))
+
+    @staticmethod
+    def is_admin_role(s, code: str) -> bool:
+        return bool(s.scalar(select(Role.is_admin).where(Role.code == code)))
 
     @staticmethod
     def count_admins(s, exclude_id: int | None = None) -> int:
         return s.scalar(
             select(func.count())
             .select_from(User)
-            .where(User.role == "admin", User.active.is_(True), User.id != (exclude_id or 0))
+            .join(Role, Role.code == User.role)
+            .where(Role.is_admin, Role.active, User.active.is_(True), User.id != (exclude_id or 0))
         )
 
 
@@ -104,7 +131,7 @@ class UserService:
             "username": text(p.get("username")) if existing is None else existing["username"],
             "name": text(p.get("name")),
             "email": text(p.get("email")),
-            "role": text(p.get("role")) or "user",
+            "role": text(p.get("role")) or USER_ROLE,
             "lang": text(p.get("lang")) or "en",
             "active": p.get("active", True) in (True, 1, "1", "true", "on"),
         }
@@ -112,11 +139,16 @@ class UserService:
             raise AuthError("required", "username")
         if not row["name"]:
             raise AuthError("required", "name")
-        if row["role"] not in ROLES:
-            raise AuthError("invalid_body", "role")
         if row["lang"] not in LANGS:
             row["lang"] = "en"
         return row
+
+    def _role(self, s, row: Row) -> None:
+        """Checks the role (an active role of the roles table) and writes its code as stored."""
+        code = self.repo.role_code(s, row["role"])
+        if code is None:
+            raise AuthError("invalid_body", "role")
+        row["role"] = code
 
     def list(self) -> list[Row]:
         return [public(r) for r in self.repo.all()]
@@ -134,6 +166,7 @@ class UserService:
             raise AuthError("required", "password")
         check_password(password)
         with database.session_scope() as s:
+            self._role(s, row)
             if self.repo.by_username(s, row["username"]) is not None:
                 raise AuthError("duplicate", "username", 409)
             u = User(**row, password_hash=generate_password_hash(password))
@@ -149,8 +182,10 @@ class UserService:
         if password:
             check_password(password)
         with database.session_scope() as s:
-            last_admin = existing["role"] == "admin" and existing["active"]
-            if last_admin and (row["role"] != "admin" or not row["active"]) and not self.repo.count_admins(s, user_id):
+            self._role(s, row)
+            last_admin = existing["is_admin"] and existing["active"]
+            stays_admin = self.repo.is_admin_role(s, row["role"]) and row["active"]
+            if last_admin and not stays_admin and not self.repo.count_admins(s, user_id):
                 raise AuthError("last_admin", "role", 409)
             u = s.get(User, user_id)
             for k in ("name", "email", "role", "lang", "active"):
@@ -164,7 +199,7 @@ class UserService:
         if user_id == me_id:
             raise AuthError("self_delete", status=409)
         with database.session_scope() as s:
-            if existing["role"] == "admin" and not self.repo.count_admins(s, user_id):
+            if existing["is_admin"] and not self.repo.count_admins(s, user_id):
                 raise AuthError("last_admin", status=409)
             s.delete(s.get(User, user_id))
 
@@ -219,7 +254,7 @@ class AuthService:
                     username=username,
                     name="Administrator",
                     email="",
-                    role="admin",
+                    role=ADMIN_ROLE,
                     lang="en",
                     active=True,
                     password_hash=generate_password_hash(password),

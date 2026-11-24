@@ -24,4 +24,17 @@ def current_is_admin(outside_request: bool = True) -> bool:
         user = current_user()
     except RuntimeError:  # outside a request (seed)
         return outside_request
-    return bool(user) and user["role"] == "admin"
+    return bool(user) and bool(user["is_admin"])
+
+
+def current_can(permission: str, outside_request: bool = True) -> bool:
+    """A permission ("<screen>:<action>") of the logged-in user's role; the API key and the start-up have all."""
+    from powererp.modules.auth import api_key_ok, current_user
+
+    try:
+        if api_key_ok():
+            return True
+        user = current_user()
+    except RuntimeError:  # outside a request (seed)
+        return outside_request
+    return bool(user) and (bool(user["is_admin"]) or permission in user["permissions"])

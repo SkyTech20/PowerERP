@@ -18,6 +18,9 @@ export function t(key, vars) {
   return s;
 }
 
+// A role's name: the built-in ones are translated, the others show their code.
+export const roleName = (code) => (t("role." + code) === "role." + code ? String(code || "") : t("role." + code));
+
 export function esc(v) {
   return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }

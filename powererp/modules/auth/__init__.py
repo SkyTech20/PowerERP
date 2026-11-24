@@ -3,8 +3,10 @@
 Who needs what:
   /  and  /assets/*            open (the page shows the login screen itself)
   /api/health, /api/auth/*     open
-  /api/*                       a logged-in user (session cookie) or the API key
-  /api/users*, /api/admin/*    an administrator (users, backups)
+  /api/*                       a logged-in user (session cookie) or the API key, with the permission of the
+                               route for the user's role (powererp/core/permissions.py: own account, lookups and
+                               dashboard for everyone; users, backups, settings and demo data for the
+                               administrator role; every other route the "<screen>:<action>" it needs)
   PowerWARE web services       open, unless ERP_API_KEY is set: then the
   (/cgi-bin/..., used by SkyAI) caller sends it in the X-API-Key header
 
@@ -22,6 +24,7 @@ from datetime import timedelta
 from flask import Blueprint, Flask, jsonify, request, session
 
 from powererp.container import Container
+from powererp.core import permissions
 from powererp.core.http import json_payload
 from powererp.core.values import text
 
@@ -31,7 +34,6 @@ __all__ = ["AuthError", "AuthService", "UserRepository", "UserService", "current
 
 PW_PREFIX = "/cgi-bin/"
 OPEN_PATHS = {"/", "/api/health", "/api/auth/login", "/api/auth/logout", "/api/auth/me"}
-ADMIN_PREFIXES = ("/api/users", "/api/admin/", "/api/demo", "/api/reset", "/api/clear")
 
 _users = UserRepository()
 
@@ -69,7 +71,9 @@ def guard():
     user = current_user()
     if user is None:
         return jsonify({"error": "unauthorized"}), 401
-    if path.startswith(ADMIN_PREFIXES) and user["role"] != "admin":
+    if not permissions.allowed(
+        request.endpoint, request.method, request.view_args or {}, user["permissions"], user["is_admin"]
+    ):
         return jsonify({"error": "forbidden"}), 403
     return None
 
@@ -119,7 +123,15 @@ def _blueprint(auth: AuthService, users: UserService) -> Blueprint:
         user = current_user()
         if user is None:
             return jsonify({"error": "unauthorized"}), 401
-        return jsonify(public(user))
+        return jsonify(
+            {
+                **public(user),
+                # what the menu and the screens show (the server checks every call again)
+                "permissions": (
+                    permissions.clean(user["permissions"]) if not user["is_admin"] else permissions.all_permissions()
+                ),
+            }
+        )
 
     @bp.route("/api/auth/password", methods=["POST"])
     def change_password():

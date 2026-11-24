@@ -7,15 +7,14 @@ from powererp.modules.auth.service import AuthError, UserService, check_password
 
 def test_user_payload_rules():
     row = UserService.from_payload({"username": " bob ", "name": "Bob", "role": "", "lang": "de", "active": "on"})
-    assert row == {"username": "bob", "name": "Bob", "email": "", "role": "user", "lang": "en", "active": True}
+    assert row == {"username": "bob", "name": "Bob", "email": "", "role": "USER", "lang": "en", "active": True}
     kept = UserService.from_payload({"username": "other", "name": "B"}, existing={"username": "bob"})
     assert kept["username"] == "bob"  # the user name never changes
     for payload, field in (({"name": "x"}, "username"), ({"username": "x"}, "name")):
         with pytest.raises(AuthError) as e:
             UserService.from_payload(payload)
         assert e.value.field == field
-    with pytest.raises(AuthError):
-        UserService.from_payload({"username": "x", "name": "x", "role": "root"})
+    # the role is checked against the roles table when the user is saved (tests/test_permissions.py)
 
 
 def test_password_length():
@@ -31,7 +30,7 @@ def test_public_view_has_no_password_hash():
         "username": "a",
         "name": "A",
         "email": "",
-        "role": "user",
+        "role": "USER",
         "lang": "fr",
         "active": 1,
         "password_hash": "x",

@@ -35,7 +35,7 @@ def test_powerware_services_need_the_key_when_set(anon, client):
 
 def test_login_ok_and_me(admin):
     me = admin.get("/api/auth/me").get_json()
-    assert me["username"] == "admin" and me["role"] == "admin"
+    assert me["username"] == "admin" and me["role"] == "ADMIN" and me["isAdmin"] is True
     assert "password_hash" not in me
 
 
