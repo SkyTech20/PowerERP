@@ -19,13 +19,14 @@ def preferred_supplier(prod: Row) -> Row | None:
 
 
 class ReplenishmentService:
-    def __init__(self, stock, params_repo, suppliers, purchase_orders, tax_calculator, username):
+    def __init__(self, stock, params_repo, suppliers, purchase_orders, tax_calculator, username, unit_factor=None):
         self.stock = stock  # StockService
         self.params_repo = params_repo
         self.suppliers = suppliers
         self.pos = purchase_orders
         self.taxes = tax_calculator
         self.username = username
+        self.unit_factor = unit_factor  # the unit converter: stock units in one purchase unit (1 CS = 25 UN)
 
     def rows(self) -> list[Row]:
         """Available + on order at or below the trigger (reorder point, else minimum) -> suggested quantity up to the
@@ -68,7 +69,7 @@ class ReplenishmentService:
             moq = number((sup or {}).get("dMinOrderQty"))
             if moq and need < moq:
                 need = moq
-            factor = number(prod.get("dPurchaseFactor")) or 1
+            factor = self.purchase_factor(prod)
             purchase_qty = math.ceil(need / factor - 1e-9)
             # Price per purchase unit (e.g. a case): the supplier's, else the last / average cost x the factor
             price = (
@@ -101,6 +102,12 @@ class ReplenishmentService:
         rows.sort(key=lambda r: (r["cSupplierCode"] or "~", r["cProduct"]))
         return rows
 
+    def purchase_factor(self, prod: Row) -> float:
+        """Stock units in one purchase unit of the product, from the unit conversions (1 when there is none)."""
+        if self.unit_factor is None or not text(prod.get("cPurchaseUOM")):
+            return 1.0
+        return self.unit_factor(prod["cPurchaseUOM"], prod.get("cStockUOM", ""), prod) or 1.0
+
     def po_taxes(self, prod: Row, supplier: Row, amount_: float, on: str) -> tuple[float, float]:
         """TPS / TVQ of a PO line: the product's purchase tax group, else the supplier's TPS / TVQ numbers."""
         res = self.taxes.calc(prod.get("cPurchaseTaxGroup"), amount_, on) if prod.get("cPurchaseTaxGroup") else None
@@ -130,7 +137,7 @@ class ReplenishmentService:
             if supplier is None:
                 raise AppError("no_supplier", "lines", detail=f"line {i}: {prod['cCode']}")
             item = next((x for x in prod.get("lines", []) if x["cSupplierCode"] == supplier["cCode"]), sup_line)
-            factor = number(prod.get("dPurchaseFactor")) or 1
+            factor = self.purchase_factor(prod)
             price = (
                 number(ln.get("dUnitCost"))
                 if text(ln.get("dUnitCost"))

@@ -103,6 +103,19 @@ def _blueprint(s: dict, counts: CountService, replenishment: ReplenishmentServic
         bp, "stock-params", "stock_params", s["params"], ("cProduct", "cWarehouse", "cDescFR", "cDescEN")
     )
 
+    @bp.route("/api/products/unit-check", methods=["POST"])
+    def products_unit_check():
+        """The purchase / sales units of the product being edited that have no conversion to its stock unit
+        (the screen warns while the user picks them; saving refuses them)."""
+        p = json_payload()
+        row = {
+            "cStockUOM": text(p.get("cStockUOM")),
+            "cPurchaseUOM": text(p.get("cPurchaseUOM")),
+            "cSalesUOM": text(p.get("cSalesUOM")),
+            "conversions": [c for c in (p.get("conversions") or []) if isinstance(c, dict) and text(c.get("cUOM"))],
+        }
+        return jsonify({"missing": s["products"].missing_conversions(row)})
+
     @bp.route("/api/stock-movements", methods=["GET", "POST"])
     def movements_collection():
         if request.method == "GET":
@@ -188,6 +201,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
         "uom": c.get("units").find,
         "tax_groups": c.get("tax_groups").find,
         "suppliers": suppliers.list,
+        "unit_factor": c.get("unit_converter").factor,
     }
     s = build_services(repos, ledger, refs, on_order=pos.quantity_on_order)
     stock = c.register("stock", s["stock"])
@@ -199,7 +213,15 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     counts = c.register("counts", CountService(counts_repo, stock, repos["warehouses"], numbering, current_username))
     replenishment = c.register(
         "replenishment",
-        ReplenishmentService(stock, repos["stock_params"], suppliers, pos, c.get("tax_calculator"), current_username),
+        ReplenishmentService(
+            stock,
+            repos["stock_params"],
+            suppliers,
+            pos,
+            c.get("tax_calculator"),
+            current_username,
+            c.get("unit_converter").factor,
+        ),
     )
     app.register_blueprint(_blueprint(s, counts, replenishment))
 

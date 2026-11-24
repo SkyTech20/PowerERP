@@ -124,10 +124,6 @@ class ProductService(CrudService):
         for f in ("cSalesTaxGroup", "cPurchaseTaxGroup"):
             must_exist(self.refs["tax_groups"], row, f)
         must_exist(self.refs["warehouses"], row, "cDefaultWarehouse")
-        for f in ("dPurchaseFactor", "dSalesFactor"):
-            if text(row.get(f)) and number(row[f]) <= 0:
-                raise AppError("positive", f)
-            row[f] = row[f] or "1"
         if row["cNature"] == "service":  # a service is never physical and has no class
             row["cStockType"], row["cClass"] = "nonphysical", ""
         if row["cStockType"] != "physical":  # only a physical product can have its stock controlled
@@ -153,8 +149,19 @@ class ProductService(CrudService):
             seen.add(cv["cUOM"].upper())
             if number(cv["dFactor"]) <= 0:
                 raise AppError("positive", "conversions", detail=f"line {i}")
+        for f in self.missing_conversions(row):
+            raise AppError("no_conversion", f, detail=f"{row[f]} -> {row['cStockUOM']}")
         for f in ("dAvgCost", "dLastCost"):
             row.setdefault(f, "")
+
+    def missing_conversions(self, row: Row) -> list[str]:
+        """The purchase / sales units of a product that do not convert to its stock unit (with its own conversions,
+        then the general ones). Nothing to check without the unit converter (the demo data is prepared without)."""
+        factor = self.refs.get("unit_factor")
+        stock = text(row.get("cStockUOM"))
+        if factor is None or not stock:
+            return []
+        return [f for f in ("cPurchaseUOM", "cSalesUOM") if text(row.get(f)) and factor(row[f], stock, row) is None]
 
     def view(self, row: Row, full: bool = True) -> Row:
         if self.stock is None:

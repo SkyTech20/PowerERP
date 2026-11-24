@@ -165,7 +165,7 @@ Object.assign(RES, {
       { f: "cStatus", l: "f.prod.cStatus", fmt: optBadge("o.status.", (v) => (v === "active" ? "yes" : "no")) },
     ],
     defaults: () => ({ cStatus: "active", cStockType: "physical", cNature: "product", cClass: "", cCostMethod: "avg", cCurrency: "CAD", cStockUOM: "UN", cPurchaseUOM: "UN",
-      dPurchaseFactor: "1", cSalesUOM: "UN", dSalesFactor: "1", cSalesTaxGroup: "QC", cPurchaseTaxGroup: "QC", lStocked: true,
+      cSalesUOM: "UN", cSalesTaxGroup: "QC", cPurchaseTaxGroup: "QC", lStocked: true,
       lSellable: true, lPurchasable: true, lPORequired: true, cWeightUOM: "kg", cDimUOM: "cm", cCountryOrigin: "CA", cABCClass: "", lines: [], conversions: [] }),
     sections: [
       { t: "prod.ident", fields: [
@@ -184,9 +184,8 @@ Object.assign(RES, {
       ] },
       { tab: "units", t: "prod.units", fields: [
         { f: "cStockUOM", l: "f.prod.cStockUOM", req: true, lookup: "uom" },
-        { f: "cPurchaseUOM", l: "f.prod.cPurchaseUOM", lookup: "uom" },
-        { f: "dPurchaseFactor", l: "f.prod.dPurchaseFactor", type: "number", help: "f.prod.factor.help" },
-        { f: "cSalesUOM", l: "f.prod.cSalesUOM", lookup: "uom" }, { f: "dSalesFactor", l: "f.prod.dSalesFactor", type: "number" },
+        { f: "cPurchaseUOM", l: "f.prod.cPurchaseUOM", lookup: "uom", help: "f.prod.unitConv.help" },
+        { f: "cSalesUOM", l: "f.prod.cSalesUOM", lookup: "uom" },
         { f: "dWeight", l: "f.prod.dWeight", type: "number" },
         { f: "cWeightUOM", l: "f.prod.cWeightUOM", type: "select", options: [["kg", "kg"], ["lb", "lb"]], raw: true },
         { f: "dVolume", l: "f.prod.dVolume", type: "number" },
@@ -238,6 +237,12 @@ Object.assign(RES, {
           { f: "cNotes", l: "f.conv.cNotes", w: "w-lg" }],
         newLine: () => ({ cUOM: "", dFactor: "", cNotes: "" }) },
     ],
+    // A purchase / sales unit with no conversion to the stock unit: the user is asked to add one (saving refuses it)
+    warnings: (m) => (m.cStockUOM && (m.cPurchaseUOM || m.cSalesUOM)
+      ? api("/products/unit-check", { method: "POST", body: { cStockUOM: m.cStockUOM, cPurchaseUOM: m.cPurchaseUOM,
+        cSalesUOM: m.cSalesUOM, conversions: m.conversions || [] } })
+        .then((r) => Object.fromEntries((r.missing || []).map((f) => [f, t("prod.noConv", { from: m[f], to: m.cStockUOM })])))
+      : {}),
     lines: {
       tab: "sup", title: "prod.suppliers", help: "prod.suppliers.help",
       cols: [

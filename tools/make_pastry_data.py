@@ -146,8 +146,6 @@ def product(code: str, **row) -> dict:
         "cCurrency": "CAD",
         "cSalesTaxGroup": "QC",
         "cPurchaseTaxGroup": "ZERO",
-        "dPurchaseFactor": "1",
-        "dSalesFactor": "1",
         "cWeightUOM": "kg",
         "cDimUOM": "cm",
         "cCountryOrigin": "CA",

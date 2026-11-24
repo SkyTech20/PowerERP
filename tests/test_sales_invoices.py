@@ -134,12 +134,12 @@ def test_a_line_offers_only_the_units_of_its_product(client):
     def units(product):
         return [r["code"] for r in client.get(f"/api/lookups/product_uoms?product={product}").get_json()]
 
-    assert units("TUBE-T8") == ["UN"]  # sold by the unit: no litre, no kilogram
+    assert units("TUBE-T8") == ["UN", "CS"]  # sold by the unit, bought by the case of 25: no litre, no kilogram
     assert units("") == []
     prod = client.get("/api/products/TUBE-T8").get_json()
-    prod["conversions"] = [{"cUOM": "CS", "dFactor": "12", "cNotes": ""}]
+    prod["conversions"] = [*prod["conversions"], {"cUOM": "BTE", "dFactor": "12", "cNotes": ""}]
     assert client.put("/api/products/TUBE-T8", json=prod).status_code == 200
-    assert units("TUBE-T8") == ["UN", "CS"]  # its own packaging too
+    assert units("TUBE-T8") == ["UN", "BTE", "CS"]  # its own packaging too
     flour = units(
         next(p["cCode"] for p in client.get("/api/products?size=500").get_json()["items"] if p["cStockUOM"] == "KG")
     )

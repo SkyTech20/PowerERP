@@ -179,6 +179,7 @@ table.grid td.wrap { white-space: normal; min-width: 220px; }
 .field .help { font-size: 11px; color: var(--muted); }
 .field .hint { font-size: 11px; color: var(--primary); min-height: 0; }
 .field .err { font-size: 11px; color: var(--danger); }
+.field .warn { font-size: 11px; color: var(--warning); }
 input[type=text], input[type=password], input[type=email], input[type=search], input[type=number], input[type=date], select, textarea {
   width: 100%; padding: 7px 9px; border: 1px solid var(--border); border-radius: 5px; background: #fff;
 }
