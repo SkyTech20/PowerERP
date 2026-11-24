@@ -1,6 +1,6 @@
 /* PowerERP: Hash router: the URL -> the screen. */
 import { $, esc, t } from "./core.js";
-import { renderSidebar } from "./menu.js";
+import { canOn, renderSidebar } from "./menu.js";
 import { RES } from "./registry.js";
 import { accountView } from "./screens/account.js";
 import { backupView } from "./screens/backups.js";
@@ -10,7 +10,7 @@ import { listView } from "./screens/list.js";
 import { replenishmentView } from "./screens/replenishment.js";
 import { roleFormView, rolesListView } from "./screens/roles.js";
 import { settingsView } from "./screens/settings.js";
-import { isAdmin, setView } from "./state.js";
+import { can, isAdmin, setView } from "./state.js";
 import { TABSETS } from "./views.js";
 
 // ------------------------------------------------------------------ Router
@@ -28,6 +28,13 @@ export const routeOf = (path) => {
     .sort((a, b) => RES[b].route.length - RES[a].route.length)[0];
   return key ? { key, rest: norm.slice(RES[key].route.length).split("/").filter(Boolean) } : null;
 };
+// May the user open this path (a link to another screen, e.g. the product of a stock line)?
+export function canOpen(path) {
+  const parts = path.replace(/^#/, "").split("/").filter(Boolean);
+  if (parts.join("/") === "inv/replenishment") return can("inv.replenishment");
+  const hit = routeOf(parts.join("/"));
+  return !hit || canOn(RES[hit.key]);
+}
 export function activeMenuRoute(path) {
   const hit = routeOf(path);
   if (!hit) return path;
@@ -41,7 +48,7 @@ export function resolve(path) {
   if (parts[0] === "account") return accountView();
   if (parts.join("/") === "admin/backups") return isAdmin() ? backupView() : dashboardView();
   if (parts.join("/") === "admin/settings") return isAdmin() ? settingsView() : dashboardView();
-  if (parts.join("/") === "inv/replenishment") return replenishmentView();
+  if (parts.join("/") === "inv/replenishment") return can("inv.replenishment") ? replenishmentView() : dashboardView();
   if (parts[0] === "admin" && parts[1] === "roles") {
     if (!isAdmin()) return dashboardView();
     if (parts.length === 2) return rolesListView();
@@ -50,9 +57,9 @@ export function resolve(path) {
   const hit = routeOf(parts.join("/"));
   if (!hit) return dashboardView();
   const R = RES[hit.key];
-  if (R.admin && !isAdmin()) return dashboardView();
+  if ((R.admin && !isAdmin()) || !canOn(R)) return dashboardView(); // a screen the role may not open
   if (!hit.rest.length) return listView(hit.key);
-  if (hit.rest[0] === "new" && !R.noNew) return formView(hit.key, null);
+  if (hit.rest[0] === "new" && !R.noNew) return canOn(R, "create") ? formView(hit.key, null) : listView(hit.key);
   return formView(hit.key, hit.rest.join("/"));
 }
 

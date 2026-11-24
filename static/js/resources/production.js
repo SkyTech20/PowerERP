@@ -1,7 +1,6 @@
 /* PowerERP: Production: list / form definitions. P1: the reference lists of the shop floor; P2: calendars. */
 import { $, api, enc, esc, fmtDateTime, lang, numOnly, t, yesNo } from "../core.js";
 import { RES } from "../registry.js";
-import { isAdmin } from "../state.js";
 import { descCol, dl, newWith, optBadge, opts, today } from "./inventory.js";
 
 export const DOWNTIME_GROUPS = ["breakdown", "setup", "minor_stop", "reduced_speed", "no_material", "no_operator", "quality", "planned", "other"];
@@ -663,17 +662,17 @@ Object.assign(RES, {
     // only a draft is edited; the other versions are read, and changed through their actions
     locked: (m, isNew) => !isNew && m.cStatus !== "draft",
     actions: [
-      { id: "submit", l: "mfg.ap.submit", primary: true, show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "mfg.ap.submit.confirm", done: "mfg.ap.submitted",
+      { id: "submit", l: "mfg.ap.submit", perm: "edit", primary: true, show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "mfg.ap.submit.confirm", done: "mfg.ap.submitted",
         run: async (m, ctx) => { await api(ctx.path, { method: "PUT", body: m }); return api(ctx.path + "/submit", { method: "POST", body: {} }); } },
-      { id: "approve", l: "mfg.ap.approve", primary: true, show: (m, isNew) => !isNew && m.cStatus === "in_review" && isAdmin(), done: "mfg.ap.approved",
+      { id: "approve", l: "mfg.ap.approve", perm: "approve", primary: true, show: (m, isNew) => !isNew && m.cStatus === "in_review", done: "mfg.ap.approved",
         run: (m, ctx) => api(ctx.path + "/approve", { method: "POST", body: { cComment: prompt(t("mfg.ap.comment")) || "" } }) },
-      { id: "reject", l: "mfg.ap.reject", show: (m, isNew) => !isNew && m.cStatus === "in_review" && isAdmin(), done: "mfg.ap.rejected",
+      { id: "reject", l: "mfg.ap.reject", perm: "approve", show: (m, isNew) => !isNew && m.cStatus === "in_review", done: "mfg.ap.rejected",
         run: (m, ctx) => { const c = prompt(t("mfg.ap.rejectWhy")); if (!c) return null; return api(ctx.path + "/reject", { method: "POST", body: { cComment: c } }); } },
-      { id: "default", l: "mfg.ap.default", show: (m, isNew) => !isNew && m.cStatus === "approved" && !m.lDefault && isAdmin(),
+      { id: "default", l: "mfg.ap.default", perm: "approve", show: (m, isNew) => !isNew && m.cStatus === "approved" && !m.lDefault,
         run: (m, ctx) => api(ctx.path + "/default", { method: "POST", body: {} }) },
-      { id: "obsolete", l: "mfg.ap.obsolete", show: (m, isNew) => !isNew && m.cStatus === "approved" && isAdmin(), confirm: "mfg.ap.obsolete.confirm",
+      { id: "obsolete", l: "mfg.ap.obsolete", perm: "approve", show: (m, isNew) => !isNew && m.cStatus === "approved", confirm: "mfg.ap.obsolete.confirm",
         run: (m, ctx) => api(ctx.path + "/obsolete", { method: "POST", body: {} }) },
-      { id: "copy", l: "mfg.ap.copy", show: (m, isNew) => !isNew,
+      { id: "copy", l: "mfg.ap.copy", perm: "create", show: (m, isNew) => !isNew,
         run: async (m, ctx) => {
           const why = prompt(t("mfg.ap.copyWhy"));
           if (why === null) return null;

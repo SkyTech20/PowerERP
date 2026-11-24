@@ -271,13 +271,13 @@ Object.assign(RES, {
       ] },
     ],
     actions: [
-      { id: "print", l: "sales.print", show: (m, isNew) => !isNew,
+      { id: "print", l: "sales.print", perm: "print", show: (m, isNew) => !isNew,
         run: async (m, ctx) => {
           if (m.cStatus === "draft") await api(ctx.path, { method: "PUT", body: m }); // prints what is on the screen
           window.open(`api/${ctx.path}/print`, "_blank");
           return null;
         } },
-      { id: "credit", l: "sales.cn.make", show: (m, isNew) => !isNew && m.cStatus === "posted" && !isCredit(m), confirm: "sales.cn.makeConfirm",
+      { id: "credit", l: "sales.cn.make", perm: "credit", show: (m, isNew) => !isNew && m.cStatus === "posted" && !isCredit(m), confirm: "sales.cn.makeConfirm",
         run: async (m, ctx) => {
           const cn = await api(ctx.path + "/credit", { method: "POST" });
           location.hash = `#/sales/invoices/${cn.iNo}`;
@@ -285,7 +285,7 @@ Object.assign(RES, {
         } },
       { id: "check", l: "sales.post.check", show: (m, isNew) => !isNew && m.cStatus === "draft",
         run: (m, ctx) => saveThen(m, ctx, "check") },
-      { id: "post", l: "sales.post.post", show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "sales.post.confirm", done: "sales.post.done",
+      { id: "post", l: "sales.post.post", perm: "post", show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "sales.post.confirm", done: "sales.post.done",
         run: (m, ctx) => saveThen(m, ctx, "post") },
     ],
     lines: {

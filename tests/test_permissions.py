@@ -40,7 +40,8 @@ def login(app, admin):
             with database.session_scope() as s:
                 s.get(Role, code).active = False
         c = app.test_client()
-        assert c.post("/api/auth/login", json={"username": name, "password": "secret1"}).status_code == 200
+        r = c.post("/api/auth/login", json={"username": name, "password": "secret1"})
+        assert r.status_code == 200 and r.get_json()["permissions"] == P.clean(perms) or not active
         return c
 
     return make
@@ -247,3 +248,13 @@ def test_demo_reset_puts_the_example_roles_back(admin):
     assert "sales.invoices:view" in admin.get("/api/roles/SALES").get_json()["permissions"]
     last = admin.get("/api/roles/SALES/history").get_json()[0]
     assert last["cChange"] == "demo" and "sales.invoices:view" in last["details"]["added"]
+
+
+# ------------------------------------------------------------------ dashboard (A3)
+def test_dashboard_shows_the_figures_of_the_role(admin, client, login):
+    everything = admin.get("/api/summary").get_json()
+    assert set(everything) == set(P.DASHBOARD_KEYS)  # every figure belongs to a screen
+    assert client.get("/api/summary").get_json() == everything  # API key: all
+    assert login(["sales.invoices:view"]).get("/api/summary").get_json() == {}
+    ap = login(["ap.invoices:view"]).get("/api/summary").get_json()
+    assert set(ap) == {"invoices", "openInvoices", "openInvoicesAmount", "recentInvoices"}

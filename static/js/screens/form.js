@@ -1,6 +1,7 @@
 /* PowerERP: Generic form screen of a resource (create / edit). */
 import { $, $$, TAX_RATES, api, enc, esc, money, num, numOnly, round2, sourceBadge, t, toast } from "../core.js";
 import { bindLookup, lookupOptions, lookupRows } from "../lookups.js";
+import { canOn } from "../menu.js";
 import { RES } from "../registry.js";
 import { clearLookups, prefill, setPrefill } from "../state.js";
 import { pageHead, tabLabel } from "../views.js";
@@ -249,15 +250,17 @@ export function formView(key, id) {
       $("#view").innerHTML = pageHead(t(R.one), "", `<a class="btn" href="#${R.route}">← ${esc(t("common.back"))}</a>`) + `<div class="card"><div class="empty">${esc(t("common.notFound"))}</div></div>`;
       return;
     }
-    locked = !!(R.locked && R.locked(model, isNew));
+    // read-only: the record says so (e.g. a posted invoice), or the role may not change it
+    locked = !!(R.locked && R.locked(model, isNew)) || (!isNew && !canOn(R, "edit"));
     const title = isNew ? t(R.newTitle) : `${t(R.oneOf ? R.oneOf(model) : R.one)} ${R.label(model)}`;
     const crumbs = `<a href="#${R.route}">${esc(t(R.title))}</a>${R.tabset ? " / " + esc(tabLabel(R)) : ""}`;
-    const extra = (R.actions || []).filter((a) => !a.show || a.show(model, isNew))
+    // a.perm: the action of the role it needs (post, print, approve…); without it the button is not shown
+    const extra = (R.actions || []).filter((a) => (!a.show || a.show(model, isNew)) && (!a.perm || canOn(R, a.perm)))
       .map((a) => `<button class="btn ${a.primary ? "primary" : ""}" data-action="${a.id}">${esc(t(a.l))}</button>`).join("");
     const actions = locked
       ? `<a class="btn" href="#${R.route}">← ${esc(t("common.back"))}</a>${extra}`
       : `<a class="btn" href="#${R.route}">${esc(t("common.cancel"))}</a>
-      ${isNew || R.noDelete ? "" : `<button class="btn danger" id="deleteBtn">${esc(t("common.delete"))}</button>`}
+      ${isNew || R.noDelete || !canOn(R, "delete") ? "" : `<button class="btn danger" id="deleteBtn">${esc(t("common.delete"))}</button>`}
       ${extra}<button class="btn primary" id="saveBtn">${esc(t("common.save"))}</button>`;
     const badge = R.badge ? R.badge(model, isNew) : (!isNew && model.cSource ? sourceBadge(model.cSource) : "");
     // Tabs: each section / the lines / the panel says its tab; the tab with an error is opened

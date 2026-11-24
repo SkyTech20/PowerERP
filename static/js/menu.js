@@ -1,7 +1,9 @@
 /* PowerERP: The sidebar menu and the static texts of the page. */
 import { $, $$, esc, lang, t, toast } from "./core.js";
 import { activeMenuRoute, currentPath } from "./router.js";
-import { isAdmin } from "./state.js";
+import { RES } from "./registry.js";
+import { can, isAdmin } from "./state.js";
+import { TABSETS } from "./views.js";
 
 // ------------------------------------------------------------------ Menu
 // Items given as plain strings are visible but disabled.
@@ -31,8 +33,22 @@ export const MENU = [
   { k: "admin", icon: "⚙️", items: ["admin.companies", { k: "admin.users", route: "/admin/users", admin: true }, { k: "admin.roles", route: "/admin/roles", admin: true }, { k: "admin.taxes", route: "/admin/taxes" }, "admin.currencies", { k: "admin.backups", route: "/admin/backups", admin: true }, { k: "admin.settings", route: "/admin/settings", admin: true }] },
 ];
 export const openGroups = new Set(["gl", "ap", "pur", "sales", "inv"]);
-// Menu items flagged admin: true are links for administrators only.
-export const usable = (i) => typeof i === "object" && (!i.admin || isAdmin());
+// Menu items flagged admin: true are links for administrators only; the others need the view of their screen
+// (the menu key is the screen of the permissions).
+export const usable = (i) => typeof i === "object" && (i.admin ? isAdmin() : can(i.k));
+
+// The screen (menu key) of a resource: the menu entry it opens from (a tab opens from the first tab's entry).
+const SCREEN_OF_ROUTE = Object.fromEntries(MENU.flatMap((m) => m.items || []).filter((i) => typeof i === "object").map((i) => [i.route, i]));
+export function menuItemOf(R) {
+  const first = R.tabset ? RES[TABSETS[R.tabset][0][0]] : R;
+  return SCREEN_OF_ROUTE[R.menu || first.menu || first.route] || SCREEN_OF_ROUTE[R.route] || null;
+}
+// May the user do this on the screen of resource R? (an administrator-only screen: administrators only)
+export function canOn(R, action = "view") {
+  const item = menuItemOf(R);
+  if (!item) return isAdmin();
+  return item.admin ? isAdmin() : can(item.k, action);
+}
 
 export function renderSidebar() {
   const path = currentPath();
@@ -44,7 +60,9 @@ export function renderSidebar() {
       return `<a class="nav-link ${isActive(m.route) ? "active" : ""}" href="#${m.route}"><span class="nav-icon">${m.icon}</span>${esc(t("menu." + m.k))}</a>`;
     }
     const enabled = m.items.some(usable);
-    const sub = m.items.map((i) => {
+    // a role sees only what it may open; the administrator also sees the modules still to come (locked)
+    if (!enabled && !isAdmin()) return "";
+    const sub = m.items.filter((i) => isAdmin() || usable(i)).map((i) => {
       if (usable(i)) {
         return `<a class="nav-link ${isActive(i.route) ? "active" : ""}" href="#${i.route}">${esc(t("menu." + i.k))}</a>`;
       }

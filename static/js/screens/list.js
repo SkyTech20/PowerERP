@@ -1,6 +1,8 @@
 /* PowerERP: Generic list screen of a resource. */
 import { $, $$, api, enc, esc, fmtInt, lang, t, toast } from "../core.js";
+import { canOn } from "../menu.js";
 import { RES } from "../registry.js";
+import { canOpen } from "../router.js";
 import { listState, pageHead, tabsHtml } from "../views.js";
 
 // ---------- Generic list
@@ -25,8 +27,9 @@ export function listView(key) {
         const arrow = st.sort === c.f ? `<span class="arrow">${st.dir === "desc" ? "▼" : "▲"}</span>` : "";
         return `<th class="sortable ${c.num ? "num" : ""}" data-sort="${c.f}">${esc(t(c.l))}${arrow}</th>`;
       }).join("");
-      const href = (r) => (R.rowHref ? R.rowHref(r) : R.route + "/" + String(R.id(r)).split("/").map(enc).join("/"));
-      const rows = data.items.map((r) => `<tr class="${R.noClick ? "" : "clickable"}" data-href="${esc(R.noClick ? "" : href(r))}">${R.columns.map((c) => {
+      const ownHref = (r) => (R.rowHref ? R.rowHref(r) : R.route + "/" + String(R.id(r)).split("/").map(enc).join("/"));
+      const href = (r) => { const h = ownHref(r); return R.rowHref && !canOpen(h) ? "" : h; }; // a link to a screen the role may not open: none
+      const rows = data.items.map((r) => `<tr class="${R.noClick || !href(r) ? "" : "clickable"}" data-href="${esc(R.noClick ? "" : href(r))}">${R.columns.map((c) => {
         const v = r[c.f];
         const cell = c.fmt ? c.fmt(v, r) : esc(v);
         return `<td class="${c.num ? "num" : ""} ${c.wrap ? "wrap" : ""}">${cell}</td>`;
@@ -36,8 +39,8 @@ export function listView(key) {
           ${f.options.map(([v, l]) => `<option value="${esc(v)}" ${st.filters[f.f] === v ? "selected" : ""}>${esc(f.raw ? l : t(l))}</option>`).join("")}
         </select>`).join("");
       // R.listActions: buttons of the list (e.g. add the standard conversions), next to "New"
-      const listActions = (R.listActions || []).map((a) => `<button class="btn" data-list-action="${a.id}">${esc(t(a.l))}</button>`).join("");
-      $("#view").innerHTML = pageHead(t(R.title), t(R.sub), listActions + (R.noNew ? "" : `<a class="btn primary" href="#${R.route}/new">＋ ${esc(t("common.new"))}</a>`))
+      const listActions = (R.listActions || []).filter((a) => canOn(R, a.perm || "create")).map((a) => `<button class="btn" data-list-action="${a.id}">${esc(t(a.l))}</button>`).join("");
+      $("#view").innerHTML = pageHead(t(R.title), t(R.sub), listActions + (R.noNew || !canOn(R, "create") ? "" : `<a class="btn primary" href="#${R.route}/new">＋ ${esc(t("common.new"))}</a>`))
         + (R.tabset ? tabsHtml(R) : "")
         + `<div class="card"><div class="toolbar"><input type="search" id="q" placeholder="${esc(t("common.search"))}" value="${esc(st.q)}">${filters}
             <span class="count">${esc(t("common.records", { n: fmtInt(data.total) }))}</span></div>

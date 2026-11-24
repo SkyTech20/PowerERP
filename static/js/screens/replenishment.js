@@ -1,6 +1,8 @@
 /* PowerERP: Inventory > Replenishment. */
 import { $, $$, api, enc, esc, fmtInt, lang, money, num, numOnly, t, toast } from "../core.js";
 import { dl, productLink, qtyFmt } from "../resources/inventory.js";
+import { canOpen } from "../router.js";
+import { can } from "../state.js";
 import { pageHead } from "../views.js";
 
 // ---------- Replenishment: products at or below their reorder point, and the POs to create
@@ -18,7 +20,7 @@ export function replenishmentView() {
     render() {
       const rows = data.items.map((r, i) => `<tr data-i="${i}">
           <td><input type="checkbox" data-pick ${r.pick ? "checked" : ""} ${r.cSupplierCode ? "" : "disabled"} aria-label="${esc(t("rep.pick"))}"></td>
-          <td><a href="#${productLink(r)}">${esc(r.cProduct)}</a></td><td class="wrap">${esc(dl(r, "cDesc"))}</td><td>${esc(r.cWarehouse)}</td>
+          <td>${canOpen(productLink(r)) ? `<a href="#${productLink(r)}">${esc(r.cProduct)}</a>` : esc(r.cProduct)}</td><td class="wrap">${esc(dl(r, "cDesc"))}</td><td>${esc(r.cWarehouse)}</td>
           <td class="num">${esc(qtyFmt(r.dQtyAvailable))}</td><td class="num">${esc(qtyFmt(r.dQtyOnOrder))}</td>
           <td class="num">${esc(qtyFmt(r.dReorderPoint))}</td><td class="num">${esc(qtyFmt(r.dMaxQty))}</td>
           <td class="num">${esc(qtyFmt(r.dSuggestedQty))} ${esc(r.cStockUOM)}</td>
@@ -27,7 +29,7 @@ export function replenishmentView() {
           <td class="num">${esc(money(r.dUnitCost))}</td><td class="num" data-amt></td></tr>`).join("");
       const done = created ? `<div class="card notice"><div class="card-body">${esc(t("rep.created"))}
           ${created.map((p) => `<a class="btn small" href="#/po/${enc(p.cPO)}">${esc(p.cPO)} — ${esc(p.cSupplierName)} (${esc(money(p.dTotalAmount))})</a>`).join(" ")}</div></div>` : "";
-      $("#view").innerHTML = pageHead(t("rep.title"), t("rep.subtitle"), `<button class="btn primary" id="createPo" ${data.items.length ? "" : "disabled"}>${esc(t("rep.createPo"))}</button>`) + done + `
+      $("#view").innerHTML = pageHead(t("rep.title"), t("rep.subtitle"), can("inv.replenishment", "create_po") ? `<button class="btn primary" id="createPo" ${data.items.length ? "" : "disabled"}>${esc(t("rep.createPo"))}</button>` : "") + done + `
         <div class="card"><div class="toolbar"><select id="repWh" style="width:auto"><option value="">${esc(t("f.inv.cWarehouse"))}: ${esc(t("common.all"))}</option>
             ${whs.map((w) => `<option value="${esc(w.code)}" ${w.code === wh ? "selected" : ""}>${esc(w.code)} — ${esc(w.label)}</option>`).join("")}</select>
             <span class="help muted">${esc(t("rep.help"))}</span><span class="count">${esc(t("common.records", { n: fmtInt(data.total) }))}</span></div>
@@ -53,7 +55,7 @@ export function replenishmentView() {
       });
       totals();
       $("#repWh").addEventListener("change", async (e) => { wh = e.target.value; created = null; await this.load(); this.render(); });
-      $("#createPo").addEventListener("click", async () => {
+      if ($("#createPo")) $("#createPo").addEventListener("click", async () => {
         // Quantity and cost in purchase units (e.g. cases): the PO lines are converted to stock units by the ERP
         const lines = data.items.filter((r) => r.pick && num(r.dPurchaseQty) > 0)
           .map((r) => ({ cProduct: r.cProduct, dPurchaseQty: r.dPurchaseQty, cSupplierCode: r.cSupplierCode, dUnitCost: r.dUnitCost }));

@@ -107,6 +107,13 @@ def _paged_users(rows):
     return {"total": len(rows), "page": page, "size": size, "items": rows[start : start + size]}
 
 
+def _me(user: dict) -> dict:
+    """The logged-in user with the permissions of their role: what the menu and the screens show (the server
+    checks every call again)."""
+    perms = permissions.all_permissions() if user["is_admin"] else permissions.clean(user["permissions"])
+    return {**public(user), "permissions": perms}
+
+
 def _blueprint(auth: AuthService, users: UserService, roles: RoleService) -> Blueprint:
     bp = Blueprint("auth", __name__)
 
@@ -121,7 +128,7 @@ def _blueprint(auth: AuthService, users: UserService, roles: RoleService) -> Blu
         session.clear()
         session.permanent = True
         session["uid"] = uid
-        return jsonify(public(users.get(uid)))
+        return jsonify(_me(users.get(uid)))
 
     @bp.route("/api/auth/logout", methods=["POST"])
     def logout():
@@ -133,15 +140,7 @@ def _blueprint(auth: AuthService, users: UserService, roles: RoleService) -> Blu
         user = current_user()
         if user is None:
             return jsonify({"error": "unauthorized"}), 401
-        return jsonify(
-            {
-                **public(user),
-                # what the menu and the screens show (the server checks every call again)
-                "permissions": (
-                    permissions.clean(user["permissions"]) if not user["is_admin"] else permissions.all_permissions()
-                ),
-            }
-        )
+        return jsonify(_me(user))
 
     @bp.route("/api/auth/password", methods=["POST"])
     def change_password():

@@ -133,7 +133,11 @@ def _blueprint(lifecycle: DataLifecycle, dashboard: DashboardRegistry, lookups: 
 
     @bp.route("/api/summary")
     def summary():
-        return jsonify(dashboard.summary())
+        """The figures of the screens the user's role may view."""
+        from powererp.core.permissions import dashboard_for
+        from powererp.core.security import current_can
+
+        return jsonify(dashboard_for(dashboard.summary(), current_can))
 
     @bp.route("/api/lookups/<kind>")
     def lookup(kind):

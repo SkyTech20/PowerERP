@@ -130,7 +130,7 @@ Object.assign(RES, {
       { f: "cFromUOM", l: "f.conv.cFromUOM", fmt: (v) => esc("1 " + v) }, { f: "dFactor", l: "f.conv.dFactor", num: true, fmt: (v) => esc(qtyFmt(v)) },
       { f: "cToUOM", l: "f.conv.cToUOM" }, { f: "cNotes", l: "f.conv.cNotes", wrap: true }, { f: "lActive", l: "opt.active", fmt: yesNo },
     ],
-    listActions: [{ id: "standard", l: "conv.standard", run: async () => {
+    listActions: [{ id: "standard", l: "conv.standard", perm: "create", run: async () => {
       const r = await api("uom-conversions/standard", { method: "POST" });
       return t("conv.standard.done", { u: r.iUnits, c: r.iConversions });
     } }],
@@ -430,9 +430,9 @@ Object.assign(RES, {
       ],
     },
     actions: [
-      { id: "generate", l: "cnt.generate", show: (m, isNew) => !isNew && m.cStatus === "Draft", confirm: "cnt.generateConfirm",
+      { id: "generate", l: "cnt.generate", perm: "edit", show: (m, isNew) => !isNew && m.cStatus === "Draft", confirm: "cnt.generateConfirm",
         run: async (m, ctx) => { await api(ctx.path, { method: "PUT", body: m }); return api(ctx.path + "/generate", { method: "POST" }); } },
-      { id: "post", l: "cnt.post", primary: true, show: (m, isNew) => !isNew && m.cStatus === "Draft", confirm: "cnt.postConfirm", done: "cnt.posted",
+      { id: "post", l: "cnt.post", perm: "post", primary: true, show: (m, isNew) => !isNew && m.cStatus === "Draft", confirm: "cnt.postConfirm", done: "cnt.posted",
         run: async (m, ctx) => { await api(ctx.path, { method: "PUT", body: m }); return api(ctx.path + "/post", { method: "POST" }); } },
     ],
   },
