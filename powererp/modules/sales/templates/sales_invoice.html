@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ t.invoice }} {{ number }} — {{ customerName }}</title>
+<style>
+  @page { size: letter; margin: 14mm 12mm; }
+  * { box-sizing: border-box; }
+  body { font: 12px/1.45 "Helvetica Neue", Arial, sans-serif; color: #1d2433; background: #eef0f4; margin: 0; }
+  .page { background: #fff; max-width: 820px; margin: 24px auto; padding: 36px 40px; box-shadow: 0 1px 4px rgba(0,0,0,.12); position: relative; }
+  .toolbar { max-width: 820px; margin: 16px auto 0; text-align: right; }
+  .toolbar button { font: inherit; padding: 7px 16px; border: 0; border-radius: 6px; background: #1f5fa8; color: #fff; cursor: pointer; }
+  header { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid #1d2433; padding-bottom: 14px; }
+  .company h1 { font-size: 18px; margin: 0 0 4px; }
+  .muted { color: #5b6475; }
+  .title { text-align: right; }
+  .title h2 { font-size: 22px; margin: 0 0 6px; letter-spacing: .04em; text-transform: uppercase; }
+  .title table td { padding: 1px 0 1px 12px; }
+  .title table td:first-child { color: #5b6475; }
+  .parties { display: flex; gap: 24px; margin: 18px 0; }
+  .parties > div { flex: 1; }
+  .parties h3, .terms h3 { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #5b6475; margin: 0 0 4px; }
+  table.lines { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  table.lines th { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: #5b6475; text-align: left; border-bottom: 1px solid #1d2433; padding: 6px 6px; }
+  table.lines td { padding: 6px; border-bottom: 1px solid #dde1e8; vertical-align: top; }
+  .num { text-align: right; white-space: nowrap; }
+  .lots { font-size: 11px; color: #5b6475; }
+  .bottom { display: flex; justify-content: space-between; gap: 24px; margin-top: 16px; }
+  .totals { min-width: 300px; border-collapse: collapse; }
+  .totals td { padding: 3px 0 3px 16px; }
+  .totals .grand td { border-top: 2px solid #1d2433; font-weight: 700; font-size: 14px; padding-top: 6px; }
+  .note { margin-top: 26px; border-top: 1px solid #dde1e8; padding-top: 10px; }
+  .watermark { position: absolute; top: 40%; left: 0; right: 0; text-align: center; font-size: 96px; font-weight: 700; color: rgba(192,57,43,.12); transform: rotate(-24deg); pointer-events: none; }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none; }
+    .page { box-shadow: none; margin: 0; max-width: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar"><button type="button" onclick="window.print()">{{ t.page }}</button></div>
+<div class="page">
+  {% if not posted %}<div class="watermark">{{ t.draft }}</div>{% endif %}
+  <header>
+    <div class="company">
+      <h1>{{ company.cLegalName or company.cName }}</h1>
+      {% for l in companyAddress %}<div>{{ l }}</div>{% endfor %}
+      <div class="muted">
+        {% if company.cPhone %}{{ company.cPhone }}{% endif %}{% if company.cEmail %} · {{ company.cEmail }}{% endif %}{% if company.cWebsite %} · {{ company.cWebsite }}{% endif %}
+      </div>
+      <div class="muted">
+        {% for n in taxNumbers %}{{ n.cTaxCode }} {{ n.cRegistrationNo }}{% if not loop.last %} · {% endif %}{% endfor %}{% if company.cNEQ %}{% if taxNumbers %} · {% endif %}{{ t.neq }} {{ company.cNEQ }}{% endif %}
+      </div>
+    </div>
+    <div class="title">
+      <h2>{{ t.invoice }}{% if not posted %} — {{ t.draft }}{% endif %}</h2>
+      <table>
+        <tr><td>{{ t.invoiceNo if posted else t.draftNo }}</td><td><b>{{ number }}</b></td></tr>
+        <tr><td>{{ t.date }}</td><td>{{ inv.dDate }}</td></tr>
+        {% if inv.cTermDesc or inv.cTermCode %}<tr><td>{{ t.terms }}</td><td>{{ inv.cTermDesc or inv.cTermCode }}</td></tr>{% endif %}
+        {% if due %}<tr><td>{{ t.due }}</td><td>{{ due }}</td></tr>{% endif %}
+        {% if inv.cCustomerPO %}<tr><td>{{ t.customerPO }}</td><td>{{ inv.cCustomerPO }}</td></tr>{% endif %}
+        <tr><td>{{ t.customer }}</td><td>{{ inv.cCustomer }}</td></tr>
+      </table>
+    </div>
+  </header>
+
+  <div class="parties">
+    <div>
+      <h3>{{ t.billTo }}</h3>
+      <b>{{ customerName }}</b>
+      {% for l in billTo %}<div>{{ l }}</div>{% endfor %}
+      {% if exemptNo %}<div class="muted">{{ t.exempt }} {{ exemptNo }}</div>{% endif %}
+    </div>
+    {% if shipTo %}
+    <div>
+      <h3>{{ t.shipTo }}</h3>
+      <b>{{ shipToName or customerName }}</b>
+      {% for l in shipTo %}<div>{{ l }}</div>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <table class="lines">
+    <thead><tr>
+      <th>{{ t.product }}</th><th>{{ t.description }}</th><th class="num">{{ t.qty }}</th><th>{{ t.unit }}</th>
+      <th class="num">{{ t.price }}</th><th class="num">{{ t.discount }}</th><th class="num">{{ t.net }}</th><th class="num">{{ t.amount }}</th>
+    </tr></thead>
+    <tbody>
+    {% for l in lines %}
+      <tr>
+        <td>{{ l.cProduct }}</td>
+        <td>{{ l.cDescription }}{% if l.taxGroup %} <span class="muted">({{ l.taxGroup }})</span>{% endif %}
+          {% if l.lots %}<div class="lots">{{ l.lots | join(" · ") }}</div>{% endif %}</td>
+        <td class="num">{{ l.qty }}</td><td>{{ l.cUOM }}</td>
+        <td class="num">{{ l.price }}</td><td class="num">{{ l.discount }}</td><td class="num">{{ l.net }}</td><td class="num">{{ l.amount }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="bottom">
+    <div class="muted">{{ t.currency }}</div>
+    <table class="totals">
+      {% if discountTotal %}<tr class="muted"><td>{{ t.discountTotal }}</td><td class="num">{{ discountTotal }}</td></tr>{% endif %}
+      <tr><td>{{ t.subTotal }}</td><td class="num">{{ subTotal }}</td></tr>
+      {% for x in taxes %}
+      <tr><td>{{ x.label }} ({{ x.code }}) {{ x.rate }} %{% if x.number %} <span class="muted">— {{ x.number }}</span>{% endif %}</td><td class="num">{{ x.tax }}</td></tr>
+      {% endfor %}
+      <tr class="grand"><td>{{ t.total }}</td><td class="num">{{ total }}</td></tr>
+    </table>
+  </div>
+
+  {% if note or inv.cNotes %}
+  <div class="note">
+    {% if inv.cNotes %}<p>{{ inv.cNotes }}</p>{% endif %}
+    {% if note %}<p class="muted">{{ note }}</p>{% endif %}
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>

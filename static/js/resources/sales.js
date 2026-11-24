@@ -260,6 +260,12 @@ Object.assign(RES, {
       ] },
     ],
     actions: [
+      { id: "print", l: "sales.print", show: (m, isNew) => !isNew,
+        run: async (m, ctx) => {
+          if (m.cStatus === "draft") await api(ctx.path, { method: "PUT", body: m }); // prints what is on the screen
+          window.open(`api/${ctx.path}/print`, "_blank");
+          return null;
+        } },
       { id: "check", l: "sales.post.check", show: (m, isNew) => !isNew && m.cStatus === "draft",
         run: (m, ctx) => saveThen(m, ctx, "check") },
       { id: "post", l: "sales.post.post", show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "sales.post.confirm", done: "sales.post.done",

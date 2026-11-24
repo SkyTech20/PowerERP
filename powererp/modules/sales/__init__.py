@@ -9,6 +9,7 @@ V2: /api/price-lists (prices by product, unit and quantity as lines; discounts b
 V3: /api/sales-invoices (drafts: GET/POST, GET/PUT/DELETE /<no>; a posted one is 409),
     POST /api/sales-invoices/calc (and /<no>/calc): the draft calculated without saving it (prices, taxes, totals).
 V4: POST /api/sales-invoices/<no>/check (what posting would do: problems, stock taken), POST /<no>/post.
+V5: GET /api/sales-invoices/<no>/print?lang=fr|en: the invoice to print (HTML), in its language by default.
 
 Sales never changes the stock directly: the invoices will post movements through the stock service of the
 container (c.get("stock").add(...) with cDocType "SO"), so every stock rule applies to them.
@@ -18,7 +19,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from flask import Blueprint, Flask, jsonify, request
+from flask import Blueprint, Flask, jsonify, render_template, request
 
 from powererp.container import Container
 from powererp.core.errors import AppError
@@ -29,6 +30,7 @@ from powererp.modules.common.crud import register_crud_routes
 from powererp.modules.common.registry import label_lookup
 from powererp.store import store
 
+from . import printing
 from .company import CompanyProfileService
 from .customers import CustomerService
 from .invoices import DRAFT_SEQUENCE, INVOICE_SEQUENCE, SalesInvoiceService
@@ -39,7 +41,7 @@ DESC_FR, DESC_EN = ("cDescFR",), ("cDescEN", "cDescFR")
 
 
 def register(app: Flask, c: Container, seed: dict) -> None:
-    bp = Blueprint("sales", __name__)
+    bp = Blueprint("sales", __name__, template_folder="templates")
     products, categories, converter = c.get("products"), c.get("categories"), c.get("unit_converter")
     plist_refs = {"products": products.find, "categories": categories.find, "converter": converter}
     price_lists = c.register("price_lists", PriceListService(store("price_lists"), plist_refs, c.get("references")))
@@ -138,6 +140,16 @@ def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, 
     @bp.route("/api/sales-invoices/<int:no>/calc", methods=["POST"])
     def sales_invoice_calc(no=None):
         return jsonify(invoices.preview(json_payload(), no))
+
+    @bp.route("/api/sales-invoices/<int:no>/print")
+    def sales_invoice_print(no):
+        inv = invoices.get(no)
+        customer = customers.find(inv["cCustomer"])
+        ship_to = customers.ship_to(customer, inv["cShipTo"]) if customer and inv["cShipTo"] else None
+        codes = {t["cCode"].upper(): t for t in c.get("tax_codes").list()}
+        lang = (request.args.get("lang") or inv.get("cLang") or "fr").lower()
+        ctx = printing.context(inv, c.get("company_profile").view(), customer, ship_to, codes, lang)
+        return render_template("sales_invoice.html", **ctx)
 
     @bp.route("/api/sales-invoices/<int:no>/check", methods=["POST"])
     def sales_invoice_check(no):
