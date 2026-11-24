@@ -197,6 +197,10 @@ ADMIN_ENDPOINTS = frozenset(
     {
         "auth.users_collection",
         "auth.users_item",
+        "auth.permission_catalog",
+        "auth.roles_collection",
+        "auth.roles_item",
+        "auth.role_history",
         "backup.backup_settings",
         "backup.backup_file",
         "backup.backup_run",

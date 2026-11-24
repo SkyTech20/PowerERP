@@ -70,4 +70,4 @@ jobs:
 
       # the screen definitions (static/js/resources), checked without a browser
       - name: Run front-end checks
-        run: node --test tests/js/forms.test.mjs
+        run: node --test tests/js/forms.test.mjs tests/js/access.test.mjs

@@ -27,7 +27,7 @@ api (Flask routes)  ->  service (business rules)  ->  repository (database)  -> 
   `CrudService` (`keep_child`), and `grids: [...]` on the screen (see the resources of Production).
 - New tables only through an Alembic migration (`alembic revision --autogenerate -m "..."`, then review it).
 - Type hints on public functions and methods.
-- Before a commit: `ruff check .`, `black .`, `mypy`, `python -m pytest`, `node --test tests/js/forms.test.mjs` (the CI runs the same).
+- Before a commit: `ruff check .`, `black .`, `mypy`, `python -m pytest`, `node --test tests/js/forms.test.mjs tests/js/access.test.mjs` (the CI runs the same).
 - Tests: the API tests in `tests/` are the contract (screens, SkyAI); add unit tests in `tests/unit/` for every service.
 
 ## Adding a module

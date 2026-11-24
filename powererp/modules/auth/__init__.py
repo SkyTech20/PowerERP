@@ -28,9 +28,19 @@ from powererp.core import permissions
 from powererp.core.http import json_payload
 from powererp.core.values import text
 
+from .roles import RoleService
 from .service import AuthError, AuthService, UserRepository, UserService, public
 
-__all__ = ["AuthError", "AuthService", "UserRepository", "UserService", "current_user", "register"]
+__all__ = [
+    "AuthError",
+    "AuthService",
+    "RoleService",
+    "UserRepository",
+    "UserService",
+    "current_user",
+    "register",
+    "role_lookup",
+]
 
 PW_PREFIX = "/cgi-bin/"
 OPEN_PATHS = {"/", "/api/health", "/api/auth/login", "/api/auth/logout", "/api/auth/me"}
@@ -97,7 +107,7 @@ def _paged_users(rows):
     return {"total": len(rows), "page": page, "size": size, "items": rows[start : start + size]}
 
 
-def _blueprint(auth: AuthService, users: UserService) -> Blueprint:
+def _blueprint(auth: AuthService, users: UserService, roles: RoleService) -> Blueprint:
     bp = Blueprint("auth", __name__)
 
     @bp.route("/api/health")
@@ -168,12 +178,55 @@ def _blueprint(auth: AuthService, users: UserService) -> Blueprint:
             return jsonify({"ok": True})
         return jsonify(users.update(user_id, json_payload()))
 
+    @bp.route("/api/permissions")
+    def permission_catalog():
+        """The screens and actions a role can be given (Administration > Roles)."""
+        return jsonify(roles.catalog())
+
+    @bp.route("/api/roles", methods=["GET", "POST"])
+    def roles_collection():
+        if request.method == "GET":
+            rows = roles.rows()
+            return jsonify({"total": len(rows), "page": 1, "size": len(rows), "items": rows})
+        return jsonify(roles.create(json_payload())), 201
+
+    @bp.route("/api/roles/<code>", methods=["GET", "PUT", "DELETE"])
+    def roles_item(code):
+        if request.method == "GET":
+            return jsonify(roles.get(code))
+        if request.method == "DELETE":
+            roles.delete(code)
+            return jsonify({"ok": True})
+        return jsonify(roles.update(code, json_payload()))
+
+    @bp.route("/api/roles/<code>/history")
+    def role_history(code):
+        roles.get(code)  # 404 when unknown
+        return jsonify(roles.history(code))
+
     return bp
+
+
+def role_lookup(roles: RoleService):
+    """Active roles for the Role field of the users: code + description in the language of the screen."""
+
+    def fn():
+        en = request.args.get("lang") == "en"
+        return [
+            {"code": r["cCode"], "label": (r["cDescEN"] if en and r["cDescEN"] else r["cDescFR"])}
+            for r in roles.rows()
+            if r["lActive"]
+        ], 200
+
+    return fn
 
 
 def register(app: Flask, c: Container) -> None:
     auth = c.register("auth", AuthService(_users))
     users = c.register("users", UserService(_users))
+    from powererp.core.security import current_username
+
+    roles = c.register("roles", RoleService(current_username))
     app.config.update(
         SECRET_KEY=auth.secret_key(),
         # Own cookie name: SkyAI is served from the same host.
@@ -185,4 +238,4 @@ def register(app: Flask, c: Container) -> None:
     )
     auth.ensure_admin()
     app.before_request(guard)
-    app.register_blueprint(_blueprint(auth, users))
+    app.register_blueprint(_blueprint(auth, users, roles))

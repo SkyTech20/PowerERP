@@ -173,3 +173,77 @@ def test_another_admin_role_keeps_the_last_admin_rule(admin):
     assert r.status_code == 201
     # another active administrator exists: the first one may become a plain user
     assert admin.put(f"/api/users/{me['id']}", json={"name": "Administrator", "role": "USER"}).status_code == 200
+
+
+# ------------------------------------------------------------------ Administration > Roles (A2)
+def test_demo_roles(admin):
+    rows = {r["cCode"]: r for r in admin.get("/api/roles").get_json()["items"]}
+    assert {"ADMIN", "USER", "SALES", "PRODUCTION", "WAREHOUSE"} <= set(rows)
+    assert rows["ADMIN"]["lAdmin"] and rows["ADMIN"]["permissions"] == P.all_permissions()
+    assert rows["ADMIN"]["iUsers"] == 1
+    assert "sales.invoices:post" in rows["SALES"]["permissions"]
+    assert "sales.invoices:credit" not in rows["SALES"]["permissions"]
+    assert all(p in P.all_permissions() for r in rows.values() for p in r["permissions"])
+    catalog = admin.get("/api/permissions").get_json()
+    assert [c["cScreen"] for c in catalog] == [s.key for s in P.SCREENS]
+    lookup = admin.get("/api/lookups/roles?lang=en").get_json()
+    assert {"code": "SALES", "label": "Sales desk"} in lookup
+
+
+def test_role_create_edit_delete_with_history(admin, app):
+    r = admin.post("/api/roles", json={"cCode": "buyer", "cDescFR": "Acheteur", "permissions": ["pur.po:edit"]})
+    assert r.status_code == 201
+    role = r.get_json()
+    # the code is upper case; an action brings the view of its screen
+    assert role["cCode"] == "BUYER" and role["permissions"] == ["pur.po:view", "pur.po:edit"]
+    assert admin.post("/api/roles", json={"cCode": "Buyer", "cDescFR": "x"}).status_code == 409
+    assert admin.post("/api/roles", json={"cCode": "A B", "cDescFR": "x"}).get_json()["error"] == "bad_code"
+    assert admin.post("/api/roles", json={"cCode": "X1", "cDescFR": ""}).get_json()["field"] == "cDescFR"
+    bad = admin.post("/api/roles", json={"cCode": "X2", "cDescFR": "x", "permissions": ["pur.po:fly"]})
+    assert bad.status_code == 400 and bad.get_json()["detail"] == "pur.po:fly"
+
+    r = admin.put(
+        "/api/roles/buyer",
+        json={"cDescFR": "Acheteuse", "permissions": ["pur.po:view", "pur.po:create", "ap.suppliers:view"]},
+    )
+    assert r.status_code == 200
+    assert r.get_json()["permissions"] == ["ap.suppliers:view", "pur.po:view", "pur.po:create"]
+
+    admin.post("/api/users", json={"username": "bea", "name": "Bea", "role": "BUYER", "password": "secret1"})
+    u = app.test_client()
+    u.post("/api/auth/login", json={"username": "bea", "password": "secret1"})
+    assert u.get("/api/suppliers").status_code == 200
+    assert u.get("/api/roles").status_code == 403  # roles: administrator only
+    assert admin.get("/api/roles/BUYER").get_json()["users"][0]["username"] == "bea"
+    assert admin.delete("/api/roles/BUYER").status_code == 409  # given to a user
+
+    history = admin.get("/api/roles/buyer/history").get_json()
+    assert [h["cChange"] for h in history] == ["permissions", "updated", "created"]
+    assert history[0]["details"] == {"added": ["ap.suppliers:view", "pur.po:create"], "removed": ["pur.po:edit"]}
+    assert history[1]["details"] == {"cDescFR": ["Acheteur", "Acheteuse"]} and history[0]["cUser"] == "admin"
+
+    me = admin.get("/api/auth/me").get_json()
+    admin.put(f"/api/users/{u.get('/api/auth/me').get_json()['id']}", json={"name": "Bea", "role": "USER"})
+    assert admin.delete("/api/roles/BUYER").status_code == 200
+    assert admin.get("/api/roles/BUYER").status_code == 404
+    assert admin.get("/api/roles/BUYER/history").status_code == 404
+    assert me["role"] == "ADMIN"
+
+
+def test_copy_role_and_admin_role_is_fixed(admin):
+    r = admin.post("/api/roles", json={"cCode": "SALES2", "cDescFR": "Ventes 2", "cCopyFrom": "sales"})
+    assert r.status_code == 201
+    sales = admin.get("/api/roles/SALES").get_json()
+    assert r.get_json()["permissions"] == sales["permissions"]
+    assert admin.get("/api/roles/SALES2/history").get_json()[0]["details"]["copiedFrom"] == "SALES"
+    assert admin.put("/api/roles/ADMIN", json={"cDescFR": "x"}).get_json()["error"] == "admin_role"
+    assert admin.delete("/api/roles/ADMIN").status_code == 409
+
+
+def test_demo_reset_puts_the_example_roles_back(admin):
+    admin.put("/api/roles/SALES", json={"permissions": []})
+    assert admin.get("/api/roles/SALES").get_json()["permissions"] == []
+    assert admin.post("/api/reset").status_code == 200
+    assert "sales.invoices:view" in admin.get("/api/roles/SALES").get_json()["permissions"]
+    last = admin.get("/api/roles/SALES/history").get_json()[0]
+    assert last["cChange"] == "demo" and "sales.invoices:view" in last["details"]["added"]
