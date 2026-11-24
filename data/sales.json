@@ -1,5 +1,5 @@
 {
- "_about": "Sales demo data (V1, V2): the company profile printed on the invoices, B2B customers and their price lists. Codes in English, fictitious companies.",
+ "_about": "Sales demo data (V1-V6): the company profile printed on the invoices, B2B customers, their price lists and 3 draft invoices (sales_invoices: calculated rows, ready to check and post). Codes in English, fictitious companies.",
  "company_profile": [
   {
    "cCode": "MAIN",
@@ -500,6 +500,225 @@
      "lInvoices": true
     }
    ]
+  }
+ ],
+ "sales_invoices": [
+  {
+   "allocations": [],
+   "cCustomer": "HOTEL-LAURIER",
+   "cCustomerName": "Hôtel Laurier Gatineau",
+   "cCustomerPO": "BC-4471",
+   "cInvoiceNo": "",
+   "cLang": "fr",
+   "cNotes": "",
+   "cOrigInvoice": "",
+   "cPostedBy": "",
+   "cShipTo": "HOTEL",
+   "cStatus": "draft",
+   "cTaxGroup": "QC",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cType": "invoice",
+   "cUser": "demo",
+   "cWarehouse": "ENT-01",
+   "dCost": "0.00",
+   "dCreated": "2026-11-18T09:00:00",
+   "dDate": "2026-11-18",
+   "dDiscountTotal": "28.21",
+   "dPosted": "",
+   "dSubTotal": "496.79",
+   "dTaxTotal": "74.39",
+   "dTotal": "571.18",
+   "iNo": 1,
+   "lines": [
+    {
+     "cDescription": "Tube DEL T8 4 pi, 18 W",
+     "cPriceSource": "price_list",
+     "cProduct": "TUBE-T8",
+     "cTaxGroup": "QC",
+     "cUOM": "UN",
+     "dAmount": "183.33",
+     "dDiscountPct": "3",
+     "dNetPrice": "15.2775",
+     "dPrice": "15.75",
+     "dQty": "12",
+     "iOrigLine": 0,
+     "lReturn": false
+    },
+    {
+     "cDescription": "Ensemble clavier et souris sans fil",
+     "cPriceSource": "product",
+     "cProduct": "CLAV-SF",
+     "cTaxGroup": "QC",
+     "cUOM": "UN",
+     "dAmount": "153.26",
+     "dDiscountPct": "3",
+     "dNetPrice": "76.63",
+     "dPrice": "79.00",
+     "dQty": "2",
+     "iOrigLine": 0,
+     "lReturn": false
+    },
+    {
+     "cDescription": "Extincteur ABC 5 lb",
+     "cPriceSource": "price_list",
+     "cProduct": "EXT-5LB",
+     "cTaxGroup": "QC",
+     "cUOM": "UN",
+     "dAmount": "160.20",
+     "dDiscountPct": "10",
+     "dNetPrice": "80.10",
+     "dPrice": "89.00",
+     "dQty": "2",
+     "iOrigLine": 0,
+     "lReturn": false
+    }
+   ],
+   "taxes": [
+    {
+     "cKind": "gst",
+     "cTaxCode": "TPS",
+     "cTaxGroup": "QC",
+     "dBase": "496.79",
+     "dRate": "5",
+     "dTax": "24.84"
+    },
+    {
+     "cKind": "pst",
+     "cTaxCode": "TVQ",
+     "cTaxGroup": "QC",
+     "dBase": "496.79",
+     "dRate": "9.975",
+     "dTax": "49.55"
+    }
+   ]
+  },
+  {
+   "allocations": [],
+   "cCustomer": "MAPLE-FOODS",
+   "cCustomerName": "Maple Foods Distribution Ltd.",
+   "cCustomerPO": "MF-20931",
+   "cInvoiceNo": "",
+   "cLang": "en",
+   "cNotes": "",
+   "cOrigInvoice": "",
+   "cPostedBy": "",
+   "cShipTo": "DC-TORONTO",
+   "cStatus": "draft",
+   "cTaxGroup": "ON",
+   "cTermCode": "n45",
+   "cTermDesc": "net 45 days",
+   "cType": "invoice",
+   "cUser": "demo",
+   "cWarehouse": "ENT-01",
+   "dCost": "0.00",
+   "dCreated": "2026-11-19T09:00:00",
+   "dDate": "2026-11-19",
+   "dDiscountTotal": "35.48",
+   "dPosted": "",
+   "dSubTotal": "851.52",
+   "dTaxTotal": "110.70",
+   "dTotal": "962.22",
+   "iNo": 2,
+   "lines": [
+    {
+     "cDescription": "USB-C docking station",
+     "cPriceSource": "price_list",
+     "cProduct": "DOCK-USBC",
+     "cTaxGroup": "ON",
+     "cUOM": "UN",
+     "dAmount": "478.08",
+     "dDiscountPct": "4",
+     "dNetPrice": "239.04",
+     "dPrice": "249.00",
+     "dQty": "2",
+     "iOrigLine": 0,
+     "lReturn": false
+    },
+    {
+     "cDescription": "27\" QHD monitor",
+     "cPriceSource": "price_list",
+     "cProduct": "MON-27Q",
+     "cTaxGroup": "ON",
+     "cUOM": "UN",
+     "dAmount": "373.44",
+     "dDiscountPct": "4",
+     "dNetPrice": "373.44",
+     "dPrice": "389.00",
+     "dQty": "1",
+     "iOrigLine": 0,
+     "lReturn": false
+    }
+   ],
+   "taxes": [
+    {
+     "cKind": "hst",
+     "cTaxCode": "TVH-ON",
+     "cTaxGroup": "ON",
+     "dBase": "851.52",
+     "dRate": "13",
+     "dTax": "110.70"
+    }
+   ]
+  },
+  {
+   "allocations": [],
+   "cCustomer": "CPE-SOLEIL",
+   "cCustomerName": "CPE Les Petits Soleils",
+   "cCustomerPO": "",
+   "cInvoiceNo": "",
+   "cLang": "fr",
+   "cNotes": "",
+   "cOrigInvoice": "",
+   "cPostedBy": "",
+   "cShipTo": "",
+   "cStatus": "draft",
+   "cTaxGroup": "EXO",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cType": "invoice",
+   "cUser": "demo",
+   "cWarehouse": "ENT-01",
+   "dCost": "0.00",
+   "dCreated": "2026-11-20T09:00:00",
+   "dDate": "2026-11-20",
+   "dDiscountTotal": "8.98",
+   "dPosted": "",
+   "dSubTotal": "170.57",
+   "dTaxTotal": "0.00",
+   "dTotal": "170.57",
+   "iNo": 3,
+   "lines": [
+    {
+     "cDescription": "Papier à photocopie 8,5 x 11 (caisse de 10 rames)",
+     "cPriceSource": "price_list",
+     "cProduct": "PAP-8511",
+     "cTaxGroup": "EXO",
+     "cUOM": "CS",
+     "dAmount": "132.81",
+     "dDiscountPct": "5",
+     "dNetPrice": "66.405",
+     "dPrice": "69.90",
+     "dQty": "2",
+     "iOrigLine": 0,
+     "lReturn": false
+    },
+    {
+     "cDescription": "Crayons HB (boîte de 12)",
+     "cPriceSource": "price_list",
+     "cProduct": "CRAY-HB",
+     "cTaxGroup": "EXO",
+     "cUOM": "BTE",
+     "dAmount": "37.76",
+     "dDiscountPct": "5",
+     "dNetPrice": "7.5525",
+     "dPrice": "7.95",
+     "dQty": "5",
+     "iOrigLine": 0,
+     "lReturn": false
+    }
+   ],
+   "taxes": []
   }
  ]
 }

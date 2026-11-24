@@ -862,6 +862,42 @@ def recipes() -> list[dict]:
     ]
 
 
+# ------------------------------------------------------------------ finished pastels (sales demo)
+
+# The pastels made before the demo starts (there are no production orders yet: M3), so that the sales invoices of
+# data/pastry/sales.json can be posted: one lot per day of production, at the shop's counter.
+MADE_BEFORE = [  # (product, quantity, unit cost)
+    ("PASTEL-BEEF", 120, "2.10"),
+    ("PASTEL-CHICKEN", 120, "1.85"),
+    ("PASTEL-HAM-CHEESE", 90, "1.95"),
+]
+
+
+def finished_goods() -> list[dict]:
+    return [
+        {
+            "dDate": day,
+            "cType": "IN",
+            "cProduct": code,
+            "dQty": num(qty // 2),
+            "dUnitCost": cost,
+            "cWarehouse": WH,
+            "cLocation": "SHOP-01",
+            "cWhTo": "",
+            "cLocTo": "",
+            "cLot": f"{code.split('-', 1)[1]}-{day.replace('-', '')}",
+            "cSerial": "",
+            "dExpiry": "",
+            "cDocType": "PROD",
+            "cDocNo": "",
+            "cReason": "Production (stock initial)",
+            "cComment": "",
+        }
+        for day in ("2026-11-18", "2026-11-19")
+        for code, qty, cost in MADE_BEFORE
+    ]
+
+
 # ------------------------------------------------------------------ files
 
 
@@ -869,6 +905,7 @@ def main() -> None:
     prods = products()
     by_code = {p["cCode"]: p for p in prods}
     suppliers, pos, recs, invoices, movements = build_purchases(by_code)
+    movements += finished_goods()
     inventory = {
         "_about": "Pastry shop demo (tools/make_pastry_data.py). Taxes and units come from data/inventory.json.",
         "categories": [

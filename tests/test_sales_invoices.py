@@ -1,6 +1,7 @@
 """Sales API (V3): draft invoices priced for the customer, with the taxes of the place of delivery."""
 
 DAY = "2026-11-23"
+DEMO = 3  # draft invoices of the demo data (data/sales.json)
 
 
 def new(client, **over):
@@ -17,7 +18,7 @@ def new(client, **over):
 
 def test_create_with_the_customer_defaults_and_prices(client):
     inv = new(client)
-    assert inv["iNo"] == 1 and inv["cStatus"] == "draft" and inv["cInvoiceNo"] == ""
+    assert inv["iNo"] == DEMO + 1 and inv["cStatus"] == "draft" and inv["cInvoiceNo"] == ""
     assert (inv["cCustomer"], inv["cCustomerName"], inv["cShipTo"]) == (
         "HOTEL-LAURIER",
         "Hôtel Laurier Gatineau",
@@ -39,8 +40,8 @@ def test_create_with_the_customer_defaults_and_prices(client):
         "22.88",
         "175.66",
     )
-    assert client.get("/api/sales-invoices/1").get_json() == inv
-    assert new(client)["iNo"] == 2
+    assert client.get(f"/api/sales-invoices/{DEMO + 1}").get_json() == inv
+    assert new(client)["iNo"] == DEMO + 2
 
 
 def test_taxes_follow_the_place_of_delivery_and_the_product(client):
@@ -97,7 +98,7 @@ def test_calc_without_saving(client):
     inv = r.get_json()
     assert inv["iNo"] == 0 and inv["cLang"] == "en" and inv["lines"][0]["dNetPrice"] == "239.04"
     assert inv["lines"][0]["cDescription"] == client.get("/api/products/DOCK-USBC").get_json()["cDescEN"]
-    assert client.get("/api/sales-invoices").get_json()["total"] == 0
+    assert client.get("/api/sales-invoices").get_json()["total"] == DEMO
     saved = new(client)
     r = client.post(f"/api/sales-invoices/{saved['iNo']}/calc", json={"lines": [{"cProduct": "TUBE-T8", "dQty": "50"}]})
     assert r.get_json()["lines"][0]["dPrice"] == "13.95"
@@ -106,11 +107,12 @@ def test_calc_without_saving(client):
 
 def test_list_delete_and_references(client):
     inv = new(client)
-    page = client.get("/api/sales-invoices?q=laurier").get_json()
-    assert page["total"] == 1 and page["items"][0]["iLines"] == 1 and "lines" not in page["items"][0]
+    page = client.get("/api/sales-invoices?q=laurier&sort=iNo&dir=desc").get_json()
+    assert page["total"] == 2 and page["items"][0]["iLines"] == 1 and "lines" not in page["items"][0]
     assert client.delete("/api/customers/HOTEL-LAURIER").status_code == 409  # used by an invoice
     assert client.delete(f"/api/sales-invoices/{inv['iNo']}").status_code == 200
     assert client.get(f"/api/sales-invoices/{inv['iNo']}").status_code == 404
+    assert client.delete("/api/sales-invoices/1").status_code == 200  # the demo's draft for the same customer
     assert client.delete("/api/customers/HOTEL-LAURIER").status_code == 200
 
 
@@ -118,5 +120,11 @@ def test_reset_restarts_the_numbering(client):
     new(client)
     new(client)
     client.post("/api/reset")
-    assert client.get("/api/sales-invoices").get_json()["total"] == 0
-    assert new(client)["iNo"] == 1
+    assert client.get("/api/sales-invoices").get_json()["total"] == DEMO
+    assert new(client)["iNo"] == DEMO + 1
+
+
+def test_the_demo_drafts_can_be_posted(client):
+    for no in range(1, DEMO + 1):
+        assert client.post(f"/api/sales-invoices/{no}/check").get_json()["ok"], no
+    assert client.post("/api/sales-invoices/1/post").get_json()["cInvoiceNo"] == "1"

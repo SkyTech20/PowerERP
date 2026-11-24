@@ -6,7 +6,8 @@ Scenario (chosen on the dashboard when the demo data is reset, ERP_SCENARIO for 
     pastry          a pastry shop that makes 3 pastels (data/pastry, tools/make_pastry_data.py): its own suppliers,
                     items, recipes and shop floor; the stock is the raw material received and invoiced
 
-Every scenario has a company profile and customers (data/sales.json; the pastry shop: data/pastry/sales.json).
+Every scenario has a company profile, customers, price lists and draft sales invoices (data/sales.json; the pastry
+shop: data/pastry/sales.json).
 
 Same shapes as the PowerWARE / SkyAI feeds. data/demo/history.json (tools/make_history_data.py) adds suppliers and
 closed POs / receptions / invoices for the supplier selection of SkyAI requisitions.

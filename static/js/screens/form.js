@@ -9,7 +9,7 @@ import { pageHead, tabLabel } from "../views.js";
 // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
 // textarea | password | email), lookup (+ fill, lookupParams, onPick), show(model, isNew), rerender (redraw on change).
 // Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
-// locked(model, isNew), actions, panel { html(model), bind(model), tab, onNew } and panels (more of them).
+// locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model), tab, onNew } and panels (more of them).
 // recalc(model, { path, field, line }) -> Promise of the model calculated by the server: called when a field or a
 // line column marked recalc: true changes (e.g. the prices and taxes of a sales invoice); its errors are shown.
 // A grid with a detail (G.detail) is shown as a list of its lines (G.cols: what a line shows, with fmt) and a panel
@@ -58,7 +58,7 @@ export function formView(key, id) {
   function fieldHtml(fd) {
     if (!visible(fd)) return "";
     const v = model[fd.f];
-    const ro = locked || fd.readonly || (fd.key && !isNew);
+    const ro = locked || (typeof fd.readonly === "function" ? fd.readonly(model) : fd.readonly) || (fd.key && !isNew);
     const required = !locked && (fd.req || (fd.reqNew && isNew));
     const label = `<label for="f-${fd.f}">${esc(t(fd.l))}${required ? '<span class="req">*</span>' : ""}</label>`;
     const err = errors[fd.f] ? `<span class="err">${esc(t("err." + errors[fd.f]))}</span>` : "";
@@ -165,14 +165,16 @@ export function formView(key, id) {
     if (L.detail) return detailHtml(L, key);
     const rows = model[key] || [];
     const amount = key === "lines" && L.amount;
-    const head = L.cols.map((c) => `<th class="${c.n ? "num" : ""}">${esc(c.raw ? c.l : t(c.l))}</th>`).join("")
+    const cols = L.cols.filter((c) => !c.show || c.show(model)); // a column can depend on the record (show)
+    const head = cols.map((c) => `<th class="${c.n ? "num" : ""}">${esc(c.raw ? c.l : t(c.l))}</th>`).join("")
       + (amount ? `<th class="num">${esc(t(L.amountLabel))}</th>` : "") + (locked ? "" : "<th></th>");
-    const body = rows.map((ln, i) => `<tr data-line="${i}" class="${L.rowClass ? L.rowClass(ln) : ""}">${L.cols.map((c) => `<td class="${c.w}">${lineCell(c, ln)}</td>`).join("")}
+    const body = rows.map((ln, i) => `<tr data-line="${i}" class="${L.rowClass ? L.rowClass(ln) : ""}">${cols.map((c) => `<td class="${c.w}">${lineCell(c, ln)}</td>`).join("")}
       ${amount ? `<td class="num" data-amount>${esc(money(L.amount(ln), cur()))}</td>` : ""}
       ${locked ? "" : `<td><button type="button" class="link-btn" data-remove="${i}" title="${esc(t("common.removeLine"))}">✕</button></td>`}</tr>`).join("");
     const addBtn = locked ? "" : `<button type="button" class="btn small" ${key === "lines" ? 'id="addLine"' : ""} data-add style="margin-left:auto">＋ ${esc(t("common.addLine"))}</button>`;
-    return `<div class="card" data-grid="${key}"><div class="card-head"><h2>${esc(t(L.title || "common.lines"))}</h2>${L.help ? `<span class="help muted">${esc(t(L.help))}</span>` : ""}${addBtn}</div>
-      <div class="table-wrap"><table class="grid lines" ${L.cols.length > 8 ? `style="min-width:${L.cols.length * 115}px"` : ""}><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+    const help = L.helpOf ? L.helpOf(model) : L.help;
+    return `<div class="card" data-grid="${key}"><div class="card-head"><h2>${esc(t(L.title || "common.lines"))}</h2>${help ? `<span class="help muted">${esc(t(help))}</span>` : ""}${addBtn}</div>
+      <div class="table-wrap"><table class="grid lines" ${cols.length > 8 ? `style="min-width:${cols.length * 115}px"` : ""}><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
       ${rows.length ? "" : `<div class="empty">${esc(t("common.noLines"))}</div>`}</div>
       ${key === "lines" && R.totals ? '<div class="totals" id="totals"></div>' : ""}</div>`;
   }
@@ -230,7 +232,7 @@ export function formView(key, id) {
       return;
     }
     locked = !!(R.locked && R.locked(model, isNew));
-    const title = isNew ? t(R.newTitle) : `${t(R.one)} ${R.label(model)}`;
+    const title = isNew ? t(R.newTitle) : `${t(R.oneOf ? R.oneOf(model) : R.one)} ${R.label(model)}`;
     const crumbs = `<a href="#${R.route}">${esc(t(R.title))}</a>${R.tabset ? " / " + esc(tabLabel(R)) : ""}`;
     const extra = (R.actions || []).filter((a) => !a.show || a.show(model, isNew))
       .map((a) => `<button class="btn ${a.primary ? "primary" : ""}" data-action="${a.id}">${esc(t(a.l))}</button>`).join("");

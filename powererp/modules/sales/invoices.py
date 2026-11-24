@@ -21,6 +21,14 @@ moves while one problem is left. Then, in one transaction:
   (allocations) with its value at the average cost; a product not stocked (a service) does not move;
 - the invoice takes its definitive number (sequence SALES_INVOICE, never below the company profile's
   iInvoiceStart, without gaps) and can no longer be changed or deleted.
+
+Credit notes (V6: cType "credit"): they credit a posted invoice (cOrigInvoice, its number), usually made from it
+(credit_from(): every line still creditable). The header is the invoice's (customer, places, language, tax group);
+each line credits a line of the invoice (iOrigLine), at its price and discount unless typed, at most the quantity
+invoiced minus what posted credit notes already credited; the taxes are those of the invoice's date. Posting it:
+the lines marked lReturn bring the goods back to the stock, into the lots / locations / serial numbers they went out
+of, at their cost (ADJ movements, document "SO"); the others only credit the price. Numbered NC-1, NC-2... (sequence
+SALES_CREDIT).
 """
 
 from __future__ import annotations
@@ -40,6 +48,8 @@ from powererp.store import Store
 
 DRAFT_SEQUENCE = "SALES_INVOICE_DRAFT"
 INVOICE_SEQUENCE = "SALES_INVOICE"
+CREDIT_SEQUENCE = "SALES_CREDIT"
+CREDIT_PREFIX = "NC-"
 EPS = 1e-9
 Rows = list[Row]
 Received = dict[tuple[str, ...], tuple[str, int, str, int]]
@@ -110,7 +120,7 @@ class SalesInvoiceService:
 
     # ---------------------------------------------------------- calculation
     def _apply(self, inv: Row, payload: Row) -> Row:
-        self.form.apply(inv, payload)
+        self.form.apply(inv, payload, skip=("cType", "cOrigInvoice") if inv.get("iNo") else ())
         if "lines" in payload:
             inv["lines"] = self.line_form.lines(payload, lambda ln: bool(text(ln.get("cProduct"))))
         return inv
@@ -142,20 +152,30 @@ class SalesInvoiceService:
 
     def calc(self, inv: Row) -> Row:
         """Check the draft and fill in everything calculated (see the module's docstring). Changes inv in place."""
+        if inv.get("cType") == "credit":
+            orig = self._credit_header(inv)
+            for i, ln in enumerate(inv.get("lines", []), 1):
+                self._credit_line(inv, orig, ln, i)
+            return self._totals(inv, orig["dDate"])
         customer = self._header(inv)
         group = self.refs["tax_groups"].find(inv["cTaxGroup"]) if inv["cTaxGroup"] else None
         invoice_taxable = group is None or group.get("cTreatment") == "taxable"
-        bases: dict[str, float] = {}
-        gross = 0.0
         for i, ln in enumerate(inv.get("lines", []), 1):
             self._line(inv, customer, ln, i, invoice_taxable)
+        return self._totals(inv, inv["dDate"])
+
+    def _totals(self, inv: Row, tax_date: str) -> Row:
+        """The taxes on the total of the lines of each tax group (at tax_date), the totals."""
+        bases: dict[str, float] = {}
+        gross = 0.0
+        for ln in inv.get("lines", []):
             gross += number(ln["dQty"]) * number(ln["dPrice"])
             if ln["cTaxGroup"]:
                 bases[ln["cTaxGroup"]] = bases.get(ln["cTaxGroup"], 0.0) + number(ln["dAmount"])
         sub = sum(number(ln["dAmount"]) for ln in inv.get("lines", []))
         taxes: list[Row] = []
         for code in sorted(bases):
-            result = self.refs["tax_calculator"].calc(code, round(bases[code], 2), inv["dDate"])
+            result = self.refs["tax_calculator"].calc(code, round(bases[code], 2), tax_date)
             for tx in (result or {}).get("taxes", []):
                 taxes.append(
                     {
@@ -255,6 +275,91 @@ class SalesInvoiceService:
                 return str(own["cCode"])
         return str(inv["cTaxGroup"])
 
+    # ---------------------------------------------------------- credit notes (V6)
+    def posted_invoice(self, number_: str) -> Row | None:
+        """The posted invoice of that number (not a credit note)."""
+        n = text(number_).strip()
+        return next(
+            (
+                i
+                for i in self.repo.all()
+                if i.get("cType", "invoice") == "invoice" and i["cStatus"] == "posted" and i["cInvoiceNo"] == n
+            ),
+            None,
+        )
+
+    def credited(self, invoice_no: str, but: int = 0) -> dict[int, float]:
+        """Quantity credited per line of the invoice by its posted credit notes (other than the draft `but`)."""
+        out: dict[int, float] = {}
+        for c in self.repo.all():
+            if c.get("cType") != "credit" or c["cOrigInvoice"] != invoice_no or c["cStatus"] != "posted":
+                continue
+            if c["iNo"] == but:
+                continue
+            for ln in c.get("lines", []):
+                out[ln["iOrigLine"]] = out.get(ln["iOrigLine"], 0.0) + number(ln["dQty"])
+        return out
+
+    def _credit_header(self, inv: Row) -> Row:
+        if not text(inv["cOrigInvoice"]):
+            raise AppError("required", "cOrigInvoice")
+        orig = self.posted_invoice(inv["cOrigInvoice"])
+        if orig is None:
+            raise AppError("unknown_ref", "cOrigInvoice")
+        for f in ("cCustomer", "cCustomerName", "cShipTo", "cWarehouse", "cLang", "cTaxGroup", "cCustomerPO"):
+            inv[f] = orig[f]
+        inv["cTermCode"], inv["cTermDesc"] = "", ""
+        inv["dDate"] = inv["dDate"] or today()
+        return orig
+
+    def _credit_line(self, inv: Row, orig: Row, ln: Row, i: int) -> None:
+        where = f"line {i}"
+        lines = orig.get("lines", [])
+        n = int(ln.get("iOrigLine") or 0)
+        if not n:  # the first line of the invoice with that product
+            n = next((k for k, ol in enumerate(lines, 1) if ol["cProduct"].upper() == text(ln["cProduct"]).upper()), 0)
+        if not 1 <= n <= len(lines):
+            raise AppError("not_invoiced", "lines", detail=f"{where}: {ln['cProduct']}")
+        ol = lines[n - 1]
+        ln["iOrigLine"] = n
+        ln["cProduct"], ln["cUOM"], ln["cTaxGroup"] = ol["cProduct"], ol["cUOM"], ol["cTaxGroup"]
+        ln["cDescription"] = ln["cDescription"] or ol["cDescription"]
+        if not text(ln["dQty"]) or number(ln["dQty"]) <= 0:
+            raise AppError("positive", "lines", detail=f"{where}: dQty")
+        left = number(ol["dQty"]) - self.credited(orig["cInvoiceNo"], inv.get("iNo") or 0).get(n, 0.0)
+        left -= sum(number(x["dQty"]) for x in inv["lines"][: i - 1] if x.get("iOrigLine") == n)
+        if number(ln["dQty"]) > left + EPS:
+            raise AppError(
+                "over_credit", "lines", detail=f"{where}: {ol['cProduct']} {number(ln['dQty']):g} > {left:g}"
+            )
+        ln["dQty"] = quantity(number(ln["dQty"]))
+        ln["dPrice"] = unit_cost(number(ln["dPrice"] if text(ln["dPrice"]) else ol["dPrice"]))
+        ln["cPriceSource"] = "invoice" if abs(number(ln["dPrice"]) - number(ol["dPrice"])) < EPS else "manual"
+        disc = number(ln["dDiscountPct"] if text(ln["dDiscountPct"]) else ol["dDiscountPct"])
+        if not 0 <= disc <= 100:
+            raise AppError("out_of_range", "lines", detail=f"{where}: dDiscountPct 0-100")
+        ln["dDiscountPct"] = quantity(disc)
+        net = number(ln["dPrice"]) * (1 - disc / 100)
+        ln["dNetPrice"] = unit_cost(net)
+        ln["dAmount"] = amount(number(ln["dQty"]) * net)
+        prod = self.refs["products"].find(ln["cProduct"]) or {}
+        ln["lReturn"] = bool(ln.get("lReturn")) and bool(prod.get("lStocked"))
+
+    def credit_from(self, no: int) -> Row:
+        """A draft credit note of a posted invoice: every line still creditable, the goods coming back."""
+        orig = self.get(no)
+        if orig.get("cType") == "credit" or orig["cStatus"] != "posted":
+            raise AppError("not_posted", status=409)
+        done = self.credited(orig["cInvoiceNo"])
+        lines = []
+        for n, ol in enumerate(orig.get("lines", []), 1):
+            left = number(ol["dQty"]) - done.get(n, 0.0)
+            if left > EPS:
+                lines.append({"iOrigLine": n, "cProduct": ol["cProduct"], "dQty": quantity(left), "lReturn": True})
+        if not lines:
+            raise AppError("fully_credited", status=409)
+        return self.create({"cType": "credit", "cOrigInvoice": orig["cInvoiceNo"], "lines": lines})
+
     def preview(self, payload: Row, no: int | None = None) -> Row:
         """The draft calculated from a payload, without saving it (the screen shows the prices and taxes)."""
         inv = copy.deepcopy(self.draft(no)) if no else self.blank()
@@ -292,6 +397,8 @@ class SalesInvoiceService:
         if not problems:
             if not inv.get("lines"):
                 problems.append({"iLine": 0, "cProduct": "", "code": "no_lines", "field": "lines", "detail": ""})
+            elif inv["cType"] == "credit":
+                allocations, problems = self._returns(inv)
             elif not inv["cWarehouse"]:
                 problems.append({"iLine": 0, "cProduct": "", "code": "required", "field": "cWarehouse", "detail": ""})
             else:
@@ -358,6 +465,43 @@ class SalesInvoiceService:
                         i, prod, "insufficient_stock", f"{quantity(need)} {stock_uom} > {available} {stock_uom}"
                     )
                 )
+        return allocations, problems
+
+    def _returns(self, inv: Row) -> tuple[Rows, Rows]:
+        """A credit note: the lines marked lReturn come back to the stock, into what their invoice line took out
+        (its allocations), less what posted credit notes already brought back."""
+        orig = self.posted_invoice(inv["cOrigInvoice"]) or {}
+        back: dict[tuple, float] = {}  # (invoice line, location, lot, serial) -> quantity already returned
+        for c in self.repo.all():
+            if c.get("cType") == "credit" and c["cOrigInvoice"] == orig.get("cInvoiceNo") and c["cStatus"] == "posted":
+                for a in c.get("allocations", []):
+                    ol = c["lines"][a["iLine"] - 1]["iOrigLine"]
+                    k = (ol, a["cLocation"], a["cLot"], a["cSerial"])
+                    back[k] = back.get(k, 0.0) + number(a["dQty"])
+        allocations: Rows = []
+        problems: Rows = []
+        for i, ln in enumerate(inv["lines"], 1):
+            if not ln.get("lReturn"):
+                continue
+            prod = self.refs["products"].find(ln["cProduct"]) or {}
+            stock_uom = prod.get("cStockUOM") or ln["cUOM"]
+            factor = self.refs["unit_factor"](ln["cUOM"], stock_uom, prod) or 1.0
+            left = round(number(ln["dQty"]) * factor, 6)
+            for a in orig.get("allocations", []):
+                if a["iLine"] != ln["iOrigLine"] or left <= EPS:
+                    continue
+                k = (a["iLine"], a["cLocation"], a["cLot"], a["cSerial"])
+                free = number(a["dQty"]) - back.get(k, 0.0)
+                if free <= EPS:
+                    continue
+                take = round(min(free, left), 6)
+                back[k] = back.get(k, 0.0) + take
+                left = round(left - take, 6)
+                row = self._allocation(i, prod, {"cCode": a["cWarehouse"]}, a, take, stock_uom)
+                row["dValue"] = amount(number(a["dValue"]) / number(a["dQty"]) * take) if number(a["dQty"]) else "0.00"
+                allocations.append(row)
+            if left > EPS:
+                problems.append(self._line_problem(i, prod, "over_return", f"{quantity(left)} {stock_uom}"))
         return allocations, problems
 
     @staticmethod
@@ -438,24 +582,27 @@ class SalesInvoiceService:
         current = self.draft(no)
         inv = self.calc(copy.deepcopy(current))
         stock = self.refs["stock"]
-        number_ = self._next_invoice_no()
+        credit = inv["cType"] == "credit"
+        number_ = self._next_credit_no() if credit else self._next_invoice_no()
         staged: list[tuple[Row, Row]] = []
         for a in result["allocations"]:
-            m = stock.movement_from(
-                {
-                    "cType": "OUT",
-                    "cProduct": a["cProduct"],
-                    "dQty": a["dQty"],
-                    "cWarehouse": a["cWarehouse"],
-                    "cLocation": a["cLocation"],
-                    "cLot": a["cLot"],
-                    "cSerial": a["cSerial"],
-                    "cDocType": "SO",
-                    "cDocNo": number_,
-                    "cReason": inv["cCustomer"],
-                    "dDate": inv["dDate"],
-                }
-            )
+            payload = {
+                "cType": "ADJ" if credit else "OUT",
+                "cProduct": a["cProduct"],
+                "dQty": a["dQty"],
+                "cWarehouse": a["cWarehouse"],
+                "cLocation": a["cLocation"],
+                "cLot": a["cLot"],
+                "cSerial": a["cSerial"],
+                "cDocType": "SO",
+                "cDocNo": number_,
+                "cReason": f"{inv['cCustomer']} {inv['cOrigInvoice']}".strip() if credit else inv["cCustomer"],
+                "dDate": inv["dDate"],
+            }
+            if credit:  # back at the cost it went out at, into its lot
+                payload["dUnitCost"] = unit_cost(number(a["dValue"]) / number(a["dQty"])) if number(a["dQty"]) else ""
+                payload["dExpiry"] = a["dExpiry"]
+            m = stock.movement_from(payload)
             try:
                 prod = stock.check(m, [s for s, _p in staged])
             except AppError as e:
@@ -467,7 +614,7 @@ class SalesInvoiceService:
         for a, (m, prod) in zip(result["allocations"], staged, strict=True):
             done = stock.post(m, prod)
             a["iMovement"] = done["iNo"]
-            a["dValue"] = amount(-number(done["dValue"]))
+            a["dValue"] = amount(abs(number(done["dValue"])))
             cost += number(a["dValue"])
         inv.update(
             {
@@ -482,7 +629,19 @@ class SalesInvoiceService:
         self.repo.update(inv, [current["iNo"]])
         return inv
 
+    def _next_credit_no(self) -> str:
+        used = [
+            int(i["cInvoiceNo"][len(CREDIT_PREFIX) :])
+            for i in self.repo.all(lines=False)
+            if i.get("cType") == "credit" and i["cInvoiceNo"][len(CREDIT_PREFIX) :].isdigit()
+        ]
+        return CREDIT_PREFIX + str(self.numbering.next(CREDIT_SEQUENCE, minimum=max(used, default=0) + 1))
+
     def _next_invoice_no(self) -> str:
         start = max(1, int(self.refs["invoice_start"]() or 0))
-        used = [int(i["cInvoiceNo"]) for i in self.repo.all(lines=False) if str(i.get("cInvoiceNo", "")).isdigit()]
+        used = [
+            int(i["cInvoiceNo"])
+            for i in self.repo.all(lines=False)
+            if i.get("cType") != "credit" and str(i.get("cInvoiceNo", "")).isdigit()
+        ]
         return str(self.numbering.next(INVOICE_SEQUENCE, start=start, minimum=max([start - 1, *used]) + 1))

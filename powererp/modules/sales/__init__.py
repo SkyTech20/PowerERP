@@ -10,6 +10,8 @@ V3: /api/sales-invoices (drafts: GET/POST, GET/PUT/DELETE /<no>; a posted one is
     POST /api/sales-invoices/calc (and /<no>/calc): the draft calculated without saving it (prices, taxes, totals).
 V4: POST /api/sales-invoices/<no>/check (what posting would do: problems, stock taken), POST /<no>/post.
 V5: GET /api/sales-invoices/<no>/print?lang=fr|en: the invoice to print (HTML), in its language by default.
+V6: credit notes: sales invoices of cType "credit"; POST /api/sales-invoices/<no>/credit makes one from a posted
+    invoice (every line still creditable); then saved, checked, posted and printed like an invoice.
 
 Sales never changes the stock directly: the invoices will post movements through the stock service of the
 container (c.get("stock").add(...) with cDocType "SO"), so every stock rule applies to them.
@@ -33,7 +35,7 @@ from powererp.store import store
 from . import printing
 from .company import CompanyProfileService
 from .customers import CustomerService
-from .invoices import DRAFT_SEQUENCE, INVOICE_SEQUENCE, SalesInvoiceService
+from .invoices import CREDIT_PREFIX, CREDIT_SEQUENCE, DRAFT_SEQUENCE, INVOICE_SEQUENCE, SalesInvoiceService
 from .pricing import PriceListService, PriceResolver
 
 SEARCH = ("cCode", "cName", "cLegalName", "cCity", "cEmail")
@@ -81,7 +83,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
         company.save(json_payload())
         return jsonify(company.view())
 
-    _register_invoices(bp, c, customers, pricing)
+    _register_invoices(bp, c, customers, pricing, seed.get("sales_invoices", []))
 
     lookups = c.get("lookups")
     lookups.register("customers", label_lookup(customers, ("cName",), keep=lambda r: r.get("lActive")))
@@ -99,10 +101,12 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     app.register_blueprint(bp)
 
 
-INVOICE_SEARCH = ("iNo", "cInvoiceNo", "cCustomer", "cCustomerName", "cCustomerPO", "dDate")
+INVOICE_SEARCH = ("iNo", "cInvoiceNo", "cOrigInvoice", "cCustomer", "cCustomerName", "cCustomerPO", "dDate")
 
 
-def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, pricing: PriceResolver) -> None:
+def _register_invoices(
+    bp: Blueprint, c: Container, customers: CustomerService, pricing: PriceResolver, demo: list[dict]
+) -> None:
     refs = {
         "customers": customers,
         "products": c.get("products"),
@@ -141,6 +145,10 @@ def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, 
     def sales_invoice_calc(no=None):
         return jsonify(invoices.preview(json_payload(), no))
 
+    @bp.route("/api/sales-invoices/<int:no>/credit", methods=["POST"])
+    def sales_invoice_credit(no):
+        return jsonify(invoices.credit_from(no)), 201
+
     @bp.route("/api/sales-invoices/<int:no>/print")
     def sales_invoice_print(no):
         inv = invoices.get(no)
@@ -160,7 +168,7 @@ def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, 
         return jsonify(invoices.post(no))
 
     lifecycle = c.get("lifecycle")
-    lifecycle.add(invoices.repo, "sales_invoices", [])
+    lifecycle.add(invoices.repo, "sales_invoices", demo)
 
     def renumber(data: dict) -> None:
         """The drafts go on from the last number loaded."""
@@ -169,5 +177,11 @@ def _register_invoices(bp: Blueprint, c: Container, customers: CustomerService, 
             numbering.set_next(DRAFT_SEQUENCE, last + 1)
             posted = [int(i["cInvoiceNo"]) for i in data["sales_invoices"] if str(i.get("cInvoiceNo", "")).isdigit()]
             numbering.set_next(INVOICE_SEQUENCE, max(posted, default=0) + 1)
+            credits = [
+                int(n[len(CREDIT_PREFIX) :])
+                for n in (str(i.get("cInvoiceNo", "")) for i in data["sales_invoices"])
+                if n.startswith(CREDIT_PREFIX) and n[len(CREDIT_PREFIX) :].isdigit()
+            ]
+            numbering.set_next(CREDIT_SEQUENCE, max(credits, default=0) + 1)
 
     lifecycle.after_load(renumber)

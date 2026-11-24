@@ -7,6 +7,7 @@ product category (price_lists_discounts); a customer points to its price list.
 V3: the sales invoices (drafts), with their lines and their taxes by tax code (sales_invoices_taxes).
 V4: posting: what went out of the stock for each line (sales_invoices_allocations); the first invoice number
 (company_profile.iInvoiceStart).
+V6: the credit notes are sales invoices of type "credit" (cType, cOrigInvoice; lines: iOrigLine, lReturn).
 """
 
 from .. import schemas as S
