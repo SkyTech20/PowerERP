@@ -128,3 +128,21 @@ def test_the_demo_drafts_can_be_posted(client):
     for no in range(1, DEMO + 1):
         assert client.post(f"/api/sales-invoices/{no}/check").get_json()["ok"], no
     assert client.post("/api/sales-invoices/1/post").get_json()["cInvoiceNo"] == "1"
+
+
+def test_a_line_offers_only_the_units_of_its_product(client):
+    def units(product):
+        return [r["code"] for r in client.get(f"/api/lookups/product_uoms?product={product}").get_json()]
+
+    assert units("TUBE-T8") == ["UN"]  # sold by the unit: no litre, no kilogram
+    assert units("") == []
+    prod = client.get("/api/products/TUBE-T8").get_json()
+    prod["conversions"] = [{"cUOM": "CS", "dFactor": "12", "cNotes": ""}]
+    assert client.put("/api/products/TUBE-T8", json=prod).status_code == 200
+    assert units("TUBE-T8") == ["UN", "CS"]  # its own packaging too
+    flour = units(
+        next(p["cCode"] for p in client.get("/api/products?size=500").get_json()["items"] if p["cStockUOM"] == "KG")
+    )
+    assert (
+        flour[0] == "KG" and {"G", "LB"} <= set(flour) and "L" not in flour
+    )  # the general conversions of the kilogram

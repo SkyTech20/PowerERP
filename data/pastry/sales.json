@@ -3,8 +3,8 @@
  "company_profile": [
   {
    "cCode": "MAIN",
-   "cName": "Pastelaria Demo",
-   "cLegalName": "Pastelaria Démo inc.",
+   "cName": "Pâtisserie Démo",
+   "cLegalName": "Pâtisserie Démo inc.",
    "cAddress1": "6200, boul. Saint-Laurent",
    "cAddress2": "",
    "cCity": "Montréal",
@@ -12,8 +12,8 @@
    "cZipCode": "H2S 3C3",
    "cCountry": "CA",
    "cPhone": "514 555-0300",
-   "cEmail": "factures@pastelaria-demo.ca",
-   "cWebsite": "www.pastelaria-demo.ca",
+   "cEmail": "factures@patisserie-demo.ca",
+   "cWebsite": "www.patisserie-demo.ca",
    "cNEQ": "1170000002",
    "cInvoiceNoteFR": "Produits frais : à conserver au réfrigérateur (0 à 4 °C). Merci !",
    "cInvoiceNoteEN": "Fresh products: keep refrigerated (0 to 4 °C). Thank you!"
@@ -131,9 +131,9 @@
  ],
  "customers": [
   {
-   "cCode": "CAFE-BRASIL",
-   "cName": "Café Brasil Montréal",
-   "cLegalName": "Café Brasil Montréal",
+   "cCode": "CAFE-PLATEAU",
+   "cName": "Café du Plateau",
+   "cLegalName": "Café du Plateau",
    "cLang": "fr",
    "cAddress1": "3456, boul. Saint-Laurent",
    "cAddress2": "",
@@ -142,7 +142,7 @@
    "cZipCode": "H2X 2V4",
    "cCountry": "CA",
    "cPhone": "514 555-0311",
-   "cEmail": "contas@cafebrasil.ca",
+   "cEmail": "comptes@cafeduplateau.ca",
    "cTaxGroup": "QC",
    "cTaxExemptNo": "",
    "cTermCode": "n15",
@@ -155,14 +155,14 @@
    "addresses": [
     {
      "cCode": "CAFE",
-     "cName": "Café Brasil",
+     "cName": "Café du Plateau",
      "cAddress1": "3456, boul. Saint-Laurent",
      "cAddress2": "",
      "cCity": "Montréal",
      "cProvince": "QC",
      "cZipCode": "H2X 2V4",
      "cCountry": "CA",
-     "cContact": "Ana Souza",
+     "cContact": "Julie Tremblay",
      "cPhone": "514 555-0311",
      "cTaxGroup": "",
      "lDefault": true
@@ -170,17 +170,17 @@
    ],
    "contacts": [
     {
-     "cName": "Ana Souza",
+     "cName": "Julie Tremblay",
      "cTitle": "Gérante",
      "cPhone": "514 555-0311",
-     "cEmail": "ana@cafebrasil.ca",
+     "cEmail": "julie@cafeduplateau.ca",
      "lInvoices": false
     },
     {
      "cName": "Comptabilité",
      "cTitle": "",
      "cPhone": "514 555-0312",
-     "cEmail": "contas@cafebrasil.ca",
+     "cEmail": "comptes@cafeduplateau.ca",
      "lInvoices": true
     }
    ]
@@ -303,8 +303,8 @@
  "sales_invoices": [
   {
    "allocations": [],
-   "cCustomer": "CAFE-BRASIL",
-   "cCustomerName": "Café Brasil Montréal",
+   "cCustomer": "CAFE-PLATEAU",
+   "cCustomerName": "Café du Plateau",
    "cCustomerPO": "",
    "cInvoiceNo": "",
    "cLang": "fr",

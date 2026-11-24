@@ -7,7 +7,7 @@ import { pageHead, tabLabel } from "../views.js";
 
 // ---------- Generic form
 // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
-// textarea | password | email), lookup (+ fill, lookupParams, onPick), show(model, isNew), rerender (redraw on change).
+// textarea | password | email), lookup (+ fill, lookupParams(model, line), onPick), show(model, isNew), rerender (redraw on change).
 // Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
 // locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model), tab, onNew } and panels (more of them).
 // recalc(model, { path, field, line }) -> Promise of the model calculated by the server: called when a field or a
@@ -417,7 +417,8 @@ export function formView(key, id) {
               if (target) target.value = label;
             }
             if (col.recalc) recalc(el.dataset.lf, ln);
-          }, col.lookupParams ? () => col.lookupParams(model) : null);
+            else refreshers.forEach((f) => f()); // e.g. the units of the product just picked on this line
+          }, col.lookupParams ? () => col.lookupParams(model, ln) : null);
           if (col.lookupParams) refreshers.push(fill);
         }
       });

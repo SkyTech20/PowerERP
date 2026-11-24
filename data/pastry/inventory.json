@@ -68,7 +68,7 @@
  "warehouses": [
   {
    "cCode": "KITCHEN",
-   "cNameFR": "Cuisine centrale - Pastelaria",
+   "cNameFR": "Cuisine centrale - Pâtisserie",
    "cNameEN": "Central kitchen - Pastry shop",
    "cType": "main",
    "cAddress1": "4520, rue Saint-Denis",

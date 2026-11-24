@@ -144,6 +144,32 @@ class UnitConverter:
                     todo.append(y)
         return None
 
+    def units_of(self, product: Row) -> list[str]:
+        """The units a product can be counted in: its stock unit and every unit that converts to it (its own
+        packaging and the general conversions). The sales unit first, then the stock unit, then the others."""
+        stock = text(product.get("cStockUOM")).upper()
+        if not stock:
+            return []
+        graph: dict[str, set[str]] = {}
+        for r in self.conversions.repo.all(lines=False):
+            if r["lActive"] and number(r["dFactor"]) > 0:
+                a, b = r["cFromUOM"].upper(), r["cToUOM"].upper()
+                graph.setdefault(a, set()).add(b)
+                graph.setdefault(b, set()).add(a)
+        for c in product.get("conversions", []):
+            u = text(c["cUOM"]).upper()
+            if u and number(c["dFactor"]) > 0:
+                graph.setdefault(u, set()).add(stock)
+                graph.setdefault(stock, set()).add(u)
+        seen, todo = {stock}, deque([stock])
+        while todo:
+            for y in graph.get(todo.popleft(), ()):
+                if y not in seen:
+                    seen.add(y)
+                    todo.append(y)
+        first = [u for u in (text(product.get("cSalesUOM")).upper(), stock) if u in seen]
+        return list(dict.fromkeys(first + sorted(seen)))
+
     def to_stock(self, qty: float, uom: str, product: Row) -> float | None:
         """A quantity in `uom` expressed in the stock unit of the product."""
         f = self.factor(uom, product.get("cStockUOM", ""), product)
@@ -198,6 +224,21 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     register_crud_routes(bp, "categories", "categories", categories, ("cCode", "cDescFR", "cDescEN", "cParent"))
     app.register_blueprint(bp)
     c.get("lookups").register("uom", label_lookup(units, DESC_FR, DESC_EN))
+
+    def product_units():
+        """The units of one product (?product=): those that convert to its stock unit, the sales unit first."""
+        prod = c.get("products").find(request.args.get("product", ""))
+        if prod is None:
+            return [], 200
+        en = (request.args.get("lang") or "fr") == "en"
+        rows = []
+        for code in c.get("unit_converter").units_of(prod):
+            u = units.find(code) or {"cCode": code}
+            label = text(u.get("cDescEN") if en else u.get("cDescFR")) or text(u.get("cDescFR"))
+            rows.append({"code": u["cCode"], "label": label})
+        return rows, 200
+
+    c.get("lookups").register("product_uoms", product_units)
     c.get("lookups").register("categories", label_lookup(categories, DESC_FR, DESC_EN))
     c.get("lifecycle").add(units.repo, "inv_uom", seed.get("uom", []))
     c.get("lifecycle").add(conversions.repo, "inv_uom_conversions", seed.get("uom_conversions", []))

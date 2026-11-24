@@ -64,7 +64,7 @@
  "calendars": [
   {
    "cCode": "PST-1X6",
-   "cDescFR": "Pastelaria : 1 équipe, lundi au samedi",
+   "cDescFR": "Pâtisserie : 1 équipe, lundi au samedi",
    "cDescEN": "Pastry shop: 1 shift, Monday to Saturday",
    "lActive": true,
    "lines": [
