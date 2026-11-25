@@ -26,7 +26,7 @@ const documented = Object.fromEntries(readdirSync(HELP).filter((f) => f.endsWith
 // The screens of the menu with no help page yet. Remove a screen from this list when its page is written;
 // a new screen of the menu must be added here or get its page.
 const PENDING = [
-  "gl.accounts", "ap.suppliers", "ap.invoices", "pur.po", "pur.receptions",
+  "gl.accounts", "ap.suppliers", "ap.invoices",
   "admin.taxes", "admin.backups",
 ];
 

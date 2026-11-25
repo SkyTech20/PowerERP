@@ -225,6 +225,7 @@ export function formView(key, id) {
     const caret = focused && document.activeElement.selectionStart;
     totals.innerHTML = totalsHtml();
     bindTotals();
+    decorateHelp(R); // the totals were drawn again: their labels get their ⓘ back
     if (focused && focused.startsWith("t-")) { const el = $("#" + focused); el.focus(); try { el.setSelectionRange(caret, caret); } catch (e) { /* ignore */ } }
   }
 
