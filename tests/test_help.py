@@ -168,7 +168,7 @@ def test_an_unknown_language_is_english(admin):
 
 
 def test_a_role_without_the_screen_sees_only_the_general_pages(login):
-    c = login(["inv.items:view"])
+    c = login(["inv.stock:view"])
     screens = [s["screen"] for s in c.get("/api/help/toc").get_json()["screens"]]
     assert screens == ["_intro"]
     assert c.get("/api/help/page/sales.invoices").status_code == 404
@@ -190,9 +190,22 @@ def test_a_role_sees_only_the_actions_it_has(login):
 
 def test_search(admin):
     res = admin.get("/api/help/search?q=prix minimum&lang=fr").get_json()
-    first = res["items"][0]
-    assert first["code"] == "sales.invoices.lines.dNetPrice"
-    assert first["path"] == ["Factures clients", "Lignes"]
-    assert "minimum" in first["snippet"].lower()
+    assert res["items"][0]["code"] == "inv.items.dMinPrice"  # the words in the title first
+    net = next(i for i in res["items"] if i["code"] == "sales.invoices.lines.dNetPrice")  # then in the text
+    assert net["path"] == ["Factures clients", "Lignes"]
+    assert "minimum" in net["snippet"].lower()
     assert admin.get("/api/help/search?q=sales.invoices.post").get_json()["items"][0]["code"] == "sales.invoices.post"
     assert admin.get("/api/help/search?q=").get_json()["items"] == []
+
+
+def test_the_administration_pages_are_for_the_administrator(admin, login):
+    c = login(["inv.items:view", "sales.customers:view"])
+    screens = [s["screen"] for s in c.get("/api/help/toc").get_json()["screens"]]
+    assert screens == ["_intro", "sales.customers", "inv.items"]  # the order of the menu
+    assert c.get("/api/help/page/admin.roles").status_code == 404
+    assert c.get("/api/help/item/admin.users.role").status_code == 404
+    assert "sales.customers.delete" not in [
+        i["code"] for i in c.get("/api/help/page/sales.customers").get_json()["items"]
+    ]
+    admin_screens = [s["screen"] for s in admin.get("/api/help/toc").get_json()["screens"]]
+    assert {"admin.users", "admin.roles", "admin.settings"} <= set(admin_screens)
