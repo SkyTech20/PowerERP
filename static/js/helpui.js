@@ -5,10 +5,10 @@
      <base>.<field>            a field of the form (its data-f), e.g. sales.invoices.cCustomer
      <base>.<grid>.<field>     a column (or a detail field) of a grid, e.g. sales.invoices.lines.dQty
    <base> is the screen (menu key); for the other tabs of a tab set, <screen>.<resource>, e.g. admin.taxes.taxgroups. */
-import { $, $$, api, enc, esc, lang, t } from "./core.js";
+import { $, $$, api, enc, esc, lang, t, toast } from "./core.js";
 import { menuItemOf } from "./menu.js";
 import { RES } from "./registry.js";
-import { helpLink, itemHtml } from "./screens/help.js";
+import { helpLink, itemsHtml } from "./screens/help.js";
 import { user } from "./state.js";
 import { TABSETS } from "./views.js";
 
@@ -94,10 +94,21 @@ export async function openHelpPanel(code) {
     <div class="help-panel-head"><b>${esc(top.title)}</b>
       <a class="btn small" href="${helpLink(code)}">${esc(t("help.openFull"))}</a>
       <button type="button" class="icon-btn" data-help-close aria-label="${esc(t("help.close"))}">✕</button></div>
-    <div class="help-panel-body"><div class="help-body help-lead">${top.html}</div>${rest.map(itemHtml).join("")}</div></aside>`);
+    <div class="help-panel-body"><div class="help-body help-lead">${top.html}</div>${itemsHtml(rest)}</div></aside>`);
   document.body.classList.add("help-open");
   const target = document.getElementById("help-" + code);
   if (target && code !== screen) { target.classList.add("help-target"); target.scrollIntoView({ block: "start" }); }
+}
+
+// The address of an item, to send to a colleague or to support
+export async function copyHelpLink(code) {
+  const url = location.href.split("#")[0] + helpLink(code);
+  try {
+    await navigator.clipboard.writeText(url);
+    toast(t("help.copied"), "success");
+  } catch (e) {
+    location.hash = helpLink(code); // no clipboard (http): the address bar shows the link
+  }
 }
 
 let bound = false;
@@ -105,6 +116,8 @@ export function bindHelpUi() {
   if (bound) return;
   bound = true;
   document.addEventListener("click", (e) => {
+    const copy = e.target.closest("[data-copy-help]");
+    if (copy) { e.preventDefault(); copyHelpLink(copy.dataset.copyHelp); return; }
     const el = e.target.closest("[data-help], [data-help-open], [data-help-close]");
     if (!el) return;
     e.preventDefault();

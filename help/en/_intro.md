@@ -6,7 +6,8 @@ This help explains each screen of PowerERP, field by field. It shows only the sc
 
 - **Contents:** on the left, the screens grouped by module, in the order of the menu.
 - **Search:** type a few words in the search box (accents and capital letters do not matter). The search also finds an item by its code, such as `sales.invoices.post`.
-- **Link to an item:** every item has a fixed code, shown next to its title. Its link opens the help right at that item, so it can be sent to a colleague or to support.
+- **Link to an item:** move the mouse over an item and click 🔗 to copy its link. The link opens the help right at that item, so it can be sent to a colleague or to support. Each item also has a fixed code (shown in the tip of 🔗), the same in English and French.
+- **From a screen:** the **?** button at the top of a screen opens its help on the side, and the ⓘ next to a field opens the help of that field, without leaving what you are typing.
 
 ## Languages {#_intro.lang}
 

@@ -63,6 +63,7 @@ def _blueprint(index: HelpIndex) -> Blueprint:
                 {
                     "screen": screen,
                     "title": top.title,
+                    "summary": summary(top.text),
                     "sections": [{"code": s.code, "title": s.title} for s in sections],
                 }
             )
