@@ -114,7 +114,7 @@ Try to delete customer HOTEL-LAURIER. The system refuses, because the customer i
 
 In **Administration > System settings**, switch to **Pastry shop**. The demo comes with:
 - 3 drafts: Café du Plateau, Traiteur Royal and Ottawa Deli (this one with HST-ON).
-- Starting stock of finished pastels (lots from 11/18 and 11/19 in location SHOP-01), so that the drafts can be posted.
+- Starting stock of finished pastels (lot from 11/18 in location SHOP-01 and lot from 11/19 in SHOP-02, one lot of a product per location), so that the drafts can be posted.
 
 The pastels use FIFO (they have no expiry date). When the Café du Plateau draft is posted, the 11/18 lots go out first.
 

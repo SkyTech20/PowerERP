@@ -65,7 +65,7 @@ The warehouse of the stock (the origin, for a transfer). Required.
 
 ### Location {#inv.movements.cLocation}
 
-The location inside the warehouse. Required in a warehouse that uses locations. A blocked or inactive location is refused. A location that does not accept several products or several lots refuses a second one.
+The location inside the warehouse. Required in a warehouse that uses locations. A blocked or inactive location is refused. A location that does not accept several products refuses a second one. A location holds one lot of a product only: another lot of the same product is refused.
 
 ### To warehouse {#inv.movements.cWhTo}
 
@@ -79,7 +79,7 @@ Transfers only: the location the stock goes to. The destination cannot be the sa
 
 ### Lot {#inv.movements.cLot}
 
-Required when the product has *Lot numbers* checked. The balance is kept by lot.
+Required when the product has *Lot numbers* checked. The balance is kept by lot. A location holds one lot of a product at a time: a receipt, transfer or count bringing a second lot of the product into a location that still has the first one is refused; put it in another location.
 
 ### Serial number {#inv.movements.cSerial}
 
@@ -117,5 +117,6 @@ Free text.
 | This location is blocked or inactive | Nothing goes in or out of a blocked location. |
 | A lot number is required for this product | The product has *Lot numbers* checked. |
 | A product with serial numbers moves one unit at a time | Quantity other than 1 for a product with serial numbers. |
-| This location accepts one product only / one lot only | The location has *Several products* or *Several lots* unchecked. |
+| This location accepts one product only | The location has *Several products* unchecked. |
+| This location already holds another lot of this product | The location still has stock of another lot of the product (shown in brackets). One lot per product per location. |
 | The destination is the same as the origin | A transfer to the same warehouse and location. |

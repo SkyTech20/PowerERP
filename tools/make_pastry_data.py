@@ -78,6 +78,7 @@ LOCATIONS = [
     ("PACK-01", "SEC", "Emballages et fournitures", "reserve"),
     ("PROD-01", "PROD", "Cuisine de production", "staging"),
     ("SHOP-01", "VENTE", "Comptoir de vente", "shipping"),
+    ("SHOP-02", "VENTE", "Vitrine de vente", "shipping"),
 ]
 
 # code: FR, EN, category, unit, class, (location, purchase price, supplier, lot / expiry days), extra
@@ -863,7 +864,8 @@ def recipes() -> list[dict]:
 # ------------------------------------------------------------------ finished pastels (sales demo)
 
 # The pastels made before the demo starts (there are no production orders yet: M3), so that the sales invoices of
-# data/pastry/sales.json can be posted: one lot per day of production, at the shop's counter.
+# data/pastry/sales.json can be posted: one lot per day of production, at the shop's counter (the first day) and in
+# the shop's display case (the second day), since a location holds one lot of a product only.
 MADE_BEFORE = [  # (product, quantity, unit cost)
     ("PASTEL-BEEF", 120, "2.10"),
     ("PASTEL-CHICKEN", 120, "1.85"),
@@ -880,7 +882,7 @@ def finished_goods() -> list[dict]:
             "dQty": num(qty // 2),
             "dUnitCost": cost,
             "cWarehouse": WH,
-            "cLocation": "SHOP-01",
+            "cLocation": loc,
             "cWhTo": "",
             "cLocTo": "",
             "cLot": f"{code.split('-', 1)[1]}-{day.replace('-', '')}",
@@ -891,7 +893,7 @@ def finished_goods() -> list[dict]:
             "cReason": "Production (stock initial)",
             "cComment": "",
         }
-        for day in ("2026-11-18", "2026-11-19")
+        for day, loc in (("2026-11-18", "SHOP-01"), ("2026-11-19", "SHOP-02"))
         for code, qty, cost in MADE_BEFORE
     ]
 
@@ -941,7 +943,6 @@ def main() -> None:
                     "cDescription": desc,
                     "cType": kind,
                     "lMixProducts": True,
-                    "lMixLots": True,
                     "iPickSeq": i,
                     "lActive": True,
                 },

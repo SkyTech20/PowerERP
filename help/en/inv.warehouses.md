@@ -148,6 +148,4 @@ For information only, ready for a WMS.
 
 Unchecked: the location holds one product only. A movement bringing in another product is refused (*This location accepts one product only*).
 
-### Several lots {#inv.warehouses.locations.lMixLots}
-
-Unchecked: the location holds one lot of a product only. A movement bringing in another lot is refused (*This location accepts one lot only*).
+Lots: a location always holds one lot of a product at a time, checked or not. Several products can share a location, each with its own lot, but a second lot of the same product goes to another location until the first one is empty (*This location already holds another lot of this product*).

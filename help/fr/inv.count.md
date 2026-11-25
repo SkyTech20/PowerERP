@@ -65,7 +65,7 @@ Où le produit a été compté.
 
 ### Lot {#inv.count.lines.cLot}
 
-Le lot compté, pour les produits suivis par lot.
+Le lot compté, pour les produits suivis par lot. Une nouvelle ligne avec un autre lot d'un produit dans un emplacement qui en contient encore un lot est refusée au report (un seul lot par produit et par emplacement).
 
 ### Numéro de série {#inv.count.lines.cSerial}
 

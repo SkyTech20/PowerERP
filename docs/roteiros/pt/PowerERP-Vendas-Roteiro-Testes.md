@@ -114,7 +114,7 @@ Botão **Print** na invoice. Abre a página para imprimir ou salvar em PDF pelo 
 
 Em **Administration > System settings**, mude para **Pastry shop**. O demo traz:
 - 3 rascunhos: Café du Plateau, Traiteur Royal e Ottawa Deli (este com TVH-ON).
-- Estoque inicial de pastéis prontos (lotes de 18 e 19/11 no local SHOP-01), para que os rascunhos possam ser postados.
+- Estoque inicial de pastéis prontos (lote de 18/11 no local SHOP-01 e lote de 19/11 no SHOP-02, um lote por produto em cada local), para que os rascunhos possam ser postados.
 
 Os pastéis usam FIFO (não têm validade). Ao postar o rascunho de Café du Plateau, saem primeiro os lotes de 18/11.
 

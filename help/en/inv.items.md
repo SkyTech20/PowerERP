@@ -262,7 +262,7 @@ Usual shelf life in days. For information only.
 
 ### Lot numbers {#inv.items.lLotControl}
 
-Every receipt and issue needs a lot number. The balance is kept by lot. On a credit note, the goods come back into the same lot.
+Every receipt and issue needs a lot number. The balance is kept by lot. On a credit note, the goods come back into the same lot. A location holds one lot of the product at a time.
 
 ### Serial numbers {#inv.items.lSerialControl}
 

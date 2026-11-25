@@ -65,7 +65,7 @@ L'entrepôt du stock (l'origine, pour un transfert). Obligatoire.
 
 ### Emplacement {#inv.movements.cLocation}
 
-L'emplacement dans l'entrepôt. Obligatoire dans un entrepôt qui gère les emplacements. Un emplacement bloqué ou inactif est refusé. Un emplacement qui n'accepte pas plusieurs produits ou plusieurs lots en refuse un deuxième.
+L'emplacement dans l'entrepôt. Obligatoire dans un entrepôt qui gère les emplacements. Un emplacement bloqué ou inactif est refusé. Un emplacement qui n'accepte pas plusieurs produits en refuse un deuxième. Un emplacement ne contient qu'un seul lot d'un produit : un autre lot du même produit est refusé.
 
 ### Vers l'entrepôt {#inv.movements.cWhTo}
 
@@ -79,7 +79,7 @@ Transferts seulement : l'emplacement où va le stock. La destination ne peut pas
 
 ### Lot {#inv.movements.cLot}
 
-Obligatoire quand le produit a *Numéros de lot* coché. Le solde est tenu par lot.
+Obligatoire quand le produit a *Numéros de lot* coché. Le solde est tenu par lot. Un emplacement contient un seul lot d'un produit à la fois : une entrée, un transfert ou un inventaire qui fait entrer un deuxième lot du produit dans un emplacement qui a encore le premier est refusé ; utilisez un autre emplacement.
 
 ### Numéro de série {#inv.movements.cSerial}
 
@@ -117,5 +117,6 @@ Texte libre.
 | Cet emplacement est bloqué ou inactif | Rien n'entre ni ne sort d'un emplacement bloqué. |
 | Un numéro de lot est obligatoire pour ce produit | Le produit a *Numéros de lot* coché. |
 | Un produit avec numéros de série se déplace une unité à la fois | Quantité autre que 1 pour un produit avec numéros de série. |
-| Cet emplacement n'accepte qu'un seul produit / qu'un seul lot | L'emplacement a *Plusieurs produits* ou *Plusieurs lots* décoché. |
+| Cet emplacement n'accepte qu'un seul produit | L'emplacement a *Plusieurs produits* décoché. |
+| Cet emplacement contient déjà un autre lot de ce produit | L'emplacement a encore du stock d'un autre lot du produit (indiqué entre parenthèses). Un seul lot par produit et par emplacement. |
 | La destination est la même que l'origine | Un transfert vers le même entrepôt et le même emplacement. |

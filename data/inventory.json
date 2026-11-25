@@ -428,7 +428,6 @@
    "dMaxVolume": "",
    "iMaxPallets": 0,
    "lMixProducts": true,
-   "lMixLots": true,
    "lBlocked": false,
    "iPickSeq": 1,
    "lActive": true
@@ -447,7 +446,6 @@
    "dMaxVolume": "",
    "iMaxPallets": 0,
    "lMixProducts": true,
-   "lMixLots": true,
    "lBlocked": false,
    "iPickSeq": 10,
    "lActive": true
@@ -466,7 +464,6 @@
    "dMaxVolume": "",
    "iMaxPallets": 0,
    "lMixProducts": true,
-   "lMixLots": true,
    "lBlocked": false,
    "iPickSeq": 11,
    "lActive": true
@@ -485,7 +482,6 @@
    "dMaxVolume": "",
    "iMaxPallets": 0,
    "lMixProducts": true,
-   "lMixLots": true,
    "lBlocked": false,
    "iPickSeq": 12,
    "lActive": true
@@ -504,7 +500,6 @@
    "dMaxVolume": "",
    "iMaxPallets": 0,
    "lMixProducts": true,
-   "lMixLots": true,
    "lBlocked": false,
    "iPickSeq": 20,
    "lActive": true
@@ -523,7 +518,6 @@
    "dMaxVolume": "",
    "iMaxPallets": 0,
    "lMixProducts": true,
-   "lMixLots": true,
    "lBlocked": true,
    "iPickSeq": 21,
    "lActive": true
@@ -542,7 +536,6 @@
    "dMaxVolume": "2.5",
    "iMaxPallets": 1,
    "lMixProducts": false,
-   "lMixLots": false,
    "lBlocked": false,
    "iPickSeq": 30,
    "lActive": true
@@ -561,7 +554,6 @@
    "dMaxVolume": "2.5",
    "iMaxPallets": 1,
    "lMixProducts": true,
-   "lMixLots": true,
    "lBlocked": false,
    "iPickSeq": 31,
    "lActive": true
@@ -580,7 +572,6 @@
    "dMaxVolume": "",
    "iMaxPallets": 0,
    "lMixProducts": true,
-   "lMixLots": true,
    "lBlocked": false,
    "iPickSeq": 90,
    "lActive": true

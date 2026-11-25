@@ -262,7 +262,7 @@ Durée de conservation habituelle, en jours. À titre d'information.
 
 ### Numéros de lot {#inv.items.lLotControl}
 
-Chaque entrée et chaque sortie demande un numéro de lot. Le solde est tenu par lot. Sur une note de crédit, la marchandise revient dans le même lot.
+Chaque entrée et chaque sortie demande un numéro de lot. Le solde est tenu par lot. Sur une note de crédit, la marchandise revient dans le même lot. Un emplacement contient un seul lot du produit à la fois.
 
 ### Numéros de série {#inv.items.lSerialControl}
 

@@ -187,10 +187,12 @@ class StockService:
             field = "cLocTo" if m["cType"] == "TRF" else "cLocation"
             if not il.get("lMixProducts", True) and any(k[0] != prod["cCode"].upper() for k in others):
                 raise AppError("location_mixed", field)
-            if not il.get("lMixLots", True) and any(
-                k[0] == prod["cCode"].upper() and k[3] != text(m.get("cLot")).upper() for k in others
-            ):
-                raise AppError("location_mixed_lots", field)
+            # One lot of a product per location, always: another lot of the same product must go elsewhere
+            other_lot = next(
+                (k[3] for k in others if k[0] == prod["cCode"].upper() and k[3] != text(m.get("cLot")).upper()), None
+            )
+            if other_lot is not None:
+                raise AppError("location_mixed_lots", field, detail=other_lot or "-")
         return prod
 
     def post(self, m: Row, prod: Row) -> Row:

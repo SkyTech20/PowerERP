@@ -16,8 +16,8 @@ def svc():
         "warehouses": MemoryRepository([{"cCode": "W1", "lUseLocations": True, "lAllowNegative": False}]),
         "locations": MemoryRepository(
             [
-                {"cWarehouse": "W1", "cCode": "A-1", "lActive": True, "lMixProducts": True, "lMixLots": True},
-                {"cWarehouse": "W1", "cCode": "B-1", "lActive": True, "lMixProducts": False, "lMixLots": True},
+                {"cWarehouse": "W1", "cCode": "A-1", "lActive": True, "lMixProducts": True},
+                {"cWarehouse": "W1", "cCode": "B-1", "lActive": True, "lMixProducts": False},
                 {"cWarehouse": "W1", "cCode": "X-1", "lActive": True, "lBlocked": True},
             ],
             keys=("cWarehouse", "cCode"),
@@ -75,6 +75,23 @@ def test_location_rules(svc):
     with pytest.raises(AppError) as e:
         move(svc, cProduct="SVC")
     assert e.value.code == "not_stocked"
+
+
+def test_one_lot_of_a_product_per_location(svc):
+    move(svc, dQty="5", cLot="L1")
+    move(svc, dQty="2", cLot="l1")  # the same lot (case does not matter)
+    move(svc, cProduct="P2", cLot="K9")  # another product, with its own lot: fine
+    for kw in ({"cLot": "L2"}, {"cType": "ADJ", "cLot": "L2"}, {"cType": "CNT", "cLot": ""}):
+        with pytest.raises(AppError) as e:
+            move(svc, **kw)
+        assert (e.value.code, e.value.field, e.value.detail) == ("location_mixed_lots", "cLocation", "L1")
+    move(svc, cLot="L2", cLocation="B-1")  # another location
+    with pytest.raises(AppError) as e:
+        move(svc, cType="TRF", cLot="L2", cLocation="B-1", cWhTo="W1", cLocTo="A-1")
+    assert (e.value.code, e.value.field) == ("location_mixed_lots", "cLocTo")
+    move(svc, cType="OUT", dQty="7", cLot="L1")  # A-1 has no more L1: L2 can come in
+    move(svc, cType="TRF", cLot="L2", cLocation="B-1", cWhTo="W1", cLocTo="A-1")
+    assert svc.quantity_at("W1", "A-1") == 2
 
 
 def test_transfer_moves_quantity_without_value(svc):
