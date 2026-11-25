@@ -27,8 +27,7 @@ const documented = Object.fromEntries(readdirSync(HELP).filter((f) => f.endsWith
 // a new screen of the menu must be added here or get its page.
 const PENDING = [
   "gl.accounts", "ap.suppliers", "ap.invoices", "pur.po", "pur.receptions",
-  "prod.recipes", "prod.items", "prod.operations", "prod.resources", "prod.workcenters", "prod.setupmatrix",
-  "prod.calendars", "prod.setup", "admin.taxes", "admin.backups",
+  "admin.taxes", "admin.backups",
 ];
 
 const TOC = {
@@ -119,6 +118,11 @@ test("an input that is not a field of the record has its code in data-help-f", (
   assert.equal(U.fieldCode("admin.roles", { dataset: { helpF: "cCode", f: "x" }, closest: () => null }), "admin.roles.cCode");
 });
 
+const PROD_PANELS = {
+  week: ["prod.calendars", "prod.workcenters", "prod.resources"], calc: ["prod.operations"], grid: ["prod.setupmatrix"],
+  explode: ["prod.recipes"], preview: ["prod.recipes"], versions: ["prod.recipes"],
+};
+
 test("the inputs of the hand-written screens and panels are documented (data-help-f)", async () => {
   const { COMPANY_FIELDS } = await import(pathToFileURL(join(STATIC, "js", "screens", "settings.js")).href);
   const helpF = (file) => [...readFileSync(join(STATIC, "js", file), "utf-8").matchAll(/data-help-f="([A-Za-z.]+)"/g)].map((m) => m[1]);
@@ -126,6 +130,8 @@ test("the inputs of the hand-written screens and panels are documented (data-hel
     ...COMPANY_FIELDS.map(([f]) => `admin.settings.${f}`), "admin.settings.scenario",
     ...helpF("screens/roles.js").map((f) => `admin.roles.${f}`),
     ...helpF("resources/sales.js").map((f) => `sales.customers.${f}`),
+    // the panels of Production: the week preview is on three screens, the others on one
+    ...helpF("resources/production.js").flatMap((f) => PROD_PANELS[f.split(".")[0]].map((s) => `${s}.${f}`)),
   ];
   assert.ok(codes.length > 20);
   const missing = codes.filter((c) => !documented[c.split(".").slice(0, 2).join(".")]?.has(c));
