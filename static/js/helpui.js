@@ -4,6 +4,8 @@
    The item code of a field (help/<lang>/<screen>.md):
      <base>.<field>            a field of the form (its data-f), e.g. sales.invoices.cCustomer
      <base>.<grid>.<field>     a column (or a detail field) of a grid, e.g. sales.invoices.lines.dQty
+     <base>.<data-help-f>      an input that is not a field of the record (a panel, a hand-written screen),
+                               e.g. sales.customers.check.cProduct, admin.roles.cCode
    <base> is the screen (menu key); for the other tabs of a tab set, <screen>.<resource>, e.g. admin.taxes.taxgroups. */
 import { $, $$, api, enc, esc, lang, t, toast } from "./core.js";
 import { menuItemOf } from "./menu.js";
@@ -23,8 +25,9 @@ export function helpBase(R) {
   if (!screen || !R.tabset || RES[TABSETS[R.tabset][0][0]] === R) return screen;
   return `${screen}.${Object.keys(RES).find((k) => RES[k] === R)}`;
 }
-// The code of the field behind an input: data-f (form) or data-lf inside a grid [data-grid]
+// The code of the field behind an input: data-help-f, data-f (form) or data-lf inside a grid [data-grid]
 export function fieldCode(base, el) {
+  if (el.dataset.helpF) return `${base}.${el.dataset.helpF}`;
   if (el.dataset.f) return `${base}.${el.dataset.f}`;
   const grid = el.closest("[data-grid]");
   return el.dataset.lf && grid ? `${base}.${grid.dataset.grid}.${el.dataset.lf}` : null;
@@ -42,16 +45,17 @@ export async function helpPage(screen) {
 }
 
 // The "?" button of a page head: shown once the screen's help page is known to exist (decorate)
-export const helpButton = (R) => {
-  const screen = screenOf(R);
+export const helpButton = (R) => helpButtonOf(screenOf(R));
+export const helpButtonOf = (screen) => {
   return screen ? `<button type="button" class="btn help-btn" data-help-open="${esc(screen)}" title="${esc(t("help.open"))}" aria-label="${esc(t("help.open"))}" hidden>?</button>` : "";
 };
 
 const icon = (code, it) => `<button type="button" class="help-i" data-help="${esc(code)}" title="${esc(it.summary || it.title)}" aria-label="${esc(t("help.aboutField", { f: it.title }))}">ⓘ</button>`;
 
 // After a list or form is drawn: show its "?" and put an ⓘ next to every documented field / column
-export async function decorateHelp(R) {
-  const screen = screenOf(R);
+export const decorateHelp = (R) => decorateScreen(screenOf(R), helpBase(R));
+// The same for a screen drawn by hand (Roles, System settings): its inputs carry data-help-f
+export async function decorateScreen(screen, base = screen) {
   if (!screen) return;
   const view = $("#view");
   const drawn = view.firstElementChild;
@@ -59,7 +63,6 @@ export async function decorateHelp(R) {
   if (!page || view.firstElementChild !== drawn) return; // no help, or the screen was drawn again meanwhile
   const items = Object.fromEntries(page.items.map((it) => [it.code, it]));
   $$("[data-help-open]", view).forEach((b) => { b.hidden = false; });
-  const base = helpBase(R);
   $$("label[for]", view).forEach((label) => {
     if ($(".help-i", label)) return;
     const input = document.getElementById(label.htmlFor);

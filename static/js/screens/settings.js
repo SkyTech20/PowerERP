@@ -1,5 +1,6 @@
 /* PowerERP: Administration > System settings (administrators only): the company profile and the demo data. */
 import { $, $$, api, esc, t, toast } from "../core.js";
+import { decorateScreen, helpButtonOf } from "../helpui.js";
 import { pageHead } from "../views.js";
 
 // The fields of the company profile (the header of the invoices): [field, label, span]
@@ -11,11 +12,12 @@ export const COMPANY_FIELDS = [
   ["cInvoiceNoteFR", "sys.company.cInvoiceNoteFR", 2], ["cInvoiceNoteEN", "sys.company.cInvoiceNoteEN", 2],
 ];
 
+const SCREEN = "admin.settings"; // its help page: help/<lang>/admin.settings.md
 const errorText = (err) => (t("err." + err.code) !== "err." + err.code ? t("err." + err.code) : t("err.generic"));
 
 function companyCard(company) {
   const fields = COMPANY_FIELDS.map(([f, l, span]) => `<div class="field span-${span}"><label for="co_${f}">${esc(t(l))}${f === "cName" ? " *" : ""}</label>
-    <input type="text" id="co_${f}" data-co="${f}" value="${esc(company[f] || "")}"></div>`).join("");
+    <input type="text" id="co_${f}" data-co="${f}" data-help-f="${f}" value="${esc(company[f] || "")}"></div>`).join("");
   const numbers = (company.taxNumbers || []).map((n) => `<tr><td>${esc(n.cTaxCode)}</td><td>${esc(n.cRegistrationNo)}</td></tr>`).join("");
   return `<div class="card"><div class="card-head"><h2>${esc(t("sys.company"))}</h2></div>
     <div class="card-body"><p class="help">${esc(t("sys.company.help"))}</p>
@@ -34,11 +36,11 @@ export function settingsView() {
     async load() { [demo, company] = await Promise.all([api("demo"), api("company")]); },
     render() {
       const options = demo.scenarios.map((s) => `<option value="${esc(s)}"${s === demo.scenario ? " selected" : ""}>${esc(t("dash.scenario." + s))}</option>`).join("");
-      $("#view").innerHTML = pageHead(t("sys.title"), t("sys.subtitle")) + companyCard(company) + `
+      $("#view").innerHTML = pageHead(t("sys.title"), t("sys.subtitle"), helpButtonOf(SCREEN)) + companyCard(company) + `
         <div class="card"><div class="card-head"><h2>${esc(t("dash.scenario"))}</h2></div>
           <div class="card-body"><div class="form-grid">
             <div class="field span-2"><label for="demoScenario">${esc(t("sys.scenario"))}</label>
-              <select id="demoScenario">${options}</select><p class="help">${esc(t("sys.scenario.help"))}</p></div>
+              <select id="demoScenario" data-help-f="scenario">${options}</select><p class="help">${esc(t("sys.scenario.help"))}</p></div>
           </div><button type="button" class="btn primary" id="resetBtn" ${busy ? "disabled" : ""}>↺ ${esc(t("dash.reset"))}</button></div></div>
         <div class="card"><div class="card-head"><h2>${esc(t("dash.clear"))}</h2></div>
           <div class="card-body"><p class="help">${esc(t("sys.clear.help"))}</p>
@@ -53,6 +55,7 @@ export function settingsView() {
         } catch (err) { toast(errorText(err), "error"); }
         busy = false; this.render();
       };
+      decorateScreen(SCREEN);
       $("#companyForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const body = {};

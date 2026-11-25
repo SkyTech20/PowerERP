@@ -1,11 +1,13 @@
 /* PowerERP: Administration > Roles: the list, and a role with its access per screen, its users and its history. */
 import { $, $$, api, enc, esc, fmtDateTime, lang, t, toast } from "../core.js";
 import { actionsOf, byScreen, levelOf, levelsOf, moduleSummary, toPermissions, toggleAction } from "../access.js";
+import { decorateScreen, helpButtonOf } from "../helpui.js";
 import { pageHead } from "../views.js";
 
 const errText = (e) => (t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic")) + (e.detail ? " — " + e.detail : "");
 const desc = (r) => (lang === "en" && r.cDescEN) || r.cDescFR || "";
 const go = (path) => { location.hash = "#" + path; };
+const SCREEN = "admin.roles"; // its help page: help/<lang>/admin.roles.md
 
 // ------------------------------------------------------------------ list
 export function rolesListView() {
@@ -15,7 +17,7 @@ export function rolesListView() {
     async load() { rows = (await api("roles")).items; },
     render() {
       const shown = rows.filter((r) => !q || (r.cCode + " " + r.cDescFR + " " + r.cDescEN).toLowerCase().includes(q.toLowerCase()));
-      $("#view").innerHTML = pageHead(t("rl.title"), t("rl.subtitle"), `<a class="btn primary" href="#/admin/roles/new">＋ ${esc(t("common.new"))}</a>`) + `
+      $("#view").innerHTML = pageHead(t("rl.title"), t("rl.subtitle"), helpButtonOf(SCREEN) + `<a class="btn primary" href="#/admin/roles/new">＋ ${esc(t("common.new"))}</a>`) + `
         <div class="card"><div class="toolbar"><input type="search" id="q" placeholder="${esc(t("common.search"))}" value="${esc(q)}">
           <span class="count">${esc(t("common.records", { n: shown.length }))}</span></div>
         <div class="table-wrap"><table class="grid"><thead><tr><th>${esc(t("f.cCode"))}</th><th>${esc(t("f.cDescFR").replace(/ \(.*\)/, ""))}</th>
@@ -24,6 +26,7 @@ export function rolesListView() {
             <td class="num">${r.iUsers}</td><td class="num">${r.lAdmin ? esc(t("rl.all")) : r.iScreens}</td>
             <td><span class="badge ${r.lActive ? "yes" : "no"}">${esc(t(r.lActive ? "opt.active" : "opt.inactive"))}</span></td></tr>`).join("")}
         </tbody></table></div></div>`;
+      decorateScreen(SCREEN);
       $("#q").addEventListener("input", (e) => { q = e.target.value; this.render(); $("#q").focus(); $("#q").setSelectionRange(q.length, q.length); });
       $$("tr[data-href]").forEach((tr) => tr.addEventListener("click", () => go(tr.dataset.href)));
     },
@@ -133,25 +136,25 @@ export function roleFormView(code) {
     },
     render() {
       const title = isNew ? t("rl.new") : `${t("rl.one")} ${role.cCode} — ${desc(role)}`;
-      const actions = `<button type="button" class="btn" id="rlPreview">👁 ${esc(t("rl.preview"))}</button>
+      const actions = helpButtonOf(SCREEN) + `<button type="button" class="btn" id="rlPreview">👁 ${esc(t("rl.preview"))}</button>
         <a class="btn" href="#/admin/roles">${esc(t("common.cancel"))}</a>
         ${!isNew && !ro() ? `<button type="button" class="btn danger" id="rlDelete">${esc(t("common.delete"))}</button>` : ""}
         ${ro() ? "" : `<button type="button" class="btn primary" id="rlSave" ${busy ? "disabled" : ""}>${esc(t("common.save"))}</button>`}`;
       // existing role: code, description FR, active on one line; new role: code, copy from, active, then the descriptions
-      const active = `<div class="field"><label class="check"><input type="checkbox" id="rlActive" ${role.lActive ? "checked" : ""} ${ro() ? "disabled" : ""}> ${esc(t("opt.active"))}</label></div>`;
-      const descFR = `<div class="field span-2"><label for="rlDescFR">${esc(t("f.cDescFR"))}<span class="req">*</span></label><input type="text" id="rlDescFR" value="${esc(role.cDescFR)}" ${ro() ? "readonly" : ""}></div>`;
+      const active = `<div class="field"><label class="check"><input type="checkbox" id="rlActive" data-help-f="lActive" ${role.lActive ? "checked" : ""} ${ro() ? "disabled" : ""}> ${esc(t("opt.active"))}</label></div>`;
+      const descFR = `<div class="field span-2"><label for="rlDescFR">${esc(t("f.cDescFR"))}<span class="req">*</span></label><input type="text" id="rlDescFR" data-help-f="cDescFR" value="${esc(role.cDescFR)}" ${ro() ? "readonly" : ""}></div>`;
       const general = `<div class="card"><div class="card-body">
         ${ro() ? `<p class="note">${esc(t("rl.adminNote"))}</p>` : ""}
         ${!role.lActive && !isNew ? `<p class="note">${esc(t("rl.inactiveWarn"))}</p>` : ""}
         <div class="form-grid">
           <div class="field"><label for="rlCode">${esc(t("f.cCode"))}${isNew ? '<span class="req">*</span>' : ""}</label>
-            <input type="text" id="rlCode" value="${esc(role.cCode)}" ${isNew ? "" : "readonly"} maxlength="30" autocomplete="off" style="text-transform:uppercase">
+            <input type="text" id="rlCode" data-help-f="cCode" value="${esc(role.cCode)}" ${isNew ? "" : "readonly"} maxlength="30" autocomplete="off" style="text-transform:uppercase">
             ${isNew ? `<p class="help">${esc(t("f.rl.cCode.help"))}</p>` : ""}</div>
-          ${isNew ? `<div class="field"><label for="rlCopy">${esc(t("rl.copyFrom"))}</label><select id="rlCopy"><option value="">${esc(t("rl.copyNone"))}</option>
+          ${isNew ? `<div class="field"><label for="rlCopy">${esc(t("rl.copyFrom"))}</label><select id="rlCopy" data-help-f="cCopyFrom"><option value="">${esc(t("rl.copyNone"))}</option>
             ${others.map((r) => `<option value="${esc(r.cCode)}" ${role.cCopyFrom === r.cCode ? "selected" : ""}>${esc(r.cCode + " — " + desc(r))}</option>`).join("")}</select>
             <p class="help">${esc(t("rl.copyHelp"))}</p></div>` : ""}
           ${isNew ? "" : descFR}${active}${isNew ? descFR : ""}
-          <div class="field span-2"><label for="rlDescEN">${esc(t("f.cDescEN"))}</label><input type="text" id="rlDescEN" value="${esc(role.cDescEN)}" ${ro() ? "readonly" : ""}></div>
+          <div class="field span-2"><label for="rlDescEN">${esc(t("f.cDescEN"))}</label><input type="text" id="rlDescEN" data-help-f="cDescEN" value="${esc(role.cDescEN)}" ${ro() ? "readonly" : ""}></div>
         </div></div></div>`;
       const tabs = isNew ? "" : `<div class="tabs form-tabs" role="tablist">${[["access", "rl.tab.access"], ["users", "rl.tab.users"], ["history", "rl.tab.history"]]
         .map(([k, l]) => `<a href="#" role="tab" data-tab="${k}" class="${tab === k ? "active" : ""}">${esc(t(l))}${k === "users" ? ` (${(role.users || []).length})` : ""}</a>`).join("")}</div>`;
@@ -159,6 +162,7 @@ export function roleFormView(code) {
       $("#view").innerHTML = pageHead(title, "", actions, `<a href="#/admin/roles">${esc(t("rl.title"))}</a>${isNew ? "" : " / " + esc(role.cCode)}`)
         + general + tabs + body + (preview ? previewHtml() : "");
       this.bind();
+      decorateScreen(SCREEN);
     },
     keep() { // the fields typed so far survive a redraw
       if (!$("#rlDescFR")) return;

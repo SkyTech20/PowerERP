@@ -28,10 +28,10 @@ const priceCheck = {
   tab: "prices",
   html: () => `<div class="card"><div class="card-head"><h2>${esc(t("sales.check.title"))}</h2><span class="help muted">${esc(t("sales.check.help"))}</span></div>
     <div class="card-body"><div class="form-grid">
-      <div class="field span-2"><label for="pcProduct">${esc(t("sales.check.product"))}</label><select id="pcProduct"></select></div>
-      <div class="field"><label for="pcQty">${esc(t("sales.check.qty"))}</label><input type="text" id="pcQty" inputmode="decimal" value="1" style="text-align:right"></div>
-      <div class="field"><label for="pcUom">${esc(t("sales.check.uom"))}</label><input type="text" id="pcUom" placeholder="${esc(t("sales.check.uom.ph"))}"></div>
-      <div class="field"><label for="pcDate">${esc(t("sales.check.date"))}</label><input type="date" id="pcDate" value="${today()}"></div>
+      <div class="field span-2"><label for="pcProduct">${esc(t("sales.check.product"))}</label><select id="pcProduct" data-help-f="check.cProduct"></select></div>
+      <div class="field"><label for="pcQty">${esc(t("sales.check.qty"))}</label><input type="text" id="pcQty" data-help-f="check.dQty" inputmode="decimal" value="1" style="text-align:right"></div>
+      <div class="field"><label for="pcUom">${esc(t("sales.check.uom"))}</label><input type="text" id="pcUom" data-help-f="check.cUOM" placeholder="${esc(t("sales.check.uom.ph"))}"></div>
+      <div class="field"><label for="pcDate">${esc(t("sales.check.date"))}</label><input type="date" id="pcDate" data-help-f="check.dDate" value="${today()}"></div>
     </div><div id="pcResult"></div></div></div>`,
   bind: (m) => {
     const sel = $("#pcProduct");
