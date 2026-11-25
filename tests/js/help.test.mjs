@@ -25,9 +25,7 @@ const documented = Object.fromEntries(readdirSync(HELP).filter((f) => f.endsWith
 
 // The screens of the menu with no help page yet. Remove a screen from this list when its page is written;
 // a new screen of the menu must be added here or get its page.
-const PENDING = [
-  "admin.taxes", "admin.backups",
-];
+const PENDING = [];
 
 const TOC = {
   screens: [
@@ -129,6 +127,8 @@ test("the inputs of the hand-written screens and panels are documented (data-hel
     ...COMPANY_FIELDS.map(([f]) => `admin.settings.${f}`), "admin.settings.scenario",
     ...helpF("screens/roles.js").map((f) => `admin.roles.${f}`),
     ...helpF("resources/sales.js").map((f) => `sales.customers.${f}`),
+    ...helpF("screens/backups.js").map((f) => `admin.backups.${f}`),
+    ...helpF("resources/inventory.js").map((f) => `admin.taxes.taxgroups.${f}`), // the "Try the group" panel
     // the panels of Production: the week preview is on three screens, the others on one
     ...helpF("resources/production.js").flatMap((f) => PROD_PANELS[f.split(".")[0]].map((s) => `${s}.${f}`)),
   ];
