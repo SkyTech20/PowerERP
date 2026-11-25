@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import os
 import secrets
-from datetime import datetime, timezone
+from collections.abc import Callable
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import func, select
@@ -18,6 +19,10 @@ from powererp.models.core import ADMIN_ROLE, USER_ROLE
 
 LANGS = ("en", "fr")
 MIN_PASSWORD = 6
+# Lockout: after this many failed logins in a row the account is refused for this many minutes (the
+# administrator can unlock it before: Administration > Users > Unlock). ERP_LOCKOUT_ATTEMPTS=0 turns it off.
+LOCKOUT_ATTEMPTS = 5
+LOCKOUT_MINUTES = 15
 Row = dict[str, Any]
 
 
@@ -48,6 +53,8 @@ def as_row(u: User | None) -> Row | None:
         "password_hash": u.password_hash,
         "created_at": _iso(u.created_at),
         "last_login": _iso(u.last_login),
+        "failed_logins": u.failed_logins or 0,
+        "locked_until": _iso(u.locked_until),
     }
 
 
@@ -64,7 +71,26 @@ def public(row: Row) -> Row:
         "active": bool(row["active"]),
         "created_at": row["created_at"],
         "last_login": row["last_login"],
+        "failed_logins": row.get("failed_logins", 0),
+        "locked_until": row.get("locked_until") if _locked(row.get("locked_until")) else None,
+        "locked": _locked(row.get("locked_until")),
     }
+
+
+def _locked(until: str | None) -> bool:
+    return bool(until) and datetime.fromisoformat(str(until)) > _now()
+
+
+def lockout() -> tuple[int, int]:
+    """(attempts, minutes) of the lockout: ERP_LOCKOUT_ATTEMPTS / ERP_LOCKOUT_MINUTES, else 5 and 15."""
+
+    def env(name: str, default: int) -> int:
+        try:
+            return max(0, int(os.environ.get(name, default)))
+        except ValueError:
+            return default
+
+    return env("ERP_LOCKOUT_ATTEMPTS", LOCKOUT_ATTEMPTS), max(1, env("ERP_LOCKOUT_MINUTES", LOCKOUT_MINUTES))
 
 
 def check_password(pw: str, field: str = "password") -> None:
@@ -194,6 +220,14 @@ class UserService:
                 u.password_hash = generate_password_hash(password)
         return public(self.get(user_id))
 
+    def unlock(self, user_id: int) -> Row:
+        """Lets a locked user log in again at once (and forgets the failed logins)."""
+        self.get(user_id)
+        with database.session_scope() as s:
+            u = s.get(User, user_id)
+            u.failed_logins, u.locked_until = 0, None
+        return public(self.get(user_id))
+
     def delete(self, user_id: int, me_id: int | None) -> None:
         existing = self.get(user_id)
         if user_id == me_id:
@@ -205,24 +239,55 @@ class UserService:
 
 
 class AuthService:
-    def __init__(self, repo: UserRepository):
+    def __init__(self, repo: UserRepository, audit: Callable[..., None] | None = None):
+        """audit(event, username, **details): keeps a security event (the audit trail)."""
         self.repo = repo
+        self.audit = audit or (lambda *a, **k: None)
 
     def login(self, username: str, password: str) -> int:
-        """The user id after checking the password (401 bad_login otherwise); records the login time."""
+        """The user id after checking the password (401 bad_login otherwise); records the login time.
+        Failed logins in a row are counted: at the limit the account is locked for a while (423 locked, with the
+        minutes left in detail); a locked account is refused even with the right password."""
+        attempts, minutes = lockout()
+        now = _now()
         with database.session_scope() as s:
             u = self.repo.by_username(s, username)
-            if u is None or not u.active or not check_password_hash(u.password_hash, password):
-                raise AuthError("bad_login", status=401)
-            u.last_login = _now()
-            return u.id
+            if u is None:
+                outcome, detail = "unknown_user", None
+            elif u.locked_until and u.locked_until > now:
+                outcome, detail = "locked", max(1, -(-int((u.locked_until - now).total_seconds()) // 60))
+            elif not u.active:
+                outcome, detail = "inactive", None
+            elif not check_password_hash(u.password_hash, password):
+                u.failed_logins = (u.failed_logins or 0) + 1
+                outcome, detail = "bad_password", u.failed_logins
+                if attempts and u.failed_logins >= attempts:
+                    u.locked_until, u.failed_logins = now + timedelta(minutes=minutes), 0
+                    outcome, detail = "now_locked", minutes
+            else:
+                u.last_login, u.failed_logins, u.locked_until = now, 0, None
+                self.audit("login_ok", u.username)
+                return u.id
+            name = u.username if u is not None else username
+        # outside the transaction: the failed login counted above is saved
+        if outcome == "locked":
+            self.audit("login_locked", name, minutes=detail)
+            raise AuthError("locked", status=423, detail=str(detail))
+        if outcome == "now_locked":
+            self.audit("login_failed", name, reason="bad_password")
+            self.audit("locked", name, minutes=detail, attempts=attempts)
+            raise AuthError("locked", status=423, detail=str(detail))
+        self.audit("login_failed", name, reason=outcome, **({"attempt": detail} if detail else {}))
+        raise AuthError("bad_login", status=401)
 
     def change_password(self, user: Row, current: str, new: str) -> None:
         if not check_password_hash(user["password_hash"], current or ""):
+            self.audit("password_failed", user["username"], reason="bad_password")
             raise AuthError("bad_password", "current")
         check_password(new)
         with database.session_scope() as s:
             s.get(User, user["id"]).password_hash = generate_password_hash(new)
+        self.audit("password_changed", user["username"])
 
     def set_lang(self, user: Row, lang: str) -> None:
         if lang in LANGS:
@@ -265,4 +330,4 @@ class AuthService:
         print(msg + extra, flush=True)
 
 
-__all__ = ["AuthError", "AuthService", "NotFound", "UserRepository", "UserService", "public"]
+__all__ = ["AuthError", "AuthService", "NotFound", "UserRepository", "UserService", "lockout", "public"]

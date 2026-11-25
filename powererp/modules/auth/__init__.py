@@ -26,6 +26,7 @@ from flask import Blueprint, Flask, jsonify, request, session
 from powererp.container import Container
 from powererp.core import permissions
 from powererp.core.http import json_payload
+from powererp.core.security import current_username
 from powererp.core.values import text
 
 from .roles import RoleService
@@ -132,6 +133,9 @@ def _blueprint(auth: AuthService, users: UserService, roles: RoleService) -> Blu
 
     @bp.route("/api/auth/logout", methods=["POST"])
     def logout():
+        user = current_user()
+        if user is not None:
+            auth.audit("logout", user["username"])
         session.clear()
         return jsonify({"ok": True})
 
@@ -177,6 +181,12 @@ def _blueprint(auth: AuthService, users: UserService, roles: RoleService) -> Blu
             return jsonify({"ok": True})
         return jsonify(users.update(user_id, json_payload()))
 
+    @bp.route("/api/users/<int:user_id>/unlock", methods=["POST"])
+    def user_unlock(user_id):
+        row = users.unlock(user_id)
+        auth.audit("unlocked", row["username"], by=current_username())
+        return jsonify(row)
+
     @bp.route("/api/permissions")
     def permission_catalog():
         """The screens and actions a role can be given (Administration > Roles)."""
@@ -221,10 +231,17 @@ def role_lookup(roles: RoleService):
 
 
 def register(app: Flask, c: Container) -> None:
-    auth = c.register("auth", AuthService(_users))
-    users = c.register("users", UserService(_users))
-    from powererp.core.security import current_username
+    from powererp.modules.audit import client_ip
 
+    trail = c.get("audit")
+
+    def security(event: str, username: str, **details) -> None:
+        trail.record(
+            "security", event, username, method=request.method, path=request.path, ip=client_ip(), details=details
+        )
+
+    auth = c.register("auth", AuthService(_users, security))
+    users = c.register("users", UserService(_users))
     roles = c.register("roles", RoleService(current_username))
     app.config.update(
         SECRET_KEY=auth.secret_key(),

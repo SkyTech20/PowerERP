@@ -55,7 +55,7 @@ $("#loginForm").addEventListener("submit", async (e) => {
   try {
     enterApp(await api("auth/login", { method: "POST", body: { username, password }, noAuthRedirect: true }));
   } catch (ex) {
-    err.textContent = t(ex.code === "bad_login" ? "auth.bad" : "err.generic");
+    err.textContent = ex.code === "locked" ? t("auth.locked", { n: ex.detail || "15" }) : t(ex.code === "bad_login" ? "auth.bad" : "err.generic");
     err.hidden = false;
     $("#loginPass").select();
   }

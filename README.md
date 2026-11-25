@@ -130,6 +130,9 @@ Not done yet: supplier invoices do not move the stock, there is no FIFO costing,
   - origin, one step back: the reception (supplier, supplier lot, PO) and, for a lot made here, the lots each order used, down to the suppliers; uses, one step forward: the orders that used it and the lots they made;
   - recall: for the lot and every lot made from it, the customers (posted invoices less credit notes), the stock still on hand and the open orders; every stock movement of the lot;
   - `GET /api/traceability/export?product=&lot=&lang=` writes the same as an .xlsx (openpyxl: the Docker image must be built again).
+- **Audit trail and security log (done, step 4 of the SCOR / ISO plan)**: **Administration > Audit log** (administrator; `GET /api/audit`, `/api/audit/filters`, `/api/audit/export`):
+  - table `audit_log`, written in its own transaction and never changed: security events (sign-in ok / failed with the reason, account locked, refused while locked, unlocked, sign-out, password changed / refused, access refused) and every change made through the API (an after_request hook: POST / PUT / PATCH / DELETE answered with a success, with the screen and action of its permission, the record and the body sent; passwords masked; calculations and checks, whose permission is a view, are left out);
+  - lockout: 5 failed sign-ins in a row lock the account for 15 minutes (`ERP_LOCKOUT_ATTEMPTS`, 0 = off, `ERP_LOCKOUT_MINUTES`); Administration > Users shows *Locked* and **Unlock** (`POST /api/users/<id>/unlock`).
 
 ## Sales
 
@@ -197,6 +200,7 @@ The data lives in PostgreSQL (volume `pgdata` with docker compose). Several ERP 
 | `ERP_ADMIN_USER` / `ERP_ADMIN_PASSWORD` | `admin` / random (printed in the log) | Administrator created when the database has no user |
 | `ERP_SECRET_KEY` | random, saved in the database | Signs the login cookie |
 | `ERP_COOKIE_SECURE` | off | `1` sends the login cookie over HTTPS only (set it behind HTTPS) |
+| `ERP_LOCKOUT_ATTEMPTS` / `ERP_LOCKOUT_MINUTES` | `5` / `15` | Failed sign-ins in a row that lock an account, and for how long (`0` attempts: no lockout) |
 | `ERP_API_KEY` | none | Lets scripts call `/api/...` without a login, and, when set, is required by the PowerWARE web services (header `X-API-Key`) |
 | `ERP_DATASET` | full data | `demo` seeds from `data/demo/` |
 | `ERP_SCENARIO` | `manufacturing` | Demo scenario of the first start: `purchasing` (SkyAI, no production), `manufacturing` or `pastry` (pastry shop making 3 pastels, data/pastry built by tools/make_pastry_data.py). A data set chosen in System settings wins |

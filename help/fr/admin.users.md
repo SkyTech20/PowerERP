@@ -6,7 +6,7 @@ Les personnes qui peuvent se connecter à PowerERP, et le rôle de chacune. Le r
 
 ## Liste {#admin.users.list}
 
-Colonnes : Nom d'utilisateur, Nom complet, Courriel, Rôle, Langue, Statut et Dernière connexion.
+Colonnes : Nom d'utilisateur, Nom complet, Courriel, Rôle, Langue, Statut, Dernière connexion et Bloqué (un utilisateur bloqué après trop de connexions refusées).
 
 Filtres : Rôle et Statut. **Nouveau** crée un utilisateur.
 
@@ -47,6 +47,10 @@ Au moins 6 caractères. Obligatoire pour un nouvel utilisateur. En modification,
 ## Quand un changement compte {#admin.users.when}
 
 Le serveur applique le nouveau rôle tout de suite, à chaque opération. Le menu et les boutons de l'utilisateur changent quand il recharge la page ou se reconnecte.
+
+## Débloquer {#admin.users.unlock}
+
+Après 5 connexions refusées de suite, un compte est bloqué pendant 15 minutes : l'utilisateur voit *Trop de connexions refusées* et ne peut pas se connecter, même avec le bon mot de passe. La liste montre *Bloqué*, et la fiche de l'utilisateur un avis jaune avec l'heure de fin. **Débloquer** permet à l'utilisateur de se connecter tout de suite (par exemple après lui avoir donné un nouveau mot de passe). Chaque blocage et déblocage est dans le [Journal d'audit](#admin.audit).
 
 ## Supprimer {#admin.users.delete}
 

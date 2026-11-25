@@ -245,7 +245,14 @@ RES.users = {
     { f: "lang", l: "f.lang", fmt: (v) => esc(String(v || "").toUpperCase()) },
     { f: "active", l: "f.active", fmt: (v) => `<span class="badge ${v ? "yes" : "no"}">${esc(t(v ? "opt.active" : "opt.inactive"))}</span>` },
     { f: "last_login", l: "f.lastLogin", fmt: (v) => esc(fmtDateTime(v)) },
+    { f: "locked", l: "usr.locked", fmt: (v, r) => (v ? `<span class="badge no" title="${esc(t("usr.lockedUntil", { d: fmtDateTime(r.locked_until) }))}">${esc(t("usr.lockedBadge"))}</span>` : "") },
   ],
+  // locked after too many failed sign-ins (the server refuses it for a while): the administrator lets the user in
+  actions: [
+    { id: "unlock", l: "usr.unlock", primary: true, show: (m, isNew) => !isNew && m.locked, done: "usr.unlocked",
+      run: (m, ctx) => api(ctx.path + "/unlock", { method: "POST", body: {} }) },
+  ],
+  panels: [{ html: (m) => (m.locked ? `<div class="alert warn">${esc(t("usr.lockedNotice", { d: fmtDateTime(m.locked_until) }))}</div>` : "") }],
   defaults: () => ({ role: "USER", lang, active: true }),
   sections: [
     { t: "common.general", fields: [

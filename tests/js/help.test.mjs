@@ -129,6 +129,7 @@ test("the inputs of the hand-written screens and panels are documented (data-hel
     ...helpF("resources/sales.js").map((f) => `sales.customers.${f}`),
     ...helpF("screens/backups.js").map((f) => `admin.backups.${f}`),
     ...helpF("screens/traceability.js").map((f) => `prod.traceability.${f}`),
+    ...helpF("screens/audit.js").map((f) => `admin.audit.${f}`),
     ...helpF("resources/inventory.js").map((f) => `admin.taxes.taxgroups.${f}`), // the "Try the group" panel
     // the panels of Production: the week preview is on three screens, the others on one
     ...helpF("resources/production.js").flatMap((f) => PROD_PANELS[f.split(".")[0]].map((s) => `${s}.${f}`)),

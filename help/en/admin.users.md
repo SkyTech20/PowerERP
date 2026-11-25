@@ -6,7 +6,7 @@ The people who can sign in to PowerERP, and the role of each one. The role decid
 
 ## List {#admin.users.list}
 
-Columns: Username, Full name, Email, Role, Language, Status and Last sign-in.
+Columns: Username, Full name, Email, Role, Language, Status, Last sign-in and Locked (a user locked after too many failed sign-ins).
 
 Filters: Role and Status. **New** creates a user.
 
@@ -47,6 +47,10 @@ At least 6 characters. Required for a new user. When changing a user, leave it e
 ## When a change counts {#admin.users.when}
 
 The server applies the new role at once, on every operation. The menu and the buttons of the user change when the user reloads the page or signs in again.
+
+## Unlock {#admin.users.unlock}
+
+After 5 failed sign-ins in a row, an account is locked for 15 minutes: the user sees *Too many failed sign-ins* and cannot sign in, even with the right password. The list shows *Locked*, and the user's form a yellow notice with the time it ends. **Unlock** lets the user sign in at once (for instance after you gave a new password). Every lockout and unlock is in the [Audit log](#admin.audit).
 
 ## Delete {#admin.users.delete}
 

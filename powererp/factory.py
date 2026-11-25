@@ -19,6 +19,7 @@ from .core.errors import register_error_handlers
 from .integrations import powerware
 from .modules import (
     admin,
+    audit,
     auth,
     catalog,
     inventory,
@@ -44,6 +45,7 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     register_error_handlers(app)
 
     c.register("database_url", settings.init(database_url))
+    audit.register(app, c)  # the audit trail (its hook runs after the commit of each request)
     auth.register(app, c)  # login, users, access control
     # the scenario chosen when the demo data was last reset (dashboard), else ERP_SCENARIO
     demo = DemoData.load(dataset, settings.get_setting("demo_scenario"))
