@@ -27,8 +27,7 @@ const documented = Object.fromEntries(readdirSync(HELP).filter((f) => f.endsWith
 // a new screen of the menu must be added here or get its page.
 const PENDING = [
   "gl.accounts", "ap.suppliers", "ap.invoices", "pur.po", "pur.receptions",
-  "inv.stock", "inv.movements", "inv.replenishment", "inv.count", "inv.valuation", "inv.warehouses", "inv.params",
-  "inv.setup", "prod.recipes", "prod.items", "prod.operations", "prod.resources", "prod.workcenters", "prod.setupmatrix",
+  "prod.recipes", "prod.items", "prod.operations", "prod.resources", "prod.workcenters", "prod.setupmatrix",
   "prod.calendars", "prod.setup", "admin.taxes", "admin.backups",
 ];
 

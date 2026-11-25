@@ -3,6 +3,7 @@ import { $, $$, api, enc, esc, fmtInt, lang, money, num, numOnly, t, toast } fro
 import { dl, productLink, qtyFmt } from "../resources/inventory.js";
 import { canOpen } from "../router.js";
 import { can } from "../state.js";
+import { decorateScreen, helpButtonOf } from "../helpui.js";
 import { pageHead } from "../views.js";
 
 // ---------- Replenishment: products at or below their reorder point, and the POs to create
@@ -29,7 +30,7 @@ export function replenishmentView() {
           <td class="num">${esc(money(r.dUnitCost))}</td><td class="num" data-amt></td></tr>`).join("");
       const done = created ? `<div class="card notice"><div class="card-body">${esc(t("rep.created"))}
           ${created.map((p) => `<a class="btn small" href="#/po/${enc(p.cPO)}">${esc(p.cPO)} — ${esc(p.cSupplierName)} (${esc(money(p.dTotalAmount))})</a>`).join(" ")}</div></div>` : "";
-      $("#view").innerHTML = pageHead(t("rep.title"), t("rep.subtitle"), can("inv.replenishment", "create_po") ? `<button class="btn primary" id="createPo" ${data.items.length ? "" : "disabled"}>${esc(t("rep.createPo"))}</button>` : "") + done + `
+      $("#view").innerHTML = pageHead(t("rep.title"), t("rep.subtitle"), helpButtonOf("inv.replenishment") + (can("inv.replenishment", "create_po") ? `<button class="btn primary" id="createPo" ${data.items.length ? "" : "disabled"}>${esc(t("rep.createPo"))}</button>` : "")) + done + `
         <div class="card"><div class="toolbar"><select id="repWh" style="width:auto"><option value="">${esc(t("f.inv.cWarehouse"))}: ${esc(t("common.all"))}</option>
             ${whs.map((w) => `<option value="${esc(w.code)}" ${w.code === wh ? "selected" : ""}>${esc(w.code)} — ${esc(w.label)}</option>`).join("")}</select>
             <span class="help muted">${esc(t("rep.help"))}</span><span class="count">${esc(t("common.records", { n: fmtInt(data.total) }))}</span></div>
@@ -54,6 +55,7 @@ export function replenishmentView() {
         $("[data-qty]", tr).addEventListener("input", (e) => { r.dPurchaseQty = numOnly(e.target); totals(); });
       });
       totals();
+      decorateScreen("inv.replenishment");
       $("#repWh").addEventListener("change", async (e) => { wh = e.target.value; created = null; await this.load(); this.render(); });
       if ($("#createPo")) $("#createPo").addEventListener("click", async () => {
         // Quantity and cost in purchase units (e.g. cases): the PO lines are converted to stock units by the ERP
