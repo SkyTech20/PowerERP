@@ -148,6 +148,4 @@ Le parcours dans l'entrepôt : les emplacements sont listés dans cet ordre. Pr�
 
 Décoché : l'emplacement ne contient qu'un seul produit. Un mouvement qui fait entrer un autre produit est refusé (*Cet emplacement n'accepte qu'un seul produit*).
 
-### Plusieurs lots {#inv.warehouses.locations.lMixLots}
-
-Décoché : l'emplacement ne contient qu'un seul lot d'un produit. Un mouvement qui fait entrer un autre lot est refusé (*Cet emplacement n'accepte qu'un seul lot*).
+Lots : un emplacement contient toujours un seul lot d'un produit à la fois, coché ou non. Plusieurs produits peuvent partager un emplacement, chacun avec son lot, mais un deuxième lot du même produit va dans un autre emplacement jusqu'à ce que le premier soit vide (*Cet emplacement contient déjà un autre lot de ce produit*).

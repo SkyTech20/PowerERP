@@ -306,7 +306,7 @@ Object.assign(RES, {
       { f: "iPickSeq", l: "f.loc.iPickSeq", num: true },
       { f: "lBlocked", l: "f.loc.lBlocked", fmt: (v) => (v ? `<span class="badge no">${esc(t("f.loc.lBlocked"))}</span>` : "") },
     ],
-    defaults: () => ({ cWarehouse: "ENT-01", cType: "picking", lMixProducts: true, lMixLots: true, lActive: true }),
+    defaults: () => ({ cWarehouse: "ENT-01", cType: "picking", lMixProducts: true, lActive: true }),
     sections: [
       { t: "common.general", fields: [
         { f: "cWarehouse", l: "f.inv.cWarehouse", req: true, key: true, lookup: "warehouses" },
@@ -323,7 +323,7 @@ Object.assign(RES, {
       { t: "loc.wms", help: "loc.wms.help", fields: [
         { f: "dMaxWeight", l: "f.loc.dMaxWeight", type: "number" }, { f: "dMaxVolume", l: "f.loc.dMaxVolume", type: "number" },
         { f: "iMaxPallets", l: "f.loc.iMaxPallets", type: "number" },
-        { f: "lMixProducts", l: "f.loc.lMixProducts", type: "check" }, { f: "lMixLots", l: "f.loc.lMixLots", type: "check" },
+        { f: "lMixProducts", l: "f.loc.lMixProducts", type: "check" },
       ] },
     ],
   },

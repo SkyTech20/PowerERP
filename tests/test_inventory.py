@@ -164,6 +164,12 @@ def test_movement_rules(client):
     assert mv(client, cProduct="LAP-14I7", cSerial="PF4K2A01").status_code == 409
     # B-01-01-A takes one product only
     assert mv(client, cLocation="B-01-01-A").get_json()["error"] == "location_mixed"
+    # One lot of a product per location: B-01-02-A holds EXT-5LB lot L2026-09
+    assert mv(client, cProduct="EXT-5LB", cLot="L2", dExpiry="2030-01-01", cLocation="B-01-02-A").get_json() == {
+        "error": "location_mixed_lots",
+        "field": "cLocation",
+        "detail": "L2026-09",
+    }
     # Warehouse without locations
     assert mv(client, cProduct="RIV-ALU-316", cWarehouse="ENT-02", cLocation="").status_code == 201
     # Movements cannot be changed

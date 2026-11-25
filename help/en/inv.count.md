@@ -65,7 +65,7 @@ Where the product was counted.
 
 ### Lot {#inv.count.lines.cLot}
 
-The lot counted, for products followed by lot.
+The lot counted, for products followed by lot. A new line with another lot of a product in a location that still holds a lot of it is refused when posting (one lot per product per location).
 
 ### Serial number {#inv.count.lines.cSerial}
 

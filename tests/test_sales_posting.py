@@ -15,8 +15,8 @@ def on_hand(client, product):
     return {(r["cLocation"], r["cLot"], r["cSerial"]): float(r["dQtyOnHand"]) for r in rows if r["cProduct"] == product}
 
 
-def receive(client, product, qty, lot, expiry, date=DAY):
-    m = {"cType": "IN", "cProduct": product, "dQty": qty, "cWarehouse": "ENT-01", "cLocation": "B-01-02-A"}
+def receive(client, product, qty, lot, expiry, date=DAY, location="B-01-02-A"):
+    m = {"cType": "IN", "cProduct": product, "dQty": qty, "cWarehouse": "ENT-01", "cLocation": location}
     m.update({"cLot": lot, "dExpiry": expiry, "dDate": date, "dUnitCost": "40"})
     r = client.post("/api/stock-movements", json=m)
     assert r.status_code == 201, r.get_json()
@@ -94,8 +94,9 @@ def test_serial_numbers_go_out_one_by_one(client):
 
 def test_pick_policy_of_the_product(client):
     # in stock: L2026-09 (5, expires 2032-09-30, received first); received now: L2027-03, expiring earlier
-    receive(client, "EXT-5LB", "2", "L2027-03", "2031-03-31")
-    receive(client, "EXT-5LB", "4", "L-OLD", "2026-01-31")  # expired: never sold
+    # (one lot of a product per location: each lot in its own location)
+    receive(client, "EXT-5LB", "2", "L2027-03", "2031-03-31", location="A-01-01-B")
+    receive(client, "EXT-5LB", "4", "L-OLD", "2026-01-31", location="A-01-02-A")  # expired: never sold
     no = draft(client, [{"cProduct": "EXT-5LB", "dQty": "3"}])
     # empty policy + expiry date = FEFO
     assert taken(client, no) == [("L2027-03", "2"), ("L2026-09", "1")]

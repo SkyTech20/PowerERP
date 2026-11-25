@@ -26,8 +26,8 @@ def inventory():
         ),
         "locations": memory(
             [
-                {"cWarehouse": "W1", "cCode": "A-1", "lActive": True, "lMixProducts": True, "lMixLots": True},
-                {"cWarehouse": "W1", "cCode": "A-2", "lActive": True, "lMixProducts": True, "lMixLots": True},
+                {"cWarehouse": "W1", "cCode": "A-1", "lActive": True, "lMixProducts": True},
+                {"cWarehouse": "W1", "cCode": "A-2", "lActive": True, "lMixProducts": True},
             ],
             keys=("cWarehouse", "cCode"),
         ),
