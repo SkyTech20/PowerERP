@@ -18,6 +18,9 @@ P10: POST /api/recipes/<product>/<revision>/submit | approve | reject | obsolete
     GET /api/recipes/<product>/compare?a=&b=, GET /api/products/<code>/recipe?date= (the current version).
 M3a: production orders /api/production-orders (+ /calc: a draft calculated without saving it, and
     POST /<no>/release | unrelease | cancel {cComment}).
+M3b: the shop floor of the orders: POST /<no>/issue/check | issue | return | report, and complete | reopen | close.
+Step 3 (SCOR / ISO): GET /api/traceability?product=&lot= (origin, uses and recall of a lot) and
+    /api/traceability/export?product=&lot=&lang= (the same as a spreadsheet); lookups traced_products, trace_lots.
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -27,7 +30,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from flask import Blueprint, Flask, jsonify, request
+from flask import Blueprint, Flask, Response, jsonify, request
 
 from powererp.container import Container
 from powererp.core.errors import AppError
@@ -56,6 +59,7 @@ from .service import (
 )
 from .setup_matrix import SetupMatrixService
 from .steps import check_value
+from .trace import TraceService
 from .work_centers import WorkCenterService
 
 DESC_FR, DESC_EN = ("cDescFR",), ("cDescEN", "cDescFR")
@@ -86,6 +90,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     _register_product_mfg(bp, c, seed)
     _register_recipes(bp, c, seed)
     _register_orders(bp, c)
+    _register_traceability(bp, c)
     app.register_blueprint(bp)
 
 
@@ -435,6 +440,48 @@ def _register_orders(bp: Blueprint, c: Container) -> None:
             numbering.set_next(SEQUENCE, max((int(o.get("iNo") or 0) for o in data["prod_orders"]), default=0) + 1)
 
     c.get("lifecycle").after_load(renumber)
+
+
+def _register_traceability(bp: Blueprint, c: Container) -> None:
+    trace = c.register(
+        "traceability",
+        TraceService(
+            {
+                "stock": lambda: c.get("stock"),
+                "orders": lambda: c.get("production_orders"),
+                "receptions": lambda: c.get("receptions"),
+                "invoices": lambda: c.get("sales_invoices"),
+                "products": lambda: c.get("products").find,
+            }
+        ),
+    )
+
+    @bp.route("/api/traceability")
+    def traceability():
+        return jsonify(trace.trace(text(request.args.get("product")), text(request.args.get("lot"))))
+
+    @bp.route("/api/traceability/export")
+    def traceability_export():
+        product, lot = text(request.args.get("product")), text(request.args.get("lot"))
+        data = trace.export(product, lot, text(request.args.get("lang")) or "en")
+        name = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in f"trace-{product}-{lot}") + ".xlsx"
+        return Response(
+            data,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f'attachment; filename="{name}"'},
+        )
+
+    def traced_products():
+        """The products that have lots in the stock (what can be traced)."""
+        fields = ("cDescEN", "cDescFR") if request.args.get("lang") == "en" else ("cDescFR",)
+        return trace.products(fields), 200
+
+    def trace_lots():
+        """The lots of a product (?product=): expiry and quantity on hand."""
+        return trace.lots(text(request.args.get("product"))), 200
+
+    c.get("lookups").register("traced_products", traced_products)
+    c.get("lookups").register("trace_lots", trace_lots)
 
 
 def _base_qty(recipes: RecipeService, product: str, revision: str) -> float:

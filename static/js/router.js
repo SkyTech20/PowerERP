@@ -9,6 +9,7 @@ import { formView } from "./screens/form.js";
 import { helpView } from "./screens/help.js";
 import { listView } from "./screens/list.js";
 import { replenishmentView } from "./screens/replenishment.js";
+import { traceabilityView } from "./screens/traceability.js";
 import { roleFormView, rolesListView } from "./screens/roles.js";
 import { settingsView } from "./screens/settings.js";
 import { can, isAdmin, setView } from "./state.js";
@@ -33,10 +34,12 @@ export const routeOf = (path) => {
 export function canOpen(path) {
   const parts = path.replace(/^#/, "").split("/").filter(Boolean);
   if (parts.join("/") === "inv/replenishment") return can("inv.replenishment");
+  if (parts.slice(0, 2).join("/") === "prod/traceability") return can("prod.traceability");
   const hit = routeOf(parts.join("/"));
   return !hit || canOn(RES[hit.key]);
 }
 export function activeMenuRoute(path) {
+  if (path.startsWith("/prod/traceability")) return "/prod/traceability";
   const hit = routeOf(path);
   if (!hit) return path;
   const R = RES[hit.key];
@@ -51,6 +54,7 @@ export function resolve(path) {
   if (parts.join("/") === "admin/backups") return isAdmin() ? backupView() : dashboardView();
   if (parts.join("/") === "admin/settings") return isAdmin() ? settingsView() : dashboardView();
   if (parts.join("/") === "inv/replenishment") return can("inv.replenishment") ? replenishmentView() : dashboardView();
+  if (parts.slice(0, 2).join("/") === "prod/traceability") return can("prod.traceability") ? traceabilityView(parts[2], parts[3]) : dashboardView();
   if (parts[0] === "admin" && parts[1] === "roles") {
     if (!isAdmin()) return dashboardView();
     if (parts.length === 2) return rolesListView();

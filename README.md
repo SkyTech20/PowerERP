@@ -126,6 +126,10 @@ Not done yet: supplier invoices do not move the stock, there is no FIFO costing,
   - report: the quantity made goes in with its lot (typed, else the order's, else `MO<no>`), expiry (date + shelf life) and location (default location, else receiving), at the estimated unit cost; backflushed materials go out with it; return: a quantity issued goes back into its lot at its cost;
   - every move is a stock movement PROD with the order number, checked first (nothing moves while one problem is left); the order keeps the lots used and made (its genealogy);
   - in progress → completed (reopen) → closed: the actual cost (materials issued + estimated operations for the quantity made) and the variance against the estimate are kept on closing.
+- **Traceability and recall (done, step 3 of the SCOR / ISO plan)**: **Production > Lots and traceability** (`GET /api/traceability?product=&lot=`, permission `prod.traceability:view`, read only):
+  - origin, one step back: the reception (supplier, supplier lot, PO) and, for a lot made here, the lots each order used, down to the suppliers; uses, one step forward: the orders that used it and the lots they made;
+  - recall: for the lot and every lot made from it, the customers (posted invoices less credit notes), the stock still on hand and the open orders; every stock movement of the lot;
+  - `GET /api/traceability/export?product=&lot=&lang=` writes the same as an .xlsx (openpyxl: the Docker image must be built again).
 
 ## Sales
 

@@ -438,3 +438,14 @@ button.link { background: none; border: 0; padding: 0; color: var(--primary); fo
 .help-panel .help-h2 { font-size: 16px; margin-top: 24px; }
 .help-panel .help-field { grid-template-columns: 1fr; gap: 2px; padding: 8px 12px; scroll-margin-top: 48px; }
 .help-panel .help-h2 { scroll-margin-top: 8px; }
+
+/* Production > Lots and traceability */
+.kpis.tr-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tr-pick { display: flex; gap: 6px; align-items: center; max-width: 100%; min-width: 0; }
+.tr-pick select { min-width: 0; }
+.tr-node { padding: 2px 0; }
+.tr-tree { list-style: none; margin: 4px 0 8px 6px; padding: 0 0 0 16px; border-left: 2px solid var(--border); }
+.tr-tree > li { margin: 4px 0; line-height: 1.5; }
+.tr-tree > li.src { color: var(--muted); }
+.tr-tree > li.src b { color: var(--text, inherit); }
+@media (max-width: 760px) { .kpis.tr-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

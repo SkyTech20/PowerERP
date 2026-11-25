@@ -269,3 +269,12 @@ def test_dashboard_shows_the_figures_of_the_role(admin, client, login):
     assert login(["sales.invoices:view"]).get("/api/summary").get_json() == {}
     ap = login(["ap.invoices:view"]).get("/api/summary").get_json()
     assert set(ap) == {"invoices", "openInvoices", "openInvoicesAmount", "recentInvoices"}
+
+
+def test_traceability_needs_its_own_view(login):
+    orders = login(["prod.orders:view"])
+    assert orders.get("/api/traceability?product=X&lot=Y").status_code == 403
+    assert orders.get("/api/traceability/export?product=X&lot=Y").status_code == 403
+    trace = login(["prod.traceability:view"])
+    assert trace.get("/api/traceability?product=X&lot=Y").status_code == 404  # allowed: an unknown lot
+    assert trace.get("/api/lookups/traced_products").status_code == 200
