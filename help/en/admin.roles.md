@@ -98,7 +98,8 @@ Opens the actions of the screen one by one (*Actions on …*). The level shows *
 | Credit note | Sales > Invoices | Make the credit note of a posted invoice. |
 | Print | Sales > Invoices | Print the invoice and the credit note. |
 | Approve | Production > Recipes | Approve, reject, make default and make obsolete a recipe. |
-| Release | Production > Production orders | Release an order, put it back to draft and cancel it. |
+| Release | Production > Production orders | Release an order, put it back to draft, cancel, complete, reopen and close it. |
+| Shop floor | Production > Production orders | Issue the materials, give them back and report the production (stock movements). |
 | Create PO | Inventory > Replenishment | Make purchase orders from the replenishment suggestions. |
 
 ## Users {#admin.roles.users}

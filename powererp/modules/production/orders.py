@@ -7,14 +7,16 @@ and the estimated cost are the recipe exploded for the quantity (RecipeService.e
 on every change while the order is a draft.
 
 Life of an order:
-    draft --release--> released --(M3b: first issue or report)--> in_progress --> completed --> closed
-    draft / released --cancel--> cancelled          released --unrelease--> draft (nothing issued yet)
+    draft --release--> released --(first issue or report, floor.py)--> in_progress --complete--> completed --close--> closed
+    draft / released --cancel--> cancelled     released --unrelease--> draft     completed --reopen--> in_progress
 Only a draft is changed or deleted. Releasing checks the recipe again (still approved) and freezes the order; the
-availability of each material in the warehouse is shown on the order (shortages warn, they do not block). Every
-change of status is written to the order's history (who, when, comment).
+availability of each material in the warehouse is shown on the order (shortages warn, they do not block). Once the
+stock has moved for the order it can no longer go back to draft or be cancelled. Completing needs a quantity made.
+Every change of status is written to the order's history (who, when, comment).
 
-Production never changes the stock here: issuing the materials and reporting the output come with M3b, as stock
-movements (document PROD, the order number) through the stock service.
+The stock moves on the shop floor (M3b, floor.py): the materials issued and the product made are stock movements
+(document PROD, the order number). The actual cost (materials issued + the estimated operations for the quantity
+made) is shown against the estimate, and kept on the order when it is closed.
 """
 
 from __future__ import annotations
@@ -39,7 +41,28 @@ MOVES = {
     "release": (("draft",), "released"),
     "unrelease": (("released",), "draft"),
     "cancel": (("draft", "released"), "cancelled"),
+    "complete": (("in_progress",), "completed"),
+    "reopen": (("completed",), "in_progress"),
+    "close": (("completed",), "closed"),
 }
+UNMOVED = ("release", "unrelease", "cancel")  # only while the stock has not moved for the order
+
+
+def actuals(order: Row) -> Row:
+    """The actual cost of an order so far: the materials issued (net of returns) and the estimated operation cost
+    for the quantity made; the variance against the estimated unit cost x the quantity made."""
+    done = number(order.get("dQtyDone"))
+    qty = number(order.get("dQty"))
+    material = sum(number(i["dValue"]) for i in order.get("issues", []))
+    operation = number(order.get("dEstOperationCost")) * done / qty if qty > EPS else 0.0
+    total = material + operation
+    return {
+        "dActMaterialCost": amount(material),
+        "dActOperationCost": amount(operation),
+        "dActCost": amount(total),
+        "dActUnitCost": unit_cost(total / done) if done > EPS else "",
+        "dVariance": amount(total - number(order.get("dEstUnitCost")) * done) if done > EPS else "",
+    }
 
 
 class ProductionOrderService:
@@ -84,7 +107,7 @@ class ProductionOrderService:
 
     @staticmethod
     def summary(order: Row) -> Row:
-        out = {k: v for k, v in order.items() if k not in ("materials", "operations", "history")}
+        out = {k: v for k, v in order.items() if k not in ("materials", "operations", "history", "issues", "outputs")}
         out["iMaterials"] = len(order.get("materials", []))
         out["iOperations"] = len(order.get("operations", []))
         return out
@@ -101,6 +124,8 @@ class ProductionOrderService:
                 m["dAvailable"] = quantity(have)
                 m["dShort"] = quantity(max(left - have, 0.0))
         out["lShort"] = any(number(m.get("dShort")) > EPS for m in out.get("materials", []))
+        if out["cStatus"] != "closed":
+            out.update(actuals(out))
         return out
 
     def _available(self) -> dict[tuple[str, str], float]:
@@ -137,6 +162,17 @@ class ProductionOrderService:
                 "materials": [],
                 "operations": [],
                 "history": [],
+                "issues": [],
+                "outputs": [],
+                "dCompleted": "",
+                "cCompletedBy": "",
+                "dClosed": "",
+                "cClosedBy": "",
+                "dActMaterialCost": "",
+                "dActOperationCost": "",
+                "dActCost": "",
+                "dActUnitCost": "",
+                "dVariance": "",
             }
         )
         return order
@@ -262,15 +298,18 @@ class ProductionOrderService:
         self.repo.delete(self.draft(no))
 
     def move(self, no: int, action: str, comment: str = "") -> Row:
-        """release / unrelease / cancel (see the module's docstring)."""
+        """release / unrelease / cancel / complete / reopen / close (see the module's docstring)."""
         if action not in MOVES:
             raise AppError("not_found", status=404)
         order = copy.deepcopy(self.get(no))
         sources, target = MOVES[action]
         if order["cStatus"] not in sources:
             raise AppError("invalid_status", status=409, detail=f"{order['cStatus']} -> {target}")
-        if any(number(m["dQtyIssued"]) > EPS for m in order.get("materials", [])) or number(order["dQtyDone"]) > EPS:
+        moved = bool(order.get("issues") or order.get("outputs")) or number(order["dQtyDone"]) > EPS
+        if action in UNMOVED and (moved or any(number(m["dQtyIssued"]) > EPS for m in order.get("materials", []))):
             raise AppError("invalid_status", status=409, detail="stock already moved")
+        if action == "complete" and number(order["dQtyDone"]) <= EPS:
+            raise AppError("nothing_made", status=409)
         if action == "release":
             self.calc(order)  # the recipe is checked again (still approved) and the quantities recalculated
             order["dReleased"] = self._now()
@@ -278,6 +317,13 @@ class ProductionOrderService:
         elif action == "unrelease":
             order["dReleased"] = ""
             order["cReleasedBy"] = ""
+        elif action == "complete":
+            order["dCompleted"], order["cCompletedBy"] = self._now(), self.username()
+        elif action == "reopen":
+            order["dCompleted"], order["cCompletedBy"] = "", ""
+        elif action == "close":
+            order.update(actuals(order))  # the actual cost is kept as it is on closing
+            order["dClosed"], order["cClosedBy"] = self._now(), self.username()
         order["history"] = order.get("history", []) + [self._event(action, order["cStatus"], target, comment)]
         order["cStatus"] = target
         self.repo.update(order, [order["iNo"]])

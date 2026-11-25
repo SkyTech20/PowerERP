@@ -1,6 +1,7 @@
 /* PowerERP: Production: list / form definitions. P1: the reference lists of the shop floor; P2: calendars. */
-import { $, api, enc, esc, fmtDateTime, lang, money, numOnly, t, yesNo } from "../core.js";
+import { $, $$, api, enc, esc, fmtDateTime, lang, money, numOnly, t, toast, yesNo } from "../core.js";
 import { RES } from "../registry.js";
+import { can } from "../state.js";
 import { descCol, dl, newWith, optBadge, opts, today } from "./inventory.js";
 
 export const DOWNTIME_GROUPS = ["breakdown", "setup", "minor_stop", "reduced_speed", "no_material", "no_operator", "quality", "planned", "other"];
@@ -817,6 +818,129 @@ const orderHistory = {
         <td>${h.cFrom ? esc(t("prod.ord.status." + h.cFrom)) + " → " : ""}${esc(t("prod.ord.status." + h.cTo))}</td><td>${esc(h.cComment)}</td></tr>`).join("")}</tbody></table></div></div>`,
 };
 
+// ------------------------------------------------------------------ M3b: the shop floor of an order
+const onFloor = (m) => ["released", "in_progress"].includes(m.cStatus);
+const mvLink = (no) => (no ? `<a href="#/inv/movements/${esc(no)}">${esc(no)}</a>` : "");
+const left = (x) => Math.max((Number(x.dQtyRequired) || 0) - (Number(x.dQtyIssued) || 0), 0);
+const round4 = (v) => String(Math.round(v * 10000) / 10000);
+
+// Issue the materials (by lot, first to expire first) and report the quantity made
+const floorPanel = {
+  html: (m) => {
+    if (!onFloor(m) || !can("prod.orders", "report")) return "";
+    const rows = (m.materials || []).map((x) => {
+      const flush = x.cIssueMethod === "backflush";
+      return `<tr><td>${esc(x.cComponent)}</td><td>${esc(dl(x, "cDesc"))}</td><td>${esc(t("mfg.o.issue." + x.cIssueMethod))}</td>
+        <td class="num">${qtyUom(x.dQtyRequired, x.cUOM)}</td><td class="num">${qtyUom(x.dQtyIssued, x.cUOM)}</td><td class="num">${qtyUom(left(x), x.cUOM)}</td>
+        <td class="num">${flush ? `<span class="muted">${esc(t("prod.fl.auto"))}</span>`
+          : `<input type="text" inputmode="decimal" data-issue="${esc(x.iSeq)}" data-help-f="floor.issueQty" value="${esc(left(x) ? round4(left(x)) : "")}" style="width:110px;text-align:right" aria-label="${esc(t("prod.fl.toIssue"))}">`}</td></tr>`;
+    }).join("");
+    const todo = Math.max((Number(m.dQty) || 0) - (Number(m.dQtyDone) || 0), 0);
+    return `<div class="card"><div class="card-head"><h2>${esc(t("prod.fl.title"))}</h2><span class="help muted">${esc(t("prod.fl.help"))}</span></div>
+      <div class="card-body">
+        <h3>1. ${esc(t("prod.fl.issue"))}</h3><p class="help muted">${esc(t("prod.fl.issue.help"))}</p>
+        <div class="table-wrap"><table class="grid"><thead><tr><th>${esc(t("mfg.f.cComponent"))}</th><th>${esc(t("f.cDescription"))}</th><th>${esc(t("mfg.f.cIssueMethod"))}</th>
+          <th class="num">${esc(t("prod.ord.required"))}</th><th class="num">${esc(t("prod.ord.issued"))}</th><th class="num">${esc(t("prod.fl.left"))}</th><th class="num">${esc(t("prod.fl.toIssue"))}</th></tr></thead>
+          <tbody>${rows}</tbody></table></div>
+        <div class="form-grid" style="margin-top:10px"><div class="field"><label for="flIssueDate">${esc(t("prod.fl.date"))}</label><input type="date" id="flIssueDate" data-help-f="floor.issueDate" value="${esc(today())}"></div></div>
+        <div style="display:flex;gap:8px;margin:10px 0"><button type="button" class="btn" id="flCheck">${esc(t("prod.fl.showLots"))}</button><button type="button" class="btn primary" id="flIssue">${esc(t("prod.fl.issueBtn"))}</button></div>
+        <div id="flLots"></div>
+        <h3 style="margin-top:18px">2. ${esc(t("prod.fl.report"))}</h3><p class="help muted">${esc(t("prod.fl.report.help"))}</p>
+        <div class="form-grid">
+          <div class="field"><label for="flQty">${esc(t("prod.fl.qtyMade"))} (${esc(m.cUOM)})</label><input type="text" id="flQty" data-help-f="floor.reportQty" inputmode="decimal" style="text-align:right" value="${esc(todo ? round4(todo) : "")}"></div>
+          <div class="field"><label for="flLot">${esc(t("f.mv.cLot"))}</label><input type="text" id="flLot" data-help-f="floor.reportLot" placeholder="${esc(t("prod.fl.autoLot", { lot: m.cLot || "MO" + m.iNo }))}"></div>
+          <div class="field"><label for="flExpiry">${esc(t("f.mv.dExpiry"))}</label><input type="date" id="flExpiry" data-help-f="floor.reportExpiry"><span class="help">${esc(t("prod.fl.autoExpiry"))}</span></div>
+          <div class="field"><label for="flLoc">${esc(t("f.mv.cLocation"))}</label><select id="flLoc" data-help-f="floor.reportLocation"><option value="">${esc(t("prod.fl.autoLocation"))}</option></select></div>
+          <div class="field"><label for="flDate">${esc(t("prod.fl.date"))}</label><input type="date" id="flDate" data-help-f="floor.reportDate" value="${esc(today())}"></div>
+        </div>
+        <div style="margin-top:10px"><button type="button" class="btn primary" id="flReport">${esc(t("prod.fl.reportBtn"))}</button></div>
+      </div></div>`;
+  },
+  bind: (m, ctx) => {
+    if (!$("#flIssue")) return;
+    const lines = () => $$("[data-issue]").map((el) => ({ iSeq: Number(el.dataset.issue), dQty: el.value || "0" }));
+    const body = () => ({ lines: lines(), dDate: $("#flIssueDate").value });
+    $$("[data-issue]").forEach((el) => el.addEventListener("input", () => numOnly(el)));
+    $("#flQty").addEventListener("input", (e) => numOnly(e.target));
+    api(`lookups/locations?all=1&wh=${enc(m.cWarehouse)}`).then((rows) => {
+      $("#flLoc").innerHTML += rows.map((r) => `<option value="${esc(r.code)}">${esc(r.code)}${r.label ? " — " + esc(r.label) : ""}</option>`).join("");
+    }).catch(() => {});
+    $("#flCheck").addEventListener("click", async () => {
+      try {
+        const r = await api(ctx.path + "/issue/check", { method: "POST", body: body() });
+        const problems = r.problems.length ? `<div class="alert error"><ul>${r.problems.map((p) =>
+          `<li>${esc(p.cComponent)} ${esc(t("err." + p.code))}${p.detail ? " — " + esc(p.detail) : ""}</li>`).join("")}</ul></div>` : `<div class="alert success">${esc(t("prod.fl.ready"))}</div>`;
+        $("#flLots").innerHTML = problems + (r.allocations.length ? `<div class="table-wrap"><table class="grid"><thead><tr><th>${esc(t("mfg.f.cComponent"))}</th>
+          <th>${esc(t("f.mv.cLocation"))}</th><th>${esc(t("f.mv.cLot"))}</th><th>${esc(t("f.mv.dExpiry"))}</th><th class="num">${esc(t("mfg.op.qty"))}</th></tr></thead><tbody>
+          ${r.allocations.map((a) => `<tr><td>${esc(a.cComponent)}</td><td>${esc(a.cLocation)}</td><td>${esc(a.cLot)}</td><td>${esc(a.dExpiry)}</td><td class="num">${qtyUom(a.dQty, a.cUOM)}</td></tr>`).join("")}
+          </tbody></table></div>` : "");
+      } catch (e) { ctx.error(e); }
+    });
+    const run = (btn, step, payload, done) => $(btn).addEventListener("click", async () => {
+      $(btn).disabled = true;
+      try {
+        ctx.reload(await api(ctx.path + "/" + step, { method: "POST", body: payload() }));
+        toast(t(done), "success");
+      } catch (e) { $(btn).disabled = false; ctx.error(e); }
+    });
+    run("#flIssue", "issue", body, "prod.fl.issued");
+    run("#flReport", "report", () => ({ dQty: $("#flQty").value, cLot: $("#flLot").value, dExpiry: $("#flExpiry").value, cLocation: $("#flLoc").value, dDate: $("#flDate").value }), "prod.fl.reported");
+  },
+};
+
+// The genealogy of the order: the lots made, and the lots of the materials used (a return gives a quantity back)
+const lotsPanel = {
+  html: (m) => {
+    const outs = m.outputs || [];
+    const ins = m.issues || [];
+    if (!outs.length && !ins.length) return "";
+    const back = onFloor(m) && can("prod.orders", "report");
+    return `<div class="card"><div class="card-head"><h2>${esc(t("prod.fl.lots"))}</h2><span class="help muted">${esc(t("prod.fl.lots.help"))}</span></div><div class="card-body">
+      <h3>${esc(t("prod.fl.made"))}</h3>${outs.length ? `<div class="table-wrap"><table class="grid"><thead><tr><th>${esc(t("prod.fl.date"))}</th><th>${esc(t("f.mv.cLot"))}</th><th>${esc(t("f.mv.dExpiry"))}</th>
+        <th>${esc(t("f.mv.cLocation"))}</th><th class="num">${esc(t("mfg.op.qty"))}</th><th class="num">${esc(t("mfg.rc.unitCost"))}</th><th class="num">${esc(t("prod.fl.value"))}</th><th>${esc(t("prod.fl.movement"))}</th><th>${esc(t("mfg.ap.who"))}</th></tr></thead><tbody>
+        ${outs.map((o) => `<tr><td>${esc(o.dDate)}</td><td><b>${esc(o.cLot)}</b></td><td>${esc(o.dExpiry || "")}</td><td>${esc(o.cLocation)}</td><td class="num">${qtyUom(o.dQty, o.cUOM)}</td>
+          <td class="num">${esc(money4(o.dUnitCost))}</td><td class="num">${esc(money(o.dValue))}</td><td>${mvLink(o.iMovement)}</td><td>${esc(o.cUser)}</td></tr>`).join("")}</tbody></table></div>`
+        : `<p class="help">${esc(t("prod.fl.noneMade"))}</p>`}
+      <h3>${esc(t("prod.fl.used"))}</h3>${ins.length ? `<div class="table-wrap"><table class="grid"><thead><tr><th>${esc(t("prod.fl.date"))}</th><th>${esc(t("prod.fl.kind"))}</th><th>${esc(t("mfg.f.cComponent"))}</th>
+        <th>${esc(t("f.mv.cLot"))}</th><th>${esc(t("f.mv.dExpiry"))}</th><th>${esc(t("f.mv.cLocation"))}</th><th class="num">${esc(t("mfg.op.qty"))}</th><th class="num">${esc(t("prod.fl.value"))}</th><th>${esc(t("prod.fl.movement"))}</th>${back ? "<th></th>" : ""}</tr></thead><tbody>
+        ${ins.map((i, k) => `<tr><td>${esc(i.dDate)}</td><td><span class="badge ${i.cKind === "return" ? "no" : ""}">${esc(t("prod.fl.k." + i.cKind))}</span></td><td>${esc(i.cComponent)}</td>
+          <td>${esc(i.cLot)}</td><td>${esc(i.dExpiry || "")}</td><td>${esc(i.cLocation)}</td><td class="num">${qtyUom(i.dQty, i.cUOM)}</td><td class="num">${esc(money(i.dValue))}</td><td>${mvLink(i.iMovement)}</td>
+          ${back ? `<td>${i.cKind !== "return" ? `<button type="button" class="link-btn" data-giveback="${k}">${esc(t("prod.fl.return"))}</button>` : ""}</td>` : ""}</tr>`).join("")}</tbody></table></div>`
+        : `<p class="help">${esc(t("prod.fl.noneUsed"))}</p>`}
+      </div></div>`;
+  },
+  bind: (m, ctx) => {
+    $$("[data-giveback]").forEach((b) => b.addEventListener("click", async () => {
+      const i = m.issues[Number(b.dataset.giveback)];
+      const q = prompt(t("prod.fl.returnHow", { c: i.cComponent, lot: i.cLot || "-", uom: i.cUOM }));
+      if (!q) return;
+      try {
+        ctx.reload(await api(ctx.path + "/return", { method: "POST", body: { iSeq: i.iSeq, cLot: i.cLot, cLocation: i.cLocation, cSerial: i.cSerial, dQty: q } }));
+        toast(t("prod.fl.returned"), "success");
+      } catch (e) { ctx.error(e); }
+    }));
+  },
+};
+
+// The actual cost against the estimate, once the stock moved
+const actualPanel = {
+  html: (m) => {
+    if (!(m.issues || []).length && !(m.outputs || []).length) return "";
+    const done = Number(m.dQtyDone) || 0;
+    const variance = Number(m.dVariance) || 0;
+    return `<div class="card"><div class="card-head"><h2>${esc(t("prod.fl.actual"))}</h2><span class="help muted">${esc(t(m.cStatus === "closed" ? "prod.fl.actual.closed" : "prod.fl.actual.help"))}</span></div>
+      <div class="card-body"><div class="totals"><table>
+        <tr><td>${esc(t("prod.fl.qtyMade"))}</td><td class="num">${qtyUom(m.dQtyDone, m.cUOM)} / ${qtyUom(m.dQty, m.cUOM)}</td></tr>
+        <tr><td>${esc(t("prod.fl.actMat"))}</td><td class="num">${esc(money(m.dActMaterialCost))}</td></tr>
+        <tr><td>${esc(t("prod.fl.actOp"))}</td><td class="num">${esc(money(m.dActOperationCost))}</td></tr>
+        <tr class="grand"><td>${esc(t("prod.fl.actCost"))}</td><td class="num">${esc(money(m.dActCost))}</td></tr>
+        ${done ? `<tr><td>${esc(t("prod.fl.actUnit"))}</td><td class="num">${esc(money4(m.dActUnitCost))} / ${esc(m.cUOM)}</td></tr>
+        <tr><td>${esc(t("prod.fl.estForDone"))}</td><td class="num">${esc(money((Number(m.dEstUnitCost) || 0) * done))}</td></tr>
+        <tr><td>${esc(t("prod.fl.variance"))}</td><td class="num"><span class="badge ${variance > 0.005 ? "no" : "yes"}">${variance > 0 ? "+" : ""}${esc(money(variance))}</span></td></tr>` : ""}
+      </table></div></div></div>`;
+  },
+};
+
 // An action that moves the order (the draft on the screen is saved first)
 const move = (action, ask) => async (m, ctx) => {
   let comment = "";
@@ -834,7 +958,8 @@ Object.assign(RES, {
     one: "prod.ord.one", newTitle: "prod.ord.new", id: (r) => r.iNo, label: (r) => `${r.iNo} — ${r.cProduct} ${dl(r, "cDesc")}`, sort: "iNo", dir: "desc",
     columns: [
       { f: "iNo", l: "prod.ord.f.iNo", n: true }, { f: "cStatus", l: "mfg.f.cStatus", fmt: orderBadge }, { f: "cProduct", l: "mfg.f.cProduct" }, descCol("cDesc"),
-      { f: "dQty", l: "mfg.op.qty", n: true, fmt: (v, r) => qtyUom(v, r.cUOM) }, { f: "cWarehouse", l: "prod.ord.f.cWarehouse" },
+      { f: "dQty", l: "mfg.op.qty", n: true, fmt: (v, r) => qtyUom(v, r.cUOM) }, { f: "dQtyDone", l: "prod.ord.done", n: true, fmt: (v, r) => (Number(v) ? qtyUom(v, r.cUOM) : "") },
+      { f: "cWarehouse", l: "prod.ord.f.cWarehouse" },
       { f: "dStart", l: "prod.ord.f.dStart" }, { f: "dDue", l: "prod.ord.f.dDue" }, { f: "cRevision", l: "mfg.f.cRevision" },
       { f: "dEstCost", l: "prod.ord.estCost", num: true, fmt: (v) => esc(money(v)) },
     ],
@@ -855,6 +980,12 @@ Object.assign(RES, {
         run: move("unrelease", "prod.ord.why") },
       { id: "cancel", l: "prod.ord.cancel", perm: "release", show: (m, isNew) => !isNew && ["draft", "released"].includes(m.cStatus), done: "prod.ord.cancelled",
         run: move("cancel", "prod.ord.cancelWhy") },
+      { id: "complete", l: "prod.ord.complete", perm: "release", primary: true, show: (m, isNew) => !isNew && m.cStatus === "in_progress", confirm: "prod.ord.complete.confirm", done: "prod.ord.completed",
+        run: move("complete") },
+      { id: "reopen", l: "prod.ord.reopen", perm: "release", show: (m, isNew) => !isNew && m.cStatus === "completed", done: "prod.ord.reopened",
+        run: move("reopen", "prod.ord.why") },
+      { id: "close", l: "prod.ord.close", perm: "release", primary: true, show: (m, isNew) => !isNew && m.cStatus === "completed", confirm: "prod.ord.close.confirm", done: "prod.ord.closed",
+        run: move("close") },
     ],
     sections: [
       { t: "prod.ord.what", help: "prod.ord.what.help", fields: [
@@ -872,9 +1003,15 @@ Object.assign(RES, {
         { f: "dCreated", l: "prod.ord.f.dCreated", readonly: true, fmt: fmtDateTime, show: (m) => !!m.iNo },
         { f: "cReleasedBy", l: "prod.ord.f.cReleasedBy", readonly: true, show: (m) => !!m.dReleased },
         { f: "dReleased", l: "prod.ord.f.dReleased", readonly: true, fmt: fmtDateTime, show: (m) => !!m.dReleased },
+        { f: "cCompletedBy", l: "prod.ord.f.cCompletedBy", readonly: true, show: (m) => !!m.dCompleted },
+        { f: "dCompleted", l: "prod.ord.f.dCompleted", readonly: true, fmt: fmtDateTime, show: (m) => !!m.dCompleted },
+        { f: "cClosedBy", l: "prod.ord.f.cClosedBy", readonly: true, show: (m) => !!m.dClosed },
+        { f: "dClosed", l: "prod.ord.f.dClosed", readonly: true, fmt: fmtDateTime, show: (m) => !!m.dClosed },
+        { f: "cLot", l: "prod.ord.f.cLot", readonly: true, show: (m) => !!m.cLot },
+        { f: "dQtyDone", l: "prod.fl.qtyMade", readonly: true, show: (m) => (m.outputs || []).length > 0 },
       ] },
     ],
     panel: orderMaterials,
-    panels: [orderOperations, orderHistory],
+    panels: [floorPanel, lotsPanel, actualPanel, orderOperations, orderHistory],
   },
 });

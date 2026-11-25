@@ -117,7 +117,7 @@ test("an input that is not a field of the record has its code in data-help-f", (
 
 const PROD_PANELS = {
   week: ["prod.calendars", "prod.workcenters", "prod.resources"], calc: ["prod.operations"], grid: ["prod.setupmatrix"],
-  explode: ["prod.recipes"], preview: ["prod.recipes"], versions: ["prod.recipes"],
+  explode: ["prod.recipes"], preview: ["prod.recipes"], versions: ["prod.recipes"], floor: ["prod.orders"],
 };
 
 test("the inputs of the hand-written screens and panels are documented (data-help-f)", async () => {

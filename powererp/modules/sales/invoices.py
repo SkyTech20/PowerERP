@@ -43,7 +43,7 @@ from powererp.core.errors import AppError, NotFound
 from powererp.core.values import amount, number, quantity, text, today, unit_cost
 from powererp.modules.common.forms import RecordForm, Row
 from powererp.modules.common.registry import ReferenceRegistry
-from powererp.modules.inventory.ledger import effects
+from powererp.modules.inventory.picking import location_usable, pick_order, received_dates
 from powererp.store import Store
 
 DRAFT_SEQUENCE = "SALES_INVOICE_DRAFT"
@@ -52,18 +52,6 @@ CREDIT_SEQUENCE = "SALES_CREDIT"
 CREDIT_PREFIX = "NC-"
 EPS = 1e-9
 Rows = list[Row]
-Received = dict[tuple[str, ...], tuple[str, int, str, int]]
-
-
-def _day(d: str) -> int:
-    """2026-11-23 -> 20261123 (0 when empty)."""
-    digits = d.replace("-", "")[:8]
-    return int(digits) if digits.isdigit() else 0
-
-
-def pick_policy(prod: Row) -> str:
-    """FEFO / FIFO / LIFO: the product's, else FEFO when it has an expiry date, else FIFO."""
-    return str(prod.get("cPickPolicy") or ("FEFO" if prod.get("lExpiryControl") else "FIFO"))
 
 
 class SalesInvoiceService:
@@ -419,9 +407,13 @@ class SalesInvoiceService:
         wh = self.refs["warehouses"].find(inv["cWarehouse"]) or {}
         allow_negative = bool(wh.get("lAllowNegative"))
         bal = {k: dict(v) for k, v in stock.balances().items()}
-        received = self._received(stock, {text(ln["cProduct"]).upper() for ln in inv["lines"]})
+        received = received_dates(stock, {text(ln["cProduct"]).upper() for ln in inv["lines"]})
         allocations: Rows = []
         problems: Rows = []
+
+        def usable(location: str) -> bool:
+            return location_usable(stock, wh.get("cCode", ""), location)
+
         for i, ln in enumerate(inv["lines"], 1):
             prod = self.refs["products"].find(ln["cProduct"]) or {}
             if not prod.get("lStocked"):
@@ -433,20 +425,9 @@ class SalesInvoiceService:
                 continue
             need = round(number(ln["dQty"]) * factor, 6)
             lots = bool(prod.get("lLotControl") or prod.get("lSerialControl"))
-            policy = pick_policy(prod)
-            candidates = []
-            for key, b in bal.items():
-                if key[0] != prod["cCode"].upper() or key[1] != wh.get("cCode", "").upper():
-                    continue
-                free = b["qty"] - b["reserved"]
-                if free <= EPS or not self._location_ok(wh, b["cLocation"]):
-                    continue
-                if prod.get("lExpiryControl") and b.get("dExpiry") and b["dExpiry"] < inv["dDate"]:
-                    continue  # expired: not sold
-                candidates.append((self._order(policy, b, received.get(key)), b, free))
-            candidates.sort(key=lambda c: c[0])
+            candidates = pick_order(prod, wh.get("cCode", ""), bal, inv["dDate"], received, usable)
             left = need
-            for _order, b, free in candidates:
+            for b, free in candidates:
                 if left <= EPS:
                     break
                 take = round(min(free, left), 6)
@@ -503,48 +484,6 @@ class SalesInvoiceService:
             if left > EPS:
                 problems.append(self._line_problem(i, prod, "over_return", f"{quantity(left)} {stock_uom}"))
         return allocations, problems
-
-    @staticmethod
-    def _received(stock: Any, products: set[str]) -> Received:
-        """Per balance key: (first received date, its movement no, last received date, its movement no)."""
-        out: Received = {}
-        for m in stock.ledger.all():
-            if m["cProduct"].upper() not in products:
-                continue
-            for wh, loc, dq, _dr in effects(m):
-                if dq <= 0:
-                    continue
-                key = (
-                    m["cProduct"].upper(),
-                    wh.upper(),
-                    loc.upper(),
-                    text(m.get("cLot")).upper(),
-                    text(m.get("cSerial")).upper(),
-                )
-                d, n = str(m.get("dDate") or ""), int(m.get("iNo") or 0)
-                first = out.get(key)
-                if first is None:
-                    out[key] = (d, n, d, n)
-                else:
-                    out[key] = min(first[:2], (d, n)) + max(first[2:], (d, n))
-        return out
-
-    @staticmethod
-    def _order(policy: str, b: Row, received: tuple[str, int, str, int] | None) -> tuple:
-        """Sort key of a balance: the stock that goes out first comes first."""
-        first, last = (received[:2], received[2:]) if received else (("", 0), ("", 0))
-        place = (b["cLot"].upper(), b["cLocation"].upper(), b["cSerial"].upper())
-        if policy == "FEFO":
-            return (b.get("dExpiry") or "9999-12-31", *first, *place)
-        if policy == "LIFO":
-            return (-_day(last[0]), -last[1], *place)
-        return (*first, *place)
-
-    def _location_ok(self, wh: Row, location: str) -> bool:
-        if not location:
-            return True
-        loc = self.refs["stock"].locations.find_in(wh["cCode"], location)
-        return loc is not None and not loc.get("lBlocked") and loc.get("lActive", True)
 
     @staticmethod
     def _line_problem(i: int, prod: Row, code: str, detail: str) -> Row:
