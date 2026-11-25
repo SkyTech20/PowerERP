@@ -95,6 +95,14 @@ def test_search_ignores_accents_and_case(tmp_path):
     assert index.search("   ", "en") == []
 
 
+def test_summary_is_the_first_sentence():
+    from powererp.modules.manual.content import summary
+
+    assert summary("Price × (1 − discount %). Calculated.") == "Price × (1 − discount %)."
+    assert summary("No end") == "No end"
+    assert summary("x" * 300).endswith(" …") and len(summary("x" * 300)) <= 200
+
+
 def test_screen_and_permission_of_a_code():
     assert screen_of("sales.invoices.lines.dQty") == "sales.invoices"
     assert screen_of("_intro.find") == "_intro"
@@ -149,6 +157,7 @@ def test_the_administrator_sees_every_page(admin):
     item = admin.get("/api/help/item/sales.invoices.lines.lReturn?lang=en").get_json()
     assert item["screen"] == "sales.invoices" and item["path"] == ["Sales invoices", "Lines"]
     assert item["untranslated"] is False
+    assert item["summary"].startswith("Credit notes only.")  # the tip of the field's ⓘ
     assert admin.get("/api/help/page/nothing").status_code == 404
     assert admin.get("/api/help/item/sales.invoices.nothing").status_code == 404
 
