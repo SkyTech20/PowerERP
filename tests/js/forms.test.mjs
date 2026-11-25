@@ -138,3 +138,14 @@ test("every screen opens from a menu entry (its permissions are the entry's)", a
   assert.equal(menuItemOf(RES.calexceptions).k, "prod.calendars");
   assert.equal(menuItemOf(RES.users).admin, true);
 });
+
+test("a production order: another product takes its own recipe and warehouse; every status has its texts", async () => {
+  const P = await import(pathToFileURL(join(STATIC, "js", "resources", "production.js")).href);
+  const m = { cProduct: "B", cRevision: "A", cWarehouse: "W1", dQty: "5" };
+  assert.deepEqual(P.prepareOrderRecalc({ ...m }, "dQty"), m);
+  assert.deepEqual(P.prepareOrderRecalc({ ...m }, "cProduct"), { ...m, cRevision: "", cWarehouse: "" });
+  const keys = [...P.ORDER_STATUS.map((s) => "prod.ord.status." + s), ...["created", "release", "unrelease", "cancel"].map((a) => "prod.ord.a." + a)];
+  for (const l of ["en", "fr"]) assert.deepEqual(keys.filter((k) => !I18N[l][k]), [], l);
+  assert.equal(RES.prodorders.locked({ cStatus: "draft" }, false), false);
+  assert.equal(RES.prodorders.locked({ cStatus: "released" }, false), true);
+});

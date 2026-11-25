@@ -124,6 +124,17 @@ SCREENS: tuple[Screen, ...] = (
             "production.product_current_recipe": "view",
         },
     ),
+    Screen(
+        "prod.orders",
+        "prod",
+        actions=(*CRUD, "release"),
+        routes={
+            "production.production_orders": "crud",
+            "production.production_order": "crud",
+            "production.production_order_calc": "view",
+            "production.production_order_action": "release",
+        },
+    ),
     Screen("prod.items", "prod", crud=("production.product_mfg",)),
     Screen(
         "prod.operations",

@@ -74,6 +74,8 @@ STEP_KINDS = ("instruction", "material_add", "parameter", "measure", "check", "t
 STEP_DATA_TYPES = ("number", "text", "yes_no", "list", "photo")
 STEP_ON_FAIL = ("block", "warn", "hold_lot")
 STEP_FREQUENCIES = ("once", "every_n_units", "every_n_min", "per_lot")
+# M3: production orders: draft -> released -> in_progress -> completed -> closed; cancelled from draft / released
+ORDER_STATUS = ("draft", "released", "in_progress", "completed", "closed", "cancelled")
 
 # --------------------------------------------------------------------------- schemas
 # kind: s = text, d = number (kept as text "12.50"), i = integer, b = yes / no, date = YYYY-MM-DD, (choices) = one of
@@ -474,6 +476,61 @@ RECIPE_STEP = {
     "lSecondSignature": "b",
     "cCondition": "s",  # done only when an earlier value matches: "TEMP_PATE < 24"
 }
+
+# ---------------------------------------------------------------- production orders (M3)
+PRODUCTION_ORDER = {  # what the screen sends; the rest comes from the recipe (PRODUCTION_ORDER_EXTRA)
+    "cProduct": "s",
+    "cRevision": "s",  # empty = the version new orders use on the start date (default approved recipe)
+    "dQty": "d",  # in the unit of the recipe
+    "cWarehouse": "s",  # where the materials come from and the product goes (empty = the product's default)
+    "dStart": "date",
+    "dDue": "date",
+    "cNotes": "s",
+}
+PRODUCTION_ORDER_EXTRA = {
+    "iNo": "i",
+    "cStatus": ORDER_STATUS,
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "cUOM": "s",  # the unit of the recipe
+    "dQtyDone": "d",  # M3b: good quantity reported
+    "cLot": "s",  # M3b: the lot of the product made
+    "dEstMaterialCost": "d",
+    "dEstOperationCost": "d",
+    "dEstCost": "d",
+    "dEstUnitCost": "d",
+    "dTotalMin": "d",
+    "cUser": "s",
+    "dCreated": "ts",
+    "dReleased": "ts",
+    "cReleasedBy": "s",
+}
+ORDER_MATERIAL = {  # the materials of the recipe for the quantity of the order, in stock units
+    "iSeq": "i",
+    "cComponent": "s",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "iOpSeq": "i",
+    "cIssueMethod": ISSUE_METHODS,
+    "cWarehouse": "s",
+    "dQtyRequired": "d",
+    "cUOM": "s",  # stock unit of the component
+    "dQtyIssued": "d",  # M3b
+    "dUnitCost": "d",
+    "dCost": "d",
+}
+ORDER_OPERATION = {
+    "iOpSeq": "i",
+    "cOperation": "s",
+    "cDescFR": "s",
+    "cDescEN": "s",
+    "cWhere": "s",  # resource, work center, capability or supplier
+    "dSetupMin": "d",
+    "dRunMin": "d",
+    "dWaitMin": "d",
+    "dCost": "d",
+}
+ORDER_HISTORY = {"dAt": "ts", "cUser": "s", "cAction": "s", "cFrom": "s", "cTo": "s", "cComment": "s"}
 
 # ---------------------------------------------------------------- sales (V1): company profile and customers
 LANGS = ("fr", "en")

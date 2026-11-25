@@ -98,6 +98,7 @@ Ouvre les actions de l'écran une à une (*Actions sur …*). Le niveau affiche 
 | Note de crédit | Ventes > Factures | Faire la note de crédit d'une facture comptabilisée. |
 | Imprimer | Ventes > Factures | Imprimer la facture et la note de crédit. |
 | Approuver | Production > Recettes | Approuver, rejeter, rendre par défaut et rendre obsolète une recette. |
+| Lancer | Production > Ordres de fabrication | Lancer un ordre, le remettre en brouillon et l'annuler. |
 | Créer commande | Inventaire > Réapprovisionnement | Faire des bons de commande à partir des propositions de réapprovisionnement. |
 
 ## Utilisateurs {#admin.roles.users}

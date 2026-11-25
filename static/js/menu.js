@@ -22,7 +22,7 @@ export const MENU = [
     { k: "inv.warehouses", route: "/inv/warehouses" }, { k: "inv.params", route: "/inv/params" }, { k: "inv.setup", route: "/inv/categories" },
   ] },
   { k: "prod", icon: "🏭", items: [
-    { k: "prod.recipes", route: "/prod/recipes" }, "prod.orders", "prod.shopfloor", "prod.traceability", "prod.schedule", "prod.mrp",
+    { k: "prod.recipes", route: "/prod/recipes" }, { k: "prod.orders", route: "/prod/orders" }, "prod.shopfloor", "prod.traceability", "prod.schedule", "prod.mrp",
     { k: "prod.items", route: "/prod/items" }, { k: "prod.operations", route: "/prod/operations" }, { k: "prod.resources", route: "/prod/resources" },
     { k: "prod.workcenters", route: "/prod/work-centers" }, { k: "prod.setupmatrix", route: "/prod/setup-matrix" }, { k: "prod.calendars", route: "/prod/calendars" }, { k: "prod.setup", route: "/prod/capabilities" },
   ] },
