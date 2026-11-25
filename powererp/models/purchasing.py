@@ -6,16 +6,29 @@ is one row with two flags, has_detail and unbilled, and the fields of both recor
 (getReceivingDetails.p / getUnbilledReceiving.p). powererp.purchasing rebuilds the PowerWARE records from them.
 
 Field maps: PowerWARE / API key -> (column, kind). Kinds: s = TEXT, d = NUMERIC (keeps the scale), date = DATE,
-b = BOOLEAN. Every mapped column is nullable: NULL means the record did not have that key. Keys that are not
+b = BOOLEAN, ts = TIMESTAMP. Every mapped column is nullable: NULL means the record did not have that key. Keys that are not
 mapped are kept in the JSONB column `extra`, so nothing sent by SkyAI or found in older data is lost.
 """
 
-from sqlalchemy import BigInteger, Boolean, Column, Date, ForeignKey, Index, Integer, Numeric, Table, Text, text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    Table,
+    Text,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 
 from ..database import Base
 
-_TYPES = {"s": Text, "d": Numeric, "date": Date, "b": Boolean}
+_TYPES = {"s": Text, "d": Numeric, "date": Date, "b": Boolean, "ts": DateTime}
 
 # ------------------------------------------------------------------ purchase orders
 PO_DOC = {"COMPANY": ("pw_company", "s")}
@@ -71,6 +84,10 @@ REC_DOC = {
     "Transport": ("freight", "d"),
     "TPS": ("gst", "d"),
     "TVQ": ("pst", "d"),
+    # entry into the stock (powererp.modules.purchasing.receiving): the IN movements are documents REC <number>
+    "lStockPosted": ("stock_posted", "b"),
+    "dStockPosted": ("stock_posted_at", "ts"),
+    "cStockPostedBy": ("stock_posted_by", "s"),
 }
 REC_UNBILLED = {
     "COMPANY": ("unb_pw_company", "s"),
@@ -103,6 +120,12 @@ REC_LINE = {
     "cGL": ("gl_account", "s"),
     "cCC1": ("cc1", "s"),
     "cCC2": ("cc2", "s"),
+    # where and how the line went into the stock: location, lot (ours), the supplier's lot, serial number, expiry
+    "cLocation": ("location", "s"),
+    "cLot": ("lot", "s"),
+    "cSupplierLot": ("supplier_lot", "s"),
+    "cSerial": ("serial", "s"),
+    "dExpiry": ("expiry", "date"),
 }
 
 # ------------------------------------------------------------------ supplier invoices

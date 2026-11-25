@@ -81,6 +81,7 @@ DEMO_ROLES: tuple[Row, ...] = (
             "pur.receptions:view",
             "pur.receptions:create",
             "pur.receptions:edit",
+            "pur.receptions:post",
         ],
     },
 )

@@ -7,7 +7,7 @@ A small PowerERP-like ERP for demos and tests.
   - **Suppliers**
   - **Invoices** (supplier / AP invoices, with lines, GL and cost center)
   - **Purchase orders** (with lines)
-  - **Receptions** (with lines; picking a PO pre-fills the supplier and the lines)
+  - **Receptions** (with lines; picking a PO pre-fills the supplier and the lines; **Check** / **Put in stock** brings the goods into the stock with their lot, the supplier's lot, expiry and location)
   - **Inventory** (see [Products, taxes and inventory](#products-taxes-and-inventory))
   - **Administration → Taxes** (tax codes and tax groups)
   - **Sales → Customers, Price lists, Invoices** (see [Sales](#sales))
@@ -53,7 +53,9 @@ SkyAI's **Offer** template (an internal purchase requisition) chooses the best s
 
 **WMS later:** locations already carry what a WMS needs (type, capacity, mixing rules, blocked, picking order) and all stock is by location; a WMS would add tasks (put-away, picking, replenishment of picking locations) on top of the movements.
 
-Not done yet: receptions and invoices do not move the stock automatically, there is no FIFO costing, and stock is not posted to the GL.
+- **Receptions into the stock** (`powererp/modules/purchasing/receiving.py`): `POST /api/receptions/<no>/check` lists what each line will put into the stock and what must be fixed, without changing anything; `POST /api/receptions/<no>/post` (permission `pur.receptions:post`) posts one IN movement per line (document REC, the reception number, at the line's unit cost) and locks the reception. Empty fields are proposed: lot `<reception>-<line>` for a lot-controlled product, expiry = reception date + shelf life, location = the product's default location in the warehouse, else the receiving location (also when the default location holds another lot). The supplier's lot (`cSupplierLot`) is kept on the line and in the movement's comment, for the traceability one step back.
+
+Not done yet: supplier invoices do not move the stock, there is no FIFO costing, and stock is not posted to the GL.
 
 ## Production
 
@@ -306,7 +308,7 @@ All endpoints return JSON. Lists accept `q` (search), `page`, `size`, `sort`, `d
 | Cost centers | `GET/POST /api/cost-centers`, `GET/PUT/DELETE /api/cost-centers/<cc1>[/<cc2>]` |
 | Suppliers | `GET/POST /api/suppliers`, `GET/PUT/DELETE /api/suppliers/<code>` |
 | Purchase orders | `GET/POST /api/purchase-orders`, `GET/PUT/DELETE /api/purchase-orders/<po>` |
-| Receptions | `GET/POST /api/receptions`, `GET/PUT/DELETE /api/receptions/<no>` |
+| Receptions | `GET/POST /api/receptions`, `GET/PUT/DELETE /api/receptions/<no>`, `POST /api/receptions/<no>/check`, `POST /api/receptions/<no>/post` |
 | Invoices | `GET/POST /api/invoices`, `GET/PUT/DELETE /api/invoices/<id>` |
 | Login | `POST /api/auth/login` `{username, password}`, `POST /api/auth/logout`, `GET /api/auth/me`, `POST /api/auth/password` `{current, password}` |
 | Users (admin) | `GET/POST /api/users`, `GET/PUT/DELETE /api/users/<id>` |

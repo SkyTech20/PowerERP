@@ -22,7 +22,7 @@ L'entrepôt de ces paramètres. Obligatoire.
 
 ### Emplacement par défaut {#inv.params.cDefaultLocation}
 
-L'emplacement habituel du produit dans cet entrepôt. Ce doit être un emplacement de cet entrepôt.
+L'emplacement habituel du produit dans cet entrepôt. Ce doit être un emplacement de cet entrepôt. Une réception mise en stock y range le produit quand sa ligne n'a pas d'emplacement.
 
 ### Actif {#inv.params.lActive}
 

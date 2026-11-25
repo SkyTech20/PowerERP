@@ -3,6 +3,54 @@ import { CURRENCIES, api, esc, fmtDateTime, lang, money, num, roleName, sourceBa
 import { RES } from "../registry.js";
 import { route } from "../router.js";
 
+// Receptions: put into the stock (Check shows what goes in; Put in stock posts it, then the reception is locked)
+const recBadge = (posted) => `<span class="badge ${posted ? "yes" : ""}">${esc(t(posted ? "rec.badge.posted" : "rec.badge.pending"))}</span>`;
+
+const recSaveThen = async (m, ctx, step) => {
+  const saved = await api(ctx.path, { method: "PUT", body: m });
+  const res = await api(ctx.path + "/" + step, { method: "POST" });
+  return step === "check" ? { ...saved, _check: res } : res;
+};
+
+const recStock = {
+  html: (m) => {
+    const check = m._check;
+    if (!check && !m.lStockPosted) return "";
+    const problems = check && check.problems.length
+      ? `<div class="alert error"><b>${esc(t("rec.stock.problems"))}</b><ul>${check.problems.map((p) =>
+        `<li>${p.iLine ? `${esc(t("rec.stock.line"))} ${esc(p.iLine)}${p.cProduct ? " (" + esc(p.cProduct) + ")" : ""}: ` : ""}${esc(t("err." + p.code))}`
+        + `${p.field && p.field !== "lines" ? " — " + esc(t(REC_FIELD_LABEL[p.field] || p.field)) : ""}${p.detail ? " — " + esc(p.detail) : ""}</li>`).join("")}</ul></div>`
+      : check ? `<div class="alert success">${esc(t("rec.stock.ready"))}</div>` : "";
+    const warnings = check && check.warnings.length
+      ? `<div class="alert">${check.warnings.map((w) => esc(t("rec.warn." + w.code))).join("<br>")}</div>` : "";
+    const head = (cols) => `<thead><tr>${cols.map(([l, n]) => `<th${n ? ' class="num"' : ""}>${esc(t(l))}</th>`).join("")}</tr></thead>`;
+    let body;
+    if (check) {
+      const rows = check.entries;
+      body = rows.length ? `<div class="table-wrap"><table class="grid">${head([["rec.stock.line"], ["f.CodeArticle"], ["f.Description"], ["rec.stock.qty", 1], ["f.mv.cLocation"], ["f.rec.cLot"], ["f.rec.cSupplierLot"], ["f.rec.dExpiry"], ["f.rec.cSerial"]])}
+        <tbody>${rows.map((e) => `<tr${e.cSkip ? ' class="muted"' : ""}><td>${esc(e.iLine)}</td><td>${esc(e.cProduct)}</td><td>${esc(e.cDescription)}</td>
+        <td class="num">${esc(e.dQty)} ${esc(e.cUOM)}</td>${e.cSkip ? `<td colspan="5">${esc(t("rec.skip." + e.cSkip))}</td>`
+          : `<td>${esc(e.cLocation)}</td><td>${esc(e.cLot)}</td><td>${esc(e.cSupplierLot)}</td><td>${esc(e.dExpiry)}</td><td>${esc(e.cSerial)}</td>`}</tr>`).join("")}</tbody></table></div>`
+        : `<p class="help">${esc(t("rec.stock.none"))}</p>`;
+    } else {
+      const rows = m.movements || [];
+      body = rows.length ? `<div class="table-wrap"><table class="grid">${head([["rec.stock.movement"], ["f.CodeArticle"], ["rec.stock.qty", 1], ["f.mv.cLocation"], ["f.rec.cLot"], ["f.rec.dExpiry"], ["f.rec.cSerial"], ["rec.stock.value", 1]])}
+        <tbody>${rows.map((mv) => `<tr><td><a href="#/inv/movements/${esc(mv.iNo)}">${esc(mv.iNo)}</a></td><td>${esc(mv.cProduct)}</td>
+        <td class="num">${esc(mv.dQty)}</td><td>${esc(mv.cLocation)}</td><td>${esc(mv.cLot)}</td><td>${esc(mv.dExpiry || "")}</td><td>${esc(mv.cSerial)}</td>
+        <td class="num">${esc(money(mv.dValue || 0))}</td></tr>`).join("")}</tbody></table></div>`
+        : `<p class="help">${esc(t("rec.stock.none"))}</p>`;
+    }
+    return `<div class="card"><div class="card-head"><h2>${esc(t(check ? "rec.stock.plan" : "rec.stock.done"))}</h2>
+      <span class="help muted">${esc(t(check ? "rec.stock.help" : "rec.stock.helpDone"))}</span></div><div class="card-body">${problems}${warnings}${body}</div></div>`;
+  },
+};
+
+// The label of a field named in a problem
+const REC_FIELD_LABEL = {
+  Entrepot: "f.Entrepot", CodeArticle: "f.CodeArticle", QuantiteRecue: "f.QuantiteRecue", cLocation: "f.rec.cLocation",
+  cLot: "f.rec.cLot", dExpiry: "f.rec.dExpiry", cSerial: "f.rec.cSerial",
+};
+
 Object.assign(RES, {
   gl: {
     api: "gl-accounts", route: "/gl/accounts", menu: "/gl", title: "gl.title", sub: "gl.subtitle", one: "gl.account", newTitle: "gl.newAccount",
@@ -128,14 +176,20 @@ Object.assign(RES, {
   receptions: {
     api: "receptions", route: "/receptions", title: "rec.title", sub: "rec.subtitle", one: "rec.one", newTitle: "rec.new",
     id: (r) => r.NoReception, label: (r) => `${r.NoReception} — ${r.Fournisseur}`, sort: "DateReception", dir: "desc",
-    filters: [{ f: "lUnbilled", l: "f.lUnbilled", options: [["true", "common.yes"], ["false", "common.no"]] }],
+    filters: [
+      { f: "lUnbilled", l: "f.lUnbilled", options: [["true", "common.yes"], ["false", "common.no"]] },
+      { f: "lStockPosted", l: "f.lStockPosted", options: [["true", "common.yes"], ["false", "common.no"]] },
+    ],
     columns: [
       { f: "NoReception", l: "f.NoReception" }, { f: "DateReception", l: "f.DateReception" }, { f: "NoBonCommande", l: "f.NoBonCommande" },
       { f: "CodeFournisseur", l: "f.CodeFournisseur" }, { f: "Fournisseur", l: "f.Fournisseur", wrap: true }, { f: "Statut", l: "f.Statut" },
       { f: "lineCount", l: "common.lineCount", num: true },
       { f: "MontantTotal", l: "f.MontantTotal", num: true, fmt: (v, r) => esc(money(v, r.Devise)) },
       { f: "lUnbilled", l: "f.lUnbilled", fmt: yesNo },
+      { f: "lStockPosted", l: "f.lStockPosted", fmt: recBadge },
     ],
+    locked: (m) => !!m.lStockPosted,
+    badge: (m, isNew) => (isNew ? "" : recBadge(m.lStockPosted)),
     defaults: () => ({ COMPANY: "MA2", DateReception: new Date().toISOString().slice(0, 10), Statut: "Reçu", Entrepot: "ENT-01", Devise: "CAD", lUnbilled: true, Transport: "0.00", TPS: "0.00", TVQ: "0.00", lines: [] }),
     sections: [{ t: "common.general", fields: [
       { f: "NoReception", l: "f.NoReception", req: true, key: true, inputmode: "numeric" },
@@ -149,13 +203,26 @@ Object.assign(RES, {
       { f: "Devise", l: "f.Devise", type: "select", options: CURRENCIES.map((c) => [c, c]), raw: true },
       { f: "lUnbilled", l: "f.lUnbilled", type: "check", help: "f.lUnbilled.help" },
       { f: "Commentaires", l: "f.Commentaires", type: "textarea", span: 4 },
+      { f: "dStockPosted", l: "f.dStockPosted", readonly: true, show: (m) => !!m.lStockPosted },
+      { f: "cStockPostedBy", l: "f.cStockPostedBy", readonly: true, show: (m) => !!m.lStockPosted },
     ] }],
     currency: (m) => m.Devise,
+    actions: [
+      { id: "check", l: "rec.check", show: (m, isNew) => !isNew && !m.lStockPosted, run: (m, ctx) => recSaveThen(m, ctx, "check") },
+      { id: "post", l: "rec.post", perm: "post", show: (m, isNew) => !isNew && !m.lStockPosted, confirm: "rec.post.confirm", done: "rec.post.done",
+        run: (m, ctx) => recSaveThen(m, ctx, "post") },
+    ],
+    panels: [recStock],
     lines: {
+      help: "rec.lines.help", minWidth: 1900,
       cols: [
-        { f: "CodeArticle", l: "f.CodeArticle", w: "w-md" }, { f: "Description", l: "f.Description", w: "w-lg" },
+        { f: "CodeArticle", l: "f.CodeArticle", w: "w-md" }, { f: "Description", l: "f.Description", w: "w-md" },
         { f: "QuantiteCommandee", l: "f.QuantiteCommandee", w: "w-xs", n: true }, { f: "QuantiteRecue", l: "f.QuantiteRecue", w: "w-xs", n: true },
         { f: "PrixUnitaire", l: "f.PrixUnitaire", w: "w-sm", n: true },
+        { f: "cSupplierLot", l: "f.rec.cSupplierLot", w: "w-md" }, { f: "cLot", l: "f.rec.cLot", w: "w-md", ph: "rec.auto" },
+        { f: "dExpiry", l: "f.rec.dExpiry", w: "w-md", type: "date" },
+        { f: "cLocation", l: "f.rec.cLocation", w: "w-md", lookup: "locations", lookupParams: (m) => ({ wh: m.Entrepot }) },
+        { f: "cSerial", l: "f.rec.cSerial", w: "w-md" },
         { f: "cGL", l: "f.cGL", w: "w-sm", lookup: "gl" }, { f: "cCC1", l: "f.lCC1", w: "w-xs" }, { f: "cCC2", l: "f.lCC2", w: "w-xs" },
       ],
       amountLabel: "f.Montant", amount: (l) => num(l.QuantiteRecue) * num(l.PrixUnitaire),

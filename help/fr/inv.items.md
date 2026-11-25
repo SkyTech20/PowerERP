@@ -258,7 +258,7 @@ Classement A, B ou C selon l'importance (rotation ou valeur). À titre d'informa
 
 ### Durée de conservation (jours) {#inv.items.iShelfLifeDays}
 
-Durée de conservation habituelle, en jours. À titre d'information.
+Durée de conservation habituelle, en jours. Une réception mise en stock donne à un produit avec date d'expiration la date réception + durée de conservation, quand sa ligne n'en a pas.
 
 ### Numéros de lot {#inv.items.lLotControl}
 

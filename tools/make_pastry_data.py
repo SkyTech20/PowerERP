@@ -9,7 +9,7 @@ Writes data/pastry/*.json:
     production.json       calendar, work centers, machines, standard operations, manufacturing data, recipes
     suppliers.json        the suppliers
     purchase_orders.json  the purchase orders (one still open)
-    receptions.json       the receptions
+    receptions.json       the receptions (in the stock: their lines carry the location, lot and expiry)
     invoices.json         the supplier invoices (posted)
 The stock of each item is what was received, and every reception is invoiced at the same quantities and prices,
 so the stock value matches the invoices. Raw food is zero-rated (no GST / QST); packaging and equipment are taxed.
@@ -464,6 +464,17 @@ def build_purchases(prods: dict[str, dict]):
                     "cComment": inv_no,
                 }
             )
+            # the reception went into the stock: its line says where and how (lot, the supplier's lot, expiry)
+            mv = movements[-1]
+            rec_details[-1]["Articles"][i - 1].update(
+                {
+                    "cLocation": mv["cLocation"],
+                    "cLot": mv["cLot"],
+                    "cSupplierLot": f"{sup[:3]}-{received[2:].replace('-', '')}-{i}" if p["lLotControl"] else "",
+                    "dExpiry": expiry,
+                }
+            )
+        rec_details[-1].update({"lStockPosted": True, "dStockPosted": received + "T16:00:00", "cStockPostedBy": BUYER})
     return (
         suppliers,
         {"po_details": po_details, "unbilled_po": unbilled_po},

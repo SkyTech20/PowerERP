@@ -1,5 +1,6 @@
 """Purchasing module: purchase orders (/api/purchase-orders), receptions (/api/receptions) and supplier invoices
-(/api/invoices). SkyAI reads and writes the same records through the PowerWARE services
+(/api/invoices). A reception goes into the stock with POST /api/receptions/<no>/check (what it would put in, what
+must be fixed) and POST /api/receptions/<no>/post (receiving.py). SkyAI reads and writes the same records through the PowerWARE services
 (powererp.integrations.powerware)."""
 
 from __future__ import annotations
@@ -9,8 +10,10 @@ from flask import Blueprint, Flask, jsonify, request
 from powererp.container import Container
 from powererp.core.http import json_payload
 from powererp.core.pagination import paginate_request
+from powererp.core.security import current_username
 
 from . import repository
+from .receiving import ReceptionStockService
 from .services import (
     BillingService,
     DocumentNumbering,
@@ -26,6 +29,7 @@ __all__ = [
     "InvoiceService",
     "PurchaseOrderService",
     "ReceptionService",
+    "ReceptionStockService",
     "compute_invoice",
     "register",
     "repository",
@@ -118,7 +122,9 @@ SAMPLE_INVOICES = [
 ]
 
 
-def _blueprint(pos: PurchaseOrderService, recs: ReceptionService, invs: InvoiceService) -> Blueprint:
+def _blueprint(
+    pos: PurchaseOrderService, recs: ReceptionService, invs: InvoiceService, entry: ReceptionStockService
+) -> Blueprint:
     bp = Blueprint("purchasing", __name__)
 
     @bp.route("/api/purchase-orders", methods=["GET", "POST"])
@@ -149,11 +155,19 @@ def _blueprint(pos: PurchaseOrderService, recs: ReceptionService, invs: InvoiceS
     def rec_item(no):
         view = recs.get(no)
         if request.method == "GET":
-            return jsonify(view)
+            return jsonify(entry.with_stock(view))
         if request.method == "DELETE":
             recs.delete(no)
             return jsonify({"ok": True})
         return jsonify(recs.update(no, json_payload()))
+
+    @bp.route("/api/receptions/<no>/check", methods=["POST"])
+    def rec_check(no):
+        return jsonify(entry.check(no))
+
+    @bp.route("/api/receptions/<no>/post", methods=["POST"])
+    def rec_post(no):
+        return jsonify(entry.post(no))
 
     @bp.route("/api/invoices", methods=["GET", "POST"])
     def inv_collection():
@@ -182,7 +196,8 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     recs = c.register("receptions", ReceptionService(supplier_name))
     billing = c.register("billing", BillingService())
     invs = c.register("invoices", InvoiceService(supplier_name, billing, numbering, recs))
-    app.register_blueprint(_blueprint(pos, recs, invs))
+    entry = c.register("reception_stock", ReceptionStockService(recs, lambda: c.get("stock"), current_username))
+    app.register_blueprint(_blueprint(pos, recs, invs, entry))
 
     c.get("lookups").register("po", pos.lookup)
     dashboard = c.get("dashboard")
