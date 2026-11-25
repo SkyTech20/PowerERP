@@ -116,7 +116,12 @@ Not done yet: supplier invoices do not move the stock, there is no FIFO costing,
   - the approved version becomes the product's **default**; validity dates; `GET /api/products/<code>/recipe?date=` gives the version new orders use that day;
   - **new version from** any version (next revision letter, reason), **history** of every change (who, when, comment), **comparison** of two versions (`GET /api/recipes/<product>/compare?a=&b=`: header, materials, operations, steps, outputs).
   - Demo: every recipe approved; a revision B of the white bread (less salt) waits for approval.
-- The master data of Production (P1 to P10) is complete. Next, when Mohamed decides: operators and skills (P11), then production orders, shop floor and scheduling.
+- The master data of Production (P1 to P10) is complete. Next, when Mohamed decides: operators and skills (P11), then shop floor and scheduling.
+- **M3a (done): Production → Production orders** (`/api/production-orders/<no>`): what to make, how much, in which warehouse and when, from an approved recipe (the revision given, else the default one valid on the start date; `GET /api/lookups/approved_revisions?product=`):
+  - the materials (stock units, scrap included), the operations (time on their resource) and the estimated cost are the recipe exploded for the quantity, recalculated on every change of a draft (`POST /api/production-orders/calc`: a product just picked takes the base quantity of its recipe);
+  - the available stock of each material in the warehouse (on hand − reserved, expired lots excluded) and the shortages are shown; they warn, they do not block;
+  - draft → released (the recipe is checked again) → in progress → completed → closed; draft / released → cancelled; released → draft while nothing was issued (`POST /api/production-orders/<no>/{release,unrelease,cancel}`, permission `prod.orders:release`); only a draft is changed or deleted; every change of status goes into the history (who, when, comment);
+  - the stock does not move yet: issuing the materials by lot and reporting the output with a new lot come with M3b.
 
 ## Sales
 

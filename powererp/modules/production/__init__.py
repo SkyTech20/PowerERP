@@ -16,6 +16,8 @@ P9: the steps of the recipe operations; POST /api/recipes/<product>/<revision>/s
     {iOpSeq, iStep, value}: the value against the limits of the step (what the shop floor will call).
 P10: POST /api/recipes/<product>/<revision>/submit | approve | reject | obsolete | default | copy,
     GET /api/recipes/<product>/compare?a=&b=, GET /api/products/<code>/recipe?date= (the current version).
+M3a: production orders /api/production-orders (+ /calc: a draft calculated without saving it, and
+    POST /<no>/release | unrelease | cancel {cComment}).
 
 Production never changes the stock directly: it posts movements through the stock service of the container
 (c.get("stock").add(...) with cDocType "PROD"), so every stock rule applies to it.
@@ -30,6 +32,7 @@ from flask import Blueprint, Flask, jsonify, request
 from powererp.container import Container
 from powererp.core.errors import AppError
 from powererp.core.http import json_payload
+from powererp.core.pagination import paginate_request
 from powererp.core.security import current_can, current_username
 from powererp.core.values import text
 from powererp.modules.common.crud import register_crud_routes
@@ -38,6 +41,7 @@ from powererp.store import store
 
 from .calendar import CalendarExceptionService, CalendarService
 from .operations import OperationService
+from .orders import SEQUENCE, ProductionOrderService
 from .products import ProductMfgService
 from .recipe_flow import RecipeFlow
 from .recipes import RecipeService, prepare_demo
@@ -80,6 +84,7 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     _register_setup_matrix(bp, c, seed, centers, resources)
     _register_product_mfg(bp, c, seed)
     _register_recipes(bp, c, seed)
+    _register_orders(bp, c)
     app.register_blueprint(bp)
 
 
@@ -334,6 +339,88 @@ def _register_recipes(bp: Blueprint, c: Container, seed: dict) -> None:
         return jsonify(recipes.view(row))
 
     c.get("lifecycle").add(recipes.repo, "prod_recipes", prepare_demo(seed.get("recipes", []), demo_lists))
+
+
+def _register_orders(bp: Blueprint, c: Container) -> None:
+    refs = {
+        "products": c.get("products").find,
+        "product_mfg": c.get("product_mfg").find,
+        "warehouses": c.get("warehouses").find,
+        "recipes": c.get("recipes"),
+        "current_recipe": c.get("recipe_flow").current,
+        "stock": lambda: c.get("stock"),
+    }
+    numbering = c.get("numbering")
+    orders = c.register(
+        "production_orders",
+        ProductionOrderService(store("production_orders"), refs, numbering, current_username, c.get("references")),
+    )
+
+    @bp.route("/api/production-orders", methods=["GET", "POST"])
+    def production_orders():
+        if request.method == "GET":
+            rows = [orders.summary(o) for o in orders.list()]
+            return jsonify(paginate_request(rows, ("cProduct", "cDescFR", "cDescEN", "cLot", "cNotes")))
+        return jsonify(orders.create(json_payload())), 201
+
+    @bp.route("/api/production-orders/<int:no>", methods=["GET", "PUT", "DELETE"])
+    def production_order(no):
+        order = orders.get(no)
+        if request.method == "GET":
+            return jsonify(orders.view(order))
+        if request.method == "DELETE":
+            orders.delete(no)
+            return jsonify({"ok": True})
+        return jsonify(orders.update(no, json_payload()))
+
+    @bp.route("/api/production-orders/calc", methods=["POST"])
+    @bp.route("/api/production-orders/<int:no>/calc", methods=["POST"])
+    def production_order_calc(no=None):
+        return jsonify(orders.preview(json_payload(), no))
+
+    @bp.route("/api/production-orders/<int:no>/<action>", methods=["POST"])
+    def production_order_action(no, action):
+        body = request.get_json(silent=True) or {}
+        return jsonify(orders.move(no, action, text(body.get("cComment"))))
+
+    recipes = c.get("recipes")
+
+    def made_products():
+        """The products that have an approved recipe (what an order can make)."""
+        fields = ("cDescEN", "cDescFR") if request.args.get("lang") == "en" else ("cDescFR",)
+        codes = sorted({r["cProduct"].upper() for r in recipes.repo.all(lines=False) if r["cStatus"] == "approved"})
+        rows = []
+        for code in codes:
+            p = c.get("products").find(code)
+            if p:
+                rows.append({"code": p["cCode"], "label": next((p[f] for f in fields if p.get(f)), "")})
+        return rows, 200
+
+    def approved_revisions():
+        """The approved revisions of a product (?product=): the recipe an order can be made from."""
+        code = text(request.args.get("product")).upper()
+        fields = ("cDescEN", "cDescFR") if request.args.get("lang") == "en" else ("cDescFR",)
+        rows = [
+            {
+                "code": r["cRevision"],
+                "label": " ".join(
+                    x for x in (next((r[f] for f in fields if r.get(f)), ""), "★" if r.get("lDefault") else "") if x
+                ),
+            }
+            for r in recipes.repo.all(lines=False)
+            if r["cProduct"].upper() == code and r["cStatus"] == "approved"
+        ]
+        return sorted(rows, key=lambda r: r["code"]), 200
+
+    c.get("lookups").register("made_products", made_products)
+    c.get("lookups").register("approved_revisions", approved_revisions)
+    c.get("lifecycle").add(orders.repo, "prod_orders", [])
+
+    def renumber(data: dict) -> None:
+        if "prod_orders" in data:
+            numbering.set_next(SEQUENCE, max((int(o.get("iNo") or 0) for o in data["prod_orders"]), default=0) + 1)
+
+    c.get("lifecycle").after_load(renumber)
 
 
 def _base_qty(recipes: RecipeService, product: str, revision: str) -> float:

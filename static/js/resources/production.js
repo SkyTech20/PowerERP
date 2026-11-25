@@ -1,5 +1,5 @@
 /* PowerERP: Production: list / form definitions. P1: the reference lists of the shop floor; P2: calendars. */
-import { $, api, enc, esc, fmtDateTime, lang, numOnly, t, yesNo } from "../core.js";
+import { $, api, enc, esc, fmtDateTime, lang, money, numOnly, t, yesNo } from "../core.js";
 import { RES } from "../registry.js";
 import { descCol, dl, newWith, optBadge, opts, today } from "./inventory.js";
 
@@ -744,5 +744,137 @@ Object.assign(RES, {
     ],
     panel: explosion,
     panels: [operatorPreview, versionsPanel],
+  },
+});
+
+// ------------------------------------------------------------------ M3a: production orders
+export const ORDER_STATUS = ["draft", "released", "in_progress", "completed", "closed", "cancelled"];
+const ORDER_BADGE = { draft: "Draft", released: "Approved", in_progress: "SkyAI", completed: "Posted", closed: "Paid", cancelled: "no" };
+const orderBadge = (v) => (v ? `<span class="badge ${ORDER_BADGE[v] || ""}">${esc(t("prod.ord.status." + v))}</span>` : "");
+const qtyUom = (v, u) => `${esc(fmtNum(v))} ${esc(u || "")}`;
+const money4 = (v) => new Intl.NumberFormat(lang === "fr" ? "fr-CA" : "en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(Number(v) || 0);
+
+// What the server recalculates after a change: another product takes its own recipe (and its default warehouse)
+export function prepareOrderRecalc(m, field) {
+  if (field === "cProduct") Object.assign(m, { cRevision: "", cWarehouse: "" });
+  return m;
+}
+
+const isOpen = (m) => ["draft", "released", "in_progress"].includes(m.cStatus);
+
+// The materials of the order: what the recipe needs for the quantity, and what the warehouse has
+const orderMaterials = {
+  onNew: true,
+  html: (m) => {
+    const mats = m.materials || [];
+    if (!mats.length) return `<div class="card"><div class="card-head"><h2>${esc(t("prod.ord.materials"))}</h2></div><div class="empty">${esc(t(m.cProduct ? "prod.ord.noMaterials" : "prod.ord.pickProduct"))}</div></div>`;
+    const open = isOpen(m);
+    const ownWh = mats.some((x) => x.cWarehouse && x.cWarehouse.toUpperCase() !== String(m.cWarehouse || "").toUpperCase()); // a material taken from another warehouse
+    const issued = m.cStatus !== "draft" && m.cStatus !== "released"; // nothing is issued before production starts
+    const alert = open && m.lShort ? `<div class="alert warn">⚠ ${esc(t("prod.ord.shortHelp"))}</div>`
+      : open ? `<div class="alert success">✓ ${esc(t("prod.ord.allAvailable"))}</div>` : "";
+    return `<div class="card"><div class="card-head"><h2>${esc(t("prod.ord.materials"))}</h2><span class="help muted">${esc(t("prod.ord.materials.help"))}</span></div>
+      <div class="card-body">${alert}<div class="table-wrap"><table class="grid"><thead><tr>
+        <th>${esc(t("mfg.f.cComponent"))}</th><th>${esc(t("f.cDescription"))}</th><th class="num">${esc(t("mfg.f.iOpSeq"))}</th><th>${esc(t("mfg.f.cIssueMethod"))}</th>${ownWh ? `<th>${esc(t("prod.ord.f.cWarehouse"))}</th>` : ""}
+        <th class="num">${esc(t("prod.ord.required"))}</th>${open ? `<th class="num">${esc(t("prod.ord.available"))}</th><th class="num">${esc(t("prod.ord.short"))}</th>` : ""}
+        ${issued ? `<th class="num">${esc(t("prod.ord.issued"))}</th>` : ""}<th class="num">${esc(t("mfg.rc.unitCost"))}</th><th class="num">${esc(t("mfg.rc.cost"))}</th></tr></thead><tbody>
+        ${mats.map((x) => {
+          const short = Number(x.dShort) > 0;
+          return `<tr><td>${esc(x.cComponent)}</td><td>${esc(dl(x, "cDesc"))}</td><td class="num">${esc(x.iOpSeq || "")}</td><td>${esc(t("mfg.o.issue." + x.cIssueMethod))}</td>
+          ${ownWh ? `<td>${esc(x.cWarehouse || m.cWarehouse)}</td>` : ""}<td class="num">${qtyUom(x.dQtyRequired, x.cUOM)}</td>
+          ${open ? `<td class="num">${qtyUom(x.dAvailable, x.cUOM)}</td><td class="num">${short ? `<span class="badge no">${qtyUom(x.dShort, x.cUOM)}</span>` : `<span class="badge yes">✓</span>`}</td>` : ""}
+          ${issued ? `<td class="num">${qtyUom(x.dQtyIssued, x.cUOM)}</td>` : ""}<td class="num">${esc(money4(x.dUnitCost))}</td><td class="num">${esc(money(x.dCost))}</td></tr>`;
+        }).join("")}</tbody></table></div></div></div>`;
+  },
+};
+
+// The operations (time on their resource) and the estimated cost of the order
+const orderOperations = {
+  onNew: true,
+  html: (m) => {
+    if (!(m.materials || []).length && !(m.operations || []).length) return "";
+    const ops = m.operations || [];
+    return `<div class="card"><div class="card-head"><h2>${esc(t("prod.ord.operations"))}</h2><span class="help muted">${esc(t("prod.ord.operations.help"))}</span></div>
+      <div class="card-body">${ops.length ? `<div class="table-wrap"><table class="grid"><thead><tr>
+        <th class="num">${esc(t("mfg.f.iOpSeq"))}</th><th>${esc(t("mfg.op.one"))}</th><th>${esc(t("mfg.op.where"))}</th><th class="num">${esc(t("mfg.f.dSetupMin"))}</th><th class="num">${esc(t("mfg.op.run"))}</th><th class="num">${esc(t("mfg.f.dMinWaitMin"))}</th><th class="num">${esc(t("mfg.rc.cost"))}</th></tr></thead><tbody>
+        ${ops.map((x) => `<tr><td class="num">${esc(x.iOpSeq)}</td><td>${esc(x.cOperation)} — ${esc(dl(x, "cDesc"))}</td><td>${esc(x.cWhere)}</td><td class="num">${esc(minutesText(x.dSetupMin))}</td><td class="num">${esc(minutesText(x.dRunMin))}</td><td class="num">${Number(x.dWaitMin) ? esc(minutesText(x.dWaitMin)) : ""}</td><td class="num">${esc(money(x.dCost))}</td></tr>`).join("")}
+        </tbody></table></div>` : `<p class="help">${esc(t("prod.ord.noOperations"))}</p>`}
+        <div class="totals"><table>
+          <tr><td>${esc(t("mfg.rc.time"))}</td><td class="num">${esc(minutesText(m.dTotalMin))}</td></tr>
+          <tr><td>${esc(t("mfg.rc.materialCost"))}</td><td class="num">${esc(money(m.dEstMaterialCost))}</td></tr>
+          <tr><td>${esc(t("mfg.rc.operationCost"))}</td><td class="num">${esc(money(m.dEstOperationCost))}</td></tr>
+          <tr class="grand"><td>${esc(t("prod.ord.estCost"))}</td><td class="num">${esc(money(m.dEstCost))}</td></tr>
+          <tr><td>${esc(t("mfg.rc.unitCostTotal"))}</td><td class="num">${esc(money4(m.dEstUnitCost))} / ${esc(m.cUOM)}</td></tr>
+        </table></div></div></div>`;
+  },
+};
+
+// Who changed the status of the order, when, and why
+const orderHistory = {
+  html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("prod.ord.history"))}</h2></div><div class="table-wrap"><table class="grid"><thead><tr>
+      <th>${esc(t("mfg.ap.when"))}</th><th>${esc(t("mfg.ap.who"))}</th><th>${esc(t("mfg.ap.action"))}</th><th>${esc(t("mfg.ap.fromTo"))}</th><th>${esc(t("mfg.ap.comment"))}</th></tr></thead><tbody>
+      ${(m.history || []).map((h) => `<tr><td>${esc(fmtDateTime(h.dAt))}</td><td>${esc(h.cUser)}</td><td>${esc(t("prod.ord.a." + h.cAction))}</td>
+        <td>${h.cFrom ? esc(t("prod.ord.status." + h.cFrom)) + " → " : ""}${esc(t("prod.ord.status." + h.cTo))}</td><td>${esc(h.cComment)}</td></tr>`).join("")}</tbody></table></div></div>`,
+};
+
+// An action that moves the order (the draft on the screen is saved first)
+const move = (action, ask) => async (m, ctx) => {
+  let comment = "";
+  if (ask) {
+    comment = prompt(t(ask));
+    if (comment === null) return null;
+  }
+  if (m.cStatus === "draft") await api(ctx.path, { method: "PUT", body: m });
+  return api(ctx.path + "/" + action, { method: "POST", body: { cComment: comment } });
+};
+
+Object.assign(RES, {
+  prodorders: {
+    api: "production-orders", route: "/prod/orders", title: "prod.ord.title", sub: "prod.ord.subtitle",
+    one: "prod.ord.one", newTitle: "prod.ord.new", id: (r) => r.iNo, label: (r) => `${r.iNo} — ${r.cProduct} ${dl(r, "cDesc")}`, sort: "iNo", dir: "desc",
+    columns: [
+      { f: "iNo", l: "prod.ord.f.iNo", n: true }, { f: "cStatus", l: "mfg.f.cStatus", fmt: orderBadge }, { f: "cProduct", l: "mfg.f.cProduct" }, descCol("cDesc"),
+      { f: "dQty", l: "mfg.op.qty", n: true, fmt: (v, r) => qtyUom(v, r.cUOM) }, { f: "cWarehouse", l: "prod.ord.f.cWarehouse" },
+      { f: "dStart", l: "prod.ord.f.dStart" }, { f: "dDue", l: "prod.ord.f.dDue" }, { f: "cRevision", l: "mfg.f.cRevision" },
+      { f: "dEstCost", l: "prod.ord.estCost", num: true, fmt: (v) => esc(money(v)) },
+    ],
+    filters: [
+      { f: "cStatus", l: "mfg.f.cStatus", options: opts("prod.ord.status.", ORDER_STATUS) },
+      { f: "cProduct", l: "mfg.f.cProduct", lookup: "made_products" },
+      { f: "cWarehouse", l: "prod.ord.f.cWarehouse", lookup: "warehouses" },
+    ],
+    defaults: () => ({ cStatus: "draft", dStart: today(), dQty: "", materials: [], operations: [], history: [] }),
+    // only a draft is changed; the other statuses are read, and changed through their actions
+    locked: (m, isNew) => !isNew && m.cStatus !== "draft",
+    badge: (m, isNew) => (isNew ? "" : orderBadge(m.cStatus)),
+    recalc: (m, { path, field }) => (m.cProduct ? api((path || "production-orders") + "/calc", { method: "POST", body: prepareOrderRecalc(m, field) }) : Promise.resolve(null)),
+    actions: [
+      { id: "release", l: "prod.ord.release", perm: "release", primary: true, show: (m, isNew) => !isNew && m.cStatus === "draft", confirm: "prod.ord.release.confirm", done: "prod.ord.released",
+        run: move("release") },
+      { id: "unrelease", l: "prod.ord.unrelease", perm: "release", show: (m, isNew) => !isNew && m.cStatus === "released", done: "prod.ord.unreleased",
+        run: move("unrelease", "prod.ord.why") },
+      { id: "cancel", l: "prod.ord.cancel", perm: "release", show: (m, isNew) => !isNew && ["draft", "released"].includes(m.cStatus), done: "prod.ord.cancelled",
+        run: move("cancel", "prod.ord.cancelWhy") },
+    ],
+    sections: [
+      { t: "prod.ord.what", help: "prod.ord.what.help", fields: [
+        { f: "cProduct", l: "mfg.f.cProduct", req: true, lookup: "made_products", recalc: true, span: 2 },
+        { f: "dQty", l: "prod.ord.f.dQty", type: "number", req: true, recalc: true },
+        { f: "cUOM", l: "mfg.f.cUOM", readonly: true },
+        { f: "cWarehouse", l: "prod.ord.f.cWarehouse", lookup: "warehouses", recalc: true, help: "prod.ord.f.cWarehouse.help" },
+        { f: "cRevision", l: "mfg.f.cRevision", lookup: "approved_revisions", lookupParams: (m) => ({ product: m.cProduct }), recalc: true, help: "prod.ord.f.cRevision.help" },
+        { f: "dStart", l: "prod.ord.f.dStart", type: "date", recalc: true },
+        { f: "dDue", l: "prod.ord.f.dDue", type: "date", recalc: true },
+        { f: "cNotes", l: "mfg.f.cNotes", type: "textarea", span: 4 },
+      ] },
+      { t: "prod.ord.tracking", fields: [
+        { f: "cUser", l: "prod.ord.f.cUser", readonly: true, show: (m) => !!m.iNo },
+        { f: "dCreated", l: "prod.ord.f.dCreated", readonly: true, fmt: fmtDateTime, show: (m) => !!m.iNo },
+        { f: "cReleasedBy", l: "prod.ord.f.cReleasedBy", readonly: true, show: (m) => !!m.dReleased },
+        { f: "dReleased", l: "prod.ord.f.dReleased", readonly: true, fmt: fmtDateTime, show: (m) => !!m.dReleased },
+      ] },
+    ],
+    panel: orderMaterials,
+    panels: [orderOperations, orderHistory],
   },
 });

@@ -9,7 +9,8 @@ import { pageHead, tabLabel } from "../views.js";
 
 // ---------- Generic form
 // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
-// textarea | password | email), lookup (+ fill, lookupParams(model, line), onPick), show(model, isNew), rerender (redraw on change).
+// textarea | password | email), lookup (+ fill, lookupParams(model, line), onPick), show(model, isNew), rerender (redraw on change),
+// fmt(value) (how a read-only value is shown).
 // Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
 // a line column's ph (placeholder text key), lines.minWidth (px: a wide grid scrolls instead of squeezing its columns), locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model), tab, onNew } and panels (more of them).
 // warnings(model) -> Promise of { field: message }: shown under those fields (not errors: saving still decides),
@@ -89,7 +90,8 @@ export function formView(key, id) {
       const type = ["date", "time", "password", "email"].includes(fd.type) ? fd.type : "text";
       const auto = fd.type === "password" ? 'autocomplete="new-password"' : fd.autocomplete ? `autocomplete="${fd.autocomplete}"` : "";
       const mode = fd.type === "number" ? 'inputmode="decimal" style="text-align:right"' : fd.inputmode ? `inputmode="${fd.inputmode}"` : "";
-      input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(v)}" ${ro ? "readonly" : ""} ${auto} ${mode}>`;
+      const shown = ro && fd.fmt ? fd.fmt(v) : v; // fmt: how a read-only value is shown (e.g. a date and time)
+      input = `<input type="${type}" id="f-${fd.f}" data-f="${fd.f}" value="${esc(shown)}" ${ro ? "readonly" : ""} ${auto} ${mode}>`;
     }
     const warn = R.warnings ? `<span class="warn" data-warn="${fd.f}" hidden></span>` : "";
     return `<div class="${cls}">${label}${input}${help}${warn}${err}</div>`;

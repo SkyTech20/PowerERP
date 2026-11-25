@@ -10,6 +10,7 @@ P7: manufacturing data of the products (1 to 1 with the item master), with their
 P8: recipes (product + revision) with their materials, outputs (co / by-products) and operations.
 P9: the steps of the recipe operations (child list recipes_steps, by operation).
 P10: approval of the recipes: who / when, validity, default version, history (recipes_history).
+M3: production orders, with the materials and operations of their recipe and the history of their status.
 """
 
 from .. import schemas as S
@@ -63,5 +64,14 @@ register_specs(
             "steps": S.RECIPE_STEP,
             "history": S.RECIPE_HISTORY,
         },
+    ),
+    TableSpec(
+        "production_orders",
+        S.PRODUCTION_ORDER,
+        keys=("iNo",),
+        order=("iNo",),
+        extra=S.PRODUCTION_ORDER_EXTRA,
+        sparse=("dReleased",),
+        children={"materials": S.ORDER_MATERIAL, "operations": S.ORDER_OPERATION, "history": S.ORDER_HISTORY},
     ),
 )
