@@ -81,8 +81,8 @@ Object.assign(RES, {
     panel: {
       html: () => `<div class="card"><div class="card-head"><h2>${esc(t("tax.sim"))}</h2><span class="help muted">${esc(t("tax.sim.help"))}</span></div>
         <div class="card-body"><div class="form-grid">
-          <div class="field"><label for="simAmount">${esc(t("tax.sim.amount"))}</label><input type="text" id="simAmount" inputmode="decimal" value="100.00" style="text-align:right"></div>
-          <div class="field"><label for="simDate">${esc(t("tax.sim.date"))}</label><input type="date" id="simDate" value="${today()}"></div>
+          <div class="field"><label for="simAmount">${esc(t("tax.sim.amount"))}</label><input type="text" id="simAmount" data-help-f="sim.amount" inputmode="decimal" value="100.00" style="text-align:right"></div>
+          <div class="field"><label for="simDate">${esc(t("tax.sim.date"))}</label><input type="date" id="simDate" data-help-f="sim.date" value="${today()}"></div>
         </div><div id="simResult" class="sim-result"></div></div></div>`,
       bind: (m) => {
         const run = async () => {
