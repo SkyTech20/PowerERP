@@ -168,7 +168,7 @@ def test_an_unknown_language_is_english(admin):
 
 
 def test_a_role_without_the_screen_sees_only_the_general_pages(login):
-    c = login(["inv.stock:view"])
+    c = login([])  # a role that opens no screen
     screens = [s["screen"] for s in c.get("/api/help/toc").get_json()["screens"]]
     assert screens == ["_intro"]
     assert c.get("/api/help/page/sales.invoices").status_code == 404
