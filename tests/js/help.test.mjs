@@ -50,20 +50,37 @@ test("the contents group the screens by module and open the sections of the curr
   assert.doesNotMatch(html, /_intro.find/); // sections of another screen stay closed
 });
 
-test("an item shows its code as a link, and the untranslated notice", () => {
-  const html = H.itemHtml({ code: "sales.invoices.post", level: 3, title: "Post", html: "<p>Posts.</p>", untranslated: true });
-  assert.match(html, /id="help-sales.invoices.post"/);
-  assert.match(html, /<h4>Post <span class="badge">Not yet translated<\/span>/);
-  assert.match(html, /<a class="help-code" href="#\/help\/sales.invoices.post"/);
-  assert.match(html, /<p>Posts.<\/p>/);
+test("a section is a heading; its fields are one list of definitions, each with a link button", () => {
+  const html = H.itemsHtml([
+    { code: "sales.invoices.header", level: 2, title: "Header", html: "" },
+    { code: "sales.invoices.cCustomer", level: 3, title: "Customer", html: "<p>The customer.</p>" },
+    { code: "sales.invoices.dDate", level: 3, title: "Date", html: "<p>Date.</p>", untranslated: true },
+    { code: "sales.invoices.post", level: 2, title: "Post", html: "<p>Posts.</p>" },
+  ]);
+  assert.equal((html.match(/<dl class="help-fields">/g) || []).length, 1);
+  assert.match(html, /<h2 class="help-h2" id="help-sales.invoices.header">Header/);
+  assert.match(html, /<div class="help-field" id="help-sales.invoices.cCustomer"><dt>Customer/);
+  assert.match(html, /<dt>Date <span class="badge">Not yet translated<\/span>/);
+  assert.match(html, /data-copy-help="sales.invoices.post"/);
+  assert.match(html, /<\/dl><h2 class="help-h2" id="help-sales.invoices.post">/);
 });
 
-test("search results show the path and the code, escaped", () => {
-  const html = H.resultsHtml({ q: "x", items: [{ code: "sales.invoices.dDate", title: "Date <b>", path: ["Sales invoices", "Header"], snippet: "a < b" }] });
-  assert.match(html, /Date &lt;b&gt;/);
+test("search results show the path, escaped, with the words marked", () => {
+  const html = H.resultsHtml({ q: "date", items: [{ code: "sales.invoices.dDate", title: "Date <b>", path: ["Sales invoices", "Header"], snippet: "a < b, the date" }] });
+  assert.match(html, /<mark>Date<\/mark> &lt;b&gt;/);
   assert.match(html, /Sales invoices › Header/);
-  assert.match(html, /a &lt; b/);
+  assert.match(html, /a &lt; b, the <mark>date<\/mark>/);
   assert.match(H.resultsHtml({ q: "zzz", items: [] }), /Nothing found for “zzz”/);
+  assert.equal(H.mark("a.b", "."), "a.b"); // one-letter words are not marked
+});
+
+test("the home page has a card per screen, and a screen opens from its help", () => {
+  const html = H.cardsHtml({ screens: [{ screen: "_intro", title: "Using" }, { screen: "sales.invoices", title: "Sales invoices", summary: "Invoices." }] });
+  assert.match(html, /<h2 class="help-h2">Sales<\/h2>/);
+  assert.match(html, /<a class="help-card" href="#\/help\/sales.invoices"><b>Sales invoices<\/b>/);
+  assert.doesNotMatch(html, /Using/);
+  assert.equal(H.screenRoute("sales.invoices"), "/sales/invoices");
+  assert.equal(H.screenRoute("_intro"), "");
 });
 
 // ------------------------------------------------------------------ coverage of the help

@@ -15,6 +15,11 @@
     "help.openFull": "Open in Help",
     "help.close": "Close",
     "help.aboutField": "Help on {f}",
+    "help.copyLink": "Copy the link to this item",
+    "help.copied": "Link copied.",
+    "help.openScreen": "Open the screen",
+    "help.search.count": "{n} results",
+    "help.search.key": "Press / to search",
   });
   Object.assign(I.fr, {
     "menu.help": "Aide",
@@ -31,5 +36,10 @@
     "help.openFull": "Ouvrir dans l'Aide",
     "help.close": "Fermer",
     "help.aboutField": "Aide sur {f}",
+    "help.copyLink": "Copier le lien vers cet élément",
+    "help.copied": "Lien copié.",
+    "help.openScreen": "Ouvrir l'écran",
+    "help.search.count": "{n} résultats",
+    "help.search.key": "Appuyez sur / pour chercher",
   });
 })(window.ERP_I18N);

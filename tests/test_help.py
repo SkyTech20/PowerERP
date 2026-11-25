@@ -150,6 +150,7 @@ def test_the_administrator_sees_every_page(admin):
     assert screens[0] == "_intro" and "sales.invoices" in screens
     inv = next(s for s in toc["screens"] if s["screen"] == "sales.invoices")
     assert inv["title"] == "Factures clients"
+    assert inv["summary"].startswith("Les factures et notes de crédit")  # the card of the home page
     assert {"code": "sales.invoices.buttons", "title": "Boutons"} in inv["sections"]  # the level-2 headings
     page = admin.get("/api/help/page/sales.invoices?lang=en").get_json()
     codes = [i["code"] for i in page["items"]]
