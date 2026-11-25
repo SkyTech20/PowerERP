@@ -137,6 +137,12 @@ SCREENS: tuple[Screen, ...] = (
             "production.production_order_floor": "report",
         },
     ),
+    Screen(
+        "prod.traceability",
+        "prod",
+        actions=("view",),
+        routes={"production.traceability": "view", "production.traceability_export": "view"},
+    ),
     Screen("prod.items", "prod", crud=("production.product_mfg",)),
     Screen(
         "prod.operations",
