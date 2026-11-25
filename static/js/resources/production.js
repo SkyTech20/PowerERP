@@ -56,7 +56,7 @@ const dayName = (iso) => new Date(iso + "T12:00:00").toLocaleDateString(lang ===
 function weekPreview(url, extra = () => "") {
   return {
     html: () => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.cal.preview"))}</h2><span class="help muted">${esc(t("mfg.cal.preview.help"))}</span></div>
-      <div class="card-body"><div class="form-grid"><div class="field"><label for="calWeek">${esc(t("mfg.cal.weekOf"))}</label><input type="date" id="calWeek" value="${monday(today())}"></div></div>
+      <div class="card-body"><div class="form-grid"><div class="field"><label for="calWeek">${esc(t("mfg.cal.weekOf"))}</label><input type="date" id="calWeek" data-help-f="week" value="${monday(today())}"></div></div>
       <div id="calPreview"></div></div></div>`,
     bind: (m) => {
       const run = async () => {
@@ -253,9 +253,9 @@ const minutesText = (m) => `${fmtNum(m)} min${Number(m) >= 60 ? ` (${hours(m)})`
 const timeCalculator = {
   html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.op.calc"))}</h2><span class="help muted">${esc(t("mfg.op.calc.help"))}</span></div>
     <div class="card-body"><div class="form-grid">
-      <div class="field"><label for="opQty">${esc(t("mfg.op.qty"))}</label><input type="text" id="opQty" inputmode="decimal" value="100" style="text-align:right"></div>
-      ${m.cRunFormat === "min_per_lot" ? `<div class="field"><label for="opLot">${esc(t("mfg.op.lot"))}</label><input type="text" id="opLot" inputmode="decimal" value="" style="text-align:right"><span class="help">${esc(t("mfg.op.lot.help"))}</span></div>` : ""}
-      <div class="field"><label for="opRes">${esc(t("mfg.res.one"))}</label><select id="opRes"><option value="">${esc(t("mfg.op.standard"))}</option></select></div>
+      <div class="field"><label for="opQty">${esc(t("mfg.op.qty"))}</label><input type="text" id="opQty" data-help-f="calc.qty" inputmode="decimal" value="100" style="text-align:right"></div>
+      ${m.cRunFormat === "min_per_lot" ? `<div class="field"><label for="opLot">${esc(t("mfg.op.lot"))}</label><input type="text" id="opLot" data-help-f="calc.lot" inputmode="decimal" value="" style="text-align:right"><span class="help">${esc(t("mfg.op.lot.help"))}</span></div>` : ""}
+      <div class="field"><label for="opRes">${esc(t("mfg.res.one"))}</label><select id="opRes" data-help-f="calc.resource"><option value="">${esc(t("mfg.op.standard"))}</option></select></div>
     </div><div id="opTime"></div></div></div>`,
   bind: (m) => {
     const run = async () => {
@@ -329,7 +329,7 @@ const cellTitle = (c) => (c.cRule === "matrix" ? `${t("mfg.sm.rule.matrix")} ${c
 const setupGrid = {
   html: () => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.sm.grid"))}</h2><span class="help muted">${esc(t("mfg.sm.grid.help"))}</span></div>
     <div class="card-body"><div class="form-grid">
-      <div class="field"><label for="smDefault">${esc(t("mfg.sm.default"))}</label><input type="text" id="smDefault" inputmode="decimal" value="30" style="text-align:right"><span class="help">${esc(t("mfg.sm.default.help"))}</span></div>
+      <div class="field"><label for="smDefault">${esc(t("mfg.sm.default"))}</label><input type="text" id="smDefault" data-help-f="grid.default" inputmode="decimal" value="30" style="text-align:right"><span class="help">${esc(t("mfg.sm.default.help"))}</span></div>
     </div><div id="smGrid" class="table-wrap"></div></div></div>`,
   bind: (m) => {
     const run = async () => {
@@ -525,7 +525,7 @@ const stepDetail = {
 const operatorPreview = {
   tab: "preview",
   html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.st.preview"))}</h2><span class="help muted">${esc(t("mfg.st.preview.help"))}</span></div>
-    <div class="card-body"><div class="form-grid"><div class="field"><label for="stOp">${esc(t("mfg.op.one"))}</label><select id="stOp">
+    <div class="card-body"><div class="form-grid"><div class="field"><label for="stOp">${esc(t("mfg.op.one"))}</label><select id="stOp" data-help-f="preview.op">
       ${(m.operations || []).map((o) => `<option value="${esc(o.iOpSeq)}">${esc(o.iOpSeq)} — ${esc(dl(o, "cDesc"))}</option>`).join("")}</select></div></div>
     <div id="stCards" class="step-cards"></div></div></div>`,
   bind: (m) => {
@@ -581,7 +581,7 @@ const versionsPanel = {
       ${(m.history || []).map((h) => `<tr><td>${esc(fmtDateTime(h.dAt))}</td><td>${esc(h.cUser)}</td><td>${esc(t("mfg.ap.a." + h.cAction))}</td><td>${esc(rsLabel(h.cFrom))} → ${esc(rsLabel(h.cTo))}</td><td>${esc(h.cComment)}</td></tr>`).join("")
         || `<tr><td colspan="5" class="muted">${esc(t("mfg.ap.noHistory"))}</td></tr>`}</tbody></table></div></div>
     <div class="card"><div class="card-head"><h2>${esc(t("mfg.ap.compare"))}</h2><span class="help muted">${esc(t("mfg.ap.compare.help"))}</span></div>
-      <div class="card-body"><div class="form-grid"><div class="field"><label for="apOther">${esc(t("mfg.ap.compareWith"))}</label><select id="apOther"></select></div></div><div id="apDiff"></div></div></div>`,
+      <div class="card-body"><div class="form-grid"><div class="field"><label for="apOther">${esc(t("mfg.ap.compareWith"))}</label><select id="apOther" data-help-f="versions.compare"></select></div></div><div id="apDiff"></div></div></div>`,
   bind: (m) => {
     const base = `#/prod/recipes/${enc(m.cProduct)}/`;
     api(`recipes?f_cProduct=${enc(m.cProduct)}&sort=cRevision&size=100`).then((r) => {
@@ -612,7 +612,7 @@ const explosion = {
   tab: "explode",
   html: (m) => `<div class="card"><div class="card-head"><h2>${esc(t("mfg.rc.explode"))}</h2><span class="help muted">${esc(t("mfg.rc.explode.help"))}</span></div>
     <div class="card-body"><div class="form-grid">
-      <div class="field"><label for="rcQty">${esc(t("mfg.op.qty"))} (${esc(m.cUOM)})</label><input type="text" id="rcQty" inputmode="decimal" value="${esc(m.dBaseQty)}" style="text-align:right"></div>
+      <div class="field"><label for="rcQty">${esc(t("mfg.op.qty"))} (${esc(m.cUOM)})</label><input type="text" id="rcQty" data-help-f="explode.qty" inputmode="decimal" value="${esc(m.dBaseQty)}" style="text-align:right"></div>
     </div><div id="rcExplode"></div></div></div>`,
   bind: (m) => {
     const run = async () => {
