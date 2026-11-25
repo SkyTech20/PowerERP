@@ -25,7 +25,10 @@
    "SousTotal": "2890.00",
    "Transport": "0.00",
    "TPS": "144.50",
-   "TVQ": "288.28"
+   "TVQ": "288.28",
+   "lStockPosted": true,
+   "dStockPosted": "2026-11-05T16:00:00",
+   "cStockPostedBy": "Cassiano"
   },
   {
    "NoReception": "900102",
@@ -43,7 +46,11 @@
      "QuantiteCommandee": "40",
      "QuantiteRecue": "40",
      "PrixUnitaire": "14.50",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "COLD-01",
+     "cLot": "900102-1",
+     "cSupplierLot": "MEA-261110-1",
+     "dExpiry": "2027-05-09"
     },
     {
      "CodeArticle": "CHICKEN-RAW",
@@ -51,7 +58,11 @@
      "QuantiteCommandee": "50",
      "QuantiteRecue": "50",
      "PrixUnitaire": "6.80",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "COLD-01",
+     "cLot": "900102-2",
+     "cSupplierLot": "MEA-261110-2",
+     "dExpiry": "2027-05-09"
     }
    ],
    "MontantTotal": "920.00",
@@ -60,7 +71,10 @@
    "SousTotal": "920.00",
    "Transport": "0.00",
    "TPS": "0.00",
-   "TVQ": "0.00"
+   "TVQ": "0.00",
+   "lStockPosted": true,
+   "dStockPosted": "2026-11-10T16:00:00",
+   "cStockPostedBy": "Cassiano"
   },
   {
    "NoReception": "900103",
@@ -78,7 +92,11 @@
      "QuantiteCommandee": "360",
      "QuantiteRecue": "360",
      "PrixUnitaire": "0.35",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "COLD-01",
+     "cLot": "900103-1",
+     "cSupplierLot": "FAR-261110-1",
+     "dExpiry": "2026-12-25"
     }
    ],
    "MontantTotal": "126.00",
@@ -87,7 +105,10 @@
    "SousTotal": "126.00",
    "Transport": "0.00",
    "TPS": "0.00",
-   "TVQ": "0.00"
+   "TVQ": "0.00",
+   "lStockPosted": true,
+   "dStockPosted": "2026-11-10T16:00:00",
+   "cStockPostedBy": "Cassiano"
   },
   {
    "NoReception": "900104",
@@ -105,7 +126,11 @@
      "QuantiteCommandee": "15",
      "QuantiteRecue": "15",
      "PrixUnitaire": "11.50",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "COLD-01",
+     "cLot": "900104-1",
+     "cSupplierLot": "DEL-261112-1",
+     "dExpiry": "2027-01-11"
     },
     {
      "CodeArticle": "CHEESE",
@@ -113,7 +138,11 @@
      "QuantiteCommandee": "15",
      "QuantiteRecue": "15",
      "PrixUnitaire": "12.80",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "COLD-01",
+     "cLot": "900104-2",
+     "cSupplierLot": "DEL-261112-2",
+     "dExpiry": "2027-01-11"
     }
    ],
    "MontantTotal": "364.50",
@@ -122,7 +151,10 @@
    "SousTotal": "364.50",
    "Transport": "0.00",
    "TPS": "0.00",
-   "TVQ": "0.00"
+   "TVQ": "0.00",
+   "lStockPosted": true,
+   "dStockPosted": "2026-11-12T16:00:00",
+   "cStockPostedBy": "Cassiano"
   },
   {
    "NoReception": "900105",
@@ -140,7 +172,11 @@
      "QuantiteCommandee": "100",
      "QuantiteRecue": "100",
      "PrixUnitaire": "1.10",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "DRY-01",
+     "cLot": "",
+     "cSupplierLot": "",
+     "dExpiry": ""
     },
     {
      "CodeArticle": "OIL-FRY",
@@ -148,7 +184,11 @@
      "QuantiteCommandee": "60",
      "QuantiteRecue": "60",
      "PrixUnitaire": "3.20",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "DRY-01",
+     "cLot": "",
+     "cSupplierLot": "",
+     "dExpiry": ""
     },
     {
      "CodeArticle": "SALT",
@@ -156,7 +196,11 @@
      "QuantiteCommandee": "10",
      "QuantiteRecue": "10",
      "PrixUnitaire": "1.20",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "DRY-01",
+     "cLot": "",
+     "cSupplierLot": "",
+     "dExpiry": ""
     },
     {
      "CodeArticle": "ONION",
@@ -164,7 +208,11 @@
      "QuantiteCommandee": "20",
      "QuantiteRecue": "20",
      "PrixUnitaire": "2.40",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "DRY-01",
+     "cLot": "",
+     "cSupplierLot": "",
+     "dExpiry": ""
     },
     {
      "CodeArticle": "SEASONING",
@@ -172,7 +220,11 @@
      "QuantiteCommandee": "3",
      "QuantiteRecue": "3",
      "PrixUnitaire": "18.00",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "DRY-01",
+     "cLot": "",
+     "cSupplierLot": "",
+     "dExpiry": ""
     }
    ],
    "MontantTotal": "416.00",
@@ -181,7 +233,10 @@
    "SousTotal": "416.00",
    "Transport": "0.00",
    "TPS": "0.00",
-   "TVQ": "0.00"
+   "TVQ": "0.00",
+   "lStockPosted": true,
+   "dStockPosted": "2026-11-12T16:00:00",
+   "cStockPostedBy": "Cassiano"
   },
   {
    "NoReception": "900106",
@@ -199,7 +254,11 @@
      "QuantiteCommandee": "2000",
      "QuantiteRecue": "2000",
      "PrixUnitaire": "0.08",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "PACK-01",
+     "cLot": "",
+     "cSupplierLot": "",
+     "dExpiry": ""
     },
     {
      "CodeArticle": "GLOVES",
@@ -207,7 +266,11 @@
      "QuantiteCommandee": "10",
      "QuantiteRecue": "10",
      "PrixUnitaire": "9.50",
-     "Devise": "CAD"
+     "Devise": "CAD",
+     "cLocation": "PACK-01",
+     "cLot": "",
+     "cSupplierLot": "",
+     "dExpiry": ""
     }
    ],
    "MontantTotal": "293.19",
@@ -216,7 +279,10 @@
    "SousTotal": "255.00",
    "Transport": "0.00",
    "TPS": "12.75",
-   "TVQ": "25.44"
+   "TVQ": "25.44",
+   "lStockPosted": true,
+   "dStockPosted": "2026-11-13T16:00:00",
+   "cStockPostedBy": "Cassiano"
   }
  ],
  "unbilled_receiving": []

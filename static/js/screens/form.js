@@ -11,7 +11,7 @@ import { pageHead, tabLabel } from "../views.js";
 // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
 // textarea | password | email), lookup (+ fill, lookupParams(model, line), onPick), show(model, isNew), rerender (redraw on change).
 // Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
-// locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model), tab, onNew } and panels (more of them).
+// a line column's ph (placeholder text key), lines.minWidth (px: a wide grid scrolls instead of squeezing its columns), locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model), tab, onNew } and panels (more of them).
 // warnings(model) -> Promise of { field: message }: shown under those fields (not errors: saving still decides),
 // checked again on every change of the form (e.g. a product unit with no conversion to its stock unit).
 // recalc(model, { path, field, line }) -> Promise of the model calculated by the server: called when a field or a
@@ -118,7 +118,7 @@ export function formView(key, id) {
       return `<select data-lf="${c.f}" ${ro ? "disabled" : ""} ${aria}>${c.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(ln[c.f] == null ? "" : ln[c.f]) === ov ? "selected" : ""}>${esc(c.rawOpt ? ol : t(ol))}</option>`).join("")}</select>`;
     }
     if (c.lookup && !ro) return `<select data-lf="${c.f}" data-lookup="${c.lookup}" ${aria}>${lookupOptions([], ln[c.f])}</select>`;
-    return `<input type="${c.type === "date" || c.type === "time" ? c.type : "text"}" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${ro ? "readonly" : ""} ${aria}>`;
+    return `<input type="${c.type === "date" || c.type === "time" ? c.type : "text"}" data-lf="${c.f}" value="${esc(ln[c.f])}" ${c.n ? 'inputmode="decimal" data-num="1" style="text-align:right"' : ""} ${c.ph && !ro ? `placeholder="${esc(t(c.ph))}"` : ""} ${ro ? "readonly" : ""} ${aria}>`;
   }
 
   // A field of the line shown in the panel of a grid with a detail
@@ -194,7 +194,7 @@ export function formView(key, id) {
     const addBtn = locked ? "" : `<button type="button" class="btn small" ${key === "lines" ? 'id="addLine"' : ""} data-add style="margin-left:auto">＋ ${esc(t("common.addLine"))}</button>`;
     const help = L.helpOf ? L.helpOf(model) : L.help;
     return `<div class="card" data-grid="${key}"><div class="card-head"><h2>${esc(t(L.title || "common.lines"))}</h2>${help ? `<span class="help muted">${esc(t(help))}</span>` : ""}${addBtn}</div>
-      <div class="table-wrap"><table class="grid lines" ${cols.length > 8 ? `style="min-width:${cols.length * 115}px"` : ""}><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+      <div class="table-wrap"><table class="grid lines" ${L.minWidth || cols.length > 8 ? `style="min-width:${L.minWidth || cols.length * 115}px"` : ""}><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
       ${rows.length ? "" : `<div class="empty">${esc(t("common.noLines"))}</div>`}</div>
       ${key === "lines" && R.totals ? '<div class="totals" id="totals"></div>' : ""}</div>`;
   }

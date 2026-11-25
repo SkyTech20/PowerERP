@@ -70,7 +70,7 @@ Coché : une sortie, un transfert ou un ajustement négatif peut prendre plus qu
 
 ### Emplacement de réception {#inv.warehouses.cReceivingLoc}
 
-L'emplacement où arrivent les marchandises. Ce doit être un emplacement de cet entrepôt. À titre d'information, prêt pour les réceptions par emplacement.
+L'emplacement où arrivent les marchandises. Ce doit être un emplacement de cet entrepôt. Une réception mise en stock l'utilise pour une ligne sans emplacement, quand le produit n'a pas d'emplacement par défaut ici (ou que son emplacement par défaut contient un autre lot).
 
 ### Emplacement d'expédition {#inv.warehouses.cShippingLoc}
 

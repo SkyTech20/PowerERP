@@ -61,7 +61,9 @@ SCREENS: tuple[Screen, ...] = (
     Screen(
         "pur.receptions",
         "pur",
+        actions=(*CRUD, "post"),
         crud=("purchasing.rec",),
+        routes={"purchasing.rec_check": "view", "purchasing.rec_post": "post"},
         reads=("suppliers.supplier_item", "purchasing.po_item"),
     ),
     # Sales

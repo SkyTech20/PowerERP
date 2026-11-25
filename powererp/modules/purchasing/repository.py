@@ -10,7 +10,7 @@ writes them in that shape:
 Every call uses the session of the current request (powererp.database.current()).
 """
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -41,6 +41,9 @@ def _to_db(kind, v):
         return date.fromisoformat(sv) if sv else None
     if kind == "b":
         return v in (True, "true", "True", 1, "1", "on", "yes")
+    if kind == "ts":
+        sv = str(v).strip()
+        return datetime.fromisoformat(sv) if sv else None
     return str(v)
 
 
@@ -49,6 +52,8 @@ def _from_db(kind, v):
         return format(v, "f")
     if kind == "date":
         return v.isoformat()
+    if kind == "ts":
+        return v.isoformat(timespec="seconds")
     return v
 
 

@@ -70,7 +70,7 @@ Checked: an issue, a transfer or a negative adjustment can take more than the av
 
 ### Receiving location {#inv.warehouses.cReceivingLoc}
 
-The location where the goods arrive. It must be a location of this warehouse. For information only, ready for the receptions by location.
+The location where the goods arrive. It must be a location of this warehouse. A reception put in stock uses it for a line without a location, when the product has no default location here (or its default location holds another lot).
 
 ### Shipping location {#inv.warehouses.cShippingLoc}
 

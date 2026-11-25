@@ -22,7 +22,7 @@ The warehouse these parameters are for. Required.
 
 ### Default location {#inv.params.cDefaultLocation}
 
-The usual location of the product in this warehouse. It must be a location of that warehouse.
+The usual location of the product in this warehouse. It must be a location of that warehouse. A reception put in stock puts the product there when its line has no location.
 
 ### Active {#inv.params.lActive}
 

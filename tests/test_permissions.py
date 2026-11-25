@@ -138,6 +138,17 @@ def test_special_actions(login):
     assert c2.post("/api/stock-counts/999999/post").status_code == 404  # allowed; the count does not exist
 
 
+def test_reception_post_is_a_permission(login):
+    from conftest import new_reception
+
+    c = login(["pur.receptions:view", "pur.receptions:create", "pur.receptions:edit"])
+    lines = [{"CodeArticle": "MON-27Q", "QuantiteRecue": "1", "PrixUnitaire": "250"}]
+    assert new_reception(c, no="990301", Entrepot="ENT-01", lines=lines).status_code == 201
+    assert c.post("/api/receptions/990301/check").status_code == 200  # a check needs only the view
+    assert c.post("/api/receptions/990301/post").status_code == 403
+    assert login(["pur.receptions:view", "pur.receptions:post"]).post("/api/receptions/990301/post").status_code == 200
+
+
 def test_approve_is_a_permission(login):
     url = "/api/recipes/PAIN-BL-675/B"
     assert login(["prod.recipes:view", "prod.recipes:edit"]).post(f"{url}/approve", json={}).status_code == 403

@@ -31,7 +31,7 @@ A role says what its users can open and do in PowerERP, screen by screen. Only t
 
 - **SALES** (Sales desk): Customers: view, create and edit. Price lists: view only. Invoices: everything (create, edit, delete a draft, Post, Print) except Credit note. Products, Stock on hand and Taxes: view only.
 - **PRODUCTION** (Production planning): every Production screen, except approving and deleting recipes. Products, Stock on hand and Categories / units: view only.
-- **WAREHOUSE** (Warehouse and counts): Stock movements: view, create and edit. Physical count: view, create, edit and Post. Reorder parameters: view and edit. Receptions: view, create and edit. Products, Stock on hand, Replenishment and Warehouses: view only (no Create PO).
+- **WAREHOUSE** (Warehouse and counts): Stock movements: view, create and edit. Physical count: view, create, edit and Post. Reorder parameters: view and edit. Receptions: view, create, edit and Post (put in stock). Products, Stock on hand, Replenishment and Warehouses: view only (no Create PO).
 
 ## The role {#admin.roles.general}
 

@@ -31,7 +31,7 @@ Un rôle dit ce que ses utilisateurs peuvent ouvrir et faire dans PowerERP, écr
 
 - **SALES** (Comptoir des ventes) : Clients : voir, créer et modifier. Listes de prix : voir seulement. Factures : tout (créer, modifier, supprimer un brouillon, Comptabiliser, Imprimer) sauf Note de crédit. Produits, Stock en main et Taxes : voir seulement.
 - **PRODUCTION** (Planification de la production) : tous les écrans de Production, sauf approuver et supprimer les recettes. Produits, Stock en main et Catégories / unités : voir seulement.
-- **WAREHOUSE** (Entrepôt et inventaires) : Mouvements de stock : voir, créer et modifier. Inventaire physique : voir, créer, modifier et Comptabiliser. Paramètres de réappro. : voir et modifier. Réceptions : voir, créer et modifier. Produits, Stock en main, Réapprovisionnement et Entrepôts : voir seulement (sans Créer commande).
+- **WAREHOUSE** (Entrepôt et inventaires) : Mouvements de stock : voir, créer et modifier. Inventaire physique : voir, créer, modifier et Comptabiliser. Paramètres de réappro. : voir et modifier. Réceptions : voir, créer, modifier et Comptabiliser (mettre en stock). Produits, Stock en main, Réapprovisionnement et Entrepôts : voir seulement (sans Créer commande).
 
 ## Le rôle {#admin.roles.general}
 

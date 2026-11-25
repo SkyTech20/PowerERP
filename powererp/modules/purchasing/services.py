@@ -252,6 +252,9 @@ class PurchaseOrderService:
 
 # ---------------------------------------------------------------------- receptions
 
+# Where and how a line goes into the stock (receiving.py): location, lot, supplier's lot, serial number, expiry
+REC_STOCK_FIELDS = ("cLocation", "cLot", "cSupplierLot", "cSerial", "dExpiry")
+
 REC_TEXT = (
     "DateReception",
     "NoBonCommande",
@@ -295,6 +298,7 @@ class ReceptionService:
                     "cCC1": text(a.get("cCC1")),
                     "cCC2": text(a.get("cCC2")),
                     "Montant": text(a.get("dTotalAmount")) or money(number(a.get("QuantiteRecue")) * number(unit)),
+                    **{f: text(a.get(f)) for f in REC_STOCK_FIELDS},
                 }
             )
         total = text((det or {}).get("MontantTotal")) or text((unb or {}).get("MontantRecu"))
@@ -317,6 +321,9 @@ class ReceptionService:
             "TVQ": text((det or {}).get("TVQ")),
             "MontantTotal": total,
             "lUnbilled": unb is not None,
+            "lStockPosted": boolean((det or {}).get("lStockPosted", False)),
+            "dStockPosted": text((det or {}).get("dStockPosted")),
+            "cStockPostedBy": text((det or {}).get("cStockPostedBy")),
             "lines": lines,
             "lineCount": len(lines),
         }
@@ -351,13 +358,20 @@ class ReceptionService:
         return self.save(no, payload)
 
     def update(self, no: str, payload: Row) -> Row:
-        self.get(no)
+        self.not_posted(no)
         require(payload, "NoBonCommande", "DateReception")
         return self.save(no, payload)
 
     def delete(self, no: str) -> None:
-        self.get(no)
+        self.not_posted(no)
         repo.rec_put(no, None, None)
+
+    def not_posted(self, no: str) -> Row:
+        """The reception, while it is not in the stock yet: once posted it is no longer changed or deleted (409)."""
+        view = self.get(no)
+        if view["lStockPosted"]:
+            raise AppError("posted", status=409)
+        return view
 
     def save(self, no: str, p: Row) -> Row:
         company = text(p.get("COMPANY")) or DEFAULT_COMPANY
@@ -380,6 +394,7 @@ class ReceptionService:
                     "cGL": text(ln.get("cGL")),
                     "cCC1": text(ln.get("cCC1")),
                     "cCC2": text(ln.get("cCC2")),
+                    **{f: text(ln.get(f)) for f in REC_STOCK_FIELDS},
                 }
             )
         sub = sum(number(a["dTotalAmount"]) for a in articles)

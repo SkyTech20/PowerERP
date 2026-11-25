@@ -258,7 +258,7 @@ A, B or C ranking by importance (turnover or value). For information only.
 
 ### Shelf life (days) {#inv.items.iShelfLifeDays}
 
-Usual shelf life in days. For information only.
+Usual shelf life in days. A reception put in stock gives a product with expiry control the expiry date reception date + shelf life, when its line has none.
 
 ### Lot numbers {#inv.items.lLotControl}
 
