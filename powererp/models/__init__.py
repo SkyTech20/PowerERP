@@ -6,5 +6,15 @@ from . import (
     sales,  # noqa: F401  (company profile, customers)
     stock,  # noqa: F401  (stock balances)
 )
-from .core import Company, DocSequence, LegacyDataset, Role, RoleHistory, RolePermission, Setting, User  # noqa: F401
+from .core import (  # noqa: F401
+    AuditEvent,
+    Company,
+    DocSequence,
+    LegacyDataset,
+    Role,
+    RoleHistory,
+    RolePermission,
+    Setting,
+    User,
+)
 from .master import SPECS  # noqa: F401

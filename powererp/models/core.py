@@ -2,7 +2,19 @@
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, CheckConstraint, DateTime, ForeignKey, Index, String, Text, func, text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -82,6 +94,30 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_login: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # lockout: failed logins in a row, and the account refused until locked_until (Administration > Users unlocks)
+    failed_logins: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class AuditEvent(Base):
+    """The audit trail: security events (logins, lockouts, passwords, refusals) and every change made through the
+    API (who, when, which screen, which record, what was sent). Written in its own transaction; never changed."""
+
+    __tablename__ = "audit_log"
+    __table_args__ = (Index("ix_audit_log_at", "at"), Index("ix_audit_log_user_at", "username", "at"))
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    username: Mapped[str] = mapped_column(String(80), default="", server_default="")
+    kind: Mapped[str] = mapped_column(String(10))  # security, change
+    event: Mapped[str] = mapped_column(String(40))  # login_ok, login_failed, locked, ... / create, edit, post, ...
+    screen: Mapped[str] = mapped_column(String(60), default="", server_default="")
+    method: Mapped[str] = mapped_column(String(10), default="", server_default="")
+    path: Mapped[str] = mapped_column(Text, default="", server_default="")
+    record: Mapped[str] = mapped_column(Text, default="", server_default="")
+    status: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    ip: Mapped[str] = mapped_column(String(64), default="", server_default="")
+    details: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
 
 
 class Setting(Base):

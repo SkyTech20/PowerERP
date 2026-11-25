@@ -449,3 +449,15 @@ button.link { background: none; border: 0; padding: 0; color: var(--primary); fo
 .tr-tree > li.src { color: var(--muted); }
 .tr-tree > li.src b { color: var(--text, inherit); }
 @media (max-width: 760px) { .kpis.tr-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Administration > Audit log */
+.au-filters input[type=date] { width: auto; }
+.au-filters select { width: auto; max-width: 100%; }
+.au-filters label { display: flex; gap: 6px; align-items: center; }
+.badge.au-sec { background: #efe9fb; color: #6b46c1; }
+.badge.au-chg { background: #e6f0fb; color: #1f5fa8; }
+tr.au-alert td { background: #fdf6f5; }
+.au-path { font-size: 12px; max-width: 260px; }
+.au-small { font-size: 11px; margin-top: 2px; }
+tr.au-detail pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12px; max-height: 320px; overflow: auto; }
+td.nowrap { white-space: nowrap; }

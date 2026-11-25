@@ -34,7 +34,7 @@ LANGS = ("en", "fr")
 DEFAULT_LANG = "en"
 
 # Screens of the administrator role only (not in permissions.SCREENS: their routes are ADMIN_ENDPOINTS)
-ADMIN_SCREENS = ("admin.users", "admin.roles", "admin.backups", "admin.settings")
+ADMIN_SCREENS = ("admin.users", "admin.roles", "admin.audit", "admin.backups", "admin.settings")
 # The order of the table of contents: the general pages, then the menu order
 ORDER = [s.key for s in SCREENS] + list(ADMIN_SCREENS)
 
