@@ -6,7 +6,7 @@ A production order says what to make, how much, in which warehouse and when. It 
 
 ## List {#prod.orders.list}
 
-Columns: Order #, Status, Product, Description, Quantity, Warehouse, Start, Due, Revision and Estimated cost.
+Columns: Order #, Status, Product, Description, Quantity, Made (quantity reported), Warehouse, Start, Due, Revision and Estimated cost.
 
 Filters: Status, Product and Warehouse. **New** creates a draft order.
 
@@ -14,12 +14,14 @@ Filters: Status, Product and Warehouse. **New** creates a draft order.
 
 1. **Draft:** created with **New**. It can be changed or deleted freely. The materials, the operations and the cost are recalculated after each change.
 2. **Released:** the order is ready for the shop floor. The recipe is checked again (it must still be approved) and the order can no longer be changed. See [Release](#prod.orders.release).
-3. **In progress, Completed, Closed:** come with the next step (issue of the materials by lot, and report of the production with a new lot). Not available yet.
-4. **Cancelled:** a draft or released order that will not be made. See [Cancel order](#prod.orders.cancel).
+3. **In progress:** the first material issued or the first quantity reported on the [shop floor](#prod.orders.floor) starts the order.
+4. **Completed:** production is over. See [Complete](#prod.orders.complete). Nothing more can be issued or reported; [Reopen](#prod.orders.reopen) puts it back in progress.
+5. **Closed:** the [actual cost](#prod.orders.actual) is kept and the order can no longer change. See [Close](#prod.orders.close).
+6. **Cancelled:** a draft or released order that will not be made. See [Cancel order](#prod.orders.cancel).
 
-A released order goes back to draft with [Back to draft](#prod.orders.unrelease), as long as nothing was issued or produced. Every change of status is kept in the [history](#prod.orders.history).
+A released order goes back to draft with [Back to draft](#prod.orders.unrelease), as long as nothing was issued or produced. Once the stock has moved, an order can no longer go back to draft or be cancelled: it is completed and closed. Every change of status is kept in the [history](#prod.orders.history).
 
-The stock does not move yet: production orders only plan. Missing materials are shown, they do not block.
+Missing materials are shown on the order; they warn, they do not block the release. The stock moves only on the shop floor, with stock movements of document *Production* and the order number (**Inventory > Stock movements**).
 
 ## What to make {#prod.orders.what}
 
@@ -73,6 +75,30 @@ The user who released the order. Shown once released.
 
 Date and time of the release. Shown once released.
 
+### Completed by {#prod.orders.cCompletedBy}
+
+The user who completed the order. Shown once completed.
+
+### Completed on {#prod.orders.dCompleted}
+
+Date and time of the completion.
+
+### Closed by {#prod.orders.cClosedBy}
+
+The user who closed the order. Shown once closed.
+
+### Closed on {#prod.orders.dClosed}
+
+Date and time of the closing.
+
+### Lot made {#prod.orders.cLot}
+
+The lot of the product made by the order (the one of the first report). Shown once something was reported.
+
+### Quantity made {#prod.orders.dQtyDone}
+
+The total quantity reported, in the unit of the recipe.
+
 ## Materials {#prod.orders.materials}
 
 The materials of the recipe for the quantity of the order, in stock units (the conversions of the product are applied), with the scrap of the recipe included.
@@ -80,8 +106,62 @@ The materials of the recipe for the quantity of the order, in stock units (the c
 - **Required:** what the order needs.
 - **Available:** stock on hand minus reserved in the warehouse of the material (or of the order), without expired lots.
 - **Short:** what is missing (required − issued − available). A red badge means a shortage: receive or move the stock before production. A green ✓ means the material is there.
-- **Issued:** what was already taken out for the order (shown once production has started, next step). The column **Warehouse** appears when a material is taken from another warehouse than the order's.
+- **Issued:** what was already taken out for the order, net of returns (shown once production has started). The column **Warehouse** appears when a material is taken from another warehouse than the order's.
 - **Unit cost / Cost:** the cost of the material in the item master, for the quantity.
+
+## Shop floor {#prod.orders.floor}
+
+Shown on released and in-progress orders, to the roles with the *Shop floor* permission. Each step makes stock movements of the order; nothing moves while one problem is left.
+
+### 1. Issue the materials {#prod.orders.floor.issue}
+
+Takes the materials out of the stock, lot by lot, from the warehouse of the order (or of the material). The lots expiring first go first (the pick policy of the product: FEFO, FIFO or LIFO); an expired lot and a blocked location are never used. **Show the lots** lists the lots, locations and quantities that would be taken, without moving anything, or what is missing. **Issue** takes them out.
+
+The backflushed materials (issue method *Backflush*) are not issued here: they go out automatically when the production is reported.
+
+### To issue {#prod.orders.floor.issueQty}
+
+The quantity of each material to take out, in its stock unit. It starts at what is left to issue (required − issued). Change it to issue part of it, or leave 0.
+
+### Date (issue) {#prod.orders.floor.issueDate}
+
+The date of the stock movements. It also decides which lots are expired.
+
+### 2. Report the production {#prod.orders.floor.report}
+
+Puts the quantity made into the stock of the order's warehouse, at the estimated unit cost of the order. The backflushed materials go out at the same time, for that quantity (required × quantity reported / quantity of the order). Several reports can be made (for example one per shift).
+
+### Quantity made {#prod.orders.floor.reportQty}
+
+The good quantity made, in the unit of the recipe. It starts at what is left to make.
+
+### Lot (report) {#prod.orders.floor.reportLot}
+
+The lot of the product made. Empty: the lot of the order, else **MO** + the order number (for example MO12), for a product followed by lot.
+
+### Expiry (report) {#prod.orders.floor.reportExpiry}
+
+The expiry date of the lot made. Empty: the date + the shelf life of the product (Inventory > Items), for a product with an expiry date.
+
+### Location (report) {#prod.orders.floor.reportLocation}
+
+Where the product goes in the warehouse. *Automatic*: the default location of the product in the warehouse (Inventory > Replenishment parameters), else the receiving location of the warehouse; the receiving location is also taken when the default location holds another lot of the product (one lot per location).
+
+### Date (report) {#prod.orders.floor.reportDate}
+
+The date of the stock movements; the expiry is counted from it.
+
+## Lots made and lots used {#prod.orders.lots}
+
+The genealogy of the order: the lots of the product made (date, lot, expiry, location, quantity, value, stock movement, who) and the lots of the materials used (issue, backflush or return). A click on a movement number opens it in **Inventory > Stock movements**.
+
+### Return {#prod.orders.return}
+
+On a lot used, gives back a quantity that was not consumed: it goes back into the same lot and location, at the cost it went out at. At most what was issued from that lot.
+
+## Actual cost {#prod.orders.actual}
+
+Shown once the stock has moved: the value of the materials issued (net of returns), the estimated operation cost for the quantity made (no labour is reported yet), the actual cost and actual cost per unit, the estimated cost for the quantity made and the **variance** (actual − estimated: red when the order cost more). It is kept as it is when the order is closed.
 
 ## Operations and cost {#prod.orders.operations}
 
@@ -108,6 +188,18 @@ Released orders only, while nothing was issued or produced. The order can be cha
 ### Cancel order {#prod.orders.cancel}
 
 Draft or released orders, while nothing was issued or produced. The order stays in the list as *Cancelled*. You can give a reason; it goes into the history.
+
+### Complete {#prod.orders.complete}
+
+In-progress orders with a quantity made. Production is over: nothing more can be issued or reported. Needs the *Release* permission.
+
+### Reopen {#prod.orders.reopen}
+
+Completed orders: back in progress, to issue or report more. You can give a reason.
+
+### Close {#prod.orders.close}
+
+Completed orders. Keeps the actual cost and the variance; the order can no longer change. Needs the *Release* permission.
 
 ### Delete {#prod.orders.delete}
 

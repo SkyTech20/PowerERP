@@ -40,6 +40,7 @@ from powererp.modules.common.registry import label_lookup
 from powererp.store import store
 
 from .calendar import CalendarExceptionService, CalendarService
+from .floor import ShopFloorService
 from .operations import OperationService
 from .orders import SEQUENCE, ProductionOrderService
 from .products import ProductMfgService
@@ -377,6 +378,19 @@ def _register_orders(bp: Blueprint, c: Container) -> None:
     @bp.route("/api/production-orders/<int:no>/calc", methods=["POST"])
     def production_order_calc(no=None):
         return jsonify(orders.preview(json_payload(), no))
+
+    floor = c.register("shop_floor", ShopFloorService(orders, current_username))
+
+    @bp.route("/api/production-orders/<int:no>/issue/check", methods=["POST"])
+    def production_order_issue_check(no):
+        return jsonify(floor.issue_check(no, json_payload()))
+
+    @bp.route("/api/production-orders/<int:no>/issue", methods=["POST"], defaults={"step": "issue"})
+    @bp.route("/api/production-orders/<int:no>/return", methods=["POST"], defaults={"step": "return"})
+    @bp.route("/api/production-orders/<int:no>/report", methods=["POST"], defaults={"step": "report"})
+    def production_order_floor(no, step):
+        steps = {"issue": floor.issue, "return": floor.give_back, "report": floor.report}
+        return jsonify(steps[step](no, json_payload()))
 
     @bp.route("/api/production-orders/<int:no>/<action>", methods=["POST"])
     def production_order_action(no, action):

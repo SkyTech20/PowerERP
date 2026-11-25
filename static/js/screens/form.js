@@ -12,7 +12,7 @@ import { pageHead, tabLabel } from "../views.js";
 // textarea | password | email), lookup (+ fill, lookupParams(model, line), onPick), show(model, isNew), rerender (redraw on change),
 // fmt(value) (how a read-only value is shown).
 // Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
-// a line column's ph (placeholder text key), lines.minWidth (px: a wide grid scrolls instead of squeezing its columns), locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model), tab, onNew } and panels (more of them).
+// a line column's ph (placeholder text key), lines.minWidth (px: a wide grid scrolls instead of squeezing its columns), locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model, { path, reload(record), error(e) }), tab, onNew } and panels (more of them).
 // warnings(model) -> Promise of { field: message }: shown under those fields (not errors: saving still decides),
 // checked again on every change of the form (e.g. a product unit with no conversion to its stock unit).
 // recalc(model, { path, field, line }) -> Promise of the model calculated by the server: called when a field or a
@@ -301,7 +301,9 @@ export function formView(key, id) {
     }));
     if ($("#totals")) { $("#totals").innerHTML = totalsHtml(); bindTotals(); }
     bind();
-    shownPanels.forEach((P) => P.bind && P.bind(model));
+    // a panel's bind gets the record and what it may do: its API path, show the record the server sent back, show an error
+    const panelCtx = { path: isNew ? null : apiPath(), reload: (res) => { model = res; render(); }, error: (e) => showError(e) };
+    shownPanels.forEach((P) => P.bind && P.bind(model, panelCtx));
     decorateHelp(R);
     if (R.tax && model[R.tax.supplier]) loadSupplierTax(model[R.tax.supplier]);
   }

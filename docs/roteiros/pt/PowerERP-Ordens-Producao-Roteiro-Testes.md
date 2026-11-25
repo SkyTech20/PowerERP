@@ -1,6 +1,6 @@
-# PowerERP — Ordens de produção (M3a): roteiro de testes
+# PowerERP — Ordens de produção (M3a e M3b): roteiro de testes
 
-Roteiro para testar as ordens de produção: criar a partir da receita aprovada, ver materiais, disponibilidade e custo, liberar, voltar a rascunho e cancelar. O estoque ainda não se move nesta etapa (consumo e apontamento vêm no M3b). Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** logo depois de restaurar o demo.
+Roteiro para testar as ordens de produção: criar a partir da receita aprovada, ver materiais, disponibilidade e custo, liberar, voltar a rascunho e cancelar (M3a); depois o chão de fábrica: consumir os materiais por lote, apontar a produção com lote novo, devolver, ver a genealogia, concluir e fechar com o custo real (M3b, seções 9 a 13). Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** logo depois de restaurar o demo.
 
 **Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo. O demo começa sem ordens.
 
@@ -75,7 +75,56 @@ Na ordem 1:
 | Perfil SALES | Sem acesso: a entrada não aparece no menu de quem tem esse perfil. |
 | Perfil personalizado com *Production orders* em *Edit* (sem *Release*) | Cria e altera rascunhos, mas os botões **Release**, **Back to draft** e **Cancel order** não aparecem. |
 
-## 8. Ajuda
+## 9. Consumir os materiais (M3b)
+
+Restaure o demo. Crie uma ordem de DOUGH, 10 KG, **Save** e **Release**.
+
+| Passo | Esperado |
+|---|---|
+| Card *Shop floor*, parte *1. Issue the materials* | FLOUR 6 KG, SALT 0,12 KG, OIL-FRY 0,4 L, com *To issue* já preenchido com o que falta. |
+| **Show the lots** | "Ready: the stock is there." e a tabela: os três em DRY-01. Nada se move (confira em **Inventory > Stock movements**). |
+| **Issue** | Mensagem *Materials issued*. Badge *In progress*. Histórico com "Production started". Coluna *Issued* do card *Materials* preenchida. |
+| Card *Lots made and lots used* | Em *Lots used*: 3 linhas *Issue* com valor (6,60 $, 0,14 $, 1,28 $) e o número do movimento; o clique abre o movimento. |
+| **Inventory > Stock movements** | 3 saídas com documento *Production* e o número da ordem. |
+| **Issue** de novo | Erro "Nothing to issue": tudo já saiu. |
+
+## 10. Apontar a produção
+
+| Passo | Esperado |
+|---|---|
+| Parte *2. Report the production*: *Quantity made* 9,8; deixar *Lot*, *Expiry* e *Location* em automático; **Report** | Mensagem *Production reported*. Em *Lots made*: lote MO1, 9,8 KG, em REC, custo unitário 2,0774, valor 20,36 $. |
+| Card *Tracking* | *Lot made* MO1 e *Quantity made* 9,8. |
+| **Inventory > Stock on hand**, DOUGH | Lote MO1 com 9,8 KG em REC. |
+| Lista das ordens | Coluna *Made* com 9,8 KG. |
+
+## 11. Devolver um material
+
+| Passo | Esperado |
+|---|---|
+| Em *Lots used*, linha FLOUR, **Return**, digitar 0,5 | Mensagem de devolução. Nova linha *Return* com -0,5 KG e -0,55 $. *Issued* de FLOUR = 5,5 KG. |
+| **Return** de 10 KG na mesma linha | Erro "More than what went out..." (máximo 5,5). |
+
+## 12. Concluir e fechar
+
+| Passo | Esperado |
+|---|---|
+| Card *Actual cost* | Materiais 7,47 $, operações 12,50 $ (para 9,8 KG), custo real 19,97 $, por unidade 2,0372 / KG, estimado para a quantidade feita 20,36 $, variação -0,39 $ (verde). |
+| **Complete** e confirmar | Badge *Completed*. O card *Shop floor* some. Botões **Reopen** e **Close**. |
+| **Reopen** | Volta a *In progress*. **Complete** de novo. |
+| **Close** e confirmar | Badge *Closed*, sem botões. *Actual cost* diz "Kept when the order was closed". Histórico: Created, Released, Production started, Completed, Reopened, Completed, Closed. |
+| **Cancel order** numa ordem que já moveu estoque | Não aparece; pela API a resposta é 409. |
+
+## 13. Regras do estoque e recusas
+
+| O que fazer | Esperado |
+|---|---|
+| Numa ordem liberada, *To issue* maior que o estoque | **Show the lots** lista o problema "Not enough stock available"; **Issue** recusa e nada se move. |
+| **Complete** sem nada apontado | "Report a quantity made before completing the order." |
+| Ordem em rascunho | O card *Shop floor* não aparece. |
+| Perfil sem a ação *Shop floor* (Administration > Roles) | O card *Shop floor* e os botões **Return** não aparecem. |
+| Lote vencido | Não é usado: um lote vencido na data escolhida em *Date* fica fora da lista de **Show the lots**. |
+
+## 14. Ajuda
 
 | Passo | Esperado |
 |---|---|

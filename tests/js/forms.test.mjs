@@ -144,7 +144,8 @@ test("a production order: another product takes its own recipe and warehouse; ev
   const m = { cProduct: "B", cRevision: "A", cWarehouse: "W1", dQty: "5" };
   assert.deepEqual(P.prepareOrderRecalc({ ...m }, "dQty"), m);
   assert.deepEqual(P.prepareOrderRecalc({ ...m }, "cProduct"), { ...m, cRevision: "", cWarehouse: "" });
-  const keys = [...P.ORDER_STATUS.map((s) => "prod.ord.status." + s), ...["created", "release", "unrelease", "cancel"].map((a) => "prod.ord.a." + a)];
+  const keys = [...P.ORDER_STATUS.map((s) => "prod.ord.status." + s), ...["created", "release", "unrelease", "cancel", "start", "complete", "reopen", "close"].map((a) => "prod.ord.a." + a),
+    ...["issue", "backflush", "return"].map((k) => "prod.fl.k." + k)];
   for (const l of ["en", "fr"]) assert.deepEqual(keys.filter((k) => !I18N[l][k]), [], l);
   assert.equal(RES.prodorders.locked({ cStatus: "draft" }, false), false);
   assert.equal(RES.prodorders.locked({ cStatus: "released" }, false), true);

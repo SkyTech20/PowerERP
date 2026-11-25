@@ -1,6 +1,6 @@
-# PowerERP — Production orders (M3a): test script
+# PowerERP — Production orders (M3a and M3b): test script
 
-Script to test the production orders: create from the approved recipe, see the materials, availability and cost, release, back to draft and cancel. The stock does not move yet in this step (issue and output reporting come with M3b). Screen labels are in English, as shown with the **EN** button. Expected values are those of the **Pastry shop** scenario right after the demo is restored.
+Script to test the production orders: create from the approved recipe, see the materials, availability and cost, release, back to draft and cancel (M3a); then the shop floor: issue the materials by lot, report the production with a new lot, give back, see the genealogy, complete and close with the actual cost (M3b, sections 9 to 13). Screen labels are in English, as shown with the **EN** button. Expected values are those of the **Pastry shop** scenario right after the demo is restored.
 
 **Before you start:** log in as administrator, go to **Administration > System settings**, choose the **Pastry shop** scenario and restore the demo data. The demo starts with no orders.
 
@@ -75,7 +75,56 @@ On order 1:
 | Role SALES | No access: the entry is not in the menu of users with that role. |
 | A custom role with *Production orders* at *Edit* (no *Release*) | Creates and changes drafts, but the **Release**, **Back to draft** and **Cancel order** buttons are not shown. |
 
-## 8. Help
+## 9. Issue the materials (M3b)
+
+Restore the demo. Create an order of DOUGH, 10 KG, **Save** and **Release**.
+
+| Step | Expected |
+|---|---|
+| Card *Shop floor*, part *1. Issue the materials* | FLOUR 6 KG, SALT 0.12 KG, OIL-FRY 0.4 L, with *To issue* already filled with what is left. |
+| **Show the lots** | "Ready: the stock is there." and the table: all three in DRY-01. Nothing moves (check **Inventory > Stock movements**). |
+| **Issue** | Message *Materials issued*. Badge *In progress*. History with "Production started". Column *Issued* of the *Materials* card filled in. |
+| Card *Lots made and lots used* | Under *Lots used*: 3 *Issue* lines with their value ($6.60, $0.14, $1.28) and the movement number; a click opens the movement. |
+| **Inventory > Stock movements** | 3 issues with document *Production* and the order number. |
+| **Issue** again | Error "Nothing to issue": everything went out. |
+
+## 10. Report the production
+
+| Step | Expected |
+|---|---|
+| Part *2. Report the production*: *Quantity made* 9.8; leave *Lot*, *Expiry* and *Location* automatic; **Report** | Message *Production reported*. Under *Lots made*: lot MO1, 9.8 KG, in REC, unit cost 2.0774, value $20.36. |
+| Card *Tracking* | *Lot made* MO1 and *Quantity made* 9.8. |
+| **Inventory > Stock on hand**, DOUGH | Lot MO1 with 9.8 KG in REC. |
+| Order list | Column *Made* with 9.8 KG. |
+
+## 11. Give a material back
+
+| Step | Expected |
+|---|---|
+| Under *Lots used*, line FLOUR, **Return**, type 0.5 | Return message. New *Return* line with -0.5 KG and -$0.55. *Issued* of FLOUR = 5.5 KG. |
+| **Return** 10 KG on the same line | Error "More than what went out..." (5.5 at most). |
+
+## 12. Complete and close
+
+| Step | Expected |
+|---|---|
+| Card *Actual cost* | Materials $7.47, operations $12.50 (for 9.8 KG), actual cost $19.97, per unit 2.0372 / KG, estimated for the quantity made $20.36, variance -$0.39 (green). |
+| **Complete** and confirm | Badge *Completed*. The *Shop floor* card is gone. Buttons **Reopen** and **Close**. |
+| **Reopen** | Back to *In progress*. **Complete** again. |
+| **Close** and confirm | Badge *Closed*, no buttons. *Actual cost* says "Kept when the order was closed". History: Created, Released, Production started, Completed, Reopened, Completed, Closed. |
+| **Cancel order** on an order whose stock moved | Not shown; through the API the answer is 409. |
+
+## 13. Stock rules and refusals
+
+| What to do | Expected |
+|---|---|
+| On a released order, *To issue* above the stock | **Show the lots** lists the problem "Not enough stock available"; **Issue** refuses and nothing moves. |
+| **Complete** with nothing reported | "Report a quantity made before completing the order." |
+| A draft order | The *Shop floor* card is not shown. |
+| A role without the *Shop floor* action (Administration > Roles) | The *Shop floor* card and the **Return** buttons are not shown. |
+| An expired lot | Never used: a lot expired on the *Date* chosen is left out of **Show the lots**. |
+
+## 14. Help
 
 | Step | Expected |
 |---|---|

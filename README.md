@@ -121,7 +121,11 @@ Not done yet: supplier invoices do not move the stock, there is no FIFO costing,
   - the materials (stock units, scrap included), the operations (time on their resource) and the estimated cost are the recipe exploded for the quantity, recalculated on every change of a draft (`POST /api/production-orders/calc`: a product just picked takes the base quantity of its recipe);
   - the available stock of each material in the warehouse (on hand − reserved, expired lots excluded) and the shortages are shown; they warn, they do not block;
   - draft → released (the recipe is checked again) → in progress → completed → closed; draft / released → cancelled; released → draft while nothing was issued (`POST /api/production-orders/<no>/{release,unrelease,cancel}`, permission `prod.orders:release`); only a draft is changed or deleted; every change of status goes into the history (who, when, comment);
-  - the stock does not move yet: issuing the materials by lot and reporting the output with a new lot come with M3b.
+- **M3b (done): the shop floor of the orders** (`POST /api/production-orders/<no>/{issue,issue/check,return,report}`, permission `prod.orders:report`):
+  - issue: the materials go out lot by lot in the order of the product's pick policy (FEFO / FIFO / LIFO, `inventory/picking.py`, shared with the sales invoices); expired lots and blocked locations are never used; `issue/check` shows the lots first;
+  - report: the quantity made goes in with its lot (typed, else the order's, else `MO<no>`), expiry (date + shelf life) and location (default location, else receiving), at the estimated unit cost; backflushed materials go out with it; return: a quantity issued goes back into its lot at its cost;
+  - every move is a stock movement PROD with the order number, checked first (nothing moves while one problem is left); the order keeps the lots used and made (its genealogy);
+  - in progress → completed (reopen) → closed: the actual cost (materials issued + estimated operations for the quantity made) and the variance against the estimate are kept on closing.
 
 ## Sales
 

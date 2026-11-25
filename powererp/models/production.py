@@ -71,7 +71,13 @@ register_specs(
         keys=("iNo",),
         order=("iNo",),
         extra=S.PRODUCTION_ORDER_EXTRA,
-        sparse=("dReleased",),
-        children={"materials": S.ORDER_MATERIAL, "operations": S.ORDER_OPERATION, "history": S.ORDER_HISTORY},
+        sparse=("dReleased", "dCompleted", "dClosed"),
+        children={
+            "materials": S.ORDER_MATERIAL,
+            "operations": S.ORDER_OPERATION,
+            "history": S.ORDER_HISTORY,
+            "issues": S.ORDER_ISSUE,
+            "outputs": S.ORDER_OUTPUT,
+        },
     ),
 )

@@ -504,6 +504,16 @@ PRODUCTION_ORDER_EXTRA = {
     "dCreated": "ts",
     "dReleased": "ts",
     "cReleasedBy": "s",
+    # M3b: completion, closing and the actual cost (at closing)
+    "dCompleted": "ts",
+    "cCompletedBy": "s",
+    "dClosed": "ts",
+    "cClosedBy": "s",
+    "dActMaterialCost": "d",  # the value of the materials issued (net of returns)
+    "dActOperationCost": "d",  # the estimated operation cost for the quantity made (no labour reporting yet)
+    "dActCost": "d",
+    "dActUnitCost": "d",
+    "dVariance": "d",  # actual cost - estimated unit cost x quantity made
 }
 ORDER_MATERIAL = {  # the materials of the recipe for the quantity of the order, in stock units
     "iSeq": "i",
@@ -531,6 +541,36 @@ ORDER_OPERATION = {
     "dCost": "d",
 }
 ORDER_HISTORY = {"dAt": "ts", "cUser": "s", "cAction": "s", "cFrom": "s", "cTo": "s", "cComment": "s"}
+ISSUE_KINDS = ("issue", "backflush", "return")
+ORDER_ISSUE = {  # M3b: a material taken out of the stock for the order (or given back): the lots used
+    "iMovement": "i",  # the stock movement (document PROD, the order number)
+    "dDate": "date",
+    "cUser": "s",
+    "cKind": ISSUE_KINDS,
+    "iSeq": "i",  # the material of the order
+    "cComponent": "s",
+    "cWarehouse": "s",
+    "cLocation": "s",
+    "cLot": "s",
+    "cSerial": "s",
+    "dExpiry": "date",
+    "dQty": "d",  # in stock units; a return is negative
+    "cUOM": "s",
+    "dValue": "d",  # the cost of the stock (negative for a return)
+}
+ORDER_OUTPUT = {  # M3b: the product made, put into the stock: the lots made
+    "iMovement": "i",
+    "dDate": "date",
+    "cUser": "s",
+    "dQty": "d",  # in the unit of the recipe (the stock unit of the product)
+    "cUOM": "s",
+    "cWarehouse": "s",
+    "cLocation": "s",
+    "cLot": "s",
+    "dExpiry": "date",
+    "dUnitCost": "d",  # the estimated unit cost of the order
+    "dValue": "d",
+}
 
 # ---------------------------------------------------------------- sales (V1): company profile and customers
 LANGS = ("fr", "en")
