@@ -87,7 +87,12 @@ SCREENS: tuple[Screen, ...] = (
     ),
     # Inventory
     Screen("inv.items", "inv", crud=("inventory.products",), routes={"inventory.products_unit_check": "view"}),
-    Screen("inv.stock", "inv", actions=("view",), routes={"inventory.inventory_stock": "view"}),
+    Screen(
+        "inv.stock",
+        "inv",
+        actions=("view",),
+        routes={"inventory.inventory_stock": "view", "inventory.inventory_stock_card": "view"},
+    ),
     Screen("inv.movements", "inv", crud=("inventory.movements",)),
     Screen(
         "inv.replenishment",

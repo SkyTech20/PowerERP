@@ -539,3 +539,12 @@ tr.pv-open td { background: #f3f8fe; }
 #pvQ { width: 100%; max-width: 480px; }
 .pv-grid > div { min-width: 0; }
 .pv-grid table.kv td { overflow-wrap: anywhere; }
+
+/* Inventory > Stock on hand > stock card */
+.sc-facts { display: flex; flex-wrap: wrap; gap: 8px 28px; padding: 12px 16px; }
+.kpis.sc-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 760px) { .kpis.sc-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .sc-kpis .kpi { padding: 10px; } .sc-kpis .kpi .value { font-size: 18px; } .sc-kpis .kpi .meta { display: none; } }
+.sc-grid td.sc-in { color: var(--success); }
+.sc-grid td.sc-out { color: var(--danger); }
+.sc-grid tr.sc-neg td { background: #fdecea; }
+.sc-small { font-size: 11px; margin-top: 2px; }

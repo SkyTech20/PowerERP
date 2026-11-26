@@ -12,6 +12,7 @@ import { helpView } from "./screens/help.js";
 import { listView } from "./screens/list.js";
 import { lotsView } from "./screens/lots.js";
 import { scorView } from "./screens/scor.js";
+import { stockCardView } from "./screens/stockcard.js";
 import { replenishmentView } from "./screens/replenishment.js";
 import { traceabilityView } from "./screens/traceability.js";
 import { roleFormView, rolesListView } from "./screens/roles.js";
@@ -65,6 +66,7 @@ export function resolve(path) {
   if (parts.join("/") === "admin/settings") return isAdmin() ? settingsView() : dashboardView();
   if (parts.join("/") === "inv/replenishment") return can("inv.replenishment") ? replenishmentView() : dashboardView();
   if (parts.slice(0, 2).join("/") === "prod/traceability") return can("prod.traceability") ? traceabilityView(parts[2], parts[3]) : dashboardView();
+  if (parts.slice(0, 3).join("/") === "inv/stock/card" && parts.length >= 5) return can("inv.stock") ? stockCardView(parts[3], parts[4], parts[5], parts[6], parts[7]) : dashboardView();
   if (parts.join("/") === "qa/lots") return can("qa.lots") ? lotsView() : dashboardView();
   if (parts.join("/") === "rep/scor") return can("rep.scor") ? scorView() : dashboardView();
   if (parts[0] === "admin" && parts[1] === "roles") {

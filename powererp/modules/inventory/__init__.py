@@ -134,6 +134,22 @@ def _blueprint(s: dict, counts: CountService, replenishment: ReplenishmentServic
         rows = stock.stock_rows(boolean(request.args.get("zero")))
         return jsonify(paginate_request(rows, ("cProduct", "cDescFR", "cDescEN", "cLocation", "cLot", "cSerial")))
 
+    @bp.route("/api/inventory/stock/card")
+    def inventory_stock_card():
+        """The stock card of one line of Stock on hand: its movements with in, out and the running balance."""
+        a = request.args
+        return jsonify(
+            stock.statement(
+                text(a.get("product")),
+                text(a.get("warehouse")),
+                text(a.get("location")),
+                text(a.get("lot")),
+                text(a.get("serial")),
+                text(a.get("from")),
+                text(a.get("to")),
+            )
+        )
+
     @bp.route("/api/inventory/valuation")
     def inventory_valuation():
         rows = stock.valuation_rows()

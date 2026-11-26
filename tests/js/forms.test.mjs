@@ -150,3 +150,28 @@ test("a production order: another product takes its own recipe and warehouse; ev
   assert.equal(RES.prodorders.locked({ cStatus: "draft" }, false), false);
   assert.equal(RES.prodorders.locked({ cStatus: "released" }, false), true);
 });
+
+test("Stock on hand: a line opens its stock card, which names each movement and links its document", async () => {
+  const { stockCardLink } = await import(pathToFileURL(join(STATIC, "js", "resources", "inventory.js")).href);
+  const { docOf, moveKind } = await import(pathToFileURL(join(STATIC, "js", "screens", "stockcard.js")).href);
+  assert.equal(RES.stock.rowHref({ cProduct: "MAPLE SYRUP", cWarehouse: "PLANT", cLocation: "FG-06", cLot: "MO8", cSerial: "" }),
+    "/inv/stock/card/MAPLE%20SYRUP/PLANT/FG-06/MO8/-");
+  assert.equal(RES.stock.rowHref, stockCardLink);
+  const { setUser } = await import(pathToFileURL(join(STATIC, "js", "state.js")).href);
+  setUser({ permissions: ["inv.items:view", "inv.stock:view"] });
+  assert.match(RES.stock.columns[0].fmt("P1", { cProduct: "P1" }), /href="#\/inv\/items\/P1"/); // the product: its own link
+  setUser({ permissions: ["inv.stock:view"] });
+  assert.equal(RES.stock.columns[0].fmt("P1", { cProduct: "P1" }), "P1"); // a role that may not open products: no link
+  setUser(null);
+  const m = (o) => ({ cType: "OUT", cDocType: "MAN", cDocNo: "", iDocId: "", dQtyIn: "", dQtyOut: "1", ...o });
+  assert.equal(moveKind(m({ cType: "IN", cDocType: "REC" })), I18N.en["stc.k.reception"]);
+  assert.equal(moveKind(m({ cDocType: "PROD" })), I18N.en["stc.k.used"]);
+  assert.equal(moveKind(m({ cType: "ADJ", cDocType: "SO" })), I18N.en["stc.k.credit"]);
+  assert.equal(moveKind(m({ cType: "TRF", dQtyIn: "2", cFrom: "PLANT / A" })), "Transfer from PLANT / A");
+  assert.equal(docOf(m({ cDocType: "SO", cDocNo: "9", iDocId: 10 })).path, "/sales/invoices/10");
+  assert.equal(docOf(m({ cDocType: "SO", cDocNo: "9" })).path, ""); // no invoice found: no link
+  assert.equal(docOf(m({ cDocType: "PROD", cDocNo: "7" })).path, "/prod/orders/7");
+  assert.equal(docOf(m({ cDocType: "REC", cDocNo: "900102" })).path, "/receptions/900102");
+  assert.equal(docOf(m({ cDocType: "CNT", cDocNo: "3" })).path, "/inv/counts/3");
+  assert.equal(docOf(m({})).label, "");
+});

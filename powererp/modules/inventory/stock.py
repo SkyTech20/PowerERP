@@ -13,7 +13,7 @@ from powererp.core.values import amount, number, quantity, text, today, unit_cos
 from powererp.modules.common.forms import RecordForm, Row
 
 from .costing import costing_of
-from .ledger import Balances, StockLedger, with_staged
+from .ledger import Balances, StockLedger, effects, with_staged
 
 PURCHASE_TYPES = ("IN",)
 
@@ -43,6 +43,9 @@ class StockService:
         self.on_order = on_order
         self.username = username
         self.form = RecordForm(S.MOVEMENT)
+        # Other modules tell how to open their documents: doc type -> {document number: record id} (e.g. "SO":
+        # the invoice / credit note numbers of the sales invoices)
+        self.document_ids: dict[str, Callable[[], dict[str, Any]]] = {}
 
     # ---------------------------------------------------------- balances
     def balances(self, staged=()) -> Balances:
@@ -282,6 +285,102 @@ class StockService:
             )
         rows.sort(key=lambda r: (r["cProduct"], r["cWarehouse"], r["cLocation"], r["cLot"], r["cSerial"]))
         return rows
+
+    def statement(
+        self,
+        product: str,
+        warehouse: str,
+        location: str = "",
+        lot: str = "",
+        serial: str = "",
+        date_from: str = "",
+        date_to: str = "",
+    ) -> Row:
+        """The stock card of one stock line (product + warehouse + location + lot + serial): every movement that
+        changed it, in date order, with what came in, what went out and the balance after each one. Movements
+        before `date_from` make the opening balance; reservations change the reserved quantity, not the balance."""
+        prod = self.products_repo.get(product) if text(product) else None
+        if prod is None:
+            raise AppError("not_found", status=404)
+        key = (prod["cCode"].upper(), text(warehouse).upper(), text(location).upper())
+        lot_u, serial_u = text(lot).upper(), text(serial).upper()
+        hits: list[tuple[Row, float, float]] = []
+        for m in self.ledger.all():
+            if m["cProduct"].upper() != key[0] or text(m.get("cLot")).upper() != lot_u:
+                continue
+            if text(m.get("cSerial")).upper() != serial_u:
+                continue
+            for wh, loc, dq, dr in effects(m):
+                if (wh.upper(), text(loc).upper()) == key[1:]:
+                    hits.append((m, dq, dr))
+        hits.sort(key=lambda h: (text(h[0].get("dDate")), int(h[0].get("iNo") or 0)))
+        ids = {t: fn() for t, fn in self.document_ids.items() if any(h[0].get("cDocType") == t for h in hits)}
+        balance = reserved = opening = opening_res = 0.0
+        rows: list[Row] = []
+        for m, dq, dr in hits:
+            balance = round(balance + dq, 6)
+            reserved = round(reserved + dr, 6)
+            day = text(m.get("dDate"))
+            if date_from and day < date_from:
+                opening, opening_res = balance, reserved
+                continue
+            if date_to and day > date_to:
+                continue
+            doc_id = ids.get(text(m.get("cDocType")), {}).get(text(m.get("cDocNo")))
+            unit = number(m.get("dUnitCost"))
+            rows.append(
+                {
+                    "iNo": m["iNo"],
+                    "dDate": day,
+                    "cType": m["cType"],
+                    "cDocType": text(m.get("cDocType")),
+                    "cDocNo": text(m.get("cDocNo")),
+                    "iDocId": doc_id if doc_id is not None else "",
+                    "cReason": text(m.get("cReason")),
+                    "cUser": text(m.get("cUser")),
+                    "dQtyIn": quantity(dq) if dq > 0 else "",
+                    "dQtyOut": quantity(-dq) if dq < 0 else "",
+                    "dQtyReserved": quantity(dr) if dr else "",
+                    "dBalance": quantity(balance),
+                    "dUnitCost": m.get("dUnitCost", ""),
+                    "dValue": amount(dq * unit) if dq else "",
+                    "lTransfer": m["cType"] == "TRF",
+                    "cFrom": (
+                        (m["cWarehouse"] + (" / " + m["cLocation"] if m.get("cLocation") else ""))
+                        if m["cType"] == "TRF"
+                        else ""
+                    ),
+                    "cTo": (
+                        (m["cWhTo"] + (" / " + m["cLocTo"] if m.get("cLocTo") else "")) if m["cType"] == "TRF" else ""
+                    ),
+                }
+            )
+        b = self.balances().get((*key, lot_u, serial_u), {"qty": 0.0, "reserved": 0.0, "dExpiry": ""})
+        place: Row = (self.locations.find_in(warehouse, location) if text(location) else None) or {}
+        house: Row = (self.warehouses_repo.get(warehouse) if text(warehouse) else None) or {}
+        last = next((m for m, dq, _dr in reversed(hits) if dq > 0 and m.get("dExpiry")), None)
+        return {
+            "cProduct": prod["cCode"],
+            "cDescFR": prod.get("cDescFR", ""),
+            "cDescEN": prod.get("cDescEN", ""),
+            "cUOM": prod.get("cStockUOM", ""),
+            "cWarehouse": house.get("cCode", text(warehouse)),
+            "cWarehouseName": house.get("cNameFR", ""),
+            "cLocation": place.get("cCode", text(location)),
+            "cLot": text(lot),
+            "cSerial": text(serial),
+            "dExpiry": b.get("dExpiry") or (last or {}).get("dExpiry", ""),
+            "lLotControl": bool(prod.get("lLotControl")),
+            "dFrom": date_from,
+            "dTo": date_to,
+            "dOpening": quantity(opening),
+            "dOpeningReserved": quantity(opening_res),
+            "dQtyOnHand": quantity(b["qty"]),
+            "dQtyReserved": quantity(b["reserved"]),
+            "dQtyAvailable": quantity(b["qty"] - b["reserved"]),
+            "dClosing": quantity(rows[-1]["dBalance"]) if rows else quantity(opening),
+            "items": rows,
+        }
 
     def valuation_rows(self) -> list[Row]:
         per: dict[tuple[str, str], dict[str, Any]] = {}
