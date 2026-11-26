@@ -25,6 +25,7 @@ from .modules import (
     inventory,
     ledger,
     manual,
+    privacy,
     production,
     purchasing,
     quality,
@@ -55,6 +56,7 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     c.get("lookups").register("roles", auth.role_lookup(c.get("roles")))
     c.get("lifecycle").after_load(c.get("roles").load_demo)  # the example roles of the demo
     admin.register(app)  # Administration > Backups
+    privacy.register(app, c)  # Administration > Personal data (Quebec Law 25)
     manual.register(app, c)  # the help: manual of the screens (help/)
     database.init_app(app)  # one transaction per request
     c.get("lifecycle").scenarios(demo.scenario, SCENARIOS, lambda scenario: _switch(c, dataset, scenario))

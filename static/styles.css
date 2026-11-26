@@ -527,3 +527,15 @@ tr.qa-detail td { white-space: normal; }
 .scor-bar i { display: block; height: 100%; background: var(--primary, #1f5fa8); }
 .scor-bar b { text-align: right; }
 @media (max-width: 900px) { .scor-cols { grid-template-columns: minmax(0, 1fr); } }
+/* Administration > Personal data */
+.badge.pv-user { background: #e6f0fb; color: #1f5fa8; }
+.badge.pv-former { background: #f1f1f1; color: #555; }
+.badge.pv-contact, .badge.pv-shipto { background: #efe9fb; color: #6b46c1; }
+.badge.pv-warehouse { background: #fff4e0; color: #9a5b00; }
+tr.pv-open td { background: #f3f8fe; }
+.pv-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.pv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+.pv-grid table.kv th { text-align: left; width: 45%; font-weight: 500; color: var(--muted, #666); }
+#pvQ { width: 100%; max-width: 480px; }
+.pv-grid > div { min-width: 0; }
+.pv-grid table.kv td { overflow-wrap: anywhere; }

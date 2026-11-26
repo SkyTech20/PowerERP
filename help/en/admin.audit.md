@@ -4,7 +4,7 @@ Who did what in PowerERP, and when: every sign-in (good or failed), every accoun
 
 **Where:** **Administration > Audit log**.
 
-The log is kept for good: no screen and no call can change or delete an event. Passwords are never written (they show as `***`).
+The log is kept for good: no screen and no call can change or delete an event. The one exception is Quebec's Law 25: when a person is [anonymized](#admin.privacy.anonymize), their name, e-mail and phone are replaced in the events, and the IP addresses of their events are emptied. Passwords are never written (they show as `***`).
 
 ## From {#admin.audit.from}
 

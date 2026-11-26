@@ -11,6 +11,7 @@ Step-by-step scripts to test each module in the demo, in Portuguese (`pt/`) and 
 | Lot status and nonconformances (quality) | [pt/PowerERP-Qualidade-Roteiro-Testes.md](pt/PowerERP-Qualidade-Roteiro-Testes.md) | [en/PowerERP-Quality-Test-Script.md](en/PowerERP-Quality-Test-Script.md) |
 | Recipe steps on the shop floor (M4, critical control points) | [pt/PowerERP-Passos-Receita-Roteiro-Testes.md](pt/PowerERP-Passos-Receita-Roteiro-Testes.md) | [en/PowerERP-Recipe-Steps-Test-Script.md](en/PowerERP-Recipe-Steps-Test-Script.md) |
 | Supply chain indicators (SCOR KPI dashboard) | [pt/PowerERP-Indicadores-SCOR-Roteiro-Testes.md](pt/PowerERP-Indicadores-SCOR-Roteiro-Testes.md) | [en/PowerERP-SCOR-Indicators-Test-Script.md](en/PowerERP-SCOR-Indicators-Test-Script.md) |
+| Personal data (Quebec Law 25) | [pt/PowerERP-Dados-Pessoais-Lei25-Roteiro-Testes.md](pt/PowerERP-Dados-Pessoais-Lei25-Roteiro-Testes.md) | [en/PowerERP-Personal-Data-Law25-Test-Script.md](en/PowerERP-Personal-Data-Law25-Test-Script.md) |
 | Audit trail and security log | [pt/PowerERP-Auditoria-Roteiro-Testes.md](pt/PowerERP-Auditoria-Roteiro-Testes.md) | [en/PowerERP-Audit-Test-Script.md](en/PowerERP-Audit-Test-Script.md) |
 | Access control (A1–A3) | [pt/PowerERP-Controle-Acesso-Roteiro-Testes.md](pt/PowerERP-Controle-Acesso-Roteiro-Testes.md) | [en/PowerERP-Access-Control-Test-Script.md](en/PowerERP-Access-Control-Test-Script.md) |
 

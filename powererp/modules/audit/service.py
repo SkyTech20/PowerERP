@@ -57,11 +57,21 @@ ADMIN_SCREENS = {
     "backup.backup_settings": "admin.backups",
     "backup.backup_run": "admin.backups",
     "sales.company_save": "admin.settings",
+    "privacy.privacy_policy": "admin.privacy",
+    "privacy.privacy_retention_apply": "admin.privacy",
     "system.reset": "admin.settings",
     "system.clear": "admin.settings",
 }
 # Writes that are not changes of data (the language of the screens) or have their own security event
-NOT_CHANGES = {"auth.login", "auth.logout", "auth.set_lang", "auth.change_password", "auth.user_unlock"}
+# (an anonymization keeps its own event, without the name of the person in the path)
+NOT_CHANGES = {
+    "auth.login",
+    "auth.logout",
+    "auth.set_lang",
+    "auth.change_password",
+    "auth.user_unlock",
+    "privacy.privacy_action",
+}
 
 
 def _now() -> datetime:

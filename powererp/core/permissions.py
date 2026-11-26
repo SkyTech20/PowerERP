@@ -6,7 +6,8 @@ have "create", "edit" and "delete"; some have their own actions (post, print, cr
 
 Each API route (Flask endpoint) is classified here:
   OPEN_ENDPOINTS   any logged-in user (own account, lookups, dashboard, company header)
-  ADMIN_ENDPOINTS  the administrator role only (users, roles, backups, system settings, demo data, audit log)
+  ADMIN_ENDPOINTS  the administrator role only (users, roles, backups, system settings, demo data, audit log,
+                 personal data)
   a screen route   the permission of that screen; CRUD routes take the action from the HTTP method
                    (GET view, POST create, PUT edit, DELETE delete)
   a screen "read"  a GET another screen needs (the PO form reads the supplier): allowed with the view of
@@ -252,6 +253,13 @@ ADMIN_ENDPOINTS = frozenset(
         "audit.audit_list",
         "audit.audit_filters",
         "audit.audit_export",
+        "privacy.privacy_policy",
+        "privacy.privacy_search",
+        "privacy.privacy_retention",
+        "privacy.privacy_retention_apply",
+        "privacy.privacy_export",
+        "privacy.privacy_action",
+        "privacy.privacy_file",
         "auth.permission_catalog",
         "auth.roles_collection",
         "auth.roles_item",
