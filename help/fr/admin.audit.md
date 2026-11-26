@@ -4,7 +4,7 @@ Qui a fait quoi dans PowerERP, et quand : chaque connexion (réussie ou refusée
 
 **Où :** **Administration > Journal d'audit**.
 
-Le journal est conservé pour de bon : aucun écran ni appel ne peut modifier ou supprimer un événement. Les mots de passe ne sont jamais écrits (ils apparaissent comme `***`).
+Le journal est conservé pour de bon : aucun écran ni appel ne peut modifier ou supprimer un événement. La seule exception vient de la Loi 25 du Québec : quand une personne est [anonymisée](#admin.privacy.anonymize), son nom, son courriel et son téléphone sont remplacés dans les événements, et les adresses IP de ses événements sont vidées. Les mots de passe ne sont jamais écrits (ils apparaissent comme `***`).
 
 ## Du {#admin.audit.from}
 

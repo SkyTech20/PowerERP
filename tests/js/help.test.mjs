@@ -130,6 +130,7 @@ test("the inputs of the hand-written screens and panels are documented (data-hel
     ...helpF("screens/backups.js").map((f) => `admin.backups.${f}`),
     ...helpF("screens/traceability.js").map((f) => `prod.traceability.${f}`),
     ...helpF("screens/audit.js").map((f) => `admin.audit.${f}`),
+    ...helpF("screens/privacy.js").map((f) => `admin.privacy.${f}`),
     ...helpF("screens/lots.js").map((f) => `qa.lots.${f}`),
     ...helpF("screens/scor.js").map((f) => `rep.scor.${f}`),
     ...helpF("resources/inventory.js").map((f) => `admin.taxes.taxgroups.${f}`), // the "Try the group" panel

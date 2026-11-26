@@ -5,6 +5,7 @@ import { RES } from "./registry.js";
 import { accountView } from "./screens/account.js";
 import { auditView } from "./screens/audit.js";
 import { backupView } from "./screens/backups.js";
+import { privacyView } from "./screens/privacy.js";
 import { dashboardView } from "./screens/dashboard.js";
 import { formView } from "./screens/form.js";
 import { helpView } from "./screens/help.js";
@@ -60,6 +61,7 @@ export function resolve(path) {
   if (parts[0] === "help") return helpView(parts[1] || "");
   if (parts.join("/") === "admin/backups") return isAdmin() ? backupView() : dashboardView();
   if (parts.join("/") === "admin/audit") return isAdmin() ? auditView() : dashboardView();
+  if (parts.join("/") === "admin/privacy") return isAdmin() ? privacyView() : dashboardView();
   if (parts.join("/") === "admin/settings") return isAdmin() ? settingsView() : dashboardView();
   if (parts.join("/") === "inv/replenishment") return can("inv.replenishment") ? replenishmentView() : dashboardView();
   if (parts.slice(0, 2).join("/") === "prod/traceability") return can("prod.traceability") ? traceabilityView(parts[2], parts[3]) : dashboardView();
