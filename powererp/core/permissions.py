@@ -211,6 +211,8 @@ SCREENS: tuple[Screen, ...] = (
             "quality.nonconformance_action": "close",
         },
     ),
+    # Reports
+    Screen("rep.scor", "rep", actions=("view",), routes={"reports.kpi_scor": "view"}),
     # Administration (the screens any role can be given; users, roles, backups and settings: ADMIN_ENDPOINTS)
     Screen(
         "admin.taxes", "admin", crud=("taxes.tax_codes", "taxes.tax_groups"), routes={"taxes.tax_group_calc": "view"}

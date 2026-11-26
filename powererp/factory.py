@@ -28,6 +28,7 @@ from .modules import (
     production,
     purchasing,
     quality,
+    reports,
     sales,
     suppliers,
     system,
@@ -76,6 +77,7 @@ def _register_modules(app: Flask, c: Container, demo: DemoData) -> None:
     production.register(app, c, demo.production)  # reference lists of the shop floor (M0)
     quality.register(app, c)  # lot status and nonconformances (step 5 of the SCOR / ISO plan)
     sales.register(app, c, demo.sales)  # customers and company profile (V1)
+    reports.register(app, c)  # the supply chain indicators (step 7 of the SCOR / ISO plan)
 
 
 def demo_snapshot(dataset: str | None, scenario: str) -> dict:

@@ -31,7 +31,7 @@ export const MENU = [
   { k: "fa", icon: "🏢", items: ["fa.assets", "fa.depreciation"] },
   { k: "proj", icon: "📁", items: ["proj.projects", "proj.jobcost"] },
   { k: "crm", icon: "🤝", items: ["crm.contacts", "crm.opportunities"] },
-  { k: "rep", icon: "📊", items: ["rep.designer", "rep.bi"] },
+  { k: "rep", icon: "📊", items: [{ k: "rep.scor", route: "/rep/scor" }, "rep.designer", "rep.bi"] },
   { k: "admin", icon: "⚙️", items: ["admin.companies", { k: "admin.users", route: "/admin/users", admin: true }, { k: "admin.roles", route: "/admin/roles", admin: true }, { k: "admin.audit", route: "/admin/audit", admin: true }, { k: "admin.taxes", route: "/admin/taxes" }, "admin.currencies", { k: "admin.backups", route: "/admin/backups", admin: true }, { k: "admin.settings", route: "/admin/settings", admin: true }] },
 ];
 export const openGroups = new Set(["gl", "ap", "pur", "sales", "inv"]);

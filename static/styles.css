@@ -507,3 +507,23 @@ tr.qa-detail td { white-space: normal; }
 .st-form .st-err:empty { display: none; }
 .st-again { margin-top: 10px; }
 .st-again summary { cursor: pointer; color: var(--primary, #1f5fa8); font-size: 13px; }
+
+/* Reports > Supply chain indicators */
+.scor-filters { flex-wrap: wrap; }
+.scor-filters label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted, #64748b); white-space: nowrap; }
+.scor-group { margin: 18px 0 6px; }
+.scor-group h2 { font-size: 16px; margin: 0 0 10px; }
+.scor-group h2 .muted { font-size: 13px; font-weight: 400; margin-left: 6px; }
+.scor-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 12px; }
+.scor-kpis .card { margin: 0; }
+.scor-kpi .value.muted { color: var(--muted, #94a3b8); }
+.scor-what { font-size: 12px; color: var(--muted, #64748b); margin-top: 6px; border-top: 1px dashed var(--border, #e2e8f0); padding-top: 6px; }
+.scor-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; margin-top: 16px; }
+.scor-cols .card { margin: 0; }
+.scor-pair { display: flex; gap: 32px; margin-bottom: 14px; }
+.scor-pair .value { font-size: 26px; font-weight: 600; }
+.scor-bar { display: grid; grid-template-columns: 110px 1fr 36px; align-items: center; gap: 8px; font-size: 13px; margin: 4px 0; }
+.scor-bar div { background: var(--surface-2, #f1f5f9); border-radius: 4px; height: 10px; overflow: hidden; }
+.scor-bar i { display: block; height: 100%; background: var(--primary, #1f5fa8); }
+.scor-bar b { text-align: right; }
+@media (max-width: 900px) { .scor-cols { grid-template-columns: minmax(0, 1fr); } }

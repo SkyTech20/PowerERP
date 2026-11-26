@@ -59,7 +59,8 @@ DEMO_ROLES: tuple[Row, ...] = (
             if a != "approve" and not (s.key == "prod.recipes" and a == "delete")
         ]
         + ["inv.items:view", "inv.stock:view", "inv.setup:view"]
-        + [f"{s.key}:{a}" for s in P.SCREENS if s.module == "qa" for a in s.actions if a != "delete"],
+        + [f"{s.key}:{a}" for s in P.SCREENS if s.module == "qa" for a in s.actions if a != "delete"]
+        + ["rep.scor:view"],
     },
     {
         "cCode": "WAREHOUSE",
@@ -86,6 +87,7 @@ DEMO_ROLES: tuple[Row, ...] = (
             "pur.receptions:create",
             "pur.receptions:edit",
             "pur.receptions:post",
+            "rep.scor:view",
         ],
     },
 )

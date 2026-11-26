@@ -10,6 +10,7 @@ import { formView } from "./screens/form.js";
 import { helpView } from "./screens/help.js";
 import { listView } from "./screens/list.js";
 import { lotsView } from "./screens/lots.js";
+import { scorView } from "./screens/scor.js";
 import { replenishmentView } from "./screens/replenishment.js";
 import { traceabilityView } from "./screens/traceability.js";
 import { roleFormView, rolesListView } from "./screens/roles.js";
@@ -38,12 +39,14 @@ export function canOpen(path) {
   if (parts.join("/") === "inv/replenishment") return can("inv.replenishment");
   if (parts.slice(0, 2).join("/") === "prod/traceability") return can("prod.traceability");
   if (parts.join("/") === "qa/lots") return can("qa.lots");
+  if (parts.join("/") === "rep/scor") return can("rep.scor");
   const hit = routeOf(parts.join("/"));
   return !hit || canOn(RES[hit.key]);
 }
 export function activeMenuRoute(path) {
   if (path.startsWith("/prod/traceability")) return "/prod/traceability";
   if (path === "/qa/lots") return "/qa/lots";
+  if (path === "/rep/scor") return "/rep/scor";
   const hit = routeOf(path);
   if (!hit) return path;
   const R = RES[hit.key];
@@ -61,6 +64,7 @@ export function resolve(path) {
   if (parts.join("/") === "inv/replenishment") return can("inv.replenishment") ? replenishmentView() : dashboardView();
   if (parts.slice(0, 2).join("/") === "prod/traceability") return can("prod.traceability") ? traceabilityView(parts[2], parts[3]) : dashboardView();
   if (parts.join("/") === "qa/lots") return can("qa.lots") ? lotsView() : dashboardView();
+  if (parts.join("/") === "rep/scor") return can("rep.scor") ? scorView() : dashboardView();
   if (parts[0] === "admin" && parts[1] === "roles") {
     if (!isAdmin()) return dashboardView();
     if (parts.length === 2) return rolesListView();
