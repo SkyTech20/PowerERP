@@ -142,6 +142,9 @@ Not done yet: supplier invoices do not move the stock, there is no FIFO costing,
   - each record keeps who, when, the value, the limits of the step at that time and whether it is within them (table `production_orders_records`); records are never changed, a step is recorded again;
   - a value out of its limits needs the corrective action and is written in the history of the order; a critical step *block* refuses report and complete (`step_blocked`) until recorded again within its limits; *hold the lot* puts the lot made on hold in Quality > Lot status (also a lot reported later); *warn* stops nothing;
   - second signature: another user, checked with their password (`bad_signature`; audit events `signature_ok` / `signature_failed`); a required role is checked on the signer (an administrator always may); conditions (`TEMP_PATE < 24`) and frequencies (once, each lot, every N units, every N minutes).
+- **Supply chain indicators (done, step 7 of the SCOR / ISO plan, ISO 9001 9.1)**: **Reports > Supply chain indicators** (`GET /api/kpi/scor?from=&to=&horizon=`, permission `rep.scor:view`, read only; `powererp/modules/reports/kpi.py`):
+  - reliability (perfect orders: invoices without a credit note, production on time and yield, supplier fill rate, receptions without a nonconformance, shop floor steps right first time), responsiveness (production cycle time, time to close a nonconformance), cost (production cost variance, gross margin), assets (stock value, turns, days of supply, value of the lots held back and of the lots to expire);
+  - the lots to watch (expiring within the horizon, held by quality), the stock by product (days of supply, slow movers), the nonconformances by source and severity and the deviations of the shop floor; migration 0032 gives the view to the roles that release production orders.
 
 ## Sales
 
