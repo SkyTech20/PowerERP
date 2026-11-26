@@ -1,5 +1,7 @@
 # PowerERP — Status de lote e não conformidades: roteiro de testes
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar o menu **Quality** (passo 5 do plano SCOR / ISO): **Quality > Lot status** (liberar, segurar, pôr em quarentena ou rejeitar um lote) e **Quality > Nonconformances** (registrar um problema, segurar o lote, fechar com a decisão e a ação corretiva), mais o botão de segurar os lotes de um recall em **Production > Lots and traceability**. Um lote que não está liberado não sai em fatura de venda nem em ordem de produção. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** depois dos preparativos da seção 1.
 
 **Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo.

@@ -1,5 +1,7 @@
 # PowerERP — Vendas: roteiro de testes (V1 a V6)
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar o módulo de vendas B2B (Quebec, CAD) no demo. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Manufacturing** logo depois de restaurar o demo.
 
 **Antes de começar:** entre como administrador e vá em **Administration > System settings**. Escolha o cenário **Manufacturing** e restaure os dados de demo. Restaurar de novo volta tudo ao estado inicial, então dá para repetir o roteiro quantas vezes quiser.

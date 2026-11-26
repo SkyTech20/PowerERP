@@ -1,5 +1,7 @@
 # PowerERP — Receptions into the stock: test script
 
+> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+
 Script to test putting a reception into the stock, with lot, supplier lot, expiry and location. The values expected are those of the **Pastry shop** scenario right after the demo data is restored.
 
 **Before you start:** log in as administrator, go to **Administration > System settings**, pick the **Pastry shop** scenario and restore the demo data. Restoring again puts everything back as it was.

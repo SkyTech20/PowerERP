@@ -1,5 +1,7 @@
 # PowerERP — Ordens de produção (M3a e M3b): roteiro de testes
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar as ordens de produção: criar a partir da receita aprovada, ver materiais, disponibilidade e custo, liberar, voltar a rascunho e cancelar (M3a); depois o chão de fábrica: consumir os materiais por lote, apontar a produção com lote novo, devolver, ver a genealogia, concluir e fechar com o custo real (M3b, seções 9 a 13). Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** logo depois de restaurar o demo.
 
 **Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo. O demo começa sem ordens.

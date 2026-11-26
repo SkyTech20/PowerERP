@@ -1,5 +1,7 @@
 # PowerERP — Lots and traceability: test script
 
+> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+
 Script to test the **Production > Lots and traceability** screen (step 3 of the SCOR / ISO plan): from a lot, see where it comes from (supplier, supplier lot, purchase order; for a lot made here, the lots of the materials), where it went (production orders, lots made from it, customers), what a recall must reach, and export it all to Excel. The screen labels are in English, as the ERP shows them with the **EN** button. The expected values are those of the **Pastry shop** scenario after the preparation of section 1.
 
 **Before you start:** log in as the administrator, go to **Administration > System settings**, pick the **Pastry shop** scenario and restore the demo data.

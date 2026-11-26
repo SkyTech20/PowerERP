@@ -10,13 +10,13 @@
   "cCodeAch": "Cassiano",
   "cDescAch": "Cassiano",
   "iTypePO": 1,
-  "cCode": "MEATCO",
-  "cName": "Boucherie Centrale Laval inc.",
-  "cAddress1": "2450, boul. Industriel",
-  "cCity": "Laval",
-  "cZipCode": "H7S 1P9",
-  "cNoTPS": "823456781RT0001",
-  "cNoTVQ": "12823456781TQ0001"
+  "cCode": "GAGNON",
+  "cName": "Érablière Gagnon et fils",
+  "cAddress1": "2140, rang Saint-Joseph",
+  "cCity": "Saint-Prosper",
+  "cZipCode": "G0M 1Y0",
+  "cNoTPS": "812345671RT0001",
+  "cNoTVQ": "12812345671TQ0001"
  },
  {
   "cTermCode": "n30",
@@ -29,13 +29,13 @@
   "cCodeAch": "Cassiano",
   "cDescAch": "Cassiano",
   "iTypePO": 1,
-  "cCode": "FARMEGG",
-  "cName": "Ferme Avicole Saint-Hyacinthe",
-  "cAddress1": "1580, rang Saint-Pierre",
-  "cCity": "Saint-Hyacinthe",
-  "cZipCode": "J2T 4P5",
-  "cNoTPS": "834567812RT0001",
-  "cNoTVQ": "12834567812TQ0001"
+  "cCode": "CANTONS",
+  "cName": "Érablière des Cantons inc.",
+  "cAddress1": "815, chemin de la Montagne",
+  "cCity": "Sutton",
+  "cZipCode": "J0E 2K0",
+  "cNoTPS": "823456712RT0001",
+  "cNoTVQ": "12823456712TQ0001"
  },
  {
   "cTermCode": "n30",
@@ -48,13 +48,13 @@
   "cCodeAch": "Cassiano",
   "cDescAch": "Cassiano",
   "iTypePO": 1,
-  "cCode": "DELIQC",
-  "cName": "Distribution Fromages et Charcuteries QC",
-  "cAddress1": "780, rue Bridge",
-  "cCity": "Montréal",
-  "cZipCode": "H3K 2C4",
-  "cNoTPS": "845678123RT0001",
-  "cNoTVQ": "12845678123TQ0001"
+  "cCode": "TREMBLAY",
+  "cName": "Sucrerie Tremblay",
+  "cAddress1": "47, rang du Lac",
+  "cCity": "Pohénégamook",
+  "cZipCode": "G0L 1J0",
+  "cNoTPS": "834567123RT0001",
+  "cNoTVQ": "12834567123TQ0001"
  },
  {
   "cTermCode": "n30",
@@ -67,13 +67,13 @@
   "cCodeAch": "Cassiano",
   "cDescAch": "Cassiano",
   "iTypePO": 1,
-  "cCode": "FOODWH",
-  "cName": "Grossiste Alimentaire Montréal",
-  "cAddress1": "9100, boul. Pie-IX",
-  "cCity": "Montréal",
-  "cZipCode": "H1Z 3T4",
-  "cNoTPS": "856781234RT0001",
-  "cNoTVQ": "12856781234TQ0001"
+  "cCode": "LAITERIE",
+  "cName": "Laiterie du Terroir inc.",
+  "cAddress1": "300, rue Principale",
+  "cCity": "Coaticook",
+  "cZipCode": "J1A 2R6",
+  "cNoTPS": "845671234RT0001",
+  "cNoTVQ": "12845671234TQ0001"
  },
  {
   "cTermCode": "n30",
@@ -86,13 +86,13 @@
   "cCodeAch": "Cassiano",
   "cDescAch": "Cassiano",
   "iTypePO": 1,
-  "cCode": "PACKPRO",
-  "cName": "Emballages Pro inc.",
-  "cAddress1": "355, rue Saint-Jacques",
-  "cCity": "Longueuil",
-  "cZipCode": "J4H 3X1",
-  "cNoTPS": "867812345RT0001",
-  "cNoTVQ": "12867812345TQ0001"
+  "cCode": "BOREAL",
+  "cName": "Emballages Boréal inc.",
+  "cAddress1": "1200, rue de l'Industrie",
+  "cCity": "Lévis",
+  "cZipCode": "G6Z 1X3",
+  "cNoTPS": "856712345RT0001",
+  "cNoTVQ": "12856712345TQ0001"
  },
  {
   "cTermCode": "n30",
@@ -105,12 +105,12 @@
   "cCodeAch": "Cassiano",
   "cDescAch": "Cassiano",
   "iTypePO": 1,
-  "cCode": "KITCHEQ",
-  "cName": "Équipements de Cuisine Pro",
-  "cAddress1": "6200, rue Saint-Hubert",
-  "cCity": "Montréal",
-  "cZipCode": "H2S 2M2",
-  "cNoTPS": "878123456RT0001",
-  "cNoTVQ": "12878123456TQ0001"
+  "cCode": "ACERI-EQ",
+  "cName": "Équipements Acéricoles Beauce",
+  "cAddress1": "560, 90e Rue",
+  "cCity": "Saint-Georges",
+  "cZipCode": "G5Y 3L1",
+  "cNoTPS": "867123456RT0001",
+  "cNoTVQ": "12867123456TQ0001"
  }
 ]

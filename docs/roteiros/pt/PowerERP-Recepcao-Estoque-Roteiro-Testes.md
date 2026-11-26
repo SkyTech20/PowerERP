@@ -1,5 +1,7 @@
 # PowerERP — Recepção com entrada no estoque: roteiro de testes
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar a entrada da recepção no estoque, com lote, lote do fornecedor, validade e localização. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** logo depois de restaurar o demo.
 
 **Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo. Restaurar de novo volta tudo ao estado inicial.

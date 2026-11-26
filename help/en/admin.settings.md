@@ -76,7 +76,11 @@ The GST / HST and QST numbers are not typed here. They come from the tax codes i
 
 ### Data set {#admin.settings.scenario}
 
-The demo data to load: *SkyAI* (purchasing, no production), *Manufacturing* (paper, bakery, metal) or *Pastry shop* (pastels, production).
+The demo data to load:
+
+- *Maple products* (the default): Érablière Démo inc., a plant in Saint-Georges (Beauce) that buys maple syrup in barrels from three sugar bushes and makes syrup in cans and bottles, maple butter, maple candy and maple fudge. It opens with two months of history (October and November 2026): production orders made and closed, the recipe steps recorded (Brix, cooking and filling temperatures), posted invoices and a credit note, lots on hold and nonconformances. Each barrel is a lot whose supplier lot is the producer's barrel number and harvest date, so **Production > Lots and traceability** follows a can sold back to its sugar bush, and **Reports > Supply chain indicators** has a value for every indicator.
+- *SkyAI* (purchasing, no production).
+- *Manufacturing* (paper, bakery, metal).
 
 **↺ Reset demo data** loads the data set chosen, after a confirmation. Every change made since is lost. The data set chosen is kept when the ERP restarts. The example roles SALES, PRODUCTION and WAREHOUSE are put back as in the demo; the roles you created are not touched.
 

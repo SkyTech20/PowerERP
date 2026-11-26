@@ -1,5 +1,7 @@
 # PowerERP — Sales: test script (V1 to V6)
 
+> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+
 Script to test the B2B sales module (Quebec, CAD) in the demo. Screen labels are in English, as the ERP shows them with the **EN** button. The expected values are those of the **Manufacturing** scenario right after the demo data is restored.
 
 **Before you start:** log in as the administrator and go to **Administration > System settings**. Choose the **Manufacturing** scenario and restore the demo data. Restoring again puts everything back to the starting point, so the script can be repeated as often as needed.

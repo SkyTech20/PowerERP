@@ -1,5 +1,7 @@
 # PowerERP — Lot status and nonconformances: test script
 
+> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+
 Script to test the **Quality** menu (step 5 of the SCOR / ISO plan): **Quality > Lot status** (release, hold, quarantine or reject a lot) and **Quality > Nonconformances** (record a problem, hold the lot, close it with the decision and the corrective action), and the button that holds the lots of a recall in **Production > Lots and traceability**. A lot that is not released does not go out on a sales invoice or a production order. The expected values are those of the **Pastry shop** scenario after the preparation of section 1.
 
 **Before you start:** sign in as administrator, go to **Administration > System settings**, choose the **Pastry shop** scenario and restore the demo data.

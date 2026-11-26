@@ -1,0 +1,1293 @@
+{
+ "_comment": "Maple products demo (tools/make_maple_data.py): syrup, butter, candy and fudge from bulk syrup.",
+ "capabilities": [
+  {
+   "cCode": "FILTER",
+   "cDescFR": "Filtration",
+   "cDescEN": "Filtering",
+   "lActive": true
+  },
+  {
+   "cCode": "COOK",
+   "cDescFR": "Cuisson",
+   "cDescEN": "Cooking",
+   "lActive": true
+  },
+  {
+   "cCode": "FILL",
+   "cDescFR": "Remplissage",
+   "cDescEN": "Filling",
+   "lActive": true
+  },
+  {
+   "cCode": "PACK",
+   "cDescFR": "Emballage",
+   "cDescEN": "Packing",
+   "lActive": true
+  }
+ ],
+ "setup_families": [],
+ "downtime_reasons": [
+  {
+   "cCode": "CLEAN",
+   "cDescFR": "Lavage (changement de produit)",
+   "cDescEN": "Washing (product change)",
+   "cGroup": "planned",
+   "lAffectsOEE": false,
+   "lActive": true
+  },
+  {
+   "cCode": "BRK-MECH",
+   "cDescFR": "Panne",
+   "cDescEN": "Breakdown",
+   "cGroup": "breakdown",
+   "lAffectsOEE": true,
+   "lActive": true
+  }
+ ],
+ "scrap_reasons": [
+  {
+   "cCode": "OVERCOOK",
+   "cDescFR": "Trop cuit (cristallisé)",
+   "cDescEN": "Overcooked (crystallized)",
+   "cGroup": "process",
+   "lActive": true
+  },
+  {
+   "cCode": "BROKEN",
+   "cDescFR": "Bonbon cassé",
+   "cDescEN": "Broken candy",
+   "cGroup": "process",
+   "lActive": true
+  },
+  {
+   "cCode": "FILL-LEAK",
+   "cDescFR": "Contenant mal scellé",
+   "cDescEN": "Container badly sealed",
+   "cGroup": "process",
+   "lActive": true
+  }
+ ],
+ "calendars": [
+  {
+   "cCode": "MPL-1X5",
+   "cDescFR": "Usine : 1 équipe, lundi au vendredi",
+   "cDescEN": "Plant: 1 shift, Monday to Friday",
+   "lActive": true,
+   "lines": [
+    {
+     "iWeekday": 1,
+     "cShift": "JOUR",
+     "cStart": "07:00",
+     "cEnd": "15:30",
+     "iBreakMin": 30
+    },
+    {
+     "iWeekday": 2,
+     "cShift": "JOUR",
+     "cStart": "07:00",
+     "cEnd": "15:30",
+     "iBreakMin": 30
+    },
+    {
+     "iWeekday": 3,
+     "cShift": "JOUR",
+     "cStart": "07:00",
+     "cEnd": "15:30",
+     "iBreakMin": 30
+    },
+    {
+     "iWeekday": 4,
+     "cShift": "JOUR",
+     "cStart": "07:00",
+     "cEnd": "15:30",
+     "iBreakMin": 30
+    },
+    {
+     "iWeekday": 5,
+     "cShift": "JOUR",
+     "cStart": "07:00",
+     "cEnd": "15:30",
+     "iBreakMin": 30
+    }
+   ]
+  }
+ ],
+ "calendar_exceptions": [
+  {
+   "cCalendar": "*",
+   "dDate": "2026-10-12",
+   "cDescFR": "Action de grâce",
+   "cDescEN": "Thanksgiving",
+   "lClosed": true,
+   "cStart": "",
+   "cEnd": "",
+   "iBreakMin": 0
+  },
+  {
+   "cCalendar": "*",
+   "dDate": "2026-12-25",
+   "cDescFR": "Noël",
+   "cDescEN": "Christmas",
+   "lClosed": true,
+   "cStart": "",
+   "cEnd": "",
+   "iBreakMin": 0
+  }
+ ],
+ "work_centers": [
+  {
+   "cCode": "MPL-FILTER",
+   "cDescFR": "Filtre-presse",
+   "cDescEN": "Filter press",
+   "cType": "machine",
+   "cCalendar": "MPL-1X5",
+   "lFinite": true,
+   "dEfficiencyPct": "100",
+   "dUtilizationPct": "90",
+   "dSetupRateHr": "30",
+   "dRunRateHr": "15",
+   "dBurdenRateHr": "12",
+   "cCostCenter": "",
+   "cWarehouse": "PLANT",
+   "cInLocation": "PROD-01",
+   "cOutLocation": "",
+   "iQueueMin": 0,
+   "iMoveMin": 0,
+   "cSupplier": "",
+   "cNotes": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-COOKER",
+   "cDescFR": "Cuiseurs à sucre",
+   "cDescEN": "Sugar cookers",
+   "cType": "machine",
+   "cCalendar": "MPL-1X5",
+   "lFinite": true,
+   "dEfficiencyPct": "100",
+   "dUtilizationPct": "90",
+   "dSetupRateHr": "35",
+   "dRunRateHr": "25",
+   "dBurdenRateHr": "12",
+   "cCostCenter": "",
+   "cWarehouse": "PLANT",
+   "cInLocation": "PROD-01",
+   "cOutLocation": "",
+   "iQueueMin": 0,
+   "iMoveMin": 0,
+   "cSupplier": "",
+   "cNotes": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-FILLER",
+   "cDescFR": "Ligne de remplissage",
+   "cDescEN": "Filling line",
+   "cType": "machine",
+   "cCalendar": "MPL-1X5",
+   "lFinite": true,
+   "dEfficiencyPct": "100",
+   "dUtilizationPct": "90",
+   "dSetupRateHr": "40",
+   "dRunRateHr": "30",
+   "dBurdenRateHr": "12",
+   "cCostCenter": "",
+   "cWarehouse": "PLANT",
+   "cInLocation": "PROD-01",
+   "cOutLocation": "",
+   "iQueueMin": 0,
+   "iMoveMin": 0,
+   "cSupplier": "",
+   "cNotes": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-CREW",
+   "cDescFR": "Équipe de production",
+   "cDescEN": "Production crew",
+   "cType": "labor",
+   "cCalendar": "MPL-1X5",
+   "lFinite": false,
+   "dEfficiencyPct": "100",
+   "dUtilizationPct": "100",
+   "dSetupRateHr": "0",
+   "dRunRateHr": "26",
+   "dBurdenRateHr": "0",
+   "cCostCenter": "",
+   "cWarehouse": "PLANT",
+   "cInLocation": "PROD-01",
+   "cOutLocation": "",
+   "iQueueMin": 0,
+   "iMoveMin": 0,
+   "cSupplier": "",
+   "cNotes": "",
+   "lActive": true
+  }
+ ],
+ "resources": [
+  {
+   "cCode": "FPRESS1",
+   "cDescFR": "Filtre-presse 10 plaques",
+   "cDescEN": "Filter press, 10 plates",
+   "cWorkCenter": "MPL-FILTER",
+   "cCalendar": "",
+   "dSpeedFactor": "1",
+   "iParallel": 1,
+   "cManufacturer": "",
+   "cModel": "",
+   "cSerialNo": "",
+   "cNotes": "",
+   "lActive": true,
+   "capabilities": [
+    {
+     "cCapability": "FILTER",
+     "iPreference": 1
+    }
+   ],
+   "attributes": [],
+   "subresources": [],
+   "downtime": []
+  },
+  {
+   "cCode": "COOKER1",
+   "cDescFR": "Cuiseur à sucre 40 L (1)",
+   "cDescEN": "Sugar cooker 40 L (1)",
+   "cWorkCenter": "MPL-COOKER",
+   "cCalendar": "",
+   "dSpeedFactor": "1",
+   "iParallel": 1,
+   "cManufacturer": "",
+   "cModel": "",
+   "cSerialNo": "",
+   "cNotes": "",
+   "lActive": true,
+   "capabilities": [
+    {
+     "cCapability": "COOK",
+     "iPreference": 1
+    }
+   ],
+   "attributes": [],
+   "subresources": [],
+   "downtime": []
+  },
+  {
+   "cCode": "COOKER2",
+   "cDescFR": "Cuiseur à sucre 40 L (2)",
+   "cDescEN": "Sugar cooker 40 L (2)",
+   "cWorkCenter": "MPL-COOKER",
+   "cCalendar": "",
+   "dSpeedFactor": "1",
+   "iParallel": 1,
+   "cManufacturer": "",
+   "cModel": "",
+   "cSerialNo": "",
+   "cNotes": "",
+   "lActive": true,
+   "capabilities": [
+    {
+     "cCapability": "COOK",
+     "iPreference": 1
+    }
+   ],
+   "attributes": [],
+   "subresources": [],
+   "downtime": []
+  },
+  {
+   "cCode": "FILLER1",
+   "cDescFR": "Remplisseuse à chaud 2 becs",
+   "cDescEN": "Hot filler, 2 heads",
+   "cWorkCenter": "MPL-FILLER",
+   "cCalendar": "",
+   "dSpeedFactor": "1",
+   "iParallel": 2,
+   "cManufacturer": "",
+   "cModel": "",
+   "cSerialNo": "",
+   "cNotes": "",
+   "lActive": true,
+   "capabilities": [
+    {
+     "cCapability": "FILL",
+     "iPreference": 1
+    }
+   ],
+   "attributes": [],
+   "subresources": [],
+   "downtime": []
+  }
+ ],
+ "operations": [
+  {
+   "cCode": "MPL-BLEND",
+   "cDescFR": "Mélange des barils",
+   "cDescEN": "Blending the barrels",
+   "cWorkCenter": "MPL-CREW",
+   "cCapability": "",
+   "cRunFormat": "min_per_lot",
+   "dSetupMin": "10",
+   "dRunValue": "30",
+   "iCrew": 2,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-FILTER",
+   "cDescFR": "Filtration",
+   "cDescEN": "Filtering",
+   "cWorkCenter": "",
+   "cCapability": "FILTER",
+   "cRunFormat": "min_per_lot",
+   "dSetupMin": "15",
+   "dRunValue": "60",
+   "iCrew": 1,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-HEAT",
+   "cDescFR": "Chauffage pour le remplissage",
+   "cDescEN": "Heating for the filling",
+   "cWorkCenter": "",
+   "cCapability": "COOK",
+   "cRunFormat": "min_per_lot",
+   "dSetupMin": "5",
+   "dRunValue": "30",
+   "iCrew": 1,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-FILL",
+   "cDescFR": "Remplissage à chaud",
+   "cDescEN": "Hot filling",
+   "cWorkCenter": "",
+   "cCapability": "FILL",
+   "cRunFormat": "units_per_hour",
+   "dSetupMin": "15",
+   "dRunValue": "600",
+   "iCrew": 2,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-COOK",
+   "cDescFR": "Cuisson du sirop",
+   "cDescEN": "Cooking the syrup",
+   "cWorkCenter": "",
+   "cCapability": "COOK",
+   "cRunFormat": "min_per_lot",
+   "dSetupMin": "10",
+   "dRunValue": "45",
+   "iCrew": 1,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-COOL",
+   "cDescFR": "Refroidissement rapide",
+   "cDescEN": "Fast cooling",
+   "cWorkCenter": "MPL-CREW",
+   "cCapability": "",
+   "cRunFormat": "min_per_lot",
+   "dSetupMin": "0",
+   "dRunValue": "40",
+   "iCrew": 1,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-WHIP",
+   "cDescFR": "Brassage",
+   "cDescEN": "Whipping",
+   "cWorkCenter": "MPL-CREW",
+   "cCapability": "",
+   "cRunFormat": "min_per_lot",
+   "dSetupMin": "5",
+   "dRunValue": "20",
+   "iCrew": 1,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-MOULD",
+   "cDescFR": "Moulage et démoulage",
+   "cDescEN": "Moulding and unmoulding",
+   "cWorkCenter": "MPL-CREW",
+   "cCapability": "",
+   "cRunFormat": "units_per_hour",
+   "dSetupMin": "10",
+   "dRunValue": "300",
+   "iCrew": 2,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  },
+  {
+   "cCode": "MPL-PACK",
+   "cDescFR": "Étiquetage et emballage",
+   "cDescEN": "Labelling and packing",
+   "cWorkCenter": "MPL-CREW",
+   "cCapability": "",
+   "cRunFormat": "units_per_hour",
+   "dSetupMin": "0",
+   "dRunValue": "500",
+   "iCrew": 1,
+   "lReportingPoint": true,
+   "lSubcontract": false,
+   "cSupplier": "",
+   "dSubcontractCost": "",
+   "iSubcontractDays": 0,
+   "cInstructionFR": "",
+   "cInstructionEN": "",
+   "lActive": true
+  }
+ ],
+ "setup_matrices": [],
+ "product_mfg": [
+  {
+   "cProduct": "SYRUP-STD",
+   "cMakeBuy": "make",
+   "cSetupFamily": "",
+   "dMfgLotMin": "",
+   "dMfgLotMultiple": "",
+   "iMfgLeadDays": 0,
+   "lPhantom": false,
+   "cTraceLevel": "lot",
+   "cNotes": "",
+   "attributes": []
+  },
+  {
+   "cProduct": "MAPLE-SYRUP-540",
+   "cMakeBuy": "make",
+   "cSetupFamily": "",
+   "dMfgLotMin": "",
+   "dMfgLotMultiple": "",
+   "iMfgLeadDays": 0,
+   "lPhantom": false,
+   "cTraceLevel": "lot",
+   "cNotes": "",
+   "attributes": []
+  },
+  {
+   "cProduct": "MAPLE-SYRUP-250",
+   "cMakeBuy": "make",
+   "cSetupFamily": "",
+   "dMfgLotMin": "",
+   "dMfgLotMultiple": "",
+   "iMfgLeadDays": 0,
+   "lPhantom": false,
+   "cTraceLevel": "lot",
+   "cNotes": "",
+   "attributes": []
+  },
+  {
+   "cProduct": "MAPLE-BUTTER-200",
+   "cMakeBuy": "make",
+   "cSetupFamily": "",
+   "dMfgLotMin": "",
+   "dMfgLotMultiple": "",
+   "iMfgLeadDays": 0,
+   "lPhantom": false,
+   "cTraceLevel": "lot",
+   "cNotes": "",
+   "attributes": []
+  },
+  {
+   "cProduct": "MAPLE-CANDY-12",
+   "cMakeBuy": "make",
+   "cSetupFamily": "",
+   "dMfgLotMin": "",
+   "dMfgLotMultiple": "",
+   "iMfgLeadDays": 0,
+   "lPhantom": false,
+   "cTraceLevel": "lot",
+   "cNotes": "",
+   "attributes": []
+  },
+  {
+   "cProduct": "MAPLE-FUDGE-250",
+   "cMakeBuy": "make",
+   "cSetupFamily": "",
+   "dMfgLotMin": "",
+   "dMfgLotMultiple": "",
+   "iMfgLeadDays": 0,
+   "lPhantom": false,
+   "cTraceLevel": "lot",
+   "cNotes": "",
+   "attributes": []
+  }
+ ],
+ "recipes": [
+  {
+   "cProduct": "SYRUP-STD",
+   "cRevision": "A",
+   "cProcessType": "batch",
+   "dBaseQty": "100",
+   "cNotes": "100 kg de sirop filtré : 101 kg de sirop en vrac (1 % reste dans le filtre).",
+   "materials": [
+    {
+     "iSeq": 10,
+     "cComponent": "SYRUP-BULK-AMB",
+     "dQtyPer": "101",
+     "iOpSeq": 10,
+     "cIssueMethod": "manual"
+    },
+    {
+     "iSeq": 20,
+     "cComponent": "FILTER-PAPER",
+     "dQtyPer": "0.5",
+     "iOpSeq": 20,
+     "cIssueMethod": "backflush"
+    }
+   ],
+   "outputs": [],
+   "operations": [
+    {
+     "iOpSeq": 10,
+     "cOperation": "MPL-BLEND",
+     "cResource": "",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 20,
+     "cOperation": "MPL-FILTER",
+     "cResource": "FPRESS1",
+     "lReportingPoint": true
+    }
+   ],
+   "steps": [
+    {
+     "iOpSeq": 10,
+     "iStep": 10,
+     "cKind": "material_add",
+     "cTitleFR": "Vider les barils (lire le lot)",
+     "cTitleEN": "Empty the barrels (scan the lot)",
+     "iMaterialSeq": 10
+    },
+    {
+     "iOpSeq": 10,
+     "iStep": 20,
+     "cKind": "check",
+     "cTitleFR": "Goût et odeur des barils conformes",
+     "cTitleEN": "Taste and smell of the barrels are right",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "block"
+    },
+    {
+     "iOpSeq": 20,
+     "iStep": 10,
+     "cKind": "timer",
+     "cTitleFR": "Filtrer 60 minutes",
+     "cTitleEN": "Filter for 60 minutes",
+     "dDurationMin": "60"
+    },
+    {
+     "iOpSeq": 20,
+     "iStep": 20,
+     "cKind": "measure",
+     "cTitleFR": "Brix du sirop (66 à 68,9)",
+     "cTitleEN": "Syrup Brix (66 to 68.9)",
+     "cParam": "BRIX",
+     "cUOM": "°Bx",
+     "dTarget": "67.2",
+     "dMin": "66",
+     "dMax": "68.9",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "block"
+    }
+   ],
+   "cStatus": "approved",
+   "lDefault": true,
+   "cSubmittedBy": "demo",
+   "cApprovedBy": "admin",
+   "dApprovedAt": "2026-09-16T09:00:00",
+   "cChangeReason": "Première version",
+   "dEffectiveFrom": "2026-09-16",
+   "history": [
+    {
+     "dAt": "2026-09-15T14:00:00",
+     "cUser": "demo",
+     "cAction": "submit",
+     "cFrom": "draft",
+     "cTo": "in_review",
+     "cComment": ""
+    },
+    {
+     "dAt": "2026-09-16T09:00:00",
+     "cUser": "admin",
+     "cAction": "approve",
+     "cFrom": "in_review",
+     "cTo": "approved",
+     "cComment": ""
+    }
+   ]
+  },
+  {
+   "cProduct": "MAPLE-SYRUP-540",
+   "cRevision": "A",
+   "cProcessType": "discrete",
+   "dBaseQty": "100",
+   "cNotes": "100 cannes de 540 ml = 72 kg de sirop. Remplissage à chaud : 82 °C ou plus, sinon le lot est retenu.",
+   "materials": [
+    {
+     "iSeq": 10,
+     "cComponent": "SYRUP-STD",
+     "dQtyPer": "72",
+     "iOpSeq": 10,
+     "cIssueMethod": "manual"
+    },
+    {
+     "iSeq": 20,
+     "cComponent": "CAN-540",
+     "dQtyPer": "100",
+     "iOpSeq": 20,
+     "cIssueMethod": "backflush"
+    },
+    {
+     "iSeq": 30,
+     "cComponent": "LABEL",
+     "dQtyPer": "100",
+     "iOpSeq": 30,
+     "cIssueMethod": "backflush"
+    }
+   ],
+   "outputs": [],
+   "operations": [
+    {
+     "iOpSeq": 10,
+     "cOperation": "MPL-HEAT",
+     "cResource": "COOKER1",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 20,
+     "cOperation": "MPL-FILL",
+     "cResource": "FILLER1",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 30,
+     "cOperation": "MPL-PACK",
+     "cResource": "",
+     "lReportingPoint": true
+    }
+   ],
+   "steps": [
+    {
+     "iOpSeq": 10,
+     "iStep": 10,
+     "cKind": "material_add",
+     "cTitleFR": "Pomper le sirop standardisé (lire le lot)",
+     "cTitleEN": "Pump the standardized syrup (scan the lot)",
+     "iMaterialSeq": 10
+    },
+    {
+     "iOpSeq": 20,
+     "iStep": 10,
+     "cKind": "measure",
+     "cTitleFR": "Température de remplissage (82 °C ou plus)",
+     "cTitleEN": "Filling temperature (82 °C or more)",
+     "cParam": "TEMP_REMPLISSAGE",
+     "cUOM": "°C",
+     "dTarget": "85",
+     "dMin": "82",
+     "dMax": "90",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "hold_lot",
+     "cFrequency": "per_lot"
+    },
+    {
+     "iOpSeq": 20,
+     "iStep": 20,
+     "cKind": "check",
+     "cTitleFR": "Cannes bien scellées",
+     "cTitleEN": "Cans well sealed",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "block"
+    },
+    {
+     "iOpSeq": 30,
+     "iStep": 10,
+     "cKind": "output",
+     "cTitleFR": "Déclarer la production",
+     "cTitleEN": "Report the production"
+    }
+   ],
+   "cStatus": "approved",
+   "lDefault": true,
+   "cSubmittedBy": "demo",
+   "cApprovedBy": "admin",
+   "dApprovedAt": "2026-09-16T09:00:00",
+   "cChangeReason": "Première version",
+   "dEffectiveFrom": "2026-09-16",
+   "history": [
+    {
+     "dAt": "2026-09-15T14:00:00",
+     "cUser": "demo",
+     "cAction": "submit",
+     "cFrom": "draft",
+     "cTo": "in_review",
+     "cComment": ""
+    },
+    {
+     "dAt": "2026-09-16T09:00:00",
+     "cUser": "admin",
+     "cAction": "approve",
+     "cFrom": "in_review",
+     "cTo": "approved",
+     "cComment": ""
+    }
+   ]
+  },
+  {
+   "cProduct": "MAPLE-SYRUP-250",
+   "cRevision": "A",
+   "cProcessType": "discrete",
+   "dBaseQty": "100",
+   "cNotes": "100 bouteilles de 250 ml = 33,5 kg de sirop foncé, filtré au moment de l'embouteillage.",
+   "materials": [
+    {
+     "iSeq": 10,
+     "cComponent": "SYRUP-BULK-DRK",
+     "dQtyPer": "33.5",
+     "iOpSeq": 10,
+     "cIssueMethod": "manual"
+    },
+    {
+     "iSeq": 20,
+     "cComponent": "FILTER-PAPER",
+     "dQtyPer": "0.2",
+     "iOpSeq": 10,
+     "cIssueMethod": "backflush"
+    },
+    {
+     "iSeq": 30,
+     "cComponent": "BOTTLE-250",
+     "dQtyPer": "100",
+     "iOpSeq": 20,
+     "cIssueMethod": "backflush"
+    },
+    {
+     "iSeq": 40,
+     "cComponent": "CAP-28",
+     "dQtyPer": "100",
+     "iOpSeq": 20,
+     "cIssueMethod": "backflush"
+    },
+    {
+     "iSeq": 50,
+     "cComponent": "LABEL",
+     "dQtyPer": "100",
+     "iOpSeq": 30,
+     "cIssueMethod": "backflush"
+    }
+   ],
+   "outputs": [],
+   "operations": [
+    {
+     "iOpSeq": 10,
+     "cOperation": "MPL-FILTER",
+     "cResource": "FPRESS1",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 20,
+     "cOperation": "MPL-FILL",
+     "cResource": "FILLER1",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 30,
+     "cOperation": "MPL-PACK",
+     "cResource": "",
+     "lReportingPoint": true
+    }
+   ],
+   "steps": [
+    {
+     "iOpSeq": 10,
+     "iStep": 10,
+     "cKind": "material_add",
+     "cTitleFR": "Vider le baril de sirop foncé (lire le lot)",
+     "cTitleEN": "Empty the barrel of dark syrup (scan the lot)",
+     "iMaterialSeq": 10
+    },
+    {
+     "iOpSeq": 10,
+     "iStep": 20,
+     "cKind": "measure",
+     "cTitleFR": "Brix du sirop (66 à 68,9)",
+     "cTitleEN": "Syrup Brix (66 to 68.9)",
+     "cParam": "BRIX",
+     "cUOM": "°Bx",
+     "dTarget": "67.2",
+     "dMin": "66",
+     "dMax": "68.9",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "block"
+    },
+    {
+     "iOpSeq": 20,
+     "iStep": 10,
+     "cKind": "measure",
+     "cTitleFR": "Température de remplissage (82 °C ou plus)",
+     "cTitleEN": "Filling temperature (82 °C or more)",
+     "cParam": "TEMP_REMPLISSAGE",
+     "cUOM": "°C",
+     "dTarget": "85",
+     "dMin": "82",
+     "dMax": "90",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "hold_lot",
+     "cFrequency": "per_lot"
+    },
+    {
+     "iOpSeq": 30,
+     "iStep": 10,
+     "cKind": "output",
+     "cTitleFR": "Déclarer la production",
+     "cTitleEN": "Report the production"
+    }
+   ],
+   "cStatus": "approved",
+   "lDefault": true,
+   "cSubmittedBy": "demo",
+   "cApprovedBy": "admin",
+   "dApprovedAt": "2026-09-16T09:00:00",
+   "cChangeReason": "Première version",
+   "dEffectiveFrom": "2026-09-16",
+   "history": [
+    {
+     "dAt": "2026-09-15T14:00:00",
+     "cUser": "demo",
+     "cAction": "submit",
+     "cFrom": "draft",
+     "cTo": "in_review",
+     "cComment": ""
+    },
+    {
+     "dAt": "2026-09-16T09:00:00",
+     "cUser": "admin",
+     "cAction": "approve",
+     "cFrom": "in_review",
+     "cTo": "approved",
+     "cComment": ""
+    }
+   ]
+  },
+  {
+   "cProduct": "MAPLE-BUTTER-200",
+   "cRevision": "A",
+   "cProcessType": "batch",
+   "dBaseQty": "100",
+   "cNotes": "100 pots de 200 g = 23 kg de sirop. Le sirop cuit est refroidi vite sous 10 °C, puis brassé jusqu'à être crémeux.",
+   "materials": [
+    {
+     "iSeq": 10,
+     "cComponent": "SYRUP-STD",
+     "dQtyPer": "23",
+     "iOpSeq": 10,
+     "cIssueMethod": "manual"
+    },
+    {
+     "iSeq": 20,
+     "cComponent": "JAR-200",
+     "dQtyPer": "100",
+     "iOpSeq": 30,
+     "cIssueMethod": "backflush"
+    },
+    {
+     "iSeq": 30,
+     "cComponent": "LABEL",
+     "dQtyPer": "100",
+     "iOpSeq": 30,
+     "cIssueMethod": "backflush"
+    }
+   ],
+   "outputs": [],
+   "operations": [
+    {
+     "iOpSeq": 10,
+     "cOperation": "MPL-COOK",
+     "cResource": "COOKER1",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 20,
+     "cOperation": "MPL-COOL",
+     "cResource": "",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 30,
+     "cOperation": "MPL-WHIP",
+     "cResource": "",
+     "lReportingPoint": true
+    }
+   ],
+   "steps": [
+    {
+     "iOpSeq": 10,
+     "iStep": 10,
+     "cKind": "material_add",
+     "cTitleFR": "Verser le sirop (lire le lot)",
+     "cTitleEN": "Pour the syrup (scan the lot)",
+     "iMaterialSeq": 10
+    },
+    {
+     "iOpSeq": 10,
+     "iStep": 20,
+     "cKind": "measure",
+     "cTitleFR": "Cuire à 112 °C",
+     "cTitleEN": "Cook to 112 °C",
+     "cParam": "TEMP_CUISSON",
+     "cUOM": "°C",
+     "dTarget": "112",
+     "dMin": "111",
+     "dMax": "113",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "hold_lot",
+     "cFrequency": "per_lot"
+    },
+    {
+     "iOpSeq": 20,
+     "iStep": 10,
+     "cKind": "measure",
+     "cTitleFR": "Refroidir sous 10 °C avant de brasser",
+     "cTitleEN": "Cool below 10 °C before whipping",
+     "cParam": "TEMP_REFROID",
+     "cUOM": "°C",
+     "dTarget": "8",
+     "dMin": "0",
+     "dMax": "10",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "hold_lot",
+     "cFrequency": "per_lot"
+    },
+    {
+     "iOpSeq": 30,
+     "iStep": 10,
+     "cKind": "timer",
+     "cTitleFR": "Brasser 20 minutes",
+     "cTitleEN": "Whip for 20 minutes",
+     "dDurationMin": "20"
+    }
+   ],
+   "cStatus": "approved",
+   "lDefault": true,
+   "cSubmittedBy": "demo",
+   "cApprovedBy": "admin",
+   "dApprovedAt": "2026-09-16T09:00:00",
+   "cChangeReason": "Première version",
+   "dEffectiveFrom": "2026-09-16",
+   "history": [
+    {
+     "dAt": "2026-09-15T14:00:00",
+     "cUser": "demo",
+     "cAction": "submit",
+     "cFrom": "draft",
+     "cTo": "in_review",
+     "cComment": ""
+    },
+    {
+     "dAt": "2026-09-16T09:00:00",
+     "cUser": "admin",
+     "cAction": "approve",
+     "cFrom": "in_review",
+     "cTo": "approved",
+     "cComment": ""
+    }
+   ]
+  },
+  {
+   "cProduct": "MAPLE-CANDY-12",
+   "cRevision": "A",
+   "cProcessType": "batch",
+   "dBaseQty": "100",
+   "cNotes": "100 boîtes de 12 bonbons (120 g) = 14 kg de sirop.",
+   "materials": [
+    {
+     "iSeq": 10,
+     "cComponent": "SYRUP-STD",
+     "dQtyPer": "14",
+     "iOpSeq": 10,
+     "cIssueMethod": "manual"
+    },
+    {
+     "iSeq": 20,
+     "cComponent": "BOX-12",
+     "dQtyPer": "100",
+     "iOpSeq": 20,
+     "cIssueMethod": "backflush"
+    },
+    {
+     "iSeq": 30,
+     "cComponent": "LABEL",
+     "dQtyPer": "100",
+     "iOpSeq": 20,
+     "cIssueMethod": "backflush"
+    }
+   ],
+   "outputs": [],
+   "operations": [
+    {
+     "iOpSeq": 10,
+     "cOperation": "MPL-COOK",
+     "cResource": "COOKER2",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 20,
+     "cOperation": "MPL-MOULD",
+     "cResource": "",
+     "lReportingPoint": true
+    }
+   ],
+   "steps": [
+    {
+     "iOpSeq": 10,
+     "iStep": 10,
+     "cKind": "material_add",
+     "cTitleFR": "Verser le sirop (lire le lot)",
+     "cTitleEN": "Pour the syrup (scan the lot)",
+     "iMaterialSeq": 10
+    },
+    {
+     "iOpSeq": 10,
+     "iStep": 20,
+     "cKind": "measure",
+     "cTitleFR": "Cuire à 115 °C",
+     "cTitleEN": "Cook to 115 °C",
+     "cParam": "TEMP_CUISSON",
+     "cUOM": "°C",
+     "dTarget": "115",
+     "dMin": "114",
+     "dMax": "116",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "hold_lot",
+     "cFrequency": "per_lot"
+    },
+    {
+     "iOpSeq": 20,
+     "iStep": 10,
+     "cKind": "timer",
+     "cTitleFR": "Laisser figer dans les moules 30 minutes",
+     "cTitleEN": "Let set in the moulds for 30 minutes",
+     "dDurationMin": "30"
+    }
+   ],
+   "cStatus": "approved",
+   "lDefault": true,
+   "cSubmittedBy": "demo",
+   "cApprovedBy": "admin",
+   "dApprovedAt": "2026-09-16T09:00:00",
+   "cChangeReason": "Première version",
+   "dEffectiveFrom": "2026-09-16",
+   "history": [
+    {
+     "dAt": "2026-09-15T14:00:00",
+     "cUser": "demo",
+     "cAction": "submit",
+     "cFrom": "draft",
+     "cTo": "in_review",
+     "cComment": ""
+    },
+    {
+     "dAt": "2026-09-16T09:00:00",
+     "cUser": "admin",
+     "cAction": "approve",
+     "cFrom": "in_review",
+     "cTo": "approved",
+     "cComment": ""
+    }
+   ]
+  },
+  {
+   "cProduct": "MAPLE-FUDGE-250",
+   "cRevision": "A",
+   "cProcessType": "batch",
+   "dBaseQty": "100",
+   "cNotes": "100 barquettes de 250 g = 18 kg de sirop, 6 L de crème et 1,5 kg de beurre. Contient du lait.",
+   "materials": [
+    {
+     "iSeq": 10,
+     "cComponent": "SYRUP-STD",
+     "dQtyPer": "18",
+     "iOpSeq": 10,
+     "cIssueMethod": "manual"
+    },
+    {
+     "iSeq": 20,
+     "cComponent": "CREAM-35",
+     "dQtyPer": "6",
+     "iOpSeq": 10,
+     "cIssueMethod": "manual"
+    },
+    {
+     "iSeq": 30,
+     "cComponent": "BUTTER",
+     "dQtyPer": "1.5",
+     "iOpSeq": 10,
+     "cIssueMethod": "manual"
+    },
+    {
+     "iSeq": 40,
+     "cComponent": "TRAY-250",
+     "dQtyPer": "100",
+     "iOpSeq": 20,
+     "cIssueMethod": "backflush"
+    },
+    {
+     "iSeq": 50,
+     "cComponent": "LABEL",
+     "dQtyPer": "100",
+     "iOpSeq": 20,
+     "cIssueMethod": "backflush"
+    }
+   ],
+   "outputs": [],
+   "operations": [
+    {
+     "iOpSeq": 10,
+     "cOperation": "MPL-COOK",
+     "cResource": "COOKER2",
+     "lReportingPoint": true
+    },
+    {
+     "iOpSeq": 20,
+     "cOperation": "MPL-PACK",
+     "cResource": "",
+     "lReportingPoint": true
+    }
+   ],
+   "steps": [
+    {
+     "iOpSeq": 10,
+     "iStep": 10,
+     "cKind": "material_add",
+     "cTitleFR": "Verser le sirop (lire le lot)",
+     "cTitleEN": "Pour the syrup (scan the lot)",
+     "iMaterialSeq": 10
+    },
+    {
+     "iOpSeq": 10,
+     "iStep": 20,
+     "cKind": "material_add",
+     "cTitleFR": "Ajouter la crème (lire le lot)",
+     "cTitleEN": "Add the cream (scan the lot)",
+     "iMaterialSeq": 20
+    },
+    {
+     "iOpSeq": 10,
+     "iStep": 30,
+     "cKind": "measure",
+     "cTitleFR": "Cuire à 113 °C",
+     "cTitleEN": "Cook to 113 °C",
+     "cParam": "TEMP_CUISSON",
+     "cUOM": "°C",
+     "dTarget": "113",
+     "dMin": "112",
+     "dMax": "114",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "hold_lot",
+     "cFrequency": "per_lot"
+    },
+    {
+     "iOpSeq": 20,
+     "iStep": 10,
+     "cKind": "check",
+     "cTitleFR": "Étiquette avec l'allergène « lait »",
+     "cTitleEN": "Label shows the allergen \"milk\"",
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "block"
+    }
+   ],
+   "cStatus": "approved",
+   "lDefault": true,
+   "cSubmittedBy": "demo",
+   "cApprovedBy": "admin",
+   "dApprovedAt": "2026-09-16T09:00:00",
+   "cChangeReason": "Première version",
+   "dEffectiveFrom": "2026-09-16",
+   "history": [
+    {
+     "dAt": "2026-09-15T14:00:00",
+     "cUser": "demo",
+     "cAction": "submit",
+     "cFrom": "draft",
+     "cTo": "in_review",
+     "cComment": ""
+    },
+    {
+     "dAt": "2026-09-16T09:00:00",
+     "cUser": "admin",
+     "cAction": "approve",
+     "cFrom": "in_review",
+     "cTo": "approved",
+     "cComment": ""
+    }
+   ]
+  }
+ ]
+}

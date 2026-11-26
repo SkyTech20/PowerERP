@@ -107,13 +107,3 @@ def test_company_profile_after_clear(admin):
     me = admin.get("/api/company").get_json()
     assert me["cName"] == "" and me["cProvince"] == "QC" and me["taxNumbers"] == []
     assert admin.put("/api/admin/company", json={"cName": "Neuve"}).get_json()["cName"] == "Neuve"
-
-
-def test_pastry_shop_customers(admin):
-    try:
-        admin.post("/api/reset", json={"scenario": "pastry"})
-        codes = {c["cCode"] for c in admin.get("/api/customers").get_json()["items"]}
-        assert codes == {"CAFE-PLATEAU", "TRAITEUR-ROYAL", "UNI-CAFE", "OTTAWA-DELI"}
-        assert admin.get("/api/company").get_json()["cName"] == "Pâtisserie Démo"
-    finally:
-        admin.post("/api/reset", json={"scenario": "manufacturing"})

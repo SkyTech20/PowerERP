@@ -79,6 +79,22 @@ class DataLifecycle:
     def snapshot(self) -> dict[str, Any]:
         return copy.deepcopy(self._snapshot)
 
+    def use_seed(self, data: dict[str, Any]) -> None:
+        """Seed these tables with these rows instead (e.g. the tables after the story of a demo scenario)."""
+        known = {key for _repo, key in self._repos}
+        for key, rows in data.items():
+            if key not in known:
+                raise KeyError(key)
+            self._snapshot[key] = copy.deepcopy(rows)
+
+    def export(self, keys: tuple[str, ...]) -> dict[str, Any]:
+        """The rows of these tables as they are now, in the shape of their seed (what use_seed takes back)."""
+        rows = {key: repo.all() for repo, key in self._repos if key in keys}
+        missing = set(keys) - set(rows)
+        if missing:
+            raise KeyError(sorted(missing))
+        return rows
+
     def replace_snapshot(self, snapshot: dict[str, Any]) -> None:
         self._snapshot = copy.deepcopy(snapshot)
 

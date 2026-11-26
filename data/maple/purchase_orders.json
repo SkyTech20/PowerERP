@@ -1,0 +1,426 @@
+{
+ "po_details": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "810101",
+   "ttPOheader": {
+    "cSupplierCode": "ACERI-EQ",
+    "cSupplierName": "Équipements Acéricoles Beauce",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-01",
+    "dSubTotal": "8900.00",
+    "dFreight": "0.00",
+    "dGST": "445.00",
+    "dPST": "887.78",
+    "dTotalAmount": "10232.78"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "CANDY-COOKER",
+     "cProductDesc": "Cuiseur à sucre 40 L",
+     "dQuantity": "1",
+     "dUnitCost": "8900.00",
+     "dSubTotal": "8900.00",
+     "dTotalAmount": "8900.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "810102",
+   "ttPOheader": {
+    "cSupplierCode": "GAGNON",
+    "cSupplierName": "Érablière Gagnon et fils",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-08",
+    "dSubTotal": "8095.60",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "8095.60"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "275",
+     "dUnitCost": "7.40",
+     "dSubTotal": "2035.00",
+     "dTotalAmount": "2035.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "268",
+     "dUnitCost": "7.40",
+     "dSubTotal": "1983.20",
+     "dTotalAmount": "1983.20"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "281",
+     "dUnitCost": "7.40",
+     "dSubTotal": "2079.40",
+     "dTotalAmount": "2079.40"
+    },
+    {
+     "cUnique": "4",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "270",
+     "dUnitCost": "7.40",
+     "dSubTotal": "1998.00",
+     "dTotalAmount": "1998.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "810103",
+   "ttPOheader": {
+    "cSupplierCode": "BOREAL",
+    "cSupplierName": "Emballages Boréal inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-08",
+    "dSubTotal": "4386.00",
+    "dFreight": "0.00",
+    "dGST": "219.30",
+    "dPST": "437.50",
+    "dTotalAmount": "5042.80"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "CAN-540",
+     "cProductDesc": "Canne de métal 540 ml",
+     "dQuantity": "3000",
+     "dUnitCost": "0.62",
+     "dSubTotal": "1860.00",
+     "dTotalAmount": "1860.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "BOTTLE-250",
+     "cProductDesc": "Bouteille de verre 250 ml",
+     "dQuantity": "1200",
+     "dUnitCost": "0.85",
+     "dSubTotal": "1020.00",
+     "dTotalAmount": "1020.00"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "CAP-28",
+     "cProductDesc": "Bouchon 28 mm",
+     "dQuantity": "1200",
+     "dUnitCost": "0.06",
+     "dSubTotal": "72.00",
+     "dTotalAmount": "72.00"
+    },
+    {
+     "cUnique": "4",
+     "cProductcode": "JAR-200",
+     "cProductDesc": "Pot de verre 200 g",
+     "dQuantity": "800",
+     "dUnitCost": "0.48",
+     "dSubTotal": "384.00",
+     "dTotalAmount": "384.00"
+    },
+    {
+     "cUnique": "5",
+     "cProductcode": "BOX-12",
+     "cProductDesc": "Boîte de 12 bonbons",
+     "dQuantity": "900",
+     "dUnitCost": "0.35",
+     "dSubTotal": "315.00",
+     "dTotalAmount": "315.00"
+    },
+    {
+     "cUnique": "6",
+     "cProductcode": "TRAY-250",
+     "cProductDesc": "Barquette 250 g",
+     "dQuantity": "700",
+     "dUnitCost": "0.30",
+     "dSubTotal": "210.00",
+     "dTotalAmount": "210.00"
+    },
+    {
+     "cUnique": "7",
+     "cProductcode": "LABEL",
+     "cProductDesc": "Étiquette imprimée",
+     "dQuantity": "8000",
+     "dUnitCost": "0.04",
+     "dSubTotal": "320.00",
+     "dTotalAmount": "320.00"
+    },
+    {
+     "cUnique": "8",
+     "cProductcode": "FILTER-PAPER",
+     "cProductDesc": "Papier filtre pour filtre-presse",
+     "dQuantity": "40",
+     "dUnitCost": "2.75",
+     "dSubTotal": "110.00",
+     "dTotalAmount": "110.00"
+    },
+    {
+     "cUnique": "9",
+     "cProductcode": "GLOVES",
+     "cProductDesc": "Gants jetables en nitrile (boîte de 100)",
+     "dQuantity": "10",
+     "dUnitCost": "9.50",
+     "dSubTotal": "95.00",
+     "dTotalAmount": "95.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "810104",
+   "ttPOheader": {
+    "cSupplierCode": "CANTONS",
+    "cSupplierName": "Érablière des Cantons inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-09-28",
+    "dSubTotal": "7887.35",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "7887.35"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "SYRUP-BULK-DRK",
+     "cProductDesc": "Sirop d'érable en vrac, foncé (baril)",
+     "dQuantity": "272",
+     "dUnitCost": "6.90",
+     "dSubTotal": "1876.80",
+     "dTotalAmount": "1876.80"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "SYRUP-BULK-DRK",
+     "cProductDesc": "Sirop d'érable en vrac, foncé (baril)",
+     "dQuantity": "266",
+     "dUnitCost": "6.90",
+     "dSubTotal": "1835.40",
+     "dTotalAmount": "1835.40"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "279",
+     "dUnitCost": "7.55",
+     "dSubTotal": "2106.45",
+     "dTotalAmount": "2106.45"
+    },
+    {
+     "cUnique": "4",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "274",
+     "dUnitCost": "7.55",
+     "dSubTotal": "2068.70",
+     "dTotalAmount": "2068.70"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "810105",
+   "ttPOheader": {
+    "cSupplierCode": "LAITERIE",
+    "cSupplierName": "Laiterie du Terroir inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-10-05",
+    "dSubTotal": "301.00",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "301.00"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "CREAM-35",
+     "cProductDesc": "Crème 35 %",
+     "dQuantity": "30",
+     "dUnitCost": "6.20",
+     "dSubTotal": "186.00",
+     "dTotalAmount": "186.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "BUTTER",
+     "cProductDesc": "Beurre non salé",
+     "dQuantity": "10",
+     "dUnitCost": "11.50",
+     "dSubTotal": "115.00",
+     "dTotalAmount": "115.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "810106",
+   "ttPOheader": {
+    "cSupplierCode": "TREMBLAY",
+    "cSupplierName": "Sucrerie Tremblay",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-10-26",
+    "dSubTotal": "6046.50",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "6046.50"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "280",
+     "dUnitCost": "7.25",
+     "dSubTotal": "2030.00",
+     "dTotalAmount": "2030.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "276",
+     "dUnitCost": "7.25",
+     "dSubTotal": "2001.00",
+     "dTotalAmount": "2001.00"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "278",
+     "dUnitCost": "7.25",
+     "dSubTotal": "2015.50",
+     "dTotalAmount": "2015.50"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "810107",
+   "ttPOheader": {
+    "cSupplierCode": "LAITERIE",
+    "cSupplierName": "Laiterie du Terroir inc.",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-09",
+    "dSubTotal": "301.00",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "301.00"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "CREAM-35",
+     "cProductDesc": "Crème 35 %",
+     "dQuantity": "30",
+     "dUnitCost": "6.20",
+     "dSubTotal": "186.00",
+     "dTotalAmount": "186.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "BUTTER",
+     "cProductDesc": "Beurre non salé",
+     "dQuantity": "10",
+     "dUnitCost": "11.50",
+     "dSubTotal": "115.00",
+     "dTotalAmount": "115.00"
+    }
+   ]
+  },
+  {
+   "COMPANY": "MA2",
+   "cPO": "810108",
+   "ttPOheader": {
+    "cSupplierCode": "GAGNON",
+    "cSupplierName": "Érablière Gagnon et fils",
+    "cBuyerCode": "Cassiano",
+    "cBuyerName": "Cassiano",
+    "cApplicantCode": "Cassiano",
+    "dOrderDate": "2026-11-23",
+    "dSubTotal": "8140.00",
+    "dFreight": "0.00",
+    "dGST": "0.00",
+    "dPST": "0.00",
+    "dTotalAmount": "8140.00"
+   },
+   "ttPOdetail": [
+    {
+     "cUnique": "1",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "275",
+     "dUnitCost": "7.40",
+     "dSubTotal": "2035.00",
+     "dTotalAmount": "2035.00"
+    },
+    {
+     "cUnique": "2",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "275",
+     "dUnitCost": "7.40",
+     "dSubTotal": "2035.00",
+     "dTotalAmount": "2035.00"
+    },
+    {
+     "cUnique": "3",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "275",
+     "dUnitCost": "7.40",
+     "dSubTotal": "2035.00",
+     "dTotalAmount": "2035.00"
+    },
+    {
+     "cUnique": "4",
+     "cProductcode": "SYRUP-BULK-AMB",
+     "cProductDesc": "Sirop d'érable en vrac, ambré (baril)",
+     "dQuantity": "275",
+     "dUnitCost": "7.40",
+     "dSubTotal": "2035.00",
+     "dTotalAmount": "2035.00"
+    }
+   ]
+  }
+ ],
+ "unbilled_po": [
+  {
+   "COMPANY": "MA2",
+   "cPO": "810108",
+   "dCreationDate": "2026-11-23",
+   "cSupplierName": "Érablière Gagnon et fils",
+   "cSupplierCode": "GAGNON"
+  }
+ ]
+}

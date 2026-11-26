@@ -50,8 +50,9 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     c.register("database_url", settings.init(database_url))
     audit.register(app, c)  # the audit trail (its hook runs after the commit of each request)
     auth.register(app, c)  # login, users, access control
-    # the scenario chosen when the demo data was last reset (dashboard), else ERP_SCENARIO
-    demo = DemoData.load(dataset, settings.get_setting("demo_scenario"))
+    # the scenario chosen when the demo data was last reset (System settings), else the one the database was
+    # seeded with (an upgrade never replaces the data with the new default scenario), else ERP_SCENARIO
+    demo = DemoData.load(dataset, settings.get_setting("demo_scenario") or seeded_scenario())
     _register_modules(app, c, demo)
     c.get("lookups").register("roles", auth.role_lookup(c.get("roles")))
     c.get("lifecycle").after_load(c.get("roles").load_demo)  # the example roles of the demo
@@ -62,6 +63,12 @@ def create_app(database_url: str | None = None, dataset: str | None = None) -> F
     c.get("lifecycle").scenarios(demo.scenario, SCENARIOS, lambda scenario: _switch(c, dataset, scenario))
     _seed_or_migrate(c, demo)
     return app
+
+
+def seeded_scenario() -> str:
+    """The scenario of the dataset the database was seeded with ("demo+history:manufacturing" -> manufacturing)."""
+    name = settings.get_setting("dataset") or ""
+    return name.rsplit(":", 1)[1] if ":" in name else ""
 
 
 def _register_modules(app: Flask, c: Container, demo: DemoData) -> None:
@@ -80,6 +87,7 @@ def _register_modules(app: Flask, c: Container, demo: DemoData) -> None:
     quality.register(app, c)  # lot status and nonconformances (step 5 of the SCOR / ISO plan)
     sales.register(app, c, demo.sales)  # customers and company profile (V1)
     reports.register(app, c)  # the supply chain indicators (step 7 of the SCOR / ISO plan)
+    c.get("lifecycle").use_seed(demo.story)  # the tables after the story of the scenario (data/maple/story.json)
 
 
 def demo_snapshot(dataset: str | None, scenario: str) -> dict:

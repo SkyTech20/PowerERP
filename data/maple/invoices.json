@@ -1,0 +1,350 @@
+[
+ {
+  "cNoFourn": "ACERI-EQ",
+  "cNoFacture": "EAB-4471",
+  "dDateFacture": "2026-09-15",
+  "cNoCommAch": "810101",
+  "cDevise": "CAD",
+  "cStatut": "Posted",
+  "cSource": "ERP",
+  "dTransport": "0.00",
+  "dTotalTPS": "445.00",
+  "dTotalTVP": "887.78",
+  "lines": [
+   {
+    "cCodeProduit": "CANDY-COOKER",
+    "cDescription": "Cuiseur à sucre 40 L",
+    "dQuantite": "1",
+    "dCoutUnitaire": "8900.00",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900101"
+   }
+  ]
+ },
+ {
+  "cNoFourn": "GAGNON",
+  "cNoFacture": "EGF-2611",
+  "dDateFacture": "2026-09-10",
+  "cNoCommAch": "810102",
+  "cDevise": "CAD",
+  "cStatut": "Posted",
+  "cSource": "ERP",
+  "dTransport": "0.00",
+  "dTotalTPS": "0.00",
+  "dTotalTVP": "0.00",
+  "lines": [
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "275",
+    "dCoutUnitaire": "7.40",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900102"
+   },
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "268",
+    "dCoutUnitaire": "7.40",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900102"
+   },
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "281",
+    "dCoutUnitaire": "7.40",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900102"
+   },
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "270",
+    "dCoutUnitaire": "7.40",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900102"
+   }
+  ]
+ },
+ {
+  "cNoFourn": "BOREAL",
+  "cNoFacture": "EB-30915",
+  "dDateFacture": "2026-09-12",
+  "cNoCommAch": "810103",
+  "cDevise": "CAD",
+  "cStatut": "Posted",
+  "cSource": "ERP",
+  "dTransport": "0.00",
+  "dTotalTPS": "219.30",
+  "dTotalTVP": "437.50",
+  "lines": [
+   {
+    "cCodeProduit": "CAN-540",
+    "cDescription": "Canne de métal 540 ml",
+    "dQuantite": "3000",
+    "dCoutUnitaire": "0.62",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   },
+   {
+    "cCodeProduit": "BOTTLE-250",
+    "cDescription": "Bouteille de verre 250 ml",
+    "dQuantite": "1200",
+    "dCoutUnitaire": "0.85",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   },
+   {
+    "cCodeProduit": "CAP-28",
+    "cDescription": "Bouchon 28 mm",
+    "dQuantite": "1200",
+    "dCoutUnitaire": "0.06",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   },
+   {
+    "cCodeProduit": "JAR-200",
+    "cDescription": "Pot de verre 200 g",
+    "dQuantite": "800",
+    "dCoutUnitaire": "0.48",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   },
+   {
+    "cCodeProduit": "BOX-12",
+    "cDescription": "Boîte de 12 bonbons",
+    "dQuantite": "900",
+    "dCoutUnitaire": "0.35",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   },
+   {
+    "cCodeProduit": "TRAY-250",
+    "cDescription": "Barquette 250 g",
+    "dQuantite": "700",
+    "dCoutUnitaire": "0.30",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   },
+   {
+    "cCodeProduit": "LABEL",
+    "cDescription": "Étiquette imprimée",
+    "dQuantite": "8000",
+    "dCoutUnitaire": "0.04",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   },
+   {
+    "cCodeProduit": "FILTER-PAPER",
+    "cDescription": "Papier filtre pour filtre-presse",
+    "dQuantite": "40",
+    "dCoutUnitaire": "2.75",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   },
+   {
+    "cCodeProduit": "GLOVES",
+    "cDescription": "Gants jetables en nitrile (boîte de 100)",
+    "dQuantite": "10",
+    "dCoutUnitaire": "9.50",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900103"
+   }
+  ]
+ },
+ {
+  "cNoFourn": "CANTONS",
+  "cNoFacture": "EDC-1187",
+  "dDateFacture": "2026-09-30",
+  "cNoCommAch": "810104",
+  "cDevise": "CAD",
+  "cStatut": "Posted",
+  "cSource": "ERP",
+  "dTransport": "0.00",
+  "dTotalTPS": "0.00",
+  "dTotalTVP": "0.00",
+  "lines": [
+   {
+    "cCodeProduit": "SYRUP-BULK-DRK",
+    "cDescription": "Sirop d'érable en vrac, foncé (baril)",
+    "dQuantite": "272",
+    "dCoutUnitaire": "6.90",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900104"
+   },
+   {
+    "cCodeProduit": "SYRUP-BULK-DRK",
+    "cDescription": "Sirop d'érable en vrac, foncé (baril)",
+    "dQuantite": "266",
+    "dCoutUnitaire": "6.90",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900104"
+   },
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "279",
+    "dCoutUnitaire": "7.55",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900104"
+   },
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "274",
+    "dCoutUnitaire": "7.55",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900104"
+   }
+  ]
+ },
+ {
+  "cNoFourn": "LAITERIE",
+  "cNoFacture": "LT-80213",
+  "dDateFacture": "2026-10-06",
+  "cNoCommAch": "810105",
+  "cDevise": "CAD",
+  "cStatut": "Posted",
+  "cSource": "ERP",
+  "dTransport": "0.00",
+  "dTotalTPS": "0.00",
+  "dTotalTVP": "0.00",
+  "lines": [
+   {
+    "cCodeProduit": "CREAM-35",
+    "cDescription": "Crème 35 %",
+    "dQuantite": "30",
+    "dCoutUnitaire": "6.20",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900105"
+   },
+   {
+    "cCodeProduit": "BUTTER",
+    "cDescription": "Beurre non salé",
+    "dQuantite": "10",
+    "dCoutUnitaire": "11.50",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900105"
+   }
+  ]
+ },
+ {
+  "cNoFourn": "TREMBLAY",
+  "cNoFacture": "ST-0577",
+  "dDateFacture": "2026-10-28",
+  "cNoCommAch": "810106",
+  "cDevise": "CAD",
+  "cStatut": "Posted",
+  "cSource": "ERP",
+  "dTransport": "0.00",
+  "dTotalTPS": "0.00",
+  "dTotalTVP": "0.00",
+  "lines": [
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "266",
+    "dCoutUnitaire": "7.25",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900106"
+   },
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "276",
+    "dCoutUnitaire": "7.25",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900106"
+   },
+   {
+    "cCodeProduit": "SYRUP-BULK-AMB",
+    "cDescription": "Sirop d'érable en vrac, ambré (baril)",
+    "dQuantite": "278",
+    "dCoutUnitaire": "7.25",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900106"
+   }
+  ]
+ },
+ {
+  "cNoFourn": "LAITERIE",
+  "cNoFacture": "LT-80977",
+  "dDateFacture": "2026-11-10",
+  "cNoCommAch": "810107",
+  "cDevise": "CAD",
+  "cStatut": "Posted",
+  "cSource": "ERP",
+  "dTransport": "0.00",
+  "dTotalTPS": "0.00",
+  "dTotalTVP": "0.00",
+  "lines": [
+   {
+    "cCodeProduit": "CREAM-35",
+    "cDescription": "Crème 35 %",
+    "dQuantite": "30",
+    "dCoutUnitaire": "6.20",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900107"
+   },
+   {
+    "cCodeProduit": "BUTTER",
+    "cDescription": "Beurre non salé",
+    "dQuantite": "10",
+    "dCoutUnitaire": "11.50",
+    "cGL": "",
+    "cCC1": "",
+    "cCC2": "",
+    "iNoReception": "900107"
+   }
+  ]
+ }
+]

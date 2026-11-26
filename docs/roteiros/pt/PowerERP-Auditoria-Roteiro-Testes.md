@@ -1,5 +1,7 @@
 # PowerERP — Auditoria e log de segurança: roteiro de testes
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar o passo 4 do plano SCOR / ISO: o **bloqueio de login** depois de tentativas erradas, o **desbloqueio** pelo administrador e a tela **Administration > Audit log** (quem fez o quê e quando: logins, bloqueios, recusas e cada alteração). Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Vale para qualquer cenário de demo.
 
 **Antes de começar:** entre como administrador (admin).

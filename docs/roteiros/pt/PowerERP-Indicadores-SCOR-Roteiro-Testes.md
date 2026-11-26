@@ -1,5 +1,7 @@
 # PowerERP — Indicadores da cadeia de suprimentos (SCOR): roteiro de testes
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar a tela **Reports > Supply chain indicators** (passo 7 do plano SCOR / ISO: atributos de desempenho SCOR, ISO 9001 9.1 monitoramento e medição). A tela não tem nada para digitar: cada número vem das faturas, recepções, ordens de produção, registros do chão de fábrica, não conformidades e movimentos de estoque do ERP. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** depois dos preparativos da seção 1, feitos no mesmo dia.
 
 **Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo.

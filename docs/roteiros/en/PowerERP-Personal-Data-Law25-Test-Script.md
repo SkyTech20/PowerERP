@@ -1,5 +1,7 @@
 # PowerERP — Personal data (Quebec Law 25): test script
 
+> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+
 Test script of the screen **Administration > Personal data** (item 9 of the SCOR / ISO comparison: Law 25 package). The screen finds what the ERP keeps on a person, exports the file to give them, anonymizes the person and keeps the privacy policy (person in charge, hosting, retention). Only the administrator role sees the screen.
 
 **Before you start:** sign in as the administrator, go to **Administration > System settings**, choose the **Pastry shop** scenario and restore the demo data.
