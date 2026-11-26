@@ -1,6 +1,6 @@
 # Lots and traceability {#prod.traceability}
 
-Where a lot comes from, where it went, and what a recall must reach. Pick a product and one of its lots: the screen follows the lot one step back (the supplier and, for a lot made here, the lots of the materials) and one step forward (the production orders that used it, the lots they made and the customers they were sold to), as the food traceability rules ask (SFCR, ISO 22000). Nothing is changed here: the screen only reads the stock movements, the receptions, the production orders and the sales invoices.
+Where a lot comes from, where it went, and what a recall must reach. Pick a product and one of its lots: the screen follows the lot one step back (the supplier and, for a lot made here, the lots of the materials) and one step forward (the production orders that used it, the lots they made and the customers they were sold to), as the food traceability rules ask (SFCR, ISO 22000). The screen reads the stock movements, the receptions, the production orders and the sales invoices; the only thing it can change is the status of the lots (to hold them during a recall).
 
 **Where:** **Production > Lots and traceability**.
 
@@ -22,6 +22,16 @@ The four figures at the top count what a recall of this lot must reach, for the 
 - **Open orders:** the released, in progress or completed orders that use or make one of these lots.
 
 The yellow box says the same in one sentence. A green box means nothing is left to recall.
+
+## Status of the lot and holding a recall {#prod.traceability.hold}
+
+Under the recall summary: the status of this lot (**Released**, **On hold**, **Quarantine**, **Rejected**, see [Lot status](#qa.lots)). The list of the lots reached and the stock on hand show the status of each lot too.
+
+While some of the lots reached are still released, the roles allowed to change the status of the lots (Quality > Lot status, **Change** permission) see the button **Put the n released lot(s) on hold**: write the reason and click it. Every lot the recall reaches that is still released is put on hold at once (the others keep their status), so that none of them is sold or used while you decide. Each change is kept in the history of its lot.
+
+### Reason {#prod.traceability.holdReason}
+
+Why the lots are held, e.g. *recall of the supplier lot L-2211*. Required; it is written in the history of each lot.
 
 ## Origin (one step back) {#prod.traceability.origin}
 

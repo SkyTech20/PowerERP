@@ -26,7 +26,7 @@ from typing import Any
 
 from powererp.core.errors import AppError
 from powererp.core.values import amount, number, quantity, text, today, unit_cost
-from powererp.modules.inventory.picking import location_usable, pick_order, received_dates
+from powererp.modules.inventory.picking import location_usable, pick_order, received_dates, shortage_code
 
 from .orders import EPS, ProductionOrderService
 
@@ -97,6 +97,7 @@ class ShopFloorService:
         stock = self.stock
         bal = {k: dict(v) for k, v in stock.balances().items()}
         received = received_dates(stock, {m["cComponent"].upper() for m, _q in wanted})
+        held = self.refs.get("held_lots", set)()
         rows: Rows = []
         problems: Rows = []
         for m, need in wanted:
@@ -110,7 +111,7 @@ class ShopFloorService:
                 return location_usable(stock, w, location)
 
             left = need
-            for b, free in pick_order(prod, wh["cCode"], bal, day, received, usable):
+            for b, free in pick_order(prod, wh["cCode"], bal, day, received, usable, held):
                 if left <= EPS:
                     break
                 take = round(min(free, left), 6)
@@ -123,7 +124,11 @@ class ShopFloorService:
                     rows.append(self._row(m, wh["cCode"], {}, left, kind, day))
                     continue
                 problems.append(
-                    self._problem(m, "insufficient_stock", f"{quantity(need)} > {quantity(need - left)} {m['cUOM']}")
+                    self._problem(
+                        m,
+                        shortage_code(prod, wh["cCode"], bal, held),
+                        f"{quantity(need)} > {quantity(need - left)} {m['cUOM']}",
+                    )
                 )
         return rows, problems
 

@@ -1,7 +1,9 @@
 /* PowerERP: Production > Lots and traceability. Where a lot comes from, where it went, and what a recall must reach. */
 import { $, api, enc, esc, fmtInt, lang, t, toast } from "../core.js";
 import { dl, qtyFmt } from "../resources/inventory.js";
+import { lotBadge } from "../resources/quality.js";
 import { canOpen } from "../router.js";
+import { can } from "../state.js";
 import { decorateScreen, helpButtonOf } from "../helpui.js";
 import { pageHead } from "../views.js";
 
@@ -89,6 +91,21 @@ export function traceabilityView(product0, lot0) {
       });
       $("#trLot").addEventListener("change", async (e) => { lot = e.target.value; await trace(); this.go(); });
       if ($("#trExport")) $("#trExport").addEventListener("click", () => toast(t("prod.tr.exporting"), "success"));
+      if ($("#trHold")) {
+        const hold = async () => {
+          const reason = $("#trHoldReason").value.trim();
+          if (!reason) { toast(t("qa.lots.reason.required"), "error"); $("#trHoldReason").focus(); return; }
+          const lots = data.recall.lots.filter((n) => n.cStatus === "released").map((n) => ({ cProduct: n.cProduct, cLot: n.cLot }));
+          try {
+            const res = await api("lot-status/hold", { method: "POST", body: { lots, cReason: reason } });
+            toast(t("prod.tr.held", { n: res.changed.length }), "success");
+            await trace();
+            this.render();
+          } catch (e) { toast(t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic"), "error"); }
+        };
+        $("#trHold").addEventListener("click", hold);
+        $("#trHoldReason").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); hold(); } });
+      }
     },
     go() {
       const path = "#/prod/traceability" + (product && lot ? `/${enc(product)}/${enc(lot)}` : "");
@@ -103,10 +120,19 @@ export function traceabilityView(product0, lot0) {
       const alert = customers || onHand || r.orders.length
         ? `<div class="alert warn"><b>${esc(t("prod.tr.recallTitle"))}</b> ${esc(t("prod.tr.recallText", { lots: r.lots.length, c: customers, s: onHand, o: r.orders.length }))}</div>`
         : `<div class="alert success">${esc(t("prod.tr.recallNone"))}</div>`;
-      const lotsReached = r.lots.length > 1 ? `<p class="help">${esc(t("prod.tr.lotsReached"))} ${r.lots.map((n) => `<b>${esc(n.cProduct)}</b> ${esc(n.cLot)}`).join(", ")}</p>` : "";
+      const lotsReached = r.lots.length > 1 ? `<p class="help">${esc(t("prod.tr.lotsReached"))} ${r.lots.map((n) => `<b>${esc(n.cProduct)}</b> ${esc(n.cLot)} ${lotBadge(n.cStatus)}`).join(", ")}</p>` : "";
+      // quality: the status of the lot, and holding every lot the recall reaches that is still released
+      const free = r.lots.filter((n) => n.cStatus === "released").length;
+      const lotsLink = can("qa.lots") ? ` · <a href="#/qa/lots">${esc(t("prod.tr.lotStatusLink"))}</a>` : "";
+      const holdBox = free && can("qa.lots", "change")
+        ? `<div class="tr-hold"><label>${esc(t("prod.tr.holdReason"))} <input type="text" id="trHoldReason" data-help-f="holdReason" maxlength="300" placeholder="${esc(t("prod.tr.holdReason.ph"))}"></label>
+          <button type="button" class="btn primary" id="trHold">${esc(t("prod.tr.hold", { n: free }))}</button></div>`
+        : "";
+      const statusCard = `<div class="card"><div class="card-body tr-status"><span>${esc(t("prod.tr.lotStatus"))} ${lotBadge(d.cStatus)}${lotsLink}</span>
+        <span class="help muted">${esc(t(free ? "prod.tr.hold.help" : "prod.tr.allHeld"))}</span>${holdBox}</div></div>`;
       const custRows = r.customers.map((c) => `<tr><td><b>${esc(c.cCustomer)}</b> ${esc(c.cCustomerName)}</td><td><span class="badge ${c.cType === "credit" ? "no" : ""}">${esc(t("prod.tr.k." + c.cType))}</span> ${esc(c.cInvoiceNo)}</td>
         <td>${esc(c.dDate)}</td><td>${esc(c.cProduct)} ${esc(dl(c, "cDesc"))}</td><td>${esc(c.cLot)}</td><td class="num">${qty(c.dQty, c.cUOM)}</td></tr>`);
-      const stockRows = r.stock.map((s) => `<tr><td>${esc(s.cProduct)} ${esc(dl(s, "cDesc"))}</td><td>${esc(s.cLot)}</td><td>${esc(s.dExpiry)}</td><td>${esc(s.cWarehouse)}</td><td>${esc(s.cLocation)}</td><td class="num">${qty(s.dQty, s.cUOM)}</td></tr>`);
+      const stockRows = r.stock.map((s) => `<tr><td>${esc(s.cProduct)} ${esc(dl(s, "cDesc"))}</td><td>${esc(s.cLot)} ${lotBadge(s.cStatus)}</td><td>${esc(s.dExpiry)}</td><td>${esc(s.cWarehouse)}</td><td>${esc(s.cLocation)}</td><td class="num">${qty(s.dQty, s.cUOM)}</td></tr>`);
       const orderRows = r.orders.map((o) => `<tr><td>${orderLink(o.iOrder)}</td><td>${status(o.cStatus)}</td><td>${esc(o.cProduct)}</td></tr>`);
       const moveRows = d.movements.map((m) => `<tr><td>${mvLink(m.iNo)}</td><td>${esc(m.dDate)}</td><td><span class="badge mv-${esc(m.cType)}">${esc(tOr("o.mv." + m.cType, m.cType))}</span></td>
         <td>${esc(docLabel(m))} ${esc(m.cDocNo)}</td><td>${esc(m.cWarehouse)}</td><td>${esc(m.cLocation)}</td>
@@ -115,6 +141,7 @@ export function traceabilityView(product0, lot0) {
       return `<div class="kpis tr-kpis">${kpi("prod.tr.kpi.lots", r.lots.length, "prod.tr.kpi.lots.meta")}${kpi("prod.tr.kpi.customers", customers, "prod.tr.kpi.customers.meta")}
           ${kpi("prod.tr.kpi.stock", onHand, "prod.tr.kpi.stock.meta")}${kpi("prod.tr.kpi.orders", r.orders.length, "prod.tr.kpi.orders.meta")}</div>
         ${alert}
+        ${statusCard}
         ${card("prod.tr.origin", "prod.tr.origin.help", originHtml(d.origin))}
         ${card("prod.tr.uses", "prod.tr.uses.help", d.uses.orders.length ? usesHtml(d.uses) : `<p class="help">${esc(t("prod.tr.noUses"))}</p>`)}
         ${card("prod.tr.customers", "prod.tr.customers.help", lotsReached + table([["prod.tr.customer"], ["prod.tr.document"], ["prod.tr.date"], ["prod.tr.product"], ["prod.tr.lot"], ["prod.tr.qty", "num"]], custRows, "prod.tr.noCustomers"))}

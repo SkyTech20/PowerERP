@@ -116,6 +116,7 @@ def _register_invoices(
         "tax_calculator": c.get("tax_calculator"),
         "stock": c.get("stock"),
         "unit_factor": c.get("unit_converter").factor,
+        "held_lots": lambda: c.get("lot_status").held() if "lot_status" in c else set(),  # quality: lots not released
         "invoice_start": lambda: c.get("company_profile").get().get("iInvoiceStart") or 0,
     }
     numbering = c.get("numbering")

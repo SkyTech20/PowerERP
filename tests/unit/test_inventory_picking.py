@@ -1,6 +1,6 @@
-"""Unit tests of the pick order of the stock (sales invoices and production orders): FEFO, FIFO, LIFO."""
+"""Unit tests of the pick order of the stock (sales invoices and production orders): FEFO, FIFO, LIFO, held lots."""
 
-from powererp.modules.inventory.picking import pick_order, pick_policy
+from powererp.modules.inventory.picking import held_quantity, pick_order, pick_policy, shortage_code
 
 
 def bal(lot, loc, qty, expiry="", reserved=0.0):
@@ -41,3 +41,14 @@ def test_fefo_fifo_lifo():
     assert lots({"cCode": "P1", "cPickPolicy": "LIFO", "lExpiryControl": True}) == ["L-OLD", "L-NEW"]
     # without expiry control, an expired date does not stop the stock
     assert "L-GONE" in lots({"cCode": "P1", "cPickPolicy": "FIFO"})
+
+
+def test_a_lot_not_released_never_goes_out():
+    prod = {"cCode": "P1", "lExpiryControl": True}
+    held = {("P1", "L-OLD")}
+    out = [b["cLot"] for b, _f in pick_order(prod, "W1", BAL, "2026-11-25", RECEIVED, lambda loc: True, held)]
+    assert "L-OLD" not in out and out[0] == "L-BLK"
+    assert held_quantity(prod, "W1", BAL, held) == 5
+    assert shortage_code(prod, "W1", BAL, held) == "insufficient_released"
+    assert shortage_code(prod, "W1", BAL, set()) == "insufficient_stock"
+    assert shortage_code(prod, "W1", BAL, {("P1", "L-RES")}) == "insufficient_stock"  # all reserved: nothing held back

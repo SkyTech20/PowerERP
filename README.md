@@ -133,6 +133,11 @@ Not done yet: supplier invoices do not move the stock, there is no FIFO costing,
 - **Audit trail and security log (done, step 4 of the SCOR / ISO plan)**: **Administration > Audit log** (administrator; `GET /api/audit`, `/api/audit/filters`, `/api/audit/export`):
   - table `audit_log`, written in its own transaction and never changed: security events (sign-in ok / failed with the reason, account locked, refused while locked, unlocked, sign-out, password changed / refused, access refused) and every change made through the API (an after_request hook: POST / PUT / PATCH / DELETE answered with a success, with the screen and action of its permission, the record and the body sent; passwords masked; calculations and checks, whose permission is a view, are left out);
   - lockout: 5 failed sign-ins in a row lock the account for 15 minutes (`ERP_LOCKOUT_ATTEMPTS`, 0 = off, `ERP_LOCKOUT_MINUTES`); Administration > Users shows *Locked* and **Unlock** (`POST /api/users/<id>/unlock`).
+- **Lot status and nonconformances (done, step 5 of the SCOR / ISO plan)**: a new **Quality** menu (permissions `qa.lots:view|change`, `qa.nc:view|create|edit|delete|close`):
+  - **Quality > Lot status** (`GET /api/lot-status?status=&product=&q=`, `GET|POST /api/lot-status/<product>/<lot>` `{cStatus, cReason}`, `POST /api/lot-status/hold` `{lots, cReason}`): released, on hold, quarantine or rejected, with the reason and the history of every change (tables `lot_status`, `lot_status_history`; a lot without a row is released);
+  - a lot that is not released is left out of the sales invoices and of the materials of the production orders (`inventory/picking.py`), and not counted as available; the error is `insufficient_released` when only held lots are left; it can still be moved, adjusted or counted;
+  - **Quality > Nonconformances** (`/api/nonconformances`, `POST /<no>/close`, `/<no>/reopen`): what was found (source, document, product, lot, quantity, severity), *Hold the lot* puts the lot on hold when saved; closing needs the disposition and the corrective action, and sets the lot (use as is: released, scrap / return to supplier: rejected, rework: stays on hold);
+  - **Production > Lots and traceability** shows the status of the lots and holds every released lot a recall reaches in one click.
 
 ## Sales
 

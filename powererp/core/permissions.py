@@ -187,6 +187,28 @@ SCREENS: tuple[Screen, ...] = (
         ),
         routes={"production.capability_resources": "view"},
     ),
+    # Quality
+    Screen(
+        "qa.lots",
+        "qa",
+        actions=("view", "change"),
+        routes={
+            "quality.lot_status_list": "view",
+            "quality.lot_status_item": "view",
+            "quality.lot_status_change": "change",
+            "quality.lot_status_hold": "change",
+        },
+    ),
+    Screen(
+        "qa.nc",
+        "qa",
+        actions=(*CRUD, "close"),
+        routes={
+            "quality.nonconformances": "crud",
+            "quality.nonconformance": "crud",
+            "quality.nonconformance_action": "close",
+        },
+    ),
     # Administration (the screens any role can be given; users, roles, backups and settings: ADMIN_ENDPOINTS)
     Screen(
         "admin.taxes", "admin", crud=("taxes.tax_codes", "taxes.tax_groups"), routes={"taxes.tax_group_calc": "view"}

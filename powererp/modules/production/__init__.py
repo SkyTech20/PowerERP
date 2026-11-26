@@ -355,6 +355,7 @@ def _register_orders(bp: Blueprint, c: Container) -> None:
         "recipes": c.get("recipes"),
         "current_recipe": c.get("recipe_flow").current,
         "stock": lambda: c.get("stock"),
+        "held_lots": lambda: c.get("lot_status").held() if "lot_status" in c else set(),  # quality: lots not released
     }
     numbering = c.get("numbering")
     orders = c.register(
@@ -452,6 +453,7 @@ def _register_traceability(bp: Blueprint, c: Container) -> None:
                 "receptions": lambda: c.get("receptions"),
                 "invoices": lambda: c.get("sales_invoices"),
                 "products": lambda: c.get("products").find,
+                "lot_status": lambda: c.get("lot_status"),
             }
         ),
     )

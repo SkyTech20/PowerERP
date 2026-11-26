@@ -461,3 +461,30 @@ tr.au-alert td { background: #fdf6f5; }
 .au-small { font-size: 11px; margin-top: 2px; }
 tr.au-detail pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12px; max-height: 320px; overflow: auto; }
 td.nowrap { white-space: nowrap; }
+
+/* Quality > Lot status and nonconformances */
+.badge.warn { background: #fff4e0; color: #9a5b00; }
+.kpis.qa-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+button.qa-kpi { text-align: left; cursor: pointer; font: inherit; border: 1px solid var(--border, #e2e8f0); }
+button.qa-kpi.on { outline: 2px solid var(--primary, #1f5fa8); }
+.qa-filters select { width: auto; max-width: 100%; }
+tr.qa-held td { background: #fffaf0; }
+tr.qa-detail td { background: #f8fafc; }
+.qa-small { font-size: 11px; margin-top: 2px; }
+.qa-change { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.qa-change label { display: flex; gap: 6px; align-items: center; }
+.qa-change select { width: auto; }
+.qa-change .qa-reason { flex: 1 1 320px; }
+.qa-change .qa-reason input { flex: 1; }
+.qa-change .help, .qa-change .alert { flex-basis: 100%; margin: 0; }
+.qa-history { margin: 0; padding-left: 18px; line-height: 1.9; }
+.tr-status { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.tr-hold { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex-basis: 100%; }
+.tr-hold label { display: flex; gap: 6px; align-items: center; flex: 1 1 320px; }
+.tr-hold input { flex: 1; }
+@media (max-width: 760px) { .kpis.qa-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+td.qa-text { white-space: normal; min-width: 110px; }
+td.qa-why { min-width: 200px; max-width: 340px; }
+.qa-actions { display: flex; flex-direction: column; gap: 4px; align-items: stretch; }
+.qa-actions .btn { text-align: center; white-space: nowrap; }
+tr.qa-detail td { white-space: normal; }

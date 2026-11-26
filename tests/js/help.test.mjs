@@ -13,7 +13,7 @@ const files = readdirSync(STATIC).filter((f) => /^i18n.*\.js$/.test(f)).sort((a,
 for (const f of files) vm.runInThisContext(readFileSync(join(STATIC, f), "utf-8"), { filename: f });
 globalThis.localStorage = { getItem: () => "en", setItem() {} };
 const H = await import(pathToFileURL(join(STATIC, "js", "screens", "help.js")).href);
-for (const f of ["erp.js", "inventory.js", "production.js", "sales.js"]) await import(pathToFileURL(join(STATIC, "js", "resources", f)).href);
+for (const f of ["erp.js", "inventory.js", "production.js", "quality.js", "sales.js"]) await import(pathToFileURL(join(STATIC, "js", "resources", f)).href);
 const { RES } = await import(pathToFileURL(join(STATIC, "js", "registry.js")).href);
 const { MENU } = await import(pathToFileURL(join(STATIC, "js", "menu.js")).href);
 const U = await import(pathToFileURL(join(STATIC, "js", "helpui.js")).href);
@@ -130,6 +130,7 @@ test("the inputs of the hand-written screens and panels are documented (data-hel
     ...helpF("screens/backups.js").map((f) => `admin.backups.${f}`),
     ...helpF("screens/traceability.js").map((f) => `prod.traceability.${f}`),
     ...helpF("screens/audit.js").map((f) => `admin.audit.${f}`),
+    ...helpF("screens/lots.js").map((f) => `qa.lots.${f}`),
     ...helpF("resources/inventory.js").map((f) => `admin.taxes.taxgroups.${f}`), // the "Try the group" panel
     // the panels of Production: the week preview is on three screens, the others on one
     ...helpF("resources/production.js").flatMap((f) => PROD_PANELS[f.split(".")[0]].map((s) => `${s}.${f}`)),
