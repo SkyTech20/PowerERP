@@ -1,67 +1,56 @@
 # PowerERP — Registros dos passos da receita no chão de fábrica: roteiro de testes
 
-> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+Roteiro para testar o card **Recipe steps** da tela **Production > Production orders** (passo 6 do plano SCOR / ISO, M4: ISO 9001 8.5.1, HACCP / ISO 22000 8.5.4 monitoramento dos pontos críticos de controle, registros de controle preventivo SFCR). O operador segue os passos da receita da ordem e registra cada um: o valor medido ou ajustado, ou "feito". Um valor fora dos limites é um desvio e pede a ação corretiva; num passo crítico o desvio **bloqueia** a ordem ou **segura o lote** em **Quality > Lot status**. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Maple products**.
 
-Roteiro para testar o card **Recipe steps** da tela **Production > Production orders** (passo 6 do plano SCOR / ISO, M4: ISO 9001 8.5.1, HACCP / ISO 22000 8.5.4 monitoramento dos pontos críticos de controle, registros de controle preventivo SFCR). O operador segue os passos da receita da ordem e registra cada um: o valor medido ou ajustado, ou "feito". Um valor fora dos limites é um desvio e pede a ação corretiva; num passo crítico o desvio **bloqueia** a ordem ou **segura o lote** em **Quality > Lot status**. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop**.
-
-**Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo.
+**Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Maple products** e restaure os dados de demo. O demo já traz as ordens 1 a 13: as novas começam na 14. A ordem 9 (bonbons cozidos a 118,5 °C) é um exemplo pronto de desvio que segurou o lote.
 
 ---
 
-## 1. A massa: um passo dentro dos limites
+## 1. O sirop padronizado: um passo dentro dos limites
 
 **Production > Production orders**, **New**
 
 | Passo | Esperado |
 |---|---|
-| DOUGH, 10 KG, **Save** | Ordem 1 em rascunho: **não** aparece o card *Recipe steps* (só depois de liberar). |
-| **Release** | Aparece o card **Recipe steps** acima do *Shop floor*: selo "Required steps: 0 of 1 done", os passos agrupados por operação (10 — ..., 20 — ..., 30 — ...), cada um com número, ícone, título e o selo *To do*. |
-| No passo *Add warm water*: campo *EAU (L)* com "min 3.4 · max 3.8" embaixo | Os limites da receita. |
-| Digitar 4 e sair do campo | Logo embaixo: selo vermelho "Above the maximum → warning" e "Write the corrective action." O campo *Corrective action* fica vermelho. Nada foi gravado. |
-| Trocar para 3,6 e sair do campo | Selo verde "✓ Within its limits". |
-| **Record** | "Step recorded." O passo fica *Done* (fundo verde) com a linha "✓ 3,6 L · admin · data e hora". O selo de cima: "Required steps: 1 of 1 done". Aparece "Record again" (fechado). |
-| Nos passos sem valor (*Weigh the flour*, *Mix for 15 minutes*, *Rest the dough*) **Mark as done** | Cada um fica *Done* com "✓ Done · admin · data". |
-| No *Shop floor*: **Issue**, *Quantity made* 9,8, **Report** | Ordem em andamento, lote MO1. |
+| SYRUP-STD, 100 KG, **Save** | Ordem 14 em rascunho: **não** aparece o card *Recipe steps* (só depois de liberar). |
+| **Release** | Aparece o card **Recipe steps** acima do *Shop floor*: selo "Required steps: 0 of 2 done", os passos agrupados por operação (10 — MPL-BLEND, 20 — MPL-FILTER), cada um com número, ícone, título e o selo *To do*. |
+| No passo *Syrup Brix (66 to 68.9)*: campo *BRIX (°Bx)* com "min 66 · max 68.9" embaixo | Os limites da receita. Selos *Critical · blocks the next step* e *Required*. |
+| Digitar 70 e sair do campo | Logo embaixo: selo vermelho "Above the maximum → blocks the next step" e "Write the corrective action." O campo *Corrective action* fica vermelho. Nada foi gravado. |
+| Trocar para 67,2 e sair do campo | Selo verde "✓ Within its limits". |
+| **Record** | "Step recorded." O passo fica *Done* (fundo verde) com a linha "✓ 67,2 °Bx · admin · data e hora". O selo de cima: "Required steps: 1 of 2 done". Aparece "Record again" (fechado). |
+| Nos passos sem valor (*Empty the barrels (scan the lot)*, *Filter for 60 minutes*) **Mark as done** | Cada um fica *Done* com "✓ Done · admin · data". |
 
-## 2. O pastel: passo crítico que bloqueia
+## 2. O gosto dos barris: passo crítico que bloqueia
 
-**New**: PASTEL-HAM-CHEESE, 40 UN, **Save**, **Release**, **Issue**
-
-| Passo | Esperado |
-|---|---|
-| Card *Recipe steps* | "Required steps: 0 of 2 done". O passo *Pastels well sealed* tem a borda vermelha e os selos *Critical · blocks the next step* e *Required*. |
-| *Pastels well sealed*: *Value* **No**, **Record** sem ação corretiva | Erro no próprio passo e no aviso: "The value is out of its limits: write the corrective action (Not confirmed)". O que foi escolhido continua no campo. |
-| *Corrective action* "3 pastéis abertos: fechados à mão", **Record** | O passo fica *Deviation* (fundo rosa) com "⛔ Out of its limits: record it again within its limits to go on". A linha do registro: "⚠ No · admin · data" e embaixo "Not confirmed → blocks the next step · Corrective action: 3 pastéis abertos...". No alto do card: selo "1 deviation(s)" e o quadro vermelho "Reporting and completing are blocked until these critical steps are recorded again within their limits: 10/30 Pastels well sealed". |
-| *Shop floor*: acima do botão **Report** | O mesmo aviso vermelho de bloqueio. |
-| **Report** (40) | Recusado: "A critical step is out of its limits: record it again within its limits first (10/30 Pastels well sealed)". Nada entra no estoque. |
-| *Pastels well sealed*: *Value* **Yes**, **Record** | O passo volta a *Done*; os dois registros ficam na lista (o mais novo em cima). O bloqueio some. |
-| **Report** (40) | Agora aceito: lote MO2. |
-| Card *History* | Uma linha *Deviation* com "10/30 Pastels well sealed: no (not_confirmed) — 3 pastéis abertos...". |
-
-## 3. A temperatura do óleo: desvio que só avisa
+Na mesma ordem 14:
 
 | Passo | Esperado |
 |---|---|
-| *Oil temperature* (TEMP_HUILE, 175 a 185 °C): 190, **Record** sem ação | Recusado: pede a ação corretiva. |
-| *Corrective action* "Fogo baixado, 180 °C após 2 min", **Record** | *Deviation*, mas sem bloqueio (não é crítico: "Above the maximum → warning"). O **Report** e o **Complete** continuam possíveis. Selo "2 deviation(s)". |
-| 180, **Record** | *Done*; o desvio continua listado no passo e contado no selo. |
+| *Taste and smell of the barrels are right* | Borda vermelha, selos *Critical · blocks the next step* e *Required*. |
+| *Value* **No**, **Record** sem ação corretiva | Erro no próprio passo e no aviso: "The value is out of its limits: write the corrective action (Not confirmed)". O que foi escolhido continua no campo. |
+| *Corrective action* "Baril 900106-2 : goût de bourgeon", **Record** | O passo fica *Deviation* (fundo rosa) com "⛔ Out of its limits: record it again within its limits to go on". No alto do card: selo "1 deviation(s)" e o quadro vermelho "Reporting and completing are blocked until these critical steps are recorded again within their limits: 10/20 Taste and smell of the barrels are right". |
+| *Shop floor*: **Issue**, depois *Quantity made* 100, **Report** | O **Issue** passa; o **Report** é recusado: "A critical step is out of its limits: record it again within its limits first (10/20 Taste and smell of the barrels are right)". Nada entra no estoque. |
+| *Taste and smell...*: *Value* **Yes**, **Record** | O passo volta a *Done*; os dois registros ficam na lista (o mais novo em cima). O bloqueio some. |
+| **Report** (100, *Location* TANK-01) | Aceito: lote MO14. |
+| Card *History* | Uma linha *Deviation* com "10/20 Taste and smell of the barrels are right: no (not_confirmed) — Baril 900106-2 : goût de bourgeon". |
 
-## 4. A carne moída: passo crítico que segura o lote
+## 3. O beurre d'érable: passo crítico que segura o lote
 
-**New**: GROUND-BEEF, 5 KG, **Save**, **Release**, **Issue**
+**New**: MAPLE-BUTTER-200, 100 UN, **Save**, **Release**, **Issue** (ordem 15)
 
 | Passo | Esperado |
 |---|---|
-| Passo *Core temperature* (TEMP_COEUR, min 71 °C, *Each lot*) | Selos *Critical · the lot is held* e *Required*; "Each lot" embaixo do título; campos *TEMP_COEUR (°C)*, *Lot* (vazio: o lote ainda não existe) e *Corrective action*. |
-| 65, *Corrective action* "Cozido mais 5 minutos, medir de novo", **Record** | *Deviation* "Below the minimum → the lot is held". Ainda não há lote: nada é segurado agora. |
-| *Shop floor*: **Report** (5) | Aceito (segurar o lote não bloqueia): lote MO3. |
-| **Quality > Lot status** | Quadro *On hold* 1: GROUND-BEEF MO3 *On hold*, motivo "Order 3, step 20/10 Core temperature: 65 °C", admin e a data. |
-| Voltar à ordem 3, *Core temperature*: **Record again**, 75, *Lot* MO3, **Record** | *Done* (1/1). O lote **continua** *On hold*: quem libera é a qualidade (**Change status** em *Lot status*, com o motivo). |
-| Em *Lot status*, MO3 **Change status** → *Released*, motivo "Recozido e medido 75 °C" | O lote volta a *Released*. Um novo **Report** do mesmo lote MO3 não o segura de novo. |
+| Passos *Cook to 112 °C* (TEMP_CUISSON, 111 a 113) e *Cool below 10 °C before whipping* (TEMP_REFROID, máximo 10) | Selos *Critical · the lot is held* e *Required*; "Each lot" embaixo do título; campos do valor, *Lot* (vazio: o lote ainda não existe) e *Corrective action*. |
+| *Cook to 112 °C*: 112,1, **Record** | *Done*. |
+| *Cool below 10 °C...*: 14, *Corrective action* "Bac de refroidissement trop plein ; refroidi de nouveau", **Record** | *Deviation* "Above the maximum → the lot is held". Ainda não há lote: nada é segurado agora, e não há bloqueio. |
+| *Shop floor*: **Report** (100) | Aceito (segurar o lote não bloqueia): lote MO15. |
+| **Quality > Lot status** | Quadro *On hold* 2: MAPLE-BUTTER-200 MO15 *On hold*, motivo "Order 15, step 20/10 Cool below 10 °C before whipping: 14 °C", admin e a data; e o MO9 dos bonbons do demo. |
+| Voltar à ordem 15, *Cool below 10 °C...*: **Record again**, 8, *Lot* MO15, **Record** | *Done*. O lote **continua** *On hold*: quem libera é a qualidade (**Change status** em *Lot status*, com o motivo). |
+| Em *Lot status*, MO15 **Change status** → *Released*, motivo "Refroidi à 8 °C, texture vérifiée" | O lote volta a *Released* e pode ser vendido. |
 
-## 5. Segunda assinatura e perfil exigido (cenário Manufacturing, opcional)
+## 4. Desvio que só avisa, segunda assinatura e perfil exigido (cenário Manufacturing, opcional)
 
-O demo da pastelaria não tem passo com segunda assinatura. Para testar: **Administration > System settings**, cenário **Manufacturing**, restaurar; **Administration > Users**, **New**: usuário *op1*, perfil USER, senha *Secret-123*.
+No demo de bordo todos os passos com valor são críticos, e nenhum pede segunda assinatura. Para testar: **Administration > System settings**, cenário **Manufacturing**, restaurar; **Administration > Users**, **New**: usuário *op1*, perfil USER, senha *Secret-123*.
 
 | Passo | Esperado |
 |---|---|
@@ -73,7 +62,7 @@ O demo da pastelaria não tem passo com segunda assinatura. Para testar: **Admin
 | *Dough temperature* 22, ação corretiva "Água morna", **Record** | *Deviation* (warning). O passo *Dough too cold: correction* passa a *To do*. |
 | Ordem de SUPP-ALU-01: passo *Release by quality control* (selo "Signed by: quality") com op1 | "This step must be signed by a user of the role (quality)". Com um administrador: aceito. |
 
-## 6. Permissões
+## 5. Permissões
 
 | Passo | Esperado |
 |---|---|

@@ -1,67 +1,56 @@
 # PowerERP — Indicadores da cadeia de suprimentos (SCOR): roteiro de testes
 
-> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+Roteiro para testar a tela **Reports > Supply chain indicators** (passo 7 do plano SCOR / ISO: atributos de desempenho SCOR, ISO 9001 9.1 monitoramento e medição). A tela não tem nada para digitar: cada número vem das faturas, recepções, ordens de produção, registros do chão de fábrica, não conformidades e movimentos de estoque do ERP. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Maple products** logo depois de restaurar o demo, com o período de 90 dias até 26/11/2026.
 
-Roteiro para testar a tela **Reports > Supply chain indicators** (passo 7 do plano SCOR / ISO: atributos de desempenho SCOR, ISO 9001 9.1 monitoramento e medição). A tela não tem nada para digitar: cada número vem das faturas, recepções, ordens de produção, registros do chão de fábrica, não conformidades e movimentos de estoque do ERP. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** depois dos preparativos da seção 1, feitos no mesmo dia.
-
-**Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo.
+**Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Maple products** e restaure os dados de demo. O demo traz outubro e novembro de 2026; se hoje for depois de 26/11/2026, coloque *From* 2026-08-29 e *To* 2026-11-26 para ver os mesmos números. Os lotes a vencer contam sempre a partir de hoje.
 
 ---
 
 ## 1. A tela com os dados do demo
 
-**Reports > Supply chain indicators** (item novo no menu **Reports**)
-
-| Passo | Esperado |
-|---|---|
-| Abrir a tela | Filtros no alto: *Period* "Last 90 days", *From* (hoje − 89 dias), *To* hoje, *Lots expiring within* "30 days", e "90 days" à direita. Quatro grupos de cartões: *Reliability* (6), *Responsiveness* (2), *Cost* (2), *Assets* (5). |
-| Cartões sem dados (ex.: *Perfect orders*, *Production on time*) | Um traço "—" e "No data in the period": o demo ainda não tem fatura postada nem ordem terminada. |
-| *Supplier fill rate* e *Receptions without a problem* | 100 %: tudo o que foi pedido foi recebido e nenhuma recepção tem não conformidade. |
-| *Stock value* | O mesmo total de **Inventory > Inventory valuation**. |
-| *Lots to expire* e o card *Lots to watch* | O ovo EGG 900103-1 (validade 2026-12-25) aparece quando faltam 30 dias ou menos; com o selo "N day(s) left". Trocar *Lots expiring within* para 7 days: some da lista se faltar mais de 7 dias. |
-| Card *Stock by product* | Os produtos em estoque; os que não saíram no período vêm primeiro com o selo *Not used*. |
-| **?** | Abre a ajuda da tela; os filtros têm seu **?**. |
-
-## 2. Preparar: vender, fabricar, achar um problema
-
-| Passo | Esperado |
-|---|---|
-| **Sales > Invoices**: abrir as faturas rascunho 1, 2 e 3 e **Post** em cada uma | Três faturas postadas. |
-| Na fatura 1 postada, **Credit note** e **Post** da nota de crédito | Uma nota de crédito que credita a fatura 1. |
-| **Production > Production orders**, **New**: DOUGH, 10 KG, *Start* 5 dias atrás, *Due* amanhã, **Save**, **Release**, **Issue** | Ordem em andamento. |
-| Card *Recipe steps*: *Add warm water* 3,6, **Record**; *Shop floor*: **Report** 9,8; **Complete**; **Close** | Ordem fechada no prazo, 9,8 de 10. |
-| **New**: PASTEL-HAM-CHEESE, 40 UN, *Start* 5 dias atrás, *Due* 2 dias atrás, **Save**, **Release**, **Issue** | Ordem em andamento. |
-| *Oil temperature* 190 com a ação corretiva "Fogo baixado", **Record**; depois 180, **Record**; **Report** 38; **Complete** | Ordem terminada com atraso, 38 de 40, um desvio. |
-| **Quality > Nonconformances**, **New**: *Found at* Reception, *Document* 900104, *Severity* Major, HAM 900104-1, "Temperatura alta na recepção", **Save** | NC aberta, lote HAM segurado. |
-
-## 3. Os indicadores depois
-
 **Reports > Supply chain indicators**
 
 | Passo | Esperado |
 |---|---|
-| *Perfect orders* | 66,7 %, "2 of 3 invoices" (a fatura 1 tem nota de crédito). |
-| *Production on time* | 50 %, "1 of 2 orders" (a ordem do pastel passou do prazo). |
-| *Production yield* | 95,6 %, "47.80 made of 50.00 ordered". |
-| *Receptions without a problem* | 83,3 %, "5 of 6 receptions" (a recepção 900104 tem a NC). |
-| *Steps right first time* | 66,7 %, "2 of 3 records" (o 190 °C). |
-| *Production cycle time* | Os dias entre o **Release** e o **Complete** (0,0 se foi no mesmo dia). |
-| *Time to close a nonconformance* | "—": nenhuma NC fechada ainda. Fechar a NC (decisão + ação corretiva) e voltar: aparecem os dias. |
-| *Production cost variance* | O % do custo real contra o estimado da ordem fechada (DOUGH). |
-| *Gross margin* | (vendas − custo) / vendas das faturas postadas, menos a nota de crédito. |
-| *Stock turns* e *Days of supply* | Agora com valor: o estoque saiu para as faturas e para as ordens. |
-| *Lots held back* | O valor do HAM 900104-1, "1 lot(s) on hold...". No card *Lots to watch*, em *Held back by quality*, HAM 900104-1 *On hold*. Clicar a linha abre o rastreio do lote. |
-| Card *Nonconformances* | "1 found in the period", "1 open today"; barras *Reception* 1 e *Major* 1. |
-| Card *Deviations on the shop floor* | A linha da ordem do pastel: *20/10 Oil temperature*, 190 °C *Above the maximum*, *warning*, "Fogo baixado", admin. Clicar abre a ordem. |
-| Card *Stock by product* | Os produtos usados agora têm *Used in the period* e *Days of supply*; os outros continuam *Not used*. |
-| Clicar o cartão *Gross margin* | Abre **Sales > Invoices**. Cada cartão abre a tela de onde vem. |
+| Abrir a tela | Filtros no alto: *Period* "Last 90 days", *From* (hoje − 89 dias), *To* hoje, *Lots expiring within* "30 days", e "90 days" à direita. Quatro grupos de cartões: *Reliability* (6), *Responsiveness* (2), *Cost* (2), *Assets* (5). Todos os cartões têm valor. |
+| *Perfect orders* | 88,9 %, "8 of 9 invoices" (a fatura 5 tem a nota de crédito NC-1). |
+| *Production on time* | 90,9 %, "10 of 11 orders" (a ordem 9 dos bonbons terminou um dia depois do prazo). |
+| *Production yield* | 99,7 %, "6,184.00 made of 6,200.00 ordered" (796 latas de 800 e 388 caixas de bala de 400). |
+| *Supplier fill rate* | 99,9 % (o barril T-118 veio com 266 kg de 280). |
+| *Receptions without a problem* | 85,7 %, "6 of 7 receptions" (a recepção 900106 tem a NC do barril T-140). |
+| *Steps right first time* | 97,6 %, "41 of 42 records" (o 118,5 °C da ordem 9). |
+| *Production cycle time* | 0,51 dia entre o **Release** e o **Complete**, na média das 11 ordens. |
+| *Time to close a nonconformance* | 3,21 dias (média das NCs 1 e 2). |
+| *Production cost variance* | 0,1 % do custo real contra o estimado das ordens fechadas. |
+| *Gross margin* | 43,3 %: (vendas − custo) / vendas das faturas postadas, menos a nota de crédito. |
+| *Stock value* | 11 966,96 $, o mesmo total de **Inventory > Inventory valuation**. |
+| *Stock turns* e *Days of supply* | 14,92 voltas e 24,47 dias. |
+| *Lots held back* | 681,20 $, "1 lot(s) on hold, in quarantine or rejected": os bonbons MO9. No card *Lots to watch*, em *Held back by quality*, MAPLE-CANDY-12 MO9 *On hold*. Clicar a linha abre o rastreio do lote. |
+| *Lots to expire* e o card *Lots to watch* | 160,30 $: a crème CREAM-35 900105-1 já vencida em 2026-10-27, a crème 900107-1 (2026-12-01) e o beurre BUTTER 900105-2 (2026-12-05), cada uma com o selo "N day(s) left" (a vencida com *Expired*). Trocar *Lots expiring within* para 7 days: o beurre some (se faltar mais de 7 dias). |
+| Card *Nonconformances* | "3 found in the period", "1 open today"; barras *Reception* 1, *Production* 1, *Customer* 1, *Major* 2, *Minor* 1. |
+| Card *Deviations on the shop floor* | A ordem 9: *10/20 Cook to 115 °C*, 118,5 °C *Above the maximum*, *the lot is held*, "Sonde du cuiseur 2 décalée...", admin. Clicar abre a ordem. |
+| Card *Stock by product* | Os produtos em estoque; os que não saíram no período vêm primeiro com o selo *Not used* (GLOVES). Os outros mostram *Used in the period* e *Days of supply*. |
+| **?** | Abre a ajuda da tela; os filtros têm seu **?**. |
 
-## 4. Período e permissões
+## 2. Mexer nos dados e ver os indicadores mudarem
 
 | Passo | Esperado |
 |---|---|
-| *Period* "Last 30 days", "Last 12 months", "This year" | As datas mudam e os números são recalculados. |
+| **Sales > Invoices**, rascunho de DISTRIB-CHAUDIERE, **Post** | Fatura 10 postada. |
+| **Quality > Nonconformances**, abrir a 3 (MAPLE-CANDY-12 MO9), *Disposition* Scrap, *Root cause* "Probe of cooker 2 out of calibration.", *Corrective action* "Probe recalibrated; check it every Monday.", **Close** | NC fechada; o lote MO9 passa a *Rejected*. |
+| **New**: *Found at* Reception, *Document* 900107, *Severity* Minor, CREAM-35 900107-1, *Quantity affected* 12, "Cream delivered at 7 °C, limit 4 °C", **Save** | NC 4 aberta, lote da crème segurado. |
+| Voltar para **Reports > Supply chain indicators** | *Perfect orders* 90 %, "9 of 10 invoices". *Receptions without a problem* 71,4 %, "5 of 7". *Gross margin* 42,6 %. *Stock value* 10 573,67 $ (saiu o custo da fatura 10); *Stock turns* 17,42 e *Days of supply* 20,96. |
+| *Time to close a nonconformance* | Sobe: a NC 3 ficou aberta desde 06/11 até hoje e entra na média. |
+| *Lots held back* | 755,60 $, 2 lotes: MO9 *Rejected* (rejeitado continua fora de venda) e a crème 900107-1 *On hold*. |
+| Card *Nonconformances* | "4 found in the period", "1 open today"; *Reception* 2, *Minor* 2. |
+| Clicar o cartão *Gross margin* | Abre **Sales > Invoices**. Cada cartão abre a tela de onde vem. |
+
+## 3. Período e permissões
+
+| Passo | Esperado |
+|---|---|
+| *Period* "Last 30 days", "Last 12 months", "This year" | As datas mudam e os números são recalculados. Com 30 dias, as ordens e faturas de outubro saem da conta. |
 | *From* depois de *To* | Aviso "The start of the period is after its end." |
-| Um período antigo (ex.: 2025) | Tudo "—" nos cartões do período; *Stock value* e os lotes continuam (são de hoje). |
+| Um período antigo (ex.: 2025) | Tudo "—" e "No data in the period" nos cartões do período; *Stock value* e os lotes continuam (são de hoje). |
 | **Administration > Roles**: um perfil sem *Supply chain indicators* | O item some do menu de quem tem esse perfil. Com *View*, aparece. Os perfis de demo PRODUCTION e WAREHOUSE já têm. |
 | Tela no celular (largura estreita) | Os cartões ficam um embaixo do outro, sem rolagem lateral. |

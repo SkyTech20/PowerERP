@@ -1,6 +1,5 @@
 # PowerERP — Audit trail and security log: test script
 
-> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
 
 Script to test step 4 of the SCOR / ISO plan: the **lockout** after wrong passwords, the **unlock** by the administrator and the **Administration > Audit log** screen (who did what and when: sign-ins, lockouts, refusals and every change). The screen labels are in English, as the ERP shows them with the **EN** button. Any demo scenario will do.
 
@@ -13,7 +12,7 @@ Script to test step 4 of the SCOR / ISO plan: the **lockout** after wrong passwo
 | Step | Expected |
 |---|---|
 | **Administration > Users & security**, **New**: *Username* marie, *Full name* Marie Tremblay, *Role* SALES, *New password* secret1, **Save** | User created. The list has the new *Locked* column (empty). |
-| **Production > Production orders**, **New**: DOUGH (or PAIN-BL-675 in the other demo), **Save**, **Release** | Order released. It will show in the log. |
+| **Production > Production orders**, **New**: SYRUP-STD, 100 KG (or PAIN-BL-675 in the Manufacturing demo), **Save**, **Release** | Order released. It will show in the log. |
 | **Sign out** | Back to the sign-in screen. |
 
 ## 2. Lockout after 5 wrong passwords

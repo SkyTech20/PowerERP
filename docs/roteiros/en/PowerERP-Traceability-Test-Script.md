@@ -1,80 +1,83 @@
 # PowerERP — Lots and traceability: test script
 
-> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+Script to test the **Production > Lots and traceability** screen (step 3 of the SCOR / ISO plan): from a lot, see where it comes from (supplier, supplier lot, purchase order; for a lot made here, the lots of the materials), where it went (production orders, lots made from it, customers), what a recall must reach, and export it all to Excel. The screen labels are in English, as the ERP shows them with the **EN** button. The expected values are those of the **Maple products** scenario right after restoring the demo.
 
-Script to test the **Production > Lots and traceability** screen (step 3 of the SCOR / ISO plan): from a lot, see where it comes from (supplier, supplier lot, purchase order; for a lot made here, the lots of the materials), where it went (production orders, lots made from it, customers), what a recall must reach, and export it all to Excel. The screen labels are in English, as the ERP shows them with the **EN** button. The expected values are those of the **Pastry shop** scenario after the preparation of section 1.
-
-**Before you start:** log in as the administrator, go to **Administration > System settings**, pick the **Pastry shop** scenario and restore the demo data.
+**Before you start:** log in as the administrator, go to **Administration > System settings**, pick the **Maple products** scenario and restore the demo data. The demo already has October and November 2026 done (barrels received, orders closed, invoices posted), so there is nothing to prepare.
 
 ---
 
-## 1. Prepare: make and sell
-
-| Step | Expected |
-|---|---|
-| **Production > Production orders**, **New**: DOUGH, 10 KG, **Save**, **Release** | Order 1 released. |
-| Card *Shop floor*: **Issue**; then *Quantity made* 9.8 and **Report** | Order 1 *In progress*, lot made MO1 (9.8 KG). |
-| **New**: PASTEL-HAM-CHEESE, 40 UN, **Save**, **Release**, **Issue**, *Quantity made* 40, **Report** | Order 2 *In progress*. Under *Lots used*: DOUGH MO1 2.4 KG, HAM 900104-1 1.6 KG, CHEESE 900104-2 1.6 KG. Lot made MO2 (40 UN). |
-| **Sales > Invoices**, **New**: CAFE-PLATEAU, PASTEL-HAM-CHEESE 100 UN, **Save**, **Post** | Invoice 1. The stock goes out FEFO: 45 from HAM-CHEESE-20261118, 45 from HAM-CHEESE-20261119 and 10 from MO2. |
-| **New**: TRAITEUR-ROYAL, PASTEL-HAM-CHEESE 15 UN, **Save**, **Post** | Invoice 2, the 15 come from MO2. |
-
-## 2. The screen
+## 1. The screen
 
 **Production > Lots and traceability**
 
 | Step | Expected |
 |---|---|
-| Open the screen | Lists *Product* and *Lot* and the message "Pick a product and a lot to see its trace." The *Lot* list is disabled until a product is picked. |
-| Open the *Product* list | Only products with a lot in the stock: BEEF-RAW, CHEESE, CHICKEN-RAW, DOUGH, EGG, HAM, PASTEL-... Products without lots, like FLOUR, are not listed. |
-| Pick HAM | It has a single lot, so it is picked already: 900104-1 — 2027-01-11 · 13.4. The trace shows at once. The address becomes `#/prod/traceability/HAM/900104-1` (it can be kept or sent). |
+| Open the screen | Lists *Product* and *Lot* and the message "Pick a product and a lot to see its trace." The *Lot* list stays disabled until a product is picked. |
+| Open the *Product* list | Only products kept by lot: BUTTER, CREAM-35, MAPLE-BUTTER-200, MAPLE-CANDY-12, MAPLE-FUDGE-250, MAPLE-SYRUP-540, SYRUP-BULK-AMB, SYRUP-STD... The packaging (CAN-540, BOX-12, LABEL) is not there. |
+| Pick MAPLE-SYRUP-540 | *Lot* list: MO2 — 2028-10-01 · 0 and MO8 — 2028-11-02 · 236 (expiry and quantity on hand). |
+| Pick MO8 | The trace shows at once. The address becomes `#/prod/traceability/MAPLE-SYRUP-540/MO8` (it can be bookmarked or sent). |
 | **?** | Opens the help of the screen; each field has its own **?**. |
 
-## 3. One step back and one step forward (HAM 900104-1)
+## 2. Backward: the lot of cans MO8
 
-| What to look at | Expected |
+| What to see | Expected |
 |---|---|
-| The 4 figures at the top | *Lots reached* 2, *Customers* 2, *Stock lines* 2, *Open orders* 1. |
-| Yellow box | "For a recall: 2 lot(s) reached, 2 customer(s) to call, 2 stock line(s) to put on hold and 1 open order(s) to check." |
-| Card *Origin* | "Received 2026-11-12 · Reception 900104 · supplier DELIQC — Distribution Fromages et Charcuteries QC · supplier lot DEL-261112-1 · PO 800104 · 15 KG". The link opens the reception. |
-| Card *Uses* | Order 2 *In progress* used 1.6 KG → made 40 UN: PASTEL-HAM-CHEESE lot MO2. The link opens the order. |
-| Card *Customers* | "Lots reached: HAM 900104-1, PASTEL-HAM-CHEESE MO2". CAFE-PLATEAU, *Invoice* 1, MO2, 10 UN; TRAITEUR-ROYAL, *Invoice* 2, MO2, 15 UN. |
-| Card *Stock on hand* | HAM 900104-1 13.4 KG in COLD-01; PASTEL-HAM-CHEESE MO2 15 UN in REC. |
-| Card *Open production orders* | Order 2 *In progress*. |
-| Card *Stock movements* | *Receipt* of Reception 900104 (15) and *Issue* Production 2 (1.6). The number opens the movement. |
+| The 4 figures on top | *Lots reached* 1, *Customers* 3, *Stock lines* 1, *Open orders* 0. |
+| Yellow box | "For a recall: 1 lot(s) reached, 3 customer(s) to call, 1 stock line(s) to put on hold and 0 open order(s) to check." |
+| Card *Origin* | "Made 2026-11-03 · Order 8 *Closed* · 1000 UN". Under it, the two lots of standardized syrup used: SYRUP-STD **MO1** (245 KG, made by Order 1) and **MO7** (475 KG, Order 7). |
+| Open MO1 inside the origin | Barrels SYRUP-BULK-AMB 900102-1, 900102-2, 900102-3 (GAGNON, producer lots B-0412, B-0418, B-0425) and 900104-3 (CANTONS, C-2101). Each shows "Received ... · Reception 900102 (or 900104) · supplier ... · supplier lot ... · PO ...". |
+| Open MO7 | Barrels 900102-3 and 900102-4 (GAGNON), 900104-4 (CANTONS, C-2124) and 900106-1 (TREMBLAY, T-118). Barrel T-140 (900106-3), returned for its "bourgeon" taste, does **not** appear. |
+| Card *Uses* | "No production order used this lot." (a can is a finished product). |
+| Card *Customers* | DISTRIB-CHAUDIERE *Invoice* 6, 364 UN; LAURENTIAN-HOTELS *Invoice* 8, 200 UN; EPICERIE-STDENIS *Invoice* 9, 200 UN. |
+| Card *Stock on hand* | MAPLE-SYRUP-540 MO8, 236 UN in FG-06. |
+| Card *Stock movements* | *Receipt* Production 8 (1000) and the issues of invoices 6 (364), 8 (200) and 9 (200). The number opens the movement. |
 
-## 4. Backwards (lot made MO2)
+## 3. Forward: one barrel down to the customers (SYRUP-BULK-AMB 900102-1)
+
+| What to see | Expected |
+|---|---|
+| *Product* SYRUP-BULK-AMB | *Lot* list with the barrels; the ones used up show 0 on hand (900102-1 — 2028-03-23 · 0). 900102-4 has 95 and 900106-2 has 276. |
+| Card *Origin* of 900102-1 | "Received 2026-09-10 · Reception 900102 · supplier GAGNON — Érablière Gagnon et fils · supplier lot B-0412 / récolte 2026-03-24 · PO 810102 · 275 KG". The link opens the reception. |
+| Card *Uses* | Order 1 *Closed* used 275 KG → made 1000 KG: SYRUP-STD MO1, used by orders 2 (cans MO2), 3 (butter MO3), 4 (candy MO4), 5 (fudge MO5) and 8 (cans MO8). Each link opens the order. |
+| Figures on top | *Lots reached* 7, *Customers* 4, *Stock lines* 2, *Open orders* 0. |
+| *Lots reached* (line under the yellow box) | SYRUP-BULK-AMB 900102-1, SYRUP-STD MO1, MAPLE-SYRUP-540 MO2, MAPLE-BUTTER-200 MO3, MAPLE-CANDY-12 MO4, MAPLE-FUDGE-250 MO5, MAPLE-SYRUP-540 MO8, all *Released*. |
+| Card *Customers* | The 4 customers of the demo, with every invoice from 1 to 9 that took those lots. |
+| Card *Stock on hand* | MAPLE-CANDY-12 MO4 22 UN in FG-03 and MAPLE-SYRUP-540 MO8 236 UN in FG-06. |
+| Card *Stock movements* | *Receipt* Reception 900102 (275, BAR-01) and *Issue* Production 1 (275). |
+
+The button that holds the lots of the recall is in the quality test script.
+
+## 4. Another example: maple fudge MO5 (with cream and butter)
 
 | Step | Expected |
 |---|---|
-| *Product* PASTEL-HAM-CHEESE, *Lot* MO2 | The lots of the 18th and 19th show 0 on hand; MO2 shows 15. |
-| Card *Origin* | "Made 2026-11-25 · Order 2 · 40 UN". Below, each lot used: DOUGH MO1 (made by Order 1), HAM 900104-1 and CHEESE 900104-2, each down to its reception and supplier lot (DEL-261112-1, DEL-261112-2). |
-| Card *Uses* | "No production order used this lot." |
-| Figures at the top | *Lots reached* 1, *Customers* 2, *Stock lines* 1, *Open orders* 1. |
-| Card *Stock movements* | *Receipt* Production 2 (40), *Issue* Invoice 1 (10), *Issue* Invoice 2 (15). |
+| *Product* MAPLE-FUDGE-250, *Lot* MO5 | *Origin*: "Made 2026-10-08 · Order 5 · 300 UN", with SYRUP-STD MO1 (and its barrels), CREAM-35 900105-1 (LAITERIE, LT-80213-1) and BUTTER 900105-2 (LAITERIE, LT-80213-2). |
+| Card *Customers* | BOUTIQUE-VQ (invoices 2 and 7), DISTRIB-CHAUDIERE (3) and EPICERIE-STDENIS (5): *Customers* 3. Credit note NC-1 is not listed, because it was a price credit only (nothing came back to stock). |
+| Figures | MO5 has no stock left: *Stock lines* 0. |
 
-## 5. Credit note
+## 5. A credit note that brings stock back
 
 | Step | Expected |
 |---|---|
-| **Sales > Invoices**, invoice 2, **Credit note**, keep 5 UN with *Return* checked, **Save**, **Post** | Credit note NC-1; 5 UN go back into MO2. |
-| Back to MO2 | Under *Customers*, a new line TRAITEUR-ROYAL *Credit note* NC-1 with -5 UN. *Stock on hand*: MO2 20 UN. *Customers* stays 2 (TRAITEUR-ROYAL still holds 10). |
+| **Sales > Invoices**, invoice 8 (LAURENTIAN-HOTELS), **Credit note**: keep only MAPLE-SYRUP-540 with qty 4 and *Return* checked, **Save**, **Post** | Credit note NC-2, total 39.60. The 4 cans go back to MO8 in FG-06. |
+| Back to MAPLE-SYRUP-540 MO8 | In *Customers*, a new line LAURENTIAN-HOTELS *Credit note* NC-2 with -4 UN. *Stock on hand*: MO8 240 UN. *Customers* is still 3. *Stock movements*: a new adjustment ADJ +4, SO NC-2. |
 
 ## 6. Export to Excel
 
 | Step | Expected |
 |---|---|
-| **Export to Excel** (HAM 900104-1) | Downloads `trace-HAM-900104-1.xlsx` and the message "The spreadsheet is being downloaded." |
+| **Export to Excel** (MAPLE-SYRUP-540 MO8) | Downloads `trace-MAPLE-SYRUP-540-MO8.xlsx` and the message "The spreadsheet is being downloaded." |
 | Open the file | Sheets *Summary*, *Origin*, *Uses*, *Customers*, *Stock*, *Movements*, with the same data as the screen; the first row bold and frozen. |
-| **FR** button and export again | The file in French: sheets *Résumé*, *Origine*, *Utilisations*, *Clients*, *Stock*, *Mouvements*. |
+| **FR** button and export again | File in French: sheets *Résumé*, *Origine*, *Utilisations*, *Clients*, *Stock*, *Mouvements*. |
 
 ## 7. Access and refusals
 
 | What to do | Expected |
 |---|---|
 | A role without *Lots and traceability* (Administration > Roles) | The menu entry is gone; through the API `/api/traceability` answers 403. |
-| The demo PRODUCTION role | Sees the screen (read only: the screen never changes anything). |
-| Through the API, a lot that does not exist: `/api/traceability?product=HAM&lot=XYZ` | 404 "This lot is not in the stock of this product." |
-| A material without a lot (FLOUR) | Not shown in the origin of DOUGH MO1: only materials kept by lot are traced. |
+| The demo PRODUCTION role | Sees the screen (the trace itself never changes anything). |
+| Through the API, a lot that does not exist: `/api/traceability?product=SYRUP-BULK-AMB&lot=XYZ` | 404 "This lot is not in the stock of this product." |
+| A material without a lot (CAN-540, LABEL) | Not shown in the origin of the cans MO8: only materials kept by lot are traced. |
 | Phone (narrow screen) | The figures go on 2 columns and nothing runs off the screen. |
 
 ## 8. Help
