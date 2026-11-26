@@ -105,3 +105,47 @@ def test_costing_strategies():
     assert isinstance(costing_of({"cCostMethod": "std"}), StandardCosting)
     assert costing_of({"cCostMethod": "std", "dStdCost": "9", "dAvgCost": "3"}).unit_cost({"dStdCost": "9"}) == 9
     assert costing_of({"cCostMethod": "avg", "dAvgCost": "3"}).unit_cost({"dAvgCost": "3"}) == 3
+
+
+def test_stock_card_of_a_line(svc):
+    """The stock card: the movements of one product + warehouse + location + lot, with in, out and the balance."""
+    svc.products_repo.get("P1")["lLotControl"] = True
+    move(svc, dQty="10", dUnitCost="2", cLot="L1", dDate="2026-10-01", cDocType="REC", cDocNo="R1")
+    move(svc, dQty="5", cProduct="P2", dDate="2026-10-02")  # another product in the same place: not on the card
+    move(svc, cType="OUT", dQty="3", cLot="L1", dDate="2026-10-05", cDocType="SO", cDocNo="F-9", cReason="CUST")
+    move(svc, cType="RSV", dQty="2", cLot="L1", dDate="2026-10-06")
+    move(svc, cType="TRF", dQty="1", cLot="L1", cWhTo="W1", cLocTo="B-1", dDate="2026-10-07")
+    move(svc, dQty="1", cLot="L1", dDate="2026-09-30")  # back-dated: first on the card
+    svc.document_ids["SO"] = lambda: {"F-9": 42}
+
+    card = svc.statement("p1", "w1", "a-1", "l1")
+    assert card["cProduct"] == "P1" and card["cLocation"] == "A-1"
+    got = [(m["dDate"], m["cType"], m["dQtyIn"], m["dQtyOut"], m["dQtyReserved"], m["dBalance"]) for m in card["items"]]
+    assert got == [
+        ("2026-09-30", "IN", "1", "", "", "1"),
+        ("2026-10-01", "IN", "10", "", "", "11"),
+        ("2026-10-05", "OUT", "", "3", "", "8"),
+        ("2026-10-06", "RSV", "", "", "2", "8"),
+        ("2026-10-07", "TRF", "", "1", "", "7"),
+    ]
+    assert (card["dClosing"], card["dQtyOnHand"], card["dQtyReserved"], card["dQtyAvailable"]) == ("7", "7", "2", "5")
+    sale = card["items"][2]
+    assert (sale["cDocNo"], sale["iDocId"], sale["cReason"]) == ("F-9", 42, "CUST")
+    assert card["items"][1]["iDocId"] == ""  # no link known for a reception number: the screen opens it by number
+    assert card["items"][4]["cTo"] == "W1 / B-1"
+
+    # the place the transfer went to has its own card
+    dest = svc.statement("P1", "W1", "B-1", "L1")
+    assert [(m["cType"], m["dQtyIn"], m["dBalance"], m["cFrom"]) for m in dest["items"]] == [
+        ("TRF", "1", "1", "W1 / A-1")
+    ]
+
+    # a period: the movements before it make the opening balance
+    part = svc.statement("P1", "W1", "A-1", "L1", date_from="2026-10-02", date_to="2026-10-05")
+    assert (part["dOpening"], [m["dBalance"] for m in part["items"]], part["dClosing"]) == ("11", ["8"], "8")
+    empty = svc.statement("P1", "W1", "A-1", "L1", date_from="2026-12-01")
+    assert (empty["items"], empty["dOpening"], empty["dClosing"]) == ([], "7", "7")
+
+    with pytest.raises(AppError) as e:
+        svc.statement("NOPE", "W1")
+    assert e.value.status == 404

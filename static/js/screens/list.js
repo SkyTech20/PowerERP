@@ -68,7 +68,8 @@ export function listView(key) {
         if (st.sort === f) st.dir = st.dir === "asc" ? "desc" : "asc"; else { st.sort = f; st.dir = "asc"; }
         reload();
       }));
-      $$("tr[data-href]").forEach((tr) => { if (tr.dataset.href) tr.addEventListener("click", () => { location.hash = "#" + tr.dataset.href; }); });
+      // a link or button inside the line (e.g. the product of a stock line) does its own thing
+      $$("tr[data-href]").forEach((tr) => { if (tr.dataset.href) tr.addEventListener("click", (e) => { if (!e.target.closest("a, button, input")) location.hash = "#" + tr.dataset.href; }); });
       $$("[data-list-action]").forEach((b) => b.addEventListener("click", async () => {
         const a = R.listActions.find((x) => x.id === b.dataset.listAction);
         b.disabled = true;

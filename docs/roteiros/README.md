@@ -5,6 +5,7 @@ Step-by-step scripts to test each module in the demo, in Portuguese (`pt/`) and 
 | Module | Português | English |
 |---|---|---|
 | Sales (V1–V6) | [pt/PowerERP-Vendas-Roteiro-Testes.md](pt/PowerERP-Vendas-Roteiro-Testes.md) | [en/PowerERP-Sales-Test-Script.md](en/PowerERP-Sales-Test-Script.md) |
+| Stock card (movements of a Stock on hand line) | [pt/PowerERP-Extrato-Estoque-Roteiro-Testes.md](pt/PowerERP-Extrato-Estoque-Roteiro-Testes.md) | [en/PowerERP-Stock-Card-Test-Script.md](en/PowerERP-Stock-Card-Test-Script.md) |
 | Receptions into the stock | [pt/PowerERP-Recepcao-Estoque-Roteiro-Testes.md](pt/PowerERP-Recepcao-Estoque-Roteiro-Testes.md) | [en/PowerERP-Reception-Stock-Test-Script.md](en/PowerERP-Reception-Stock-Test-Script.md) |
 | Production orders (M3a, M3b) | [pt/PowerERP-Ordens-Producao-Roteiro-Testes.md](pt/PowerERP-Ordens-Producao-Roteiro-Testes.md) | [en/PowerERP-Production-Orders-Test-Script.md](en/PowerERP-Production-Orders-Test-Script.md) |
 | Lots and traceability (recall) | [pt/PowerERP-Rastreabilidade-Roteiro-Testes.md](pt/PowerERP-Rastreabilidade-Roteiro-Testes.md) | [en/PowerERP-Traceability-Test-Script.md](en/PowerERP-Traceability-Test-Script.md) |

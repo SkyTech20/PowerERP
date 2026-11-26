@@ -125,6 +125,11 @@ def _register_invoices(
         SalesInvoiceService(store("sales_invoices"), refs, numbering, current_username, c.get("references")),
     )
 
+    # The stock card links a sales movement (its document number is the invoice / credit note number) to its invoice
+    c.get("stock").document_ids["SO"] = lambda: {
+        i["cInvoiceNo"]: i["iNo"] for i in invoices.repo.all(lines=False) if i.get("cInvoiceNo")
+    }
+
     @bp.route("/api/sales-invoices", methods=["GET", "POST"])
     def sales_invoices():
         if request.method == "GET":

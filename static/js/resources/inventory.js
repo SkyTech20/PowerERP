@@ -1,7 +1,7 @@
 /* PowerERP: Products, taxes and inventory: list / form definitions. */
 import { $, CURRENCIES, api, enc, esc, fmtDateTime, lang, money, num, numOnly, statusBadge, t, yesNo } from "../core.js";
 import { RES } from "../registry.js";
-import { route } from "../router.js";
+import { canOpen, route } from "../router.js";
 import { setPrefill } from "../state.js";
 
 // ------------------------------------------------------------------ Products, taxes and inventory
@@ -13,6 +13,9 @@ export const qtyFmt = (v) => (v === "" || v == null ? "" : new Intl.NumberFormat
 export const optBadge = (prefix, cls) => (v) => (v ? `<span class="badge ${cls ? cls(v) : ""}">${esc(t(prefix + v))}</span>` : "");
 export const descCol = (base) => ({ f: base + "FR", l: "f.cDescription", wrap: true, fmt: (v, r) => esc(dl(r, base)) });
 export const productLink = (r) => "/inv/items/" + enc(r.cProduct);
+// The stock card of a line of Stock on hand (its movements); an empty location, lot or serial is "-" in the address
+export const STOCK_NONE = "-";
+export const stockCardLink = (r) => "/inv/stock/card/" + [r.cProduct, r.cWarehouse, r.cLocation, r.cLot, r.cSerial].map((v) => enc(v || STOCK_NONE)).join("/");
 export const whFilter = { f: "cWarehouse", l: "f.inv.cWarehouse", lookup: "warehouses" };
 export const isPhysical = (m) => m.cNature !== "service" && m.cStockType === "physical";
 export const isProduct = (m) => m.cNature !== "service";
@@ -437,10 +440,11 @@ Object.assign(RES, {
     ],
   },
   stock: {
-    api: "inventory/stock", route: "/inv/stock", title: "stk.title", sub: "stk.subtitle", noNew: true, rowHref: productLink,
+    api: "inventory/stock", route: "/inv/stock", title: "stk.title", sub: "stk.subtitle", noNew: true, rowHref: stockCardLink,
     id: (r) => r.cProduct, sort: "cProduct", filters: [whFilter],
     columns: [
-      { f: "cProduct", l: "f.prod.cCode" }, descCol("cDesc"), { f: "cWarehouse", l: "f.inv.cWarehouse" }, { f: "cLocation", l: "f.mv.cLocation" },
+      // a click on the line opens its stock card; the code opens the product
+      { f: "cProduct", l: "f.prod.cCode", fmt: (v, r) => (canOpen(productLink(r)) ? `<a href="#${productLink(r)}" title="${esc(t("stk.openProduct"))}">${esc(v)}</a>` : esc(v)) }, descCol("cDesc"), { f: "cWarehouse", l: "f.inv.cWarehouse" }, { f: "cLocation", l: "f.mv.cLocation" },
       { f: "cLot", l: "f.mv.cLot" }, { f: "cSerial", l: "f.mv.cSerial" }, { f: "dExpiry", l: "f.mv.dExpiry" },
       { f: "dQtyOnHand", l: "f.inv.dQtyOnHand", num: true, fmt: (v) => esc(qtyFmt(v)) },
       { f: "dQtyReserved", l: "f.inv.dQtyReserved", num: true, fmt: (v) => esc(qtyFmt(v)) },
