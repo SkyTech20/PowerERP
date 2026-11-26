@@ -79,6 +79,7 @@ class ProductionOrderService:
         self.repo = repo
         self.refs = refs
         self.numbering = numbering
+        self.records: Any = None  # the StepRecordService (M4): the recipe steps recorded on the shop floor
         self.username = username
         self.form = RecordForm(S.PRODUCTION_ORDER)
         references.register("product", self._uses_product)
@@ -107,7 +108,11 @@ class ProductionOrderService:
 
     @staticmethod
     def summary(order: Row) -> Row:
-        out = {k: v for k, v in order.items() if k not in ("materials", "operations", "history", "issues", "outputs")}
+        out = {
+            k: v
+            for k, v in order.items()
+            if k not in ("materials", "operations", "history", "issues", "outputs", "records")
+        }
         out["iMaterials"] = len(order.get("materials", []))
         out["iOperations"] = len(order.get("operations", []))
         return out
@@ -126,6 +131,8 @@ class ProductionOrderService:
         out["lShort"] = any(number(m.get("dShort")) > EPS for m in out.get("materials", []))
         if out["cStatus"] != "closed":
             out.update(actuals(out))
+        if self.records is not None and out["cStatus"] != "draft":
+            out["shopSteps"] = self.records.board(out)
         return out
 
     def _available(self) -> dict[tuple[str, str], float]:
@@ -314,6 +321,8 @@ class ProductionOrderService:
             raise AppError("invalid_status", status=409, detail="stock already moved")
         if action == "complete" and number(order["dQtyDone"]) <= EPS:
             raise AppError("nothing_made", status=409)
+        if action == "complete" and self.records is not None:
+            self.records.check_not_blocked(order)  # a critical "block" step out of its limits
         if action == "release":
             self.calc(order)  # the recipe is checked again (still approved) and the quantities recalculated
             order["dReleased"] = self._now()

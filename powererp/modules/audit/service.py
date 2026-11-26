@@ -4,6 +4,7 @@ Two kinds of events, kept in the table audit_log, each in its own transaction (a
 request fails, and is never changed afterwards):
 - security: login_ok, login_failed, locked (the account is locked after too many failed logins), login_locked
   (a login refused while locked), unlocked (by the administrator), logout, password_changed, password_failed,
+  signature_ok / signature_failed (the second signature of a shop floor step, checked with the password),
   access_denied (a call refused by the role);
 - change: every call that changes data (POST / PUT / PATCH / DELETE answered with a success), with the screen of the
   permission it needs, the action (create, edit, delete, post, release...), the record and what was sent
@@ -38,6 +39,8 @@ SECURITY_EVENTS = (
     "logout",
     "password_changed",
     "password_failed",
+    "signature_ok",
+    "signature_failed",
     "access_denied",
 )
 SECRET_KEYS = ("password", "current", "secret", "token", "apikey", "api_key")

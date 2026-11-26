@@ -109,6 +109,51 @@ The materials of the recipe for the quantity of the order, in stock units (the c
 - **Issued:** what was already taken out for the order, net of returns (shown once production has started). The column **Warehouse** appears when a material is taken from another warehouse than the order's.
 - **Unit cost / Cost:** the cost of the material in the item master, for the quantity.
 
+## Recipe steps {#prod.orders.steps}
+
+Shown on released, in-progress, completed and closed orders: the steps of the recipe of the order (**Production > Recipes**, tab *Steps*), grouped by operation, as the operator follows them. Each step shows its state:
+
+- **To do:** not recorded yet (or not enough records: see the frequency below).
+- **Done:** recorded within its limits.
+- **Deviation:** the last record is out of its limits. Red with *blocks the next step*: see below.
+- **Does not apply:** the step has a condition (for example *Only if TEMP_PATE < 24*) that the values recorded so far do not meet.
+
+At the top: how many required steps are done, and how many deviations were recorded. Each record is listed on its step (newest first): the value, who, the second signer, when, and for a deviation the reason, what it does and the corrective action. Records are never changed or deleted: a step is recorded again.
+
+What a deviation does, for a **critical** step (the *If out of limits* of the step in the recipe):
+
+- **Blocks the next step:** the order cannot report production or be completed until the step is recorded again within its limits.
+- **Holds the lot:** the lot made is put *On hold* in **Quality > Lot status** (the lot of the record, else every lot the order made, and the lots it reports later), until quality decides.
+- **Warning:** recorded and shown; nothing is stopped. A deviation of a step that is not critical is always a warning.
+
+The required steps that are not recorded warn; they do not stop the order. The records need the *Shop floor* permission of the role.
+
+**Frequency:** *Once*: one record within limits. *Each lot*: one for each lot made. *Every N units*: one for each N units reported (at least one). *Every N minutes*: as often as needed, at least once. The badge shows the good records and the records needed (for example 1/2).
+
+### Value {#prod.orders.steps.value}
+
+What was measured, set or checked, for the steps of kind *Set a parameter*, *Measure* and *Check*: a number (in the unit shown, with its limits under it), Yes / No, or a choice of the list. Required. As soon as it is typed it is compared with the limits: a green ✓ or the reason (for example *Below the minimum*). The other steps (instruction, add material, timer, report production, second signature) are recorded with **Mark as done**.
+
+### Lot (step) {#prod.orders.steps.lot}
+
+For a step done *Each lot*: the lot it was done for. It starts at the lot of the order; the lots already made are proposed. Empty before the first lot is reported: the record counts for the lot reported next.
+
+### Corrective action {#prod.orders.steps.comment}
+
+What was done about a value out of its limits (for example *Baked 5 more minutes, probe again*). Required when the value is out of its limits; it is written in the history of the order with the value.
+
+### Second signer (user) {#prod.orders.steps.signer}
+
+For a step with a *2nd signature* (and a *Second signature* step): the user name of the person who checks and signs, another user than the one logged in. When the step has a required role (*Signed by*), the second signer must have that role (an administrator always may).
+
+### Their password {#prod.orders.steps.password}
+
+The password of the second signer, typed by them. It is checked and never kept; a wrong password is refused and written in **Administration > Audit log**.
+
+### Record / Mark as done {#prod.orders.steps.record}
+
+Records the step with who (the user logged in), when, the value, the limits of the step at that time and whether it is within them. On a step already done, **Record again** opens the form again (a new measure, another lot).
+
 ## Shop floor {#prod.orders.floor}
 
 Shown on released and in-progress orders, to the roles with the *Shop floor* permission. Each step makes stock movements of the order; nothing moves while one problem is left.
@@ -191,7 +236,7 @@ Draft or released orders, while nothing was issued or produced. The order stays 
 
 ### Complete {#prod.orders.complete}
 
-In-progress orders with a quantity made. Production is over: nothing more can be issued or reported. Needs the *Release* permission.
+In-progress orders with a quantity made. Production is over: nothing more can be issued or reported. Refused while a critical step that blocks is out of its limits (see [Recipe steps](#prod.orders.steps)). Needs the *Release* permission.
 
 ### Reopen {#prod.orders.reopen}
 

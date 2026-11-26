@@ -280,6 +280,34 @@ class AuthService:
         self.audit("login_failed", name, reason=outcome, **({"attempt": detail} if detail else {}))
         raise AuthError("bad_login", status=401)
 
+    def signer(self, username: str, password: str) -> Row:
+        """A second signature (shop floor records): the other user, checked with their own password.
+        Returns {username, role, is_admin}; 400 bad_signature (field cSecondPassword) when the user is unknown,
+        inactive, locked or the password is wrong (not 401: the operator stays logged in)."""
+        if not text(username):
+            raise AuthError("required", "cSecondUser")
+        if not password:
+            raise AuthError("required", "cSecondPassword")
+        row: Row | None = None
+        name = username
+        with database.session_scope() as s:
+            u = self.repo.by_username(s, username)
+            if u is not None:
+                name = u.username
+                locked = bool(u.locked_until and u.locked_until > _now())
+                if u.active and not locked and check_password_hash(u.password_hash, password):
+                    role = s.get(Role, u.role)
+                    row = {
+                        "username": u.username,
+                        "role": u.role,
+                        "is_admin": bool(role and role.active and role.is_admin),
+                    }
+        if row is None:
+            self.audit("signature_failed", name)
+            raise AuthError("bad_signature", "cSecondPassword")
+        self.audit("signature_ok", name)
+        return row
+
     def change_password(self, user: Row, current: str, new: str) -> None:
         if not check_password_hash(user["password_hash"], current or ""):
             self.audit("password_failed", user["username"], reason="bad_password")

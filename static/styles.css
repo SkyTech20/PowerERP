@@ -488,3 +488,22 @@ td.qa-why { min-width: 200px; max-width: 340px; }
 .qa-actions { display: flex; flex-direction: column; gap: 4px; align-items: stretch; }
 .qa-actions .btn { text-align: center; white-space: nowrap; }
 tr.qa-detail td { white-space: normal; }
+
+/* Production orders: the records of the recipe steps (M4) */
+.st-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.st-op { margin: 14px 0 0; font-size: 14px; color: var(--muted, #64748b); }
+.step-card.st-done { background: #f6fbf7; }
+.step-card.st-deviation { background: #fff7f5; }
+.step-card.st-skipped { opacity: .6; }
+.st-records { list-style: none; margin: 10px 0 0; padding: 0; font-size: 13px; }
+.st-records li { padding: 4px 0; border-top: 1px dashed #e2e8f0; }
+.st-records li.st-bad { color: #9b2c2c; }
+.st-why { color: #6b4a00; margin-left: 18px; }
+.st-form { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; margin-top: 12px; }
+.st-form .field { margin: 0; min-width: 140px; }
+.st-form .field.st-wide { flex: 1 1 260px; }
+.st-form .field.st-need input { border-color: #c53030; box-shadow: 0 0 0 2px #fed7d7; }
+.st-form .st-err { flex-basis: 100%; }
+.st-form .st-err:empty { display: none; }
+.st-again { margin-top: 10px; }
+.st-again summary { cursor: pointer; color: var(--primary, #1f5fa8); font-size: 13px; }

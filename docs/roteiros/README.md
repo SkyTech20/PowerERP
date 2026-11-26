@@ -9,6 +9,7 @@ Step-by-step scripts to test each module in the demo, in Portuguese (`pt/`) and 
 | Production orders (M3a, M3b) | [pt/PowerERP-Ordens-Producao-Roteiro-Testes.md](pt/PowerERP-Ordens-Producao-Roteiro-Testes.md) | [en/PowerERP-Production-Orders-Test-Script.md](en/PowerERP-Production-Orders-Test-Script.md) |
 | Lots and traceability (recall) | [pt/PowerERP-Rastreabilidade-Roteiro-Testes.md](pt/PowerERP-Rastreabilidade-Roteiro-Testes.md) | [en/PowerERP-Traceability-Test-Script.md](en/PowerERP-Traceability-Test-Script.md) |
 | Lot status and nonconformances (quality) | [pt/PowerERP-Qualidade-Roteiro-Testes.md](pt/PowerERP-Qualidade-Roteiro-Testes.md) | [en/PowerERP-Quality-Test-Script.md](en/PowerERP-Quality-Test-Script.md) |
+| Recipe steps on the shop floor (M4, critical control points) | [pt/PowerERP-Passos-Receita-Roteiro-Testes.md](pt/PowerERP-Passos-Receita-Roteiro-Testes.md) | [en/PowerERP-Recipe-Steps-Test-Script.md](en/PowerERP-Recipe-Steps-Test-Script.md) |
 | Audit trail and security log | [pt/PowerERP-Auditoria-Roteiro-Testes.md](pt/PowerERP-Auditoria-Roteiro-Testes.md) | [en/PowerERP-Audit-Test-Script.md](en/PowerERP-Audit-Test-Script.md) |
 | Access control (A1–A3) | [pt/PowerERP-Controle-Acesso-Roteiro-Testes.md](pt/PowerERP-Controle-Acesso-Roteiro-Testes.md) | [en/PowerERP-Access-Control-Test-Script.md](en/PowerERP-Access-Control-Test-Script.md) |
 

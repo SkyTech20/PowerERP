@@ -853,6 +853,7 @@ const floorPanel = {
           <div class="field"><label for="flLoc">${esc(t("f.mv.cLocation"))}</label><select id="flLoc" data-help-f="floor.reportLocation"><option value="">${esc(t("prod.fl.autoLocation"))}</option></select></div>
           <div class="field"><label for="flDate">${esc(t("prod.fl.date"))}</label><input type="date" id="flDate" data-help-f="floor.reportDate" value="${esc(today())}"></div>
         </div>
+        ${(m.shopSteps?.blocking || []).length ? `<div class="alert error" style="margin-top:10px">⛔ ${esc(t("prod.st.blocked"))} ${esc(m.shopSteps.blocking.join(", "))}</div>` : ""}
         <div style="margin-top:10px"><button type="button" class="btn primary" id="flReport">${esc(t("prod.fl.reportBtn"))}</button></div>
       </div></div>`;
   },
@@ -941,6 +942,127 @@ const actualPanel = {
   },
 };
 
+// ------------------------------------------------------------------ M4: the records of the recipe steps
+const STEP_STATE_CLASS = { todo: "", done: "yes", deviation: "no", skipped: "" };
+const stepTitle = (s) => (lang === "fr" ? s.cTitleFR || s.cTitleEN : s.cTitleEN || s.cTitleFR) || "";
+const stepText = (s) => (lang === "fr" ? s.cInstructionFR || s.cInstructionEN : s.cInstructionEN || s.cInstructionFR) || "";
+const stepLimits = (s) => [s.dMin !== "" && s.dMin != null && `min ${fmtNum(s.dMin)}`, s.dTarget && `${t("mfg.f.dTarget").toLowerCase()} ${fmtNum(s.dTarget)}`,
+  s.dMax !== "" && s.dMax != null && `max ${fmtNum(s.dMax)}`].filter(Boolean).join(" · ");
+const YES_NO = { yes: "common.yes", oui: "common.yes", true: "common.yes", ok: "common.yes", no: "common.no", non: "common.no", false: "common.no" };
+const recordValue = (r) => {
+  if (!VALUED_KINDS.includes(r.cKind)) return t("prod.st.doneValue");
+  const yn = r.cKind === "check" && YES_NO[String(r.cValue).toLowerCase()];
+  return yn ? t(yn) : `${r.cValue}${r.cUOM ? " " + r.cUOM : ""}`;
+};
+const recordLine = (r) => `<li class="${r.lOk ? "" : "st-bad"}">${r.lOk ? "✓" : "⚠"} <b>${esc(recordValue(r))}</b>${r.cLot ? ` · ${esc(t("f.mv.cLot"))} ${esc(r.cLot)}` : ""}
+  · ${esc(r.cUser)}${r.cSecondUser ? ` + ${esc(r.cSecondUser)}` : ""} · ${esc(fmtDateTime(r.dAt))}
+  ${r.lOk ? "" : `<div class="st-why">${esc(t("mfg.st.r." + r.cReason))} → ${esc(t("mfg.st.a." + r.cAction))}${r.cComment ? ` · ${esc(t("prod.st.action"))}: ${esc(r.cComment)}` : ""}</div>`}</li>`;
+
+// The form to record a step: the value (by its type), the lot, the corrective action, the second signer
+const stepForm = (s, i, m) => {
+  const valued = VALUED_KINDS.includes(s.cKind);
+  const sign = s.lSecondSignature || s.cKind === "signature";
+  const lots = [...new Set([m.cLot, ...(m.outputs || []).map((o) => o.cLot)].filter(Boolean))];
+  const value = !valued ? "" : s.cKind === "check" || s.cDataType === "yes_no"
+    ? `<select id="stV${i}" data-help-f="steps.value"><option value=""></option><option value="yes">${esc(t("common.yes"))}</option><option value="no">${esc(t("common.no"))}</option></select>`
+    : s.cDataType === "list" ? `<select id="stV${i}" data-help-f="steps.value"><option value=""></option>${String(s.cOptions || "").split(",").map((o) => `<option>${esc(o.trim())}</option>`).join("")}</select>`
+      : `<input type="text" id="stV${i}" data-help-f="steps.value" ${s.cDataType === "number" ? 'inputmode="decimal"' : ""} placeholder="${esc(s.cUOM || "")}">`;
+  return `<div class="st-form" data-step="${i}">
+    ${valued ? `<div class="field"><label for="stV${i}">${esc(s.cParam || t("prod.st.value"))}${s.cUOM ? ` (${esc(s.cUOM)})` : ""}</label>${value}<span class="help" id="stR${i}">${esc(stepLimits(s))}</span></div>` : ""}
+    ${s.cFrequency === "per_lot" ? `<div class="field"><label for="stL${i}">${esc(t("f.mv.cLot"))}</label><input type="text" id="stL${i}" data-help-f="steps.lot" list="stLots${i}" value="${esc(m.cLot || "")}" placeholder="${esc(t("prod.st.lotLater"))}">
+      <datalist id="stLots${i}">${lots.map((l) => `<option value="${esc(l)}">`).join("")}</datalist></div>` : ""}
+    ${valued ? `<div class="field st-wide"><label for="stC${i}">${esc(t("prod.st.action"))}</label><input type="text" id="stC${i}" data-help-f="steps.comment" maxlength="300" placeholder="${esc(t("prod.st.action.ph"))}"></div>` : ""}
+    ${sign ? `<div class="field"><label for="stU${i}">${esc(t("prod.st.signer"))}</label><input type="text" id="stU${i}" data-help-f="steps.signer" autocomplete="off"></div>
+      <div class="field"><label for="stP${i}">${esc(t("prod.st.password"))}</label><input type="password" id="stP${i}" data-help-f="steps.password" autocomplete="new-password"></div>` : ""}
+    <div class="field st-go"><button type="button" class="btn primary" data-record="${i}" data-help-f="steps.record">${esc(t(valued ? "prod.st.record" : "prod.st.markDone"))}</button></div>
+    <div class="st-err" id="stE${i}"></div>
+  </div>`;
+};
+
+const stepsPanel = {
+  html: (m) => {
+    const b = m.shopSteps;
+    if (!b || !b.steps.length) return "";
+    const live = onFloor(m) && can("prod.orders", "report");
+    const ops = Object.fromEntries((m.operations || []).map((o) => [String(o.iOpSeq), `${o.iOpSeq} — ${dl(o, "cDesc") || o.cOperation || ""}`]));
+    let lastOp = null;
+    const cards = b.steps.map((s, i) => {
+      const head = String(s.iOpSeq) !== lastOp ? `<h3 class="st-op">${esc(ops[String(s.iOpSeq)] || `${t("mfg.op.one")} ${s.iOpSeq}`)}</h3>` : "";
+      lastOp = String(s.iOpSeq);
+      const recs = s.records || [];
+      const many = s.cFrequency !== "once" && s.iNeeded > 1 ? ` (${s.iGood}/${s.iNeeded})` : "";
+      const form = !live || s.cState === "skipped" ? "" : s.cState === "done"
+        ? `<details class="st-again"><summary>${esc(t("prod.st.again"))}</summary>${stepForm(s, i, m)}</details>` : stepForm(s, i, m);
+      return head + `<div class="step-card st-${esc(s.cState)} ${s.lCritical ? "critical" : ""}" id="st${i}">
+        <div class="step-head"><span class="step-no">${esc(s.iStep)}</span><span class="step-icon">${STEP_ICON[s.cKind] || ""}</span><strong>${esc(stepTitle(s))}</strong>
+          <span class="badge ${STEP_STATE_CLASS[s.cState]}">${esc(t("prod.st.state." + s.cState))}${esc(many)}</span>
+          ${s.lCritical ? `<span class="badge no">${esc(t("mfg.f.lCritical"))} · ${esc(t("mfg.st.a." + s.cOnFail))}</span>` : ""}
+          ${s.lRequired ? `<span class="badge">${esc(t("prod.st.required"))}</span>` : ""}
+          ${s.lSecondSignature || s.cKind === "signature" ? `<span class="badge">✍️ ${esc(t("mfg.f.lSecondSignature"))}</span>` : ""}
+          ${s.cRequiredRole ? `<span class="badge">${esc(t("prod.st.role", { r: s.cRequiredRole }))}</span>` : ""}</div>
+        ${s.cCondition ? `<div class="muted">${esc(t("mfg.st.onlyIf", { c: s.cCondition }))}</div>` : ""}
+        ${stepText(s) ? `<p>${esc(stepText(s))}</p>` : ""}
+        ${s.cKind === "timer" ? `<p>⏱️ ${esc(minutesText(s.dDurationMin))}</p>` : ""}
+        ${s.cFrequency !== "once" ? `<div class="muted">${esc(t("mfg.o.fq." + s.cFrequency))}${Number(s.dFrequencyValue) ? " " + esc(fmtNum(s.dFrequencyValue)) : ""}</div>` : ""}
+        ${s.lBlocking ? `<div class="alert error">⛔ ${esc(t("prod.st.blocking"))}</div>` : ""}
+        ${recs.length ? `<ul class="st-records">${recs.slice().reverse().map(recordLine).join("")}</ul>` : ""}
+        ${form}</div>`;
+    }).join("");
+    const done = b.iRequiredDone >= b.iRequired;
+    return `<div class="card"><div class="card-head"><h2>${esc(t("prod.st.title"))}</h2><span class="help muted">${esc(t("prod.st.help"))}</span></div>
+      <div class="card-body">
+        <div class="st-summary"><span class="badge ${done ? "yes" : ""}">${esc(t("prod.st.progress", { n: b.iRequiredDone, of: b.iRequired }))}</span>
+          ${b.iDeviations ? `<span class="badge warn">${esc(t("prod.st.deviations", { n: b.iDeviations }))}</span>` : ""}</div>
+        ${b.blocking.length ? `<div class="alert error">⛔ ${esc(t("prod.st.blocked"))}<ul>${b.blocking.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`
+          : !done && m.cStatus === "in_progress" ? `<div class="alert warn">${esc(t("prod.st.missing"))}</div>` : ""}
+        <div class="step-cards">${cards}</div></div></div>`;
+  },
+  bind: (m, ctx) => {
+    const b = m.shopSteps;
+    if (!b) return;
+    b.steps.forEach((s, i) => {
+      const btn = $(`[data-record="${i}"]`);
+      if (!btn) return;
+      const val = $(`#stV${i}`);
+      const show = (r) => {
+        const out = $(`#stR${i}`);
+        if (!out) return;
+        out.innerHTML = r == null ? esc(stepLimits(s)) : r.ok ? `<span class="badge yes">✓ ${esc(t("prod.st.within"))}</span>`
+          : `<span class="badge no">${esc(t("mfg.st.r." + r.reason))} → ${esc(t("mfg.st.a." + r.action))}</span> ${esc(t("prod.st.needAction"))}`;
+        const c = $(`#stC${i}`);
+        if (c) c.closest(".field").classList.toggle("st-need", !!r && !r.ok);
+      };
+      // the value is checked against the limits as it is typed (nothing is recorded)
+      if (val) val.addEventListener("change", async () => {
+        if (!val.value.trim()) { show(null); return; }
+        try { show(await api(`recipes/${enc(m.cProduct)}/${enc(m.cRevision)}/steps/check`, { method: "POST", body: { iOpSeq: s.iOpSeq, iStep: s.iStep, value: val.value } })); } catch (e) { /* ignore */ }
+      });
+      btn.addEventListener("click", async () => {
+        const get = (id) => ($(id) ? $(id).value : "");
+        btn.disabled = true;
+        try {
+          ctx.reload(await api(ctx.path + "/steps/record", { method: "POST", body: {
+            iOpSeq: s.iOpSeq, iStep: s.iStep, cValue: get(`#stV${i}`), cLot: get(`#stL${i}`), cComment: get(`#stC${i}`).trim(),
+            cSecondUser: get(`#stU${i}`).trim(), cSecondPassword: get(`#stP${i}`) } }));
+          toast(t("prod.st.recorded"), "success");
+          const card = $(`#st${i}`);
+          if (card) card.scrollIntoView({ block: "nearest" });
+        } catch (e) {
+          // shown on the step itself: what was typed stays (the screen is not drawn again)
+          btn.disabled = false;
+          let msg = t("err." + e.code) !== "err." + e.code ? t("err." + e.code) : t("err.generic");
+          if (e.detail) msg += " (" + (e.code === "corrective_action" ? t("mfg.st.r." + e.detail) : e.detail) + ")";
+          const box = $(`#stE${i}`);
+          if (box) box.innerHTML = `<div class="alert error">${esc(msg)}</div>`;
+          toast(msg, "error");
+          const focus = { cComment: "#stC", cSecondUser: "#stU", cSecondPassword: "#stP", cValue: "#stV", cLot: "#stL" }[e.field];
+          if (focus && $(focus + i)) $(focus + i).focus();
+        }
+      });
+    });
+  },
+};
+
 // An action that moves the order (the draft on the screen is saved first)
 const move = (action, ask) => async (m, ctx) => {
   let comment = "";
@@ -1012,6 +1134,6 @@ Object.assign(RES, {
       ] },
     ],
     panel: orderMaterials,
-    panels: [floorPanel, lotsPanel, actualPanel, orderOperations, orderHistory],
+    panels: [stepsPanel, floorPanel, lotsPanel, actualPanel, orderOperations, orderHistory],
   },
 });

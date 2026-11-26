@@ -11,6 +11,7 @@ P8: recipes (product + revision) with their materials, outputs (co / by-products
 P9: the steps of the recipe operations (child list recipes_steps, by operation).
 P10: approval of the recipes: who / when, validity, default version, history (recipes_history).
 M3: production orders, with the materials and operations of their recipe and the history of their status.
+M4: the records of the recipe steps done on the shop floor (production_orders_records).
 """
 
 from .. import schemas as S
@@ -78,6 +79,7 @@ register_specs(
             "history": S.ORDER_HISTORY,
             "issues": S.ORDER_ISSUE,
             "outputs": S.ORDER_OUTPUT,
+            "records": S.ORDER_STEP_RECORD,
         },
     ),
 )

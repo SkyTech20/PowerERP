@@ -36,7 +36,7 @@ from powererp.container import Container
 from powererp.core.errors import AppError
 from powererp.core.http import json_payload
 from powererp.core.pagination import paginate_request
-from powererp.core.security import current_can, current_username
+from powererp.core.security import current_can, current_is_admin, current_username
 from powererp.core.values import text
 from powererp.modules.common.crud import register_crud_routes
 from powererp.modules.common.registry import label_lookup
@@ -49,6 +49,7 @@ from .orders import SEQUENCE, ProductionOrderService
 from .products import ProductMfgService
 from .recipe_flow import RecipeFlow
 from .recipes import RecipeService, prepare_demo
+from .records import StepRecordService
 from .resources import ResourceService
 from .service import (
     CapabilityService,
@@ -386,6 +387,26 @@ def _register_orders(bp: Blueprint, c: Container) -> None:
         return jsonify(orders.preview(json_payload(), no))
 
     floor = c.register("shop_floor", ShopFloorService(orders, current_username))
+    records = c.register(
+        "step_records",
+        StepRecordService(
+            orders,
+            {
+                "operator": _operator,
+                "signer": lambda user, password: c.get("auth").signer(user, password),
+                "lots": lambda: c.get("lot_status") if "lot_status" in c else None,
+            },
+        ),
+    )
+    orders.records = records
+
+    @bp.route("/api/production-orders/<int:no>/steps")
+    def production_order_steps(no):
+        return jsonify(records.board(orders.get(no)))
+
+    @bp.route("/api/production-orders/<int:no>/steps/record", methods=["POST"])
+    def production_order_step_record(no):
+        return jsonify(records.record(no, json_payload()))
 
     @bp.route("/api/production-orders/<int:no>/issue/check", methods=["POST"])
     def production_order_issue_check(no):
@@ -441,6 +462,19 @@ def _register_orders(bp: Blueprint, c: Container) -> None:
             numbering.set_next(SEQUENCE, max((int(o.get("iNo") or 0) for o in data["prod_orders"]), default=0) + 1)
 
     c.get("lifecycle").after_load(renumber)
+
+
+def _operator() -> dict:
+    """Who records a step: the logged-in user (the API key and the start-up act as an administrator)."""
+    from powererp.modules.auth import current_user
+
+    try:
+        user = current_user()
+    except RuntimeError:
+        user = None
+    if not user:
+        return {"username": current_username(), "role": "", "is_admin": current_is_admin()}
+    return {"username": user["username"], "role": user["role"], "is_admin": bool(user["is_admin"])}
 
 
 def _register_traceability(bp: Blueprint, c: Container) -> None:

@@ -109,6 +109,51 @@ Les matières de la recette pour la quantité de l'ordre, en unités de stock (l
 - **Sorti :** ce qui a déjà été sorti pour l'ordre, moins les retours (affiché une fois la production commencée). La colonne **Entrepôt** apparaît quand une matière est prise dans un autre entrepôt que celui de l'ordre.
 - **Coût unitaire / Coût :** le coût de la matière dans la fiche article, pour la quantité.
 
+## Étapes de la recette {#prod.orders.steps}
+
+Affichées sur les ordres lancés, en cours, terminés et fermés : les étapes de la recette de l'ordre (**Production > Recettes**, onglet *Étapes*), groupées par opération, comme l'opérateur les suit. Chaque étape montre son état :
+
+- **À faire :** pas encore enregistrée (ou pas assez d'enregistrements : voir la fréquence plus bas).
+- **Fait :** enregistrée dans ses limites.
+- **Écart :** le dernier enregistrement est hors limites. En rouge avec *bloque l'étape suivante* : voir plus bas.
+- **Ne s'applique pas :** l'étape a une condition (par exemple *Seulement si TEMP_PATE < 24*) que les valeurs enregistrées ne remplissent pas.
+
+En haut : combien d'étapes obligatoires sont faites, et combien d'écarts ont été enregistrés. Chaque enregistrement est listé sur son étape (le plus récent en premier) : la valeur, qui, le second signataire, quand, et pour un écart la raison, ce qu'il fait et l'action corrective. Un enregistrement n'est jamais modifié ni supprimé : l'étape est enregistrée à nouveau.
+
+Ce que fait un écart, pour une étape **critique** (le *Si hors limites* de l'étape dans la recette) :
+
+- **Bloque l'étape suivante :** l'ordre ne peut plus déclarer de production ni être terminé tant que l'étape n'est pas enregistrée à nouveau dans ses limites.
+- **Retient le lot :** le lot fabriqué est mis *En attente* dans **Qualité > Statut des lots** (le lot de l'enregistrement, sinon tous les lots de l'ordre, et ceux qu'il déclarera ensuite), jusqu'à la décision de la qualité.
+- **Avertissement :** enregistré et affiché ; rien n'est arrêté. L'écart d'une étape qui n'est pas critique est toujours un avertissement.
+
+Les étapes obligatoires non enregistrées avertissent ; elles n'arrêtent pas l'ordre. Les enregistrements demandent la permission *Atelier* du rôle.
+
+**Fréquence :** *Une fois* : un enregistrement dans les limites. *Chaque lot* : un par lot fabriqué. *Toutes les N unités* : un pour chaque N unités déclarées (au moins un). *Toutes les N minutes* : aussi souvent que nécessaire, au moins une fois. Le badge montre les bons enregistrements et ceux qu'il faut (par exemple 1/2).
+
+### Valeur {#prod.orders.steps.value}
+
+Ce qui a été mesuré, réglé ou vérifié, pour les étapes de type *Régler un paramètre*, *Mesurer* et *Vérifier* : un nombre (dans l'unité affichée, avec ses limites en dessous), Oui / Non, ou un choix de la liste. Obligatoire. Dès la saisie, elle est comparée aux limites : un ✓ vert ou la raison (par exemple *Sous le minimum*). Les autres étapes (instruction, ajout de matière, minuterie, déclaration, deuxième signature) s'enregistrent avec **Marquer comme fait**.
+
+### Lot (étape) {#prod.orders.steps.lot}
+
+Pour une étape faite *Chaque lot* : le lot pour lequel elle a été faite. Il commence au lot de l'ordre ; les lots déjà fabriqués sont proposés. Vide avant la première déclaration : l'enregistrement compte pour le lot déclaré ensuite.
+
+### Action corrective {#prod.orders.steps.comment}
+
+Ce qui a été fait pour une valeur hors limites (par exemple *Cuit 5 minutes de plus, sonde à nouveau*). Obligatoire quand la valeur est hors limites ; elle est écrite dans l'historique de l'ordre avec la valeur.
+
+### Second signataire (utilisateur) {#prod.orders.steps.signer}
+
+Pour une étape avec *2e signature* (et une étape *Deuxième signature*) : le nom d'utilisateur de la personne qui vérifie et signe, un autre utilisateur que celui connecté. Quand l'étape a un rôle exigé (*Signée par*), le second signataire doit avoir ce rôle (un administrateur peut toujours).
+
+### Son mot de passe {#prod.orders.steps.password}
+
+Le mot de passe du second signataire, saisi par lui. Il est vérifié et jamais gardé ; un mot de passe erroné est refusé et écrit dans **Administration > Journal d'audit**.
+
+### Enregistrer / Marquer comme fait {#prod.orders.steps.record}
+
+Enregistre l'étape avec qui (l'utilisateur connecté), quand, la valeur, les limites de l'étape à ce moment et si elle est dans ses limites. Sur une étape déjà faite, **Enregistrer à nouveau** rouvre le formulaire (une nouvelle mesure, un autre lot).
+
 ## Atelier {#prod.orders.floor}
 
 Affiché sur les ordres lancés et en cours, pour les rôles qui ont la permission *Atelier*. Chaque étape fait des mouvements de stock de l'ordre ; rien ne bouge tant qu'il reste un problème.
@@ -191,7 +236,7 @@ Ordres brouillons ou lancés, tant que rien n'a été sorti ni produit. L'ordre 
 
 ### Terminer {#prod.orders.complete}
 
-Ordres en cours avec une quantité fabriquée. La production est finie : plus rien ne peut être sorti ni déclaré. Demande la permission *Lancer*.
+Ordres en cours avec une quantité fabriquée. La production est finie : plus rien ne peut être sorti ni déclaré. Refusé tant qu'une étape critique qui bloque est hors limites (voir [Étapes de la recette](#prod.orders.steps)). Demande la permission *Lancer*.
 
 ### Rouvrir {#prod.orders.reopen}
 

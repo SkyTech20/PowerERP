@@ -138,6 +138,10 @@ Not done yet: supplier invoices do not move the stock, there is no FIFO costing,
   - a lot that is not released is left out of the sales invoices and of the materials of the production orders (`inventory/picking.py`), and not counted as available; the error is `insufficient_released` when only held lots are left; it can still be moved, adjusted or counted;
   - **Quality > Nonconformances** (`/api/nonconformances`, `POST /<no>/close`, `/<no>/reopen`): what was found (source, document, product, lot, quantity, severity), *Hold the lot* puts the lot on hold when saved; closing needs the disposition and the corrective action, and sets the lot (use as is: released, scrap / return to supplier: rejected, rework: stays on hold);
   - **Production > Lots and traceability** shows the status of the lots and holds every released lot a recall reaches in one click.
+- **Records of the recipe steps on the shop floor (done, step 6 of the SCOR / ISO plan, M4)**: the card **Recipe steps** of a released or in-progress order (`GET /api/production-orders/<no>/steps`, `POST /api/production-orders/<no>/steps/record` `{iOpSeq, iStep, cValue, cLot, cComment, cSecondUser, cSecondPassword}`, permission `prod.orders:report`; `powererp/modules/production/records.py`):
+  - each record keeps who, when, the value, the limits of the step at that time and whether it is within them (table `production_orders_records`); records are never changed, a step is recorded again;
+  - a value out of its limits needs the corrective action and is written in the history of the order; a critical step *block* refuses report and complete (`step_blocked`) until recorded again within its limits; *hold the lot* puts the lot made on hold in Quality > Lot status (also a lot reported later); *warn* stops nothing;
+  - second signature: another user, checked with their password (`bad_signature`; audit events `signature_ok` / `signature_failed`); a required role is checked on the signer (an administrator always may); conditions (`TEMP_PATE < 24`) and frequencies (once, each lot, every N units, every N minutes).
 
 ## Sales
 

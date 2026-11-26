@@ -541,6 +541,28 @@ ORDER_OPERATION = {
     "dCost": "d",
 }
 ORDER_HISTORY = {"dAt": "ts", "cUser": "s", "cAction": "s", "cFrom": "s", "cTo": "s", "cComment": "s"}
+# M4 (step 6 of the SCOR / ISO plan): what was done and measured at each step of the recipe, on the shop floor
+ORDER_STEP_RECORD = {
+    "iSeq": "i",  # the record number on the order
+    "dAt": "ts",
+    "cUser": "s",  # the operator
+    "iOpSeq": "i",
+    "iStep": "i",
+    "cKind": "s",
+    "cTitleFR": "s",
+    "cTitleEN": "s",
+    "cParam": "s",
+    "cValue": "s",  # the value recorded ("done" for a step without a value)
+    "cUOM": "s",
+    "dMin": "d",  # the limits of the step when it was recorded
+    "dMax": "d",
+    "lOk": "b",
+    "cReason": "s",  # below_min, above_max, not_confirmed, not_in_list
+    "cAction": "s",  # out of limits: block, warn, hold_lot
+    "cComment": "s",  # the corrective action of a deviation, or a remark
+    "cSecondUser": "s",  # the second signature
+    "cLot": "s",  # the lot of a per-lot check
+}
 ISSUE_KINDS = ("issue", "backflush", "return")
 ORDER_ISSUE = {  # M3b: a material taken out of the stock for the order (or given back): the lots used
     "iMovement": "i",  # the stock movement (document PROD, the order number)
