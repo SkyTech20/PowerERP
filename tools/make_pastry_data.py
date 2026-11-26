@@ -742,7 +742,17 @@ def pastel(product: str, fillings: list[tuple[str, float]], filling_title: tuple
                 iMaterialSeq=10,
             ),
             step(10, 20, "material_add", filling_title[0], filling_title[1], iMaterialSeq=20),
-            step(10, 30, "check", "Pastels bien fermés", "Pastels well sealed", lRequired=True),
+            # critical: a pastel that is not sealed opens in the oil (the order is blocked until checked again)
+            step(
+                10,
+                30,
+                "check",
+                "Pastels bien fermés",
+                "Pastels well sealed",
+                lRequired=True,
+                lCritical=True,
+                cOnFail="block",
+            ),
             step(
                 20,
                 10,

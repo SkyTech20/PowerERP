@@ -1260,7 +1260,9 @@
      "cKind": "check",
      "cTitleFR": "Pastels bien fermés",
      "cTitleEN": "Pastels well sealed",
-     "lRequired": true
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "block"
     },
     {
      "iOpSeq": 20,
@@ -1397,7 +1399,9 @@
      "cKind": "check",
      "cTitleFR": "Pastels bien fermés",
      "cTitleEN": "Pastels well sealed",
-     "lRequired": true
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "block"
     },
     {
      "iOpSeq": 20,
@@ -1541,7 +1545,9 @@
      "cKind": "check",
      "cTitleFR": "Pastels bien fermés",
      "cTitleEN": "Pastels well sealed",
-     "lRequired": true
+     "lRequired": true,
+     "lCritical": true,
+     "cOnFail": "block"
     },
     {
      "iOpSeq": 20,

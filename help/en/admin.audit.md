@@ -35,6 +35,7 @@ Security events:
 - **Refused: locked:** a sign-in tried while the account was locked.
 - **Unlocked:** the administrator unlocked the account ([Users](#admin.users.unlock)); *Details* says who.
 - **Password changed** / **Password change refused** (in *My account*, the current password was wrong).
+- **Second signature** / **Second signature refused** (a step of a production order signed by a second user with their password; refused: unknown user or wrong password).
 - **Access refused:** the user called something the role does not allow (a screen or a button they do not have).
 
 Change events are the actions of the screens: **Create**, **Edit**, **Delete**, **Post**, **Release**, **Issue**, **Complete**, **Close**... Calculations and checks that change nothing (the preview of an order, the check of a posting) are not kept.

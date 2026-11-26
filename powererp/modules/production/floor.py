@@ -180,6 +180,9 @@ class ShopFloorService:
     def report(self, no: int, payload: Row) -> Row:
         """The quantity made goes into the stock (see the module's docstring): {dQty, cLot, dExpiry, cLocation, dDate}."""
         order = self._floor(no)
+        records = self.orders.records
+        if records is not None:
+            records.check_not_blocked(order)  # a critical "block" step out of its limits
         qty = round(number(payload.get("dQty")), 6)
         if qty <= 0:
             raise AppError("positive" if text(payload.get("dQty")) else "required", "dQty")
@@ -193,11 +196,15 @@ class ShopFloorService:
         rows, problems = self._allocate(order, [(m, q) for m, q in flush if q > EPS], day, "backflush")
         self._raise(problems)
         output = self._output(order, payload, qty, day)
+        made = {text(o.get("cLot")).upper() for o in order["outputs"]}
         self._post(order, rows, output)
         order["dQtyDone"] = quantity(number(order["dQtyDone"]) + qty)
         if output["cLot"] and not order["cLot"]:
             order["cLot"] = output["cLot"]
-        return self._save(order)
+        saved = self._save(order)
+        if records is not None and output["cLot"] and output["cLot"].upper() not in made:
+            records.hold_new_lot(order, output["cLot"])  # after a "hold the lot" deviation of the order
+        return saved
 
     def _output(self, order: Row, payload: Row, qty: float, day: str) -> Row:
         prod = self.refs["products"](order["cProduct"]) or {}

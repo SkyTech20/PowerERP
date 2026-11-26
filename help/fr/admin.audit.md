@@ -35,6 +35,7 @@ Ce qui s'est passé. La liste montre seulement les événements présents dans l
 - **Refusé : bloqué :** une connexion essayée pendant que le compte était bloqué.
 - **Débloqué :** l'administrateur a débloqué le compte ([Utilisateurs](#admin.users.unlock)) ; *Détails* dit qui.
 - **Mot de passe changé** / **Changement de mot de passe refusé** (dans *Mon compte*, le mot de passe actuel était faux).
+- **Seconde signature** / **Seconde signature refusée** (une étape d'un ordre de production signée par un second utilisateur avec son mot de passe ; refusée : utilisateur inconnu ou mot de passe erroné).
 - **Accès refusé :** l'utilisateur a appelé quelque chose que son rôle ne permet pas (un écran ou un bouton qu'il n'a pas).
 
 Les événements de modification sont les actions des écrans : **Créer**, **Modifier**, **Supprimer**, **Comptabiliser**, **Lancer**, **Sortir**, **Terminer**, **Fermer**... Les calculs et vérifications qui ne changent rien (l'aperçu d'un ordre, la vérification d'une comptabilisation) ne sont pas gardés.

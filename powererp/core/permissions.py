@@ -135,6 +135,8 @@ SCREENS: tuple[Screen, ...] = (
             "production.production_order_action": "release",
             "production.production_order_issue_check": "view",
             "production.production_order_floor": "report",
+            "production.production_order_steps": "view",
+            "production.production_order_step_record": "report",
         },
     ),
     Screen(
