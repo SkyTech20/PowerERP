@@ -1,33 +1,25 @@
 # PowerERP — Lot status and nonconformances: test script
 
-> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+Script to test the **Quality** menu (step 5 of the SCOR / ISO plan): **Quality > Lot status** (release, hold, quarantine or reject a lot) and **Quality > Nonconformances** (record a problem, hold the lot, close it with the decision and the corrective action), plus the button that holds the lots of a recall in **Production > Lots and traceability**. A lot that is not released does not go out on a sales invoice nor on a production order. The screen labels are in English, as the ERP shows them with the **EN** button. The expected values are those of the **Maple products** scenario right after restoring the demo.
 
-Script to test the **Quality** menu (step 5 of the SCOR / ISO plan): **Quality > Lot status** (release, hold, quarantine or reject a lot) and **Quality > Nonconformances** (record a problem, hold the lot, close it with the decision and the corrective action), and the button that holds the lots of a recall in **Production > Lots and traceability**. A lot that is not released does not go out on a sales invoice or a production order. The expected values are those of the **Pastry shop** scenario after the preparation of section 1.
-
-**Before you start:** sign in as administrator, go to **Administration > System settings**, choose the **Pastry shop** scenario and restore the demo data.
+**Before you start:** log in as the administrator, go to **Administration > System settings**, pick the **Maple products** scenario and restore the demo data. The demo already has 3 nonconformances (1 and 2 closed, 3 open), the candy lot MO9 on hold and barrel 900106-3 rejected; the new nonconformance of this script will be number 4.
 
 ---
 
-## 1. Prepare: make and sell
+## 1. The Lot status screen
+
+**Quality > Lot status**
 
 | Step | Expected |
 |---|---|
-| **Production > Production orders**, **New**: DOUGH, 10 KG, **Save**, **Release**, **Issue**, *Quantity made* 9.8, **Report** | Order 1, lot made MO1. |
-| **New**: PASTEL-HAM-CHEESE, 40 UN, **Save**, **Release**, **Issue**, *Quantity made* 40, **Report** | Order 2, uses HAM 900104-1 and makes lot MO2 (40 UN). |
-| **Sales > Invoices**, **New**: CAFE-PLATEAU, PASTEL-HAM-CHEESE 100 UN, **Save**, **Post** | Invoice posted; 30 UN of MO2 are left. |
+| Open the screen | 4 figures at the top: *On hold* 1, *Quarantine* 0, *Rejected* 1, *Released* 14. The lots: product and description, lot with its expiry under it, quantity with the warehouse/location under it, and *Status*. On top, the ones that need a decision: MAPLE-CANDY-12 MO9 *On hold* (yellow, reason "Order 9, step 10/20 Cook to 115 °C: 118.5 °C") and SYRUP-BULK-AMB 900106-3 *Rejected* (0, returned to the supplier, reason "NC 1 closed: return to supplier"). |
+| **?** | Opens the help of the screen; the filters and the fields have their own **?**. |
+| *Product* filter SYRUP-BULK-AMB | 900106-3 *Rejected*, 900102-4 95 KG in PLANT/BAR-04 and 900106-2 276 KG in PLANT/BAR-10, both *Released*. Back to *All*. |
+| Search "TANK" | Only SYRUP-STD MO7, 146 KG in PLANT/TANK-02. Clear the search. |
 
-## 2. The Lot status screen
+## 2. A nonconformance at reception (holds the lot)
 
-**Quality > Lot status** (the **Quality** menu is new, under Production)
-
-| Step | Expected |
-|---|---|
-| Open the screen | 4 figures at the top: *On hold* 0, *Quarantine* 0, *Rejected* 0, *Released* 11. The lots in stock: product and description, lot with its expiry under it, quantity with the warehouse/location under it, *Status* (all *Released*, green). |
-| **?** | Opens the help of the screen; the filters and fields have their **?**. |
-| *Product* filter HAM | Only HAM 900104-1, 13.4 KG in KITCHEN/COLD-01. Back to *All*. |
-| Search "COLD" | The lots of COLD-01. Clear the search. |
-
-## 3. A nonconformance at reception (holds the lot)
+The case: the lab analysis of barrel B-0431 from Érablière Gagnon (lot 900102-4, still 95 kg in BAR-04) found lead above the limit. Part of the barrel already went into the standardized syrup MO7.
 
 **Quality > Nonconformances**, **New**
 
@@ -35,55 +27,59 @@ Script to test the **Quality** menu (step 5 of the SCOR / ISO plan): **Quality >
 |---|---|
 | Open | *Date found* today, *Found at* Internal check, *Severity* Minor, *Hold the lot* ticked, *Disposition* To decide. |
 | **Save** with nothing | Error on *What is wrong* (required). |
-| *Found at* Reception, *Document* REC 900104, *Severity* Critical, *Product* HAM, *Lot* 900104-1, *Quantity affected* 13.4, *What is wrong* "Temperature 9 °C at reception, limit 4 °C", **Save** | "Created." Nonconformance 1 — HAM · 900104-1, *Open* badge. *Lot status*: On hold. *Unit*: KG. *History* card: Created; Lot put on hold. |
-| **Quality > Lot status** | *On hold* figure 1. HAM 900104-1 at the top, yellow line, *On hold*, reason "NC 1: Temperature 9 °C...", under it admin, the date and the *Nonconformance 1* link. |
+| *Found at* Reception, *Document* REC 900102, *Severity* Critical, *Product* SYRUP-BULK-AMB, *Lot* 900102-4, *Quantity affected* 95, *What is wrong* "Lab analysis of barrel B-0431: lead 0.6 ppm, limit 0.5 ppm", **Save** | "Created." Nonconformance 4 — SYRUP-BULK-AMB · 900102-4, *Open* badge. *Lot status*: On hold. *Unit*: KG. Card *History*: Created; Lot put on hold. |
+| **Quality > Lot status** | *On hold* figure 2. SYRUP-BULK-AMB 900102-4 on top, yellow line, *On hold*, reason "NC 4: Lab analysis of barrel B-0431...", under it admin, the date and the link *Nonconformance 4*. |
 | **History** on the line | Released → On hold, who, when and the reason. **Hide history** closes it. |
 
-## 4. Recall: hold the lots made with the ham
+## 3. Recall: hold the lots made with the barrel
 
 | Step | Expected |
 |---|---|
-| On the HAM line, **Trace** | Opens **Production > Lots and traceability** on HAM 900104-1. New card: "Status of this lot: *On hold* · Lot status". In *Customers*, the lots reached show their status: HAM *On hold*, PASTEL-HAM-CHEESE MO2 *Released*. |
-| Click **Put the 1 released lot(s) on hold** with no reason | Message "Write the reason of the change." |
-| *Reason* "Ham lot 900104-1 too warm at reception (NC 1)", the button | "1 lot(s) put on hold." MO2 becomes *On hold*; the card says "Every lot the recall reaches is already held back." |
+| On the 900102-4 line, **Trace** | Opens **Production > Lots and traceability** with SYRUP-BULK-AMB 900102-4. Card "Status of this lot: *On hold* · Lot status". Figures: *Lots reached* 6, *Customers* 4, *Stock lines* 6, *Open orders* 1 (order 9, *Completed*). |
+| *Lots reached* | SYRUP-BULK-AMB 900102-4 *On hold*, SYRUP-STD MO7 *Released*, MAPLE-SYRUP-540 MO8 *Released*, MAPLE-CANDY-12 MO9 *On hold*, MAPLE-FUDGE-250 MO10 *Released*, MAPLE-BUTTER-200 MO11 *Released*. |
+| Card *Customers* | DISTRIB-CHAUDIERE (invoice 6), LAURENTIAN-HOTELS (8), EPICERIE-STDENIS (9) and BOUTIQUE-VQ (7). |
+| Click **Put the 4 released lot(s) on hold** without a reason | Notice "Write the reason of the change." |
+| *Reason* "Barrel 900102-4 (B-0431): lead above the limit (NC 4)", the button | "4 lot(s) put on hold." MO7, MO8, MO10 and MO11 become *On hold*; the card says "Every lot the recall reaches is already held back." |
+| **Quality > Lot status** | *On hold* 6, *Rejected* 1, *Released* 9. |
 
-## 5. A held lot does not go out
-
-| Step | Expected |
-|---|---|
-| **Sales > Invoices**, **New**: CAFE-PLATEAU, PASTEL-HAM-CHEESE 10 UN, **Save**, **Post** | Error: "Not enough released stock: lots on hold, in quarantine or rejected cannot go out (Quality > Lot status)." The invoice stays a draft. (Delete it.) |
-| **Production > Production orders**, **New**: PASTEL-HAM-CHEESE 40 UN, **Save** | In the materials, HAM with *Available* 0 (the held lot does not count). |
-| **Release**, **Issue** | Error on HAM: "Not enough released stock...". (Cancel the order.) |
-| **Inventory > Stock movements**, transfer HAM 900104-1 from COLD-01 to another location | Works: a held lot can still be moved, adjusted or counted in the stock. |
-
-## 6. Close the nonconformance
-
-**Quality > Nonconformances**, open number 1
+## 4. A held lot does not go out
 
 | Step | Expected |
 |---|---|
-| **Close** (confirm) with no decision | Error on *Disposition* (required). |
-| *Disposition* Scrap, **Close** | Error on *Corrective action* (required). |
-| *Root cause* "The supplier truck refrigeration was off.", *Corrective action* "Probe every delivery of meat at reception; refuse above 4 °C.", **Close**, confirm | "Nonconformance closed." *Closed* badge, read-only fields, *Lot status* Rejected, *Closed by* / *Closed on* filled. *History*: Closed (Scrap), Lot rejected, Lot put on hold, Created. Buttons: **Back to list** and **Reopen** (no Save or Delete). |
-| **Quality > Lot status** | HAM 900104-1 *Rejected*, reason "NC 1 closed: scrap". |
-| **Quality > Nonconformances** (list) | Nonconformance 1 *Closed*, *Critical*, Reception, HAM, 900104-1, *Rejected*, 13.4 KG, Scrap. Filters *Status*, *Found at*, *Severity*, *Product*. |
-| Open number 1, **Reopen**, reason "More boxes to check" | "Nonconformance reopened." *Open* badge, the fields can be changed again; the lot stays *Rejected*. Close it again with Scrap. |
+| **Sales > Invoices**, the draft of DISTRIB-CHAUDIERE, **Check** | *To fix before posting*: "MAPLE-SYRUP-540 200 UN > 0 UN" and "MAPLE-FUDGE-250 60 UN > 0 UN". **Post** is refused with "Not enough released stock: lots on hold, in quarantine or rejected cannot go out (Quality > Lot status)." The invoice stays a draft. |
+| **Production > Production orders**, **New**: MAPLE-SYRUP-540 100 UN, **Save** | Order 14. In the materials, SYRUP-STD 72 KG with *Available* 0 (the held MO7 does not count). |
+| **Release**, **Issue** | Error on SYRUP-STD: "Not enough released stock..." (72 > 0 KG). Order 12, already released, cannot take the syrup either. (Cancel order 14.) |
+| **Inventory > Stock movements**, transfer SYRUP-BULK-AMB 900102-4 from BAR-04 to an empty location (for example BAR-12) | It works: a held lot can still be moved, adjusted or counted in the stock. |
 
-Rules of the dispositions when closing: **Use as is** releases the lot (only if this nonconformance had held it); **Scrap** and **Return to supplier** reject it; **Rework** keeps it on hold.
+## 5. Close the nonconformance
 
-## 7. Change a status by hand
+**Quality > Nonconformances**, open number 4
+
+| Step | Expected |
+|---|---|
+| **Close** (confirm) without a decision | Error on *Disposition* (required). |
+| *Disposition* Return to supplier, **Close** | Error on *Corrective action* (required). |
+| *Root cause* "Old evaporator pan at the sugar bush (lead solder).", *Corrective action* "Return the barrel to Érablière Gagnon; ask for a lead analysis with every barrel.", **Close**, confirm | "Nonconformance closed." *Closed* badge, read-only fields, *Lot status* Rejected, *Closed by* / *Closed on* filled in. *History*: Closed (Return to supplier), Lot rejected, Lot put on hold, Created. Buttons: **Back to list** and **Reopen** (no Save nor Delete). |
+| **Quality > Lot status** | SYRUP-BULK-AMB 900102-4 *Rejected*, reason "NC 4 closed: return to supplier". The lots made with it stay *On hold*: each one needs its own decision (section 6). |
+| **Quality > Nonconformances** (list) | 1 *Closed* (Reception, 900106-3, Return to supplier), 2 *Closed* (Customer, MAPLE-FUDGE-250 MO5, Use as is), 3 *Open* (Production, MAPLE-CANDY-12 MO9) and 4 *Closed*, *Critical*, Reception, SYRUP-BULK-AMB, 900102-4, *Rejected*, 95 KG, Return to supplier. Filters *Status*, *Found at*, *Severity*, *Product*. |
+| Open number 4, **Reopen**, reason "More barrels of B-04xx to check" | "Nonconformance reopened." *Open* badge, the fields can be changed again; the lot stays *Rejected*. Close it again with Return to supplier. |
+
+Rules of the dispositions on closing: **Use as is** releases the lot (only if this nonconformance held it); **Scrap** and **Return to supplier** reject it; **Rework** keeps it on hold.
+
+## 6. Change a status by hand
 
 **Quality > Lot status**
 
 | Step | Expected |
 |---|---|
-| On the PASTEL-HAM-CHEESE MO2 line, **Change status** | Opens under it: *New status* (the other 3 statuses), *Reason*, **Save**, **Cancel** and the explanation. |
-| **Save** with no reason | "Write the reason of the change." |
-| *Quarantine*, reason "Sample sent to the lab", **Save** (or Enter) | "Lot MO2: Quarantine." Figures: *Quarantine* 1, *On hold* 0. |
-| **Change status** again: *Released*, reason "Lab result: conform", **Save** | MO2 *Released*; it moves to the end of the list (the lots that need a decision come first). **History** shows the 3 changes. |
-| The *Rejected* figure | Shows only the rejected lots (HAM). Click again to clear it. *Status* filter "Not released" shows on hold + quarantine + rejected. |
+| On the MAPLE-SYRUP-540 MO8 line, **Change status** | Opens under it: *New status* (the other 3 statuses), *Reason*, **Save**, **Cancel** and the explanation. |
+| **Save** without a reason | "Write the reason of the change." |
+| *Quarantine*, reason "Cans sent to the lab for lead", **Save** (or Enter) | "Lot MO8: Quarantine." Figures: *Quarantine* 1, *On hold* 4. |
+| **Change status** again: *Released*, reason "Lab result: lead 0.02 ppm, conform", **Save** | MO8 *Released*; it goes to the end of the list (the lots that need a decision come first). **History** shows the 3 changes. |
+| The draft of DISTRIB-CHAUDIERE, **Check** | Only the fudge problem is left (MO10 still on hold). |
+| The *Rejected* figure | Filters the rejected lots only (900106-3 and 900102-4). Click again to remove the filter. The *Status* filter "Not released" shows on hold + quarantine + rejected. |
 
-## 8. Roles
+## 7. Roles
 
 | Step | Expected |
 |---|---|
@@ -92,7 +88,7 @@ Rules of the dispositions when closing: **Use as is** releases the lot (only if 
 | Sign in with a WAREHOUSE user | Sees **Quality > Lot status** without the *Change status* button; on the traceability screen (if allowed) the hold button does not show. Can create a nonconformance but does not see **Close**. |
 | **Administration > Audit log** | The changes are there: Change status (Lot status), Create / Edit / Close (Nonconformances). |
 
-## 9. French
+## 8. French
 
 | Step | Expected |
 |---|---|

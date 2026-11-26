@@ -1,7 +1,5 @@
 # PowerERP — Sales: test script (V1 to V6)
 
-> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
-
 Script to test the B2B sales module (Quebec, CAD) in the demo. Screen labels are in English, as the ERP shows them with the **EN** button. The expected values are those of the **Manufacturing** scenario right after the demo data is restored.
 
 **Before you start:** log in as the administrator and go to **Administration > System settings**. Choose the **Manufacturing** scenario and restore the demo data. Restoring again puts everything back to the starting point, so the script can be repeated as often as needed.
@@ -112,13 +110,18 @@ Try to delete customer HOTEL-LAURIER. The system refuses, because the customer i
 | **Print** on the posted note | NOTE DE CRÉDIT, n° NC-1, *Facture créditée* 1. |
 | **Sales > Invoices** list | *Type* column (Invoice / Credit note) and a filter by type. |
 
-## 8. Pastry shop scenario
+## 8. Maple products scenario (the default)
 
-In **Administration > System settings**, switch to **Pastry shop**. The demo comes with:
-- 3 drafts: Café du Plateau, Traiteur Royal and Ottawa Deli (this one with HST-ON).
-- Starting stock of finished pastels (lot from 11/18 in location SHOP-01 and lot from 11/19 in SHOP-02, one lot of a product per location), so that the drafts can be posted.
+In **Administration > System settings**, switch to **Maple products** and restore. The demo already has the sales of October and November 2026: invoices 1 to 9 posted, credit note NC-1 and 2 drafts. The full script of the scenario is PowerERP-Maple-Demo-Test-Script.md.
 
-The pastels use FIFO (they have no expiry date). When the Café du Plateau draft is posted, the 11/18 lots go out first.
+| Step | Expected |
+|---|---|
+| Draft of DISTRIB-CHAUDIERE (price list DISTRIB, 3% discount) | MAPLE-SYRUP-540 200 × 8.924 = 1,784.80, group ZERO (pure syrup, no tax); MAPLE-FUDGE-250 60 × 5.626 = 337.56, group QC. *Discounts given* 65.64; GST 16.88 and QST 33.67 on the fudge only; total **2,172.91**. |
+| **Check** on that draft | *Ready to post*. The cans come out of lot MO8 (FG-06) and the fudge out of lot MO10 (FG-08), FEFO. |
+| Draft of LAURENTIAN-HOTELS: 48 MAPLE-CANDY-12, **Check** | *To fix before posting*: "MAPLE-CANDY-12 48 UN > 22 UN". Only 22 boxes of lot MO4 are released; lot MO9 (400 boxes) is held by quality (cooked at 118.5 °C). |
+| Change to 20 boxes, **Check** and **Post** | Posted with the next number (10); 20 boxes come out of MO4. |
+| Invoice 2 (BOUTIQUE-VQ), **Print** | In French, company Érablière Démo, the company's note about the maple products; the syrup without tax, candy and fudge with GST and QST. |
+| Invoice 4 (LAURENTIAN-HOTELS), **Print** | In English (customer language EN), no tax (syrup only). |
 
 ---
 

@@ -1,10 +1,10 @@
 # PowerERP — Recepção com entrada no estoque: roteiro de testes
 
-> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+Roteiro para testar a entrada da recepção no estoque, com lote, lote do fornecedor, validade e localização. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Maple products** logo depois de restaurar o demo.
 
-Roteiro para testar a entrada da recepção no estoque, com lote, lote do fornecedor, validade e localização. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** logo depois de restaurar o demo.
+**Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Maple products** e restaure os dados de demo. Restaurar de novo volta tudo ao estado inicial.
 
-**Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo. Restaurar de novo volta tudo ao estado inicial.
+No demo, cada barril de sirop d'érable é um lote e fica na sua localização (BAR-01 a BAR-12): a regra do ERP é um lote de um produto por localização.
 
 ---
 
@@ -14,44 +14,51 @@ Roteiro para testar a entrada da recepção no estoque, com lote, lote do fornec
 
 | Passo | Esperado |
 |---|---|
-| Ver a coluna *In stock* da lista | As 6 recepções do demo (900101 a 900106) mostram *In stock*. |
-| Abrir a 900102 (MEATCO) | Badge *In stock*, tudo em leitura. Nas linhas: lote 900102-1 e 900102-2, lote do fornecedor MEA-261110-1 e MEA-261110-2, validade 2027-05-09, localização COLD-01. |
-| Card *Put into the stock* | Dois movimentos (BEEF-RAW 40, CHICKEN-RAW 50) com valor. Clicar no número abre o movimento em **Inventory > Stock movements**. |
+| Ver a coluna *In stock* da lista | As 7 recepções do demo (900101 a 900107) mostram *In stock*. |
+| Abrir a 900102 (GAGNON, Érablière Gagnon et fils) | Badge *In stock*, tudo em leitura. Quatro barris SYRUP-BULK-AMB: lotes 900102-1 a 900102-4, lote do fornecedor "B-0412 / récolte 2026-03-24", "B-0418 / récolte 2026-03-29", "B-0425 / récolte 2026-04-02" e "B-0431 / récolte 2026-04-08" (número do barril do produtor e data da colheita), validades 2028-03-23 a 2028-04-07, localizações BAR-01 a BAR-04. |
+| Card *Put into the stock* | Quatro movimentos com valor: 2 035,00, 1 983,20, 2 079,40 e 1 998,00. Clicar no número abre o movimento em **Inventory > Stock movements**. |
+| Abrir a 900106 (TREMBLAY) | O comentário "Baril T-118 : 266 kg reçus sur 280 kg commandés." e a linha 1 com 280 pedidos e 266 recebidos. |
 | Filtro *In stock* = No | Lista vazia. |
 
-## 2. Receber o pedido em aberto 800107
+## 2. Receber o pedido em aberto 810108
+
+O pedido 810108 (GAGNON) tem 4 barris de sirop ambré de 275 kg.
 
 | Passo | Esperado |
 |---|---|
-| **New**, *Reception number* 900107, *PO number* 800107 | Fornecedor MEATCO e duas linhas preenchidos: BEEF-RAW 40 e CHICKEN-RAW 50. |
-| *Warehouse* KITCHEN | |
-| Na linha 1, *Supplier lot* MC-88231; na linha 2, MC-88232. Deixar *Lot*, *Expiry* e *Location* vazios | O campo *Lot* mostra "Automatic". |
+| **New**, *Reception number* 900108, *PO number* 810108 | Fornecedor GAGNON e quatro linhas SYRUP-BULK-AMB de 275 KG preenchidos. |
+| *Warehouse* PLANT | |
+| Em cada linha, o *Supplier lot* do barril: B-0510, B-0514, B-0519, B-0523. Deixar *Lot*, *Expiry* e *Location* vazios | O campo *Lot* mostra "Automatic". |
 | **Save** | Badge *Not in stock yet*. |
-| **Check** | Card *What goes into the stock* com "Ready: nothing to fix". Linha 1: lote 900107-1, validade = data da recepção + 180 dias, localização REC. Linha 2: lote 900107-2, REC. |
-| Por que REC e não COLD-01? | COLD-01 já tem outro lote desses produtos e a regra é um lote por localização. O ERP usa então a localização de recepção da cozinha. |
-| **Inventory > Stock on hand**, filtrar BEEF-RAW | Ainda só o lote 900102-1: o Check não muda nada. |
+| **Check** | Card *What goes into the stock*: lotes 900108-1 a 900108-4, validade = data da recepção + 730 dias, localização REC em todas. Problema nas linhas 2, 3 e 4: "This location already holds another lot of this product: one lot per product per location." |
+| Por que? | O sirop em vrac não tem localização padrão, então o ERP propõe a localização de recepção (REC) para todos os barris, e REC só pode ter um lote do produto. |
+| Digitar a *Location* de cada barril: BAR-01, BAR-02, BAR-03 e BAR-07 (estão vazias), **Save**, **Check** | "Ready: nothing to fix. Click Put in stock." |
+| **Inventory > Stock on hand**, filtrar SYRUP-BULK-AMB | Ainda só os lotes 900102-4 (BAR-04, 95 KG) e 900106-2 (BAR-10, 276 KG): o Check não muda nada. |
+
+A validade proposta conta da data da recepção. Para usar a data da colheita, digite a *Expiry* (colheita + 2 anos) em cada linha antes de pôr no estoque.
 
 ## 3. Pôr no estoque
 
 | Passo | Esperado |
 |---|---|
 | **Put in stock** e confirmar | Mensagem *Reception put in stock*. Badge *In stock*, tela em leitura, *Put in stock on* e *Put in stock by* preenchidos. |
-| Card *Put into the stock* | 2 movimentos, BEEF-RAW 40 (580,00) e CHICKEN-RAW 50 (340,00). |
-| **Inventory > Stock on hand**, BEEF-RAW | Novo lote 900107-1 em REC, 40 KG, com a validade. |
-| **Inventory > Stock movements**, último movimento | Tipo *Receipt*, documento *Reception* 900107, motivo MEATCO, comentário "PO 800107 · MC-88231". |
-| Tentar apagar a recepção 900107 | O botão não aparece. Pela API a resposta é 409 *posted*. |
+| Card *Put into the stock* | 4 movimentos SYRUP-BULK-AMB de 275 KG a 7,40, cada um 2 035,00. |
+| **Inventory > Stock on hand**, SYRUP-BULK-AMB | Os novos lotes 900108-1 a 900108-4 em BAR-01, BAR-02, BAR-03 e BAR-07. |
+| **Inventory > Stock movements**, último movimento | Tipo *Receipt*, documento *Reception* 900108, motivo GAGNON, comentário "PO 810108 · B-0523". |
+| **Production > Lots and traceability**, SYRUP-BULK-AMB, lote 900108-1 | *Origin*: recepção 900108, fornecedor GAGNON, lote do fornecedor B-0510, PO 810108. |
+| Tentar apagar a recepção 900108 | O botão não aparece. Pela API a resposta é 409 *posted*. |
 
 ## 4. Problemas que bloqueiam
 
-Crie a recepção 900108 sobre o PO 800107, warehouse KITCHEN:
+Restaure o demo e crie a recepção 900109 sobre o PO 810108, warehouse PLANT:
 
 | Linha | O que digitar | Esperado no **Check** |
 |---|---|---|
-| 1 | BEEF-RAW, qty 20, *Location* COLD-01 | "Line 1 (BEEF-RAW): This location already holds another lot..." porque a localização foi digitada. Apague a localização e o ERP escolhe outra. |
+| 1 | SYRUP-BULK-AMB, qty 100, *Location* BAR-04 | "Line 1 (SYRUP-BULK-AMB): This location already holds another lot..." porque BAR-04 tem o barril 900102-4. Escolha uma localização vazia (ex.: BAR-08). |
 | 2 | Item XYZ-99, qty 1 | "Line 2 (XYZ-99): This code does not exist. — Item". |
 | 3 | Sem item, descrição Transport, qty 1, custo 25 | Aparece em cinza: "No item: not stocked". Não é problema. |
 
-**Put in stock** recusa com a primeira mensagem e nada entra no estoque. Corrija (apague a localização da linha 1 e a linha 2) e ponha no estoque.
+**Put in stock** recusa com a primeira mensagem e nada entra no estoque. Corrija (localização da linha 1 e apague a linha 2) e ponha no estoque.
 
 ## 5. Permissão
 

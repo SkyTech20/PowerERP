@@ -1,6 +1,5 @@
 # PowerERP — Auditoria e log de segurança: roteiro de testes
 
-> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
 
 Roteiro para testar o passo 4 do plano SCOR / ISO: o **bloqueio de login** depois de tentativas erradas, o **desbloqueio** pelo administrador e a tela **Administration > Audit log** (quem fez o quê e quando: logins, bloqueios, recusas e cada alteração). Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Vale para qualquer cenário de demo.
 
@@ -13,7 +12,7 @@ Roteiro para testar o passo 4 do plano SCOR / ISO: o **bloqueio de login** depoi
 | Passo | Esperado |
 |---|---|
 | **Administration > Users & security**, **New**: *Username* marie, *Full name* Marie Tremblay, *Role* SALES, *New password* secret1, **Save** | Usuário criado. A lista tem a coluna nova *Locked* (vazia). |
-| **Production > Production orders**, **New**: DOUGH (ou PAIN-BL-675 no outro demo), **Save**, **Release** | Ordem liberada. Isso vai aparecer no log. |
+| **Production > Production orders**, **New**: SYRUP-STD, 100 KG (ou PAIN-BL-675 no demo Manufacturing), **Save**, **Release** | Ordem liberada. Isso vai aparecer no log. |
 | **Sign out** | Volta para a tela de login. |
 
 ## 2. Bloqueio depois de 5 senhas erradas

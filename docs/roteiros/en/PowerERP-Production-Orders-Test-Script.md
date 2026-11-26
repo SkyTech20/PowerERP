@@ -1,10 +1,8 @@
 # PowerERP — Production orders (M3a and M3b): test script
 
-> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+Script to test the production orders: create from the approved recipe, see the materials, availability and cost, release, back to draft and cancel (M3a); then the shop floor: issue the materials by lot, report the production with a new lot, give back, see the genealogy, complete and close with the actual cost (M3b, sections 9 to 13). Screen labels are in English, as the ERP shows them with the **EN** button. The values expected are those of the **Maple products** scenario right after the demo data is restored, done on 2026-11-26 (the costs do not depend on the date).
 
-Script to test the production orders: create from the approved recipe, see the materials, availability and cost, release, back to draft and cancel (M3a); then the shop floor: issue the materials by lot, report the production with a new lot, give back, see the genealogy, complete and close with the actual cost (M3b, sections 9 to 13). Screen labels are in English, as shown with the **EN** button. Expected values are those of the **Pastry shop** scenario right after the demo is restored.
-
-**Before you start:** log in as administrator, go to **Administration > System settings**, choose the **Pastry shop** scenario and restore the demo data. The demo starts with no orders.
+**Before you start:** log in as administrator, go to **Administration > System settings**, choose the **Maple products** scenario and restore the demo data. The demo already has orders 1 to 13 of October and November (10 closed, 9 completed, 12 released and 13 a draft): the orders created by this script start at 14.
 
 ---
 
@@ -14,14 +12,14 @@ Script to test the production orders: create from the approved recipe, see the m
 
 | Step | Expected |
 |---|---|
-| Open the screen | Empty list, filters *Status*, *Product* and *Warehouse*. |
+| Open the screen | The 13 orders of the demo, filters *Status*, *Product* and *Warehouse*. |
 | **New** | Card *What to make*, *Start* = today. The material cards say "Pick a product to see the materials of its recipe." |
-| Open the *Product* list | Only products with an approved recipe (BOILED-EGG, DOUGH, PASTEL-BEEF, PASTEL-CHICKEN...). Raw materials such as FLOUR are not listed. |
-| Pick PASTEL-BEEF | With nothing else typed: *Quantity to make* 100 (the base quantity of the recipe), *Unit* UN, *Warehouse* KITCHEN (the product's default), *Revision* A ★. |
-| Card *Materials* | Yellow shortage alert. DOUGH 6 KG, available 0, short 6 KG (red); FILL-BEEF-EGG 8 KG, short 8 KG; OIL-FRY 2 L, available 60 L ✓; PAPER-BAG 100 UN, available 2,000 UN ✓. |
-| Card *Operations and cost* | 3 operations (PST-SHAPE, PST-FRY, PST-PACK). Total time 80 min, *Estimated cost* $60.07, cost per unit 0.6007 / UN. |
-| Change *Quantity to make* to 200 and leave the field | Everything is recalculated: DOUGH 12 KG, FILL-BEEF-EGG 16 KG, OIL-FRY 4 L, PAPER-BAG 200 UN; time 135 min (2.25 h); estimated cost $110.13. |
-| **Save** | Message *Created*. Order 1, badge *Draft*. Card *Tracking* with *Created by* and *Created on*. Card *History* with "Created". |
+| Open the *Product* list | Only products with an approved recipe: MAPLE-BUTTER-200, MAPLE-CANDY-12, MAPLE-FUDGE-250, MAPLE-SYRUP-250, MAPLE-SYRUP-540 and SYRUP-STD. Raw materials such as SYRUP-BULK-AMB are not there. |
+| Choose MAPLE-CANDY-12 | Without typing anything else: *Quantity to make* 100 (base quantity of the recipe), *Unit* UN, *Warehouse* PLANT, *Revision* A ★. |
+| Card *Materials* | Green alert "All the materials are available": SYRUP-STD 14 KG (146 available), BOX-12 100 UN (112 available), LABEL 100 UN. |
+| Card *Operations and cost* | 2 operations (MPL-COOK, MPL-MOULD). Total time 85 min, *Estimated cost* $195.53, unit cost 1.9553 / UN. |
+| Change *Quantity to make* to 200 and leave the field | Everything is recalculated: SYRUP-STD 28 KG, BOX-12 200 UN, LABEL 200 UN; yellow shortage alert: BOX-12 short 88 UN (red); time 105 min; estimated cost $357.47. |
+| **Save** | Message *Created*. Order 14, badge *Draft*. Card *Tracking* with *Created by* and *Created on*. Card *History* with "Created". |
 
 ## 2. Refusals
 
@@ -29,45 +27,45 @@ On a new order:
 
 | What to do | Expected |
 |---|---|
-| **Save** with no product | "This field is required" on *Product*. |
-| PASTEL-BEEF, *Quantity to make* 0, **Save** | "Must be greater than zero." |
+| **Save** without a product | "This field is required" on *Product*. |
+| MAPLE-CANDY-12, *Quantity to make* 0, **Save** | "Must be greater than zero." |
 | *Start* 2026-12-10 and *Due* 2026-12-01 | "The end is before the start." on *Due*. |
-| Through the API, `POST /api/production-orders` with `cProduct` FLOUR | 400 *not_made* (a bought product). |
+| Through the API, `POST /api/production-orders` with `cProduct` SYRUP-BULK-AMB | 400 *no_approved_recipe* (a purchased product, no recipe). |
 
 ## 3. Release
 
-On order 1:
+On order 14:
 
 | Step | Expected |
 |---|---|
-| **Release** and confirm | Message *Order released*. Badge *Released*, read-only screen, *Released by* and *Released on* filled in. |
+| **Release** and confirm | Message *Order released*. Badge *Released*, screen read only, *Released by* and *Released on* filled in. |
 | Card *History* | "Created" and "Released" (Draft → Released). |
 | Buttons | **Back to draft** and **Cancel order**. No **Save** or **Delete**. |
-| The DOUGH shortage | Still shown in the *Materials* card: a shortage warns, it does not block. |
+| The BOX-12 shortage | Still in the *Materials* card: a shortage warns, it does not block. |
 
 ## 4. Back to draft and cancel
 
 | Step | Expected |
 |---|---|
 | **Back to draft**, reason "change the quantity" | Badge *Draft*, fields editable, *Released by/on* gone. History with the reason. |
-| Change to 150 and **Save** | Materials and cost recalculated. |
-| **Cancel order**, reason "no dough" | Badge *Cancelled*, read-only, no action buttons. History with 4 lines. |
-| List filtered on *Status* = Cancelled | Order 1. |
+| Change to 100 and **Save** | Materials and cost recalculated ($195.53), green alert. |
+| **Cancel order**, reason "no boxes" | Badge *Cancelled*, screen read only, no action buttons. History with 4 lines. |
+| List with filter *Status* = Cancelled | Order 14. |
 
 ## 5. Delete and numbering
 
 | Step | Expected |
 |---|---|
-| Create order 2 (DOUGH, 10 KG) | Every material available: green alert "All the materials are available". Estimated cost $20.77. |
-| **Delete** on order 2 | Gone from the list. |
-| Create another order | It gets number 3: numbers are never reused. |
+| Create order 15 (SYRUP-STD, 100 KG) | Every material available: SYRUP-BULK-AMB 101 KG (371 available), FILTER-PAPER 0.5 UN. Estimated cost $807.64. |
+| **Delete** on order 15 | It leaves the list. |
+| Create another order | It gets number 16: numbers are never reused. |
 
 ## 6. Links with other screens
 
 | Step | Expected |
 |---|---|
-| **Inventory > Items**, try to delete PAPER-BAG | Refused: the product is used by an order. |
-| **Production > Recipes**, PASTEL-BEEF A, **Make obsolete**; then try **Release** on a draft order of PASTEL-BEEF | "This product has no approved recipe." The order stays a draft. (Restore the demo afterwards.) |
+| **Inventory > Items**, try to delete BOX-12 | Refused: the product is in use. |
+| **Production > Recipes**, MAPLE-CANDY-12 A, **Make obsolete**; then **Release** order 13 (a draft of MAPLE-CANDY-12) | "This product has no approved recipe." The order stays a draft. (Restore the demo afterwards.) |
 
 ## 7. Permissions
 
@@ -79,52 +77,53 @@ On order 1:
 
 ## 9. Issue the materials (M3b)
 
-Restore the demo. Create an order of DOUGH, 10 KG, **Save** and **Release**.
+Restore the demo. Create an order of SYRUP-STD, 100 KG (order 14), **Save** and **Release**.
 
 | Step | Expected |
 |---|---|
-| Card *Shop floor*, part *1. Issue the materials* | FLOUR 6 KG, SALT 0.12 KG, OIL-FRY 0.4 L, with *To issue* already filled with what is left. |
-| **Show the lots** | "Ready: the stock is there." and the table: all three in DRY-01. Nothing moves (check **Inventory > Stock movements**). |
+| Card *Shop floor*, part *1. Issue the materials* | SYRUP-BULK-AMB 101 KG, with *To issue* already filled in. FILTER-PAPER is *backflush*: it goes out by itself when the production is reported. |
+| **Show the lots** | "Ready: the stock is there." and the table, FEFO (expires first, out first): 95 KG of barrel 900102-4 (BAR-04) and 6 KG of barrel 900106-2 (BAR-10). Nothing moves (check **Inventory > Stock movements**). |
 | **Issue** | Message *Materials issued*. Badge *In progress*. History with "Production started". Column *Issued* of the *Materials* card filled in. |
-| Card *Lots made and lots used* | Under *Lots used*: 3 *Issue* lines with their value ($6.60, $0.14, $1.28) and the movement number; a click opens the movement. |
-| **Inventory > Stock movements** | 3 issues with document *Production* and the order number. |
-| **Issue** again | Error "Nothing to issue": everything went out. |
+| Card *Lots made and lots used* | Under *Lots used*: 2 *Issue* lines with their value ($701.46 and $44.30) and the movement number; clicking it opens the movement. |
+| **Inventory > Stock movements** | 2 movements out with document *Production* 14. |
+| **Issue** again | Error "Nothing to issue: every material is issued, or the quantities are empty." |
 
 ## 10. Report the production
 
 | Step | Expected |
 |---|---|
-| Part *2. Report the production*: *Quantity made* 9.8; leave *Lot*, *Expiry* and *Location* automatic; **Report** | Message *Production reported*. Under *Lots made*: lot MO1, 9.8 KG, in REC, unit cost 2.0774, value $20.36. |
-| Card *Tracking* | *Lot made* MO1 and *Quantity made* 9.8. |
-| **Inventory > Stock on hand**, DOUGH | Lot MO1 with 9.8 KG in REC. |
-| Order list | Column *Made* with 9.8 KG. |
+| Part *2. Report the production*: *Quantity made* 99; leave *Lot*, *Expiry* and *Location* automatic; **Report** | Message *Production reported*. Under *Lots made*: lot MO14, 99 KG, in REC (standardized syrup has no default location), expiry 2027-11-26 (365 days), unit cost 8.0764, value $799.56. To put it in a tank, type *Location* TANK-01 (empty) before **Report**. |
+| Card *Tracking* | *Lot made* MO14 and *Quantity made* 99. |
+| **Inventory > Stock on hand**, SYRUP-STD | Lot MO14 with 99 KG, besides MO7 (146 KG in TANK-02). |
+| List of the orders | Column *Made* with 99 KG. |
 
 ## 11. Give a material back
 
 | Step | Expected |
 |---|---|
-| Under *Lots used*, line FLOUR, **Return**, type 0.5 | Return message. New *Return* line with -0.5 KG and -$0.55. *Issued* of FLOUR = 5.5 KG. |
-| **Return** 10 KG on the same line | Error "More than what went out..." (5.5 at most). |
+| Under *Lots used*, line of barrel 900106-2, **Return**, type 2 | Return message. New *Return* line with -2 KG and -$14.77. *Issued* of SYRUP-BULK-AMB = 99 KG. The barrel goes back to BAR-10. |
+| **Return** of 50 KG on the same line | Error "More than what went out of the stock for this line." (4 KG of that barrel are left). |
 
 ## 12. Complete and close
 
 | Step | Expected |
 |---|---|
-| Card *Actual cost* | Materials $7.47, operations $12.50 (for 9.8 KG), actual cost $19.97, per unit 2.0372 / KG, estimated for the quantity made $20.36, variance -$0.39 (green). |
+| Card *Actual cost* | Materials $732.35, operations $59.90 (for 99 KG), actual cost $792.25, per unit 8.0025 / KG, estimated 8.0764 / KG, variance -$7.32 (green). |
 | **Complete** and confirm | Badge *Completed*. The *Shop floor* card is gone. Buttons **Reopen** and **Close**. |
 | **Reopen** | Back to *In progress*. **Complete** again. |
 | **Close** and confirm | Badge *Closed*, no buttons. *Actual cost* says "Kept when the order was closed". History: Created, Released, Production started, Completed, Reopened, Completed, Closed. |
-| **Cancel order** on an order whose stock moved | Not shown; through the API the answer is 409. |
+| **Cancel order** on an order that moved stock | Not shown; through the API the answer is 409. |
+| Orders of the demo (e.g. 4, MAPLE-CANDY-12) | Already closed with their actual cost: 388 boxes made of 400, note "12 boîtes de bonbons cassés au démoulage." |
 
 ## 13. Stock rules and refusals
 
 | What to do | Expected |
 |---|---|
-| On a released order, *To issue* above the stock | **Show the lots** lists the problem "Not enough stock available"; **Issue** refuses and nothing moves. |
-| **Complete** with nothing reported | "Report a quantity made before completing the order." |
+| A released order of MAPLE-FUDGE-250 100 UN, **Show the lots** | The cream comes out of lot 900107-1: lot 900105-1 (12 L) expired on 2026-10-27 and is never used. The butter comes out 1 KG of lot 900105-2 (expires first) and 0.5 KG of 900107-2. |
+| On the same order, *To issue* of SYRUP-STD 500 | **Show the lots** lists the problem "Not enough stock available" (500 > 146 KG); **Issue** refuses and nothing moves. |
+| A normal **Issue**, then **Complete** without reporting | "Report a quantity made before completing the order." |
 | A draft order | The *Shop floor* card is not shown. |
 | A role without the *Shop floor* action (Administration > Roles) | The *Shop floor* card and the **Return** buttons are not shown. |
-| An expired lot | Never used: a lot expired on the *Date* chosen is left out of **Show the lots**. |
 
 ## 14. Help
 

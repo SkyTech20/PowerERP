@@ -1,7 +1,5 @@
 # PowerERP — Vendas: roteiro de testes (V1 a V6)
 
-> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
-
 Roteiro para testar o módulo de vendas B2B (Quebec, CAD) no demo. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Manufacturing** logo depois de restaurar o demo.
 
 **Antes de começar:** entre como administrador e vá em **Administration > System settings**. Escolha o cenário **Manufacturing** e restaure os dados de demo. Restaurar de novo volta tudo ao estado inicial, então dá para repetir o roteiro quantas vezes quiser.
@@ -112,13 +110,18 @@ Botão **Print** na invoice. Abre a página para imprimir ou salvar em PDF pelo 
 | **Print** na nota postada | NOTE DE CRÉDIT, n° NC-1, *Facture créditée* 1. |
 | Lista **Sales > Invoices** | Coluna *Type* (Invoice / Credit note) e filtro por tipo. |
 
-## 8. Cenário Pastry shop
+## 8. Cenário Maple products (o padrão)
 
-Em **Administration > System settings**, mude para **Pastry shop**. O demo traz:
-- 3 rascunhos: Café du Plateau, Traiteur Royal e Ottawa Deli (este com TVH-ON).
-- Estoque inicial de pastéis prontos (lote de 18/11 no local SHOP-01 e lote de 19/11 no SHOP-02, um lote por produto em cada local), para que os rascunhos possam ser postados.
+Em **Administration > System settings**, mude para **Maple products** e restaure. O demo já traz as vendas de outubro e novembro de 2026: faturas 1 a 9 postadas, a nota de crédito NC-1 e 2 rascunhos. O roteiro completo do cenário está em PowerERP-Demo-Bordo-Roteiro-Testes.md.
 
-Os pastéis usam FIFO (não têm validade). Ao postar o rascunho de Café du Plateau, saem primeiro os lotes de 18/11.
+| Passo | Esperado |
+|---|---|
+| Rascunho de DISTRIB-CHAUDIERE (tabela DISTRIB, escompte de 3 %) | MAPLE-SYRUP-540 200 × 8.924 = 1,784.80, grupo ZERO (xarope puro, sem imposto); MAPLE-FUDGE-250 60 × 5.626 = 337.56, grupo QC. *Discounts given* 65.64; TPS 16.88 e TVQ 33.67 só sobre o sucre à la crème; total **2,172.91**. |
+| **Check** nesse rascunho | *Ready to post*. As latas saem do lote MO8 (FG-06) e o sucre à la crème do lote MO10 (FG-08), na ordem FEFO. |
+| Rascunho de LAURENTIAN-HOTELS: 48 MAPLE-CANDY-12, **Check** | *To fix before posting*: "MAPLE-CANDY-12 48 UN > 22 UN". Só 22 caixas do lote MO4 estão liberadas; o lote MO9 (400 caixas) está retido pela qualidade (cozido a 118,5 °C). |
+| Mude para 20 caixas, **Check** e **Post** | Postada com o próximo número (10); saem 20 caixas do MO4. |
+| Fatura 2 (BOUTIQUE-VQ), **Print** | Em francês, empresa Érablière Démo, a nota da empresa sobre os produtos de l'érable; o xarope sem imposto, bala e sucre à la crème com TPS e TVQ. |
+| Fatura 4 (LAURENTIAN-HOTELS), **Print** | Em inglês (cliente com idioma EN), sem imposto (só xarope). |
 
 ---
 
