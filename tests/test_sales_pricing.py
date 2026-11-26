@@ -137,19 +137,3 @@ def test_crud_and_references(client):
     assert client.delete("/api/categories/ECL").status_code == 409  # discount of a price list
     client.put("/api/customers/CPE-SOLEIL", json={"cPriceList": ""})
     assert client.delete("/api/price-lists/PROMO").status_code == 200
-
-
-def test_pastry_shop_prices(admin):
-    try:
-        admin.post("/api/reset", json={"scenario": "pastry"})
-        p = price(admin, "TRAITEUR-ROYAL", "PASTEL-BEEF", "250")
-        assert (p["cPriceList"], p["dPrice"], p["cDiscountSource"], p["dNetPrice"]) == (
-            "CATERERS",
-            "4.85",
-            "customer",
-            "4.6075",
-        )
-        p = price(admin, "OTTAWA-DELI", "PASTEL-CHICKEN", "24")
-        assert (p["cPriceSource"], p["dNetPrice"]) == ("product", "6.00")
-    finally:
-        admin.post("/api/reset", json={"scenario": "manufacturing"})

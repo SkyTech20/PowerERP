@@ -1,5 +1,7 @@
 # PowerERP — Registros dos passos da receita no chão de fábrica: roteiro de testes
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar o card **Recipe steps** da tela **Production > Production orders** (passo 6 do plano SCOR / ISO, M4: ISO 9001 8.5.1, HACCP / ISO 22000 8.5.4 monitoramento dos pontos críticos de controle, registros de controle preventivo SFCR). O operador segue os passos da receita da ordem e registra cada um: o valor medido ou ajustado, ou "feito". Um valor fora dos limites é um desvio e pede a ação corretiva; num passo crítico o desvio **bloqueia** a ordem ou **segura o lote** em **Quality > Lot status**. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop**.
 
 **Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo.

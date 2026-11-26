@@ -1,4 +1,5 @@
-"""The demo data scenarios chosen in System settings: SkyAI (purchasing), manufacturing or the pastry shop."""
+"""The demo data scenarios chosen in System settings: maple products (the default), SkyAI (purchasing) or
+manufacturing. The maple products company: tests/test_demo_maple.py."""
 
 from powererp import settings
 from powererp.seed.demo import DemoData, scenario_or_default
@@ -8,9 +9,11 @@ def _count(client, path):
     return client.get(path + "?limit=1000").get_json()["total"]
 
 
-def test_the_scenarios():
+def test_the_scenarios(monkeypatch):
     assert scenario_or_default("Purchasing") == "purchasing"
-    assert scenario_or_default("bogus") == "manufacturing"
+    assert scenario_or_default("bogus") == "manufacturing"  # ERP_SCENARIO of the tests
+    monkeypatch.delenv("ERP_SCENARIO")
+    assert scenario_or_default("bogus") == scenario_or_default(None) == "maple"  # the default
     purchasing = DemoData.load("demo", "purchasing")
     assert purchasing.production == {} and purchasing.name.endswith(":purchasing")
     codes = {p["cCode"] for p in purchasing.inventory["products"]}
@@ -20,7 +23,7 @@ def test_the_scenarios():
 def test_reset_switches_the_scenario(admin):
     assert admin.get("/api/demo").get_json() == {
         "scenario": "manufacturing",
-        "scenarios": ["purchasing", "manufacturing", "pastry"],
+        "scenarios": ["maple", "purchasing", "manufacturing"],
     }
     products, recipes = _count(admin, "/api/products"), _count(admin, "/api/recipes")
     assert recipes > 0
@@ -54,47 +57,16 @@ def test_only_administrators(app, admin):
     assert c.get("/api/summary").status_code == 200  # the dashboard stays open to every user
 
 
-def test_pastry_shop(admin):
-    """3 pastels; dough and fillings made from raw meat, chicken and eggs; ham and cheese bought; stock = invoices."""
+def test_an_upgrade_keeps_the_scenario_the_database_was_seeded_with(app):
+    """A database seeded before maple became the default (no scenario chosen in System settings) keeps its data:
+    the scenario comes from the name of the dataset it was seeded with."""
+    from powererp.factory import seeded_scenario
+
+    before = settings.get_setting("dataset")
     try:
-        assert admin.post("/api/reset", json={"scenario": "pastry"}).get_json() == {"ok": True, "scenario": "pastry"}
-        products = {p["cCode"]: p for p in admin.get("/api/products?limit=1000").get_json()["items"]}
-        finished = {c for c, p in products.items() if p["cClass"] == "finished"}
-        assert finished == {"PASTEL-BEEF", "PASTEL-CHICKEN", "PASTEL-HAM-CHEESE"}
-        assert all(products[c]["lSellable"] for c in finished)
-        for bought in ("HAM", "CHEESE", "BEEF-RAW", "CHICKEN-RAW", "EGG"):
-            assert products[bought]["cClass"] == "raw" and products[bought]["lPurchasable"]
-        assert products["GLOVES"]["cClass"] == "consumable" and products["FRYER-2T"]["cClass"] == "asset"
-        assert "LAP-14I7" not in products  # nothing of SkyAI
-
-        recipes = admin.get("/api/recipes?limit=1000").get_json()["items"]
-        made = {r["cProduct"] for r in recipes if r["cStatus"] == "approved" and r["lDefault"]}
-        assert made == finished | {
-            "DOUGH",
-            "GROUND-BEEF",
-            "BOILED-EGG",
-            "FILL-BEEF-EGG",
-            "CHICKEN-COOKED",
-            "CHICKEN-SHRED",
-        }
-        uses = {
-            m["cComponent"]
-            for r in recipes
-            for m in admin.get(f"/api/recipes/{r['cProduct']}/{r['cRevision']}").get_json()["materials"]
-        }
-        assert {"BEEF-RAW", "CHICKEN-RAW", "EGG", "HAM", "CHEESE", "GROUND-BEEF", "BOILED-EGG"} <= uses
-
-        # the stock on hand is the raw material received and invoiced (the fryer is a fixed asset, not stocked),
-        # plus the pastels made before the demo, for the sales invoices (tools/make_pastry_data.py MADE_BEFORE)
-        invoiced = 0.0
-        for inv in admin.get("/api/invoices?limit=1000").get_json()["items"]:
-            assert inv["cStatut"] == "Posted"
-            for line in admin.get(f"/api/invoices/{inv['id']}").get_json()["lines"]:
-                if products[line["cCodeProduit"]]["lStocked"]:
-                    invoiced += float(line["dQuantite"]) * float(line["dCoutUnitaire"])
-        valuation = admin.get("/api/inventory/valuation?limit=1000").get_json()
-        made = 120 * 2.10 + 120 * 1.85 + 90 * 1.95
-        assert invoiced > 0 and float(valuation["totalValue"]) == round(invoiced + made, 2)
-        assert _count(admin, "/api/purchase-orders") == 7  # the last meat order is still open
+        settings.set_setting("dataset", "demo+history:manufacturing")
+        assert seeded_scenario() == "manufacturing"
+        settings.set_setting("dataset", "demo")  # older than the scenarios
+        assert seeded_scenario() == ""
     finally:
-        admin.post("/api/reset", json={"scenario": "manufacturing"})
+        settings.set_setting("dataset", before)

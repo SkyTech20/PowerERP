@@ -1,5 +1,7 @@
 # PowerERP — Production orders (M3a and M3b): test script
 
+> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+
 Script to test the production orders: create from the approved recipe, see the materials, availability and cost, release, back to draft and cancel (M3a); then the shop floor: issue the materials by lot, report the production with a new lot, give back, see the genealogy, complete and close with the actual cost (M3b, sections 9 to 13). Screen labels are in English, as shown with the **EN** button. Expected values are those of the **Pastry shop** scenario right after the demo is restored.
 
 **Before you start:** log in as administrator, go to **Administration > System settings**, choose the **Pastry shop** scenario and restore the demo data. The demo starts with no orders.

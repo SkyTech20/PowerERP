@@ -1,5 +1,7 @@
 # PowerERP — Dados pessoais (Lei 25 do Quebec): roteiro de testes
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar a tela **Administration > Personal data** (item 9 do comparativo SCOR / ISO: pacote Lei 25). A tela acha o que o ERP guarda sobre uma pessoa, exporta o dossiê para entregar a ela, anonimiza a pessoa e guarda a política de privacidade (responsável, hospedagem, prazo de retenção). Só o perfil administrador vê a tela. Os rótulos estão em inglês, como aparecem no ERP com o botão **EN**.
 
 **Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo.

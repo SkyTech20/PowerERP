@@ -20,6 +20,8 @@ COPY migrations/ ./migrations/
 COPY static/ ./static/
 COPY help/ ./help/
 COPY data/demo/ ./data/demo/
+# The maple products company, the default scenario (fictitious, tools/make_maple_data.py)
+COPY data/maple/ ./data/maple/
 # Products, taxes and inventory seed (fictitious, shared by both datasets)
 COPY data/inventory.json data/production.json ./data/
 

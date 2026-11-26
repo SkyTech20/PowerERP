@@ -1,0 +1,395 @@
+{
+ "_about": "Maple products scenario (tools/make_maple_data.py): the company profile, the retailers, hotels and the distributor buying the maple products, and their price lists. The invoices are in story.json.",
+ "company_profile": [
+  {
+   "cCode": "MAIN",
+   "cName": "Érablière Démo",
+   "cLegalName": "Érablière Démo inc.",
+   "cAddress1": "1250, 1re Avenue Est",
+   "cAddress2": "",
+   "cCity": "Saint-Georges",
+   "cProvince": "QC",
+   "cZipCode": "G5Y 5B2",
+   "cCountry": "CA",
+   "cPhone": "418 555-0400",
+   "cEmail": "factures@erabliere-demo.ca",
+   "cWebsite": "www.erabliere-demo.ca",
+   "cNEQ": "1170000003",
+   "cInvoiceNoteFR": "Produits de l'érable purs du Québec. Sirop et beurre : conserver au froid après ouverture. Merci !",
+   "cInvoiceNoteEN": "Pure maple products from Quebec. Syrup and butter: keep cold once opened. Thank you!"
+  }
+ ],
+ "price_lists": [
+  {
+   "cCode": "RETAIL",
+   "cDescFR": "Détaillants",
+   "cDescEN": "Retailers",
+   "dStartDate": "",
+   "dEndDate": "",
+   "cNotes": "",
+   "lActive": true,
+   "lines": [
+    {
+     "cProduct": "MAPLE-SYRUP-540",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "10.25",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-SYRUP-540",
+     "cUOM": "UN",
+     "dMinQty": "120",
+     "dPrice": "9.75",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-SYRUP-250",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "7.40",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-BUTTER-200",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "7.10",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-CANDY-12",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "5.80",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-FUDGE-250",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "6.50",
+     "dDiscountPct": ""
+    }
+   ],
+   "discounts": []
+  },
+  {
+   "cCode": "DISTRIB",
+   "cDescFR": "Distributeurs",
+   "cDescEN": "Distributors",
+   "dStartDate": "",
+   "dEndDate": "",
+   "cNotes": "Prix à la palette ; l'escompte du client s'ajoute.",
+   "lActive": true,
+   "lines": [
+    {
+     "cProduct": "MAPLE-SYRUP-540",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "9.20",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-SYRUP-540",
+     "cUOM": "UN",
+     "dMinQty": "300",
+     "dPrice": "8.80",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-SYRUP-250",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "6.60",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-BUTTER-200",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "6.35",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-CANDY-12",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "5.15",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-FUDGE-250",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "5.80",
+     "dDiscountPct": ""
+    }
+   ],
+   "discounts": []
+  },
+  {
+   "cCode": "HOTELS",
+   "cDescFR": "Hôtels et restaurants",
+   "cDescEN": "Hotels and restaurants",
+   "dStartDate": "",
+   "dEndDate": "",
+   "cNotes": "",
+   "lActive": true,
+   "lines": [
+    {
+     "cProduct": "MAPLE-SYRUP-540",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "9.90",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-SYRUP-250",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "6.95",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-BUTTER-200",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "6.90",
+     "dDiscountPct": ""
+    },
+    {
+     "cProduct": "MAPLE-CANDY-12",
+     "cUOM": "UN",
+     "dMinQty": "0",
+     "dPrice": "5.60",
+     "dDiscountPct": ""
+    }
+   ],
+   "discounts": []
+  }
+ ],
+ "customers": [
+  {
+   "cCode": "EPICERIE-STDENIS",
+   "cName": "Épicerie fine Saint-Denis",
+   "cLegalName": "Épicerie fine Saint-Denis",
+   "cLang": "fr",
+   "cAddress1": "4280, rue Saint-Denis",
+   "cAddress2": "",
+   "cCity": "Montréal",
+   "cProvince": "QC",
+   "cZipCode": "H2J 2K8",
+   "cCountry": "CA",
+   "cPhone": "514 555-0421",
+   "cEmail": "comptes@epiceriestdenis.ca",
+   "cTaxGroup": "QC",
+   "cTaxExemptNo": "",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cPriceList": "RETAIL",
+   "dDiscountPct": "",
+   "cWarehouse": "PLANT",
+   "cNotes": "",
+   "lActive": true,
+   "addresses": [
+    {
+     "cCode": "MAGASIN",
+     "cName": "Épicerie fine Saint-Denis",
+     "cAddress1": "4280, rue Saint-Denis",
+     "cAddress2": "",
+     "cCity": "Montréal",
+     "cProvince": "QC",
+     "cZipCode": "H2J 2K8",
+     "cCountry": "CA",
+     "cContact": "Mélanie Roy",
+     "cPhone": "514 555-0421",
+     "cTaxGroup": "",
+     "lDefault": true
+    }
+   ],
+   "contacts": [
+    {
+     "cName": "Mélanie Roy",
+     "cTitle": "Acheteuse",
+     "cPhone": "514 555-0421",
+     "cEmail": "achats@epiceriestdenis.ca",
+     "lInvoices": false
+    },
+    {
+     "cName": "Comptabilité",
+     "cTitle": "",
+     "cPhone": "514 555-0421",
+     "cEmail": "comptes@epiceriestdenis.ca",
+     "lInvoices": true
+    }
+   ]
+  },
+  {
+   "cCode": "BOUTIQUE-VQ",
+   "cName": "Boutique Souvenirs du Vieux-Québec",
+   "cLegalName": "Boutique Souvenirs du Vieux-Québec",
+   "cLang": "fr",
+   "cAddress1": "38, rue du Petit-Champlain",
+   "cAddress2": "",
+   "cCity": "Québec",
+   "cProvince": "QC",
+   "cZipCode": "G1K 4H5",
+   "cCountry": "CA",
+   "cPhone": "418 555-0433",
+   "cEmail": "comptes@souvenirsvieuxquebec.ca",
+   "cTaxGroup": "QC",
+   "cTaxExemptNo": "",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 jours",
+   "cPriceList": "RETAIL",
+   "dDiscountPct": "",
+   "cWarehouse": "PLANT",
+   "cNotes": "",
+   "lActive": true,
+   "addresses": [
+    {
+     "cCode": "MAGASIN",
+     "cName": "Boutique Souvenirs du Vieux-Québec",
+     "cAddress1": "38, rue du Petit-Champlain",
+     "cAddress2": "",
+     "cCity": "Québec",
+     "cProvince": "QC",
+     "cZipCode": "G1K 4H5",
+     "cCountry": "CA",
+     "cContact": "Patrice Gagné",
+     "cPhone": "418 555-0433",
+     "cTaxGroup": "",
+     "lDefault": true
+    }
+   ],
+   "contacts": [
+    {
+     "cName": "Patrice Gagné",
+     "cTitle": "Propriétaire",
+     "cPhone": "418 555-0433",
+     "cEmail": "achats@souvenirsvieuxquebec.ca",
+     "lInvoices": false
+    },
+    {
+     "cName": "Comptabilité",
+     "cTitle": "",
+     "cPhone": "418 555-0433",
+     "cEmail": "comptes@souvenirsvieuxquebec.ca",
+     "lInvoices": true
+    }
+   ]
+  },
+  {
+   "cCode": "LAURENTIAN-HOTELS",
+   "cName": "Laurentian Hotels Group",
+   "cLegalName": "Laurentian Hotels Group",
+   "cLang": "en",
+   "cAddress1": "1000, chemin du Village",
+   "cAddress2": "",
+   "cCity": "Mont-Tremblant",
+   "cProvince": "QC",
+   "cZipCode": "J8E 1K4",
+   "cCountry": "CA",
+   "cPhone": "819 555-0447",
+   "cEmail": "comptes@laurentianhotels.ca",
+   "cTaxGroup": "QC",
+   "cTaxExemptNo": "",
+   "cTermCode": "n30",
+   "cTermDesc": "net 30 days",
+   "cPriceList": "HOTELS",
+   "dDiscountPct": "",
+   "cWarehouse": "PLANT",
+   "cNotes": "",
+   "lActive": true,
+   "addresses": [
+    {
+     "cCode": "MAIN",
+     "cName": "Laurentian Hotels Group",
+     "cAddress1": "1000, chemin du Village",
+     "cAddress2": "",
+     "cCity": "Mont-Tremblant",
+     "cProvince": "QC",
+     "cZipCode": "J8E 1K4",
+     "cCountry": "CA",
+     "cContact": "Emily Clarke",
+     "cPhone": "819 555-0447",
+     "cTaxGroup": "",
+     "lDefault": true
+    }
+   ],
+   "contacts": [
+    {
+     "cName": "Emily Clarke",
+     "cTitle": "Purchasing manager",
+     "cPhone": "819 555-0447",
+     "cEmail": "achats@laurentianhotels.ca",
+     "lInvoices": false
+    },
+    {
+     "cName": "Accounts payable",
+     "cTitle": "",
+     "cPhone": "819 555-0447",
+     "cEmail": "comptes@laurentianhotels.ca",
+     "lInvoices": true
+    }
+   ]
+  },
+  {
+   "cCode": "DISTRIB-CHAUDIERE",
+   "cName": "Distribution Alimentaire Chaudière inc.",
+   "cLegalName": "Distribution Alimentaire Chaudière inc.",
+   "cLang": "fr",
+   "cAddress1": "2500, boul. de la Rive-Sud",
+   "cAddress2": "",
+   "cCity": "Lévis",
+   "cProvince": "QC",
+   "cZipCode": "G6W 6N7",
+   "cCountry": "CA",
+   "cPhone": "418 555-0459",
+   "cEmail": "comptes@distchaudiere.ca",
+   "cTaxGroup": "QC",
+   "cTaxExemptNo": "",
+   "cTermCode": "n45",
+   "cTermDesc": "net 45 jours",
+   "cPriceList": "DISTRIB",
+   "dDiscountPct": "3",
+   "cWarehouse": "PLANT",
+   "cNotes": "",
+   "lActive": true,
+   "addresses": [
+    {
+     "cCode": "MAGASIN",
+     "cName": "Distribution Alimentaire Chaudière inc.",
+     "cAddress1": "2500, boul. de la Rive-Sud",
+     "cAddress2": "",
+     "cCity": "Lévis",
+     "cProvince": "QC",
+     "cZipCode": "G6W 6N7",
+     "cCountry": "CA",
+     "cContact": "Jean-François Poulin",
+     "cPhone": "418 555-0459",
+     "cTaxGroup": "",
+     "lDefault": true
+    }
+   ],
+   "contacts": [
+    {
+     "cName": "Jean-François Poulin",
+     "cTitle": "Directeur des achats",
+     "cPhone": "418 555-0459",
+     "cEmail": "achats@distchaudiere.ca",
+     "lInvoices": false
+    },
+    {
+     "cName": "Comptabilité",
+     "cTitle": "",
+     "cPhone": "418 555-0459",
+     "cEmail": "comptes@distchaudiere.ca",
+     "lInvoices": true
+    }
+   ]
+  }
+ ],
+ "sales_invoices": []
+}

@@ -1,5 +1,7 @@
 # PowerERP — Supply chain indicators (SCOR): test script
 
+> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+
 Script to test **Reports > Supply chain indicators** (step 7 of the SCOR / ISO plan: SCOR performance attributes, ISO 9001 9.1 monitoring and measurement). Nothing is typed on this screen: every figure comes from the invoices, receptions, production orders, shop floor records, nonconformances and stock movements of the ERP. The expected values are those of the **Pastry shop** scenario after the preparation of section 2, done on the same day.
 
 **Before you start:** log in as administrator, go to **Administration > System settings**, choose the **Pastry shop** scenario and restore the demo data.

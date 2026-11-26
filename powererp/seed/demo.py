@@ -3,11 +3,12 @@
 Scenario (chosen on the dashboard when the demo data is reset, ERP_SCENARIO for the first start):
     purchasing      SkyAI: GL, suppliers, products, POs, receptions, invoices and stock, nothing of production
     manufacturing   the same, plus the shop floor of a paper, a food and a metal plant (data/production.json)
-    pastry          a pastry shop that makes 3 pastels (data/pastry, tools/make_pastry_data.py): its own suppliers,
-                    items, recipes and shop floor; the stock is the raw material received and invoiced
+    maple           the default: a maple products company (data/maple, tools/make_maple_data.py): its own
+                    suppliers, items, recipes, shop floor, customers and price lists; story.json adds two months
+                    played through the ERP (production orders, posted sales invoices, lot status, nonconformances)
 
-Every scenario has a company profile, customers, price lists and draft sales invoices (data/sales.json; the pastry
-shop: data/pastry/sales.json).
+Every scenario has a company profile, customers, price lists and sales invoices (data/sales.json; the maple
+products company: data/maple/sales.json and story.json).
 
 Same shapes as the PowerWARE / SkyAI feeds. data/demo/history.json (tools/make_history_data.py) adds suppliers and
 closed POs / receptions / invoices for the supplier selection of SkyAI requisitions.
@@ -17,19 +18,19 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 DATA_ROOT = Path(__file__).resolve().parent.parent.parent / "data"
-SCENARIOS = ("purchasing", "manufacturing", "pastry")
-PASTRY = DATA_ROOT / "pastry"
-# what the pastry shop keeps from data/inventory.json: taxes and units
+SCENARIOS = ("maple", "purchasing", "manufacturing")
+MAPLE = DATA_ROOT / "maple"
+# what the maple products company keeps from data/inventory.json: taxes and units
 SHARED_INVENTORY = ("tax_codes", "tax_groups", "uom", "uom_conversions")
-DEFAULT_SCENARIO = "manufacturing"
+DEFAULT_SCENARIO = "maple"
 
 
 def scenario_or_default(scenario: str | None) -> str:
-    """The scenario asked for, else ERP_SCENARIO, else manufacturing (an unknown value falls back too)."""
+    """The scenario asked for, else ERP_SCENARIO, else maple (an unknown value falls back too)."""
     for value in (scenario, os.environ.get("ERP_SCENARIO")):
         value = (value or "").strip().lower()
         if value in SCENARIOS:
@@ -45,8 +46,10 @@ class DemoData:
         dict  # data/inventory.json: taxes, units, categories, warehouses, products, opening stock (both datasets)
     )
     production: dict  # data/production.json: shop floor reference lists of a paper, a food and a metal plant
-    sales: dict  # data/sales.json (data/pastry/sales.json): company profile and customers
+    sales: dict  # data/sales.json (data/maple/sales.json): company profile and customers
     scenario: str = DEFAULT_SCENARIO
+    # tables as they are after the story of the scenario (data/maple/story.json): they replace their seed
+    story: dict = field(default_factory=dict)
 
     @property
     def name(self) -> str:
@@ -92,18 +95,23 @@ class DemoData:
         # the items of the production demo (paper, bakery, metal) join the item master
         for key, rows in production.get("inventory", {}).items():
             inventory[key] = inventory.get(key, []) + rows
-        sales_file = (PASTRY if scenario == "pastry" else DATA_ROOT) / "sales.json"
+        sales_file = (MAPLE if scenario == "maple" else DATA_ROOT) / "sales.json"
         sales = json.loads(sales_file.read_text(encoding="utf-8")) if sales_file.exists() else {}
-        if scenario == "pastry":
-            lists, inventory, production = cls._pastry(lists, inventory)
-        return cls(folder, lists, inventory, production, sales, scenario)
+        story: dict = {}
+        if scenario == "maple":
+            lists, inventory, production = cls._maple(lists, inventory)
+            story_file = MAPLE / "story.json"
+            if story_file.exists():
+                story = {k: v for k, v in json.loads(story_file.read_text(encoding="utf-8")).items() if k[0] != "_"}
+        return cls(folder, lists, inventory, production, sales, scenario, story)
 
     @staticmethod
-    def _pastry(lists: dict, inventory: dict) -> tuple[dict, dict, dict]:
-        """GL and cost centres of the dataset; suppliers, purchases, items, stock and shop floor of the pastry shop."""
+    def _maple(lists: dict, inventory: dict) -> tuple[dict, dict, dict]:
+        """GL and cost centres of the dataset; suppliers, purchases, items, stock and shop floor of the maple
+        products company."""
 
         def read(name):
-            return json.loads((PASTRY / name).read_text(encoding="utf-8"))
+            return json.loads((MAPLE / name).read_text(encoding="utf-8"))
 
         po, rec = read("purchase_orders.json"), read("receptions.json")
         lists = {

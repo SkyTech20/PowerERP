@@ -1,5 +1,7 @@
 # PowerERP — Lotes e rastreabilidade: roteiro de testes
 
+> **Atenção:** este roteiro foi escrito para o cenário *Pastry shop*, que foi removido (o padrão agora é *Maple products*, veja PowerERP-Demo-Bordo-Roteiro-Testes.md). Ele será refeito com os produtos de bordo; até lá, os códigos e números citados aqui não existem no demo.
+
 Roteiro para testar a tela **Production > Lots and traceability** (passo 3 do plano SCOR / ISO): de um lote, ver de onde veio (fornecedor, lote do fornecedor, pedido de compra; para um lote fabricado, os lotes das matérias), para onde foi (ordens de produção, lotes feitos com ele, clientes), o que um recall precisa alcançar e exportar tudo para Excel. Os rótulos de tela estão em inglês, como aparecem no ERP com o botão **EN**. Os valores esperados são os do cenário **Pastry shop** depois dos preparativos da seção 1.
 
 **Antes de começar:** entre como administrador, vá em **Administration > System settings**, escolha o cenário **Pastry shop** e restaure os dados de demo.

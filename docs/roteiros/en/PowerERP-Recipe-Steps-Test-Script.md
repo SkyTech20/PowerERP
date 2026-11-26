@@ -1,5 +1,7 @@
 # PowerERP — Records of the recipe steps on the shop floor: test script
 
+> **Note:** this script was written for the *Pastry shop* scenario, which was removed (the default is now *Maple products*, see PowerERP-Maple-Demo-Test-Script.md). It will be rewritten with the maple products; until then, the codes and figures quoted here are not in the demo.
+
 Script to test the **Recipe steps** card of **Production > Production orders** (step 6 of the SCOR / ISO plan, M4: ISO 9001 8.5.1, HACCP / ISO 22000 8.5.4 monitoring of the critical control points, SFCR preventive control records). The operator follows the steps of the order's recipe and records each one: the value measured or set, or "done". A value out of its limits is a deviation and needs the corrective action; on a critical step the deviation **blocks** the order or **holds the lot** in **Quality > Lot status**. The expected values are those of the **Pastry shop** scenario.
 
 **Before you start:** log in as administrator, go to **Administration > System settings**, choose the **Pastry shop** scenario and restore the demo data.

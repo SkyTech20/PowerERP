@@ -76,7 +76,11 @@ Les numéros de TPS / TVH et de TVQ ne sont pas tapés ici. Ils viennent des cod
 
 ### Jeu de données {#admin.settings.scenario}
 
-Les données de démonstration à charger : *SkyAI* (achats, sans production), *Fabrication* (papier, boulangerie, métal) ou *Pâtisserie* (pastels, production).
+Les données de démonstration à charger :
+
+- *Produits de l'érable* (par défaut) : Érablière Démo inc., une usine de Saint-Georges (Beauce) qui achète le sirop d'érable en barils à trois érablières et fabrique du sirop en cannes et en bouteilles, du beurre d'érable, des bonbons d'érable et du sucre à la crème. Elle s'ouvre avec deux mois d'historique (octobre et novembre 2026) : ordres de fabrication faits et fermés, étapes des recettes enregistrées (Brix, températures de cuisson et de remplissage), factures reportées et une note de crédit, lots retenus et non-conformités. Chaque baril est un lot dont le lot du fournisseur est le numéro du baril du producteur et la date de récolte : **Production > Lots et traçabilité** suit une canne vendue jusqu'à son érablière, et **Rapports > Indicateurs de la chaîne d'approvisionnement** a une valeur pour chaque indicateur.
+- *SkyAI* (achats, sans production).
+- *Fabrication* (papier, boulangerie, métal).
 
 **↺ Réinitialiser les données** charge le jeu choisi, après une confirmation. Toutes les modifications faites depuis sont perdues. Le jeu choisi est conservé au redémarrage de l'ERP. Les rôles d'exemple SALES, PRODUCTION et WAREHOUSE sont remis comme dans la démo ; les rôles que vous avez créés ne sont pas touchés.
 
