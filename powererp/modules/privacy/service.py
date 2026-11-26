@@ -403,7 +403,7 @@ class PrivacyService:
         return {
             "kind": kind,
             "ref": str(ref),
-            "identity": {k: (_iso(v) if isinstance(v, (date, datetime)) else v) for k, v in identity.items()},
+            "identity": {k: (_iso(v) if isinstance(v, date) else v) for k, v in identity.items()},
             "documents": documents,
             "events": len(events),
             "recentEvents": events[:20],
