@@ -38,7 +38,8 @@ def key(product: Any, lot: Any) -> Key:
 
 class TraceService:
     def __init__(self, deps: dict[str, Callable[[], Any]]):
-        """deps: stock, orders (ProductionOrderService), receptions (ReceptionService), invoices (sales), products (find)."""
+        """deps: stock, orders (ProductionOrderService), receptions (ReceptionService), invoices (sales), products (find),
+        lot_status (quality: the status of the lots)."""
         self.deps = deps
 
     def _get(self, name: str) -> Any:
@@ -90,17 +91,29 @@ class TraceService:
         uses = self._uses(ctx, k, 0, set())
         reached = self._reached(ctx, k)
         prod = ctx["product"](k[0])
+        recall = self._recall(ctx, reached)
+        statuses = self._statuses()
+        for n in recall["lots"] + recall["stock"]:
+            n["cStatus"] = statuses.get(key(n["cProduct"], n["cLot"]), "released")
         return {
             "cProduct": prod.get("cCode", k[0]),
             "cLot": ctx["lot_name"].get(k, lot),
+            "cStatus": statuses.get(k, "released"),
             "cDescFR": text(prod.get("cDescFR")),
             "cDescEN": text(prod.get("cDescEN")),
             "cUOM": text(prod.get("cStockUOM")),
             "origin": origin,
             "uses": uses,
-            "recall": self._recall(ctx, reached),
+            "recall": recall,
             "movements": [self._movement(ctx, m) for m in ctx["moves"][k]],
         }
+
+    def _statuses(self) -> dict[Key, str]:
+        """The status of the lots (quality: released when the lot has none)."""
+        try:
+            return self._get("lot_status").statuses()
+        except KeyError:  # no quality module
+            return {}
 
     def _context(self) -> Row:
         """Everything the trace reads, indexed once."""
@@ -361,6 +374,7 @@ class TraceService:
             [L["product"], t["cProduct"]],
             [L["description"], d(t)],
             [L["lot"], t["cLot"]],
+            [L["lot_status"], L["lot_statuses"].get(t["cStatus"], t["cStatus"])],
             [L["lots_reached"], len(t["recall"]["lots"])],
             [L["customers"], t["recall"]["iCustomers"]],
             [L["stock_rows"], len(t["recall"]["stock"])],
@@ -494,6 +508,13 @@ LABELS: dict[str, dict[str, Any]] = {
         "product": "Product",
         "description": "Description",
         "lot": "Lot",
+        "lot_status": "Lot status",
+        "lot_statuses": {
+            "released": "Released",
+            "on_hold": "On hold",
+            "quarantine": "Quarantine",
+            "rejected": "Rejected",
+        },
         "lots_reached": "Lots made from it (with itself)",
         "customers": "Customers reached",
         "stock_rows": "Stock lines still on hand",
@@ -592,6 +613,13 @@ LABELS: dict[str, dict[str, Any]] = {
         "product": "Produit",
         "description": "Description",
         "lot": "Lot",
+        "lot_status": "Statut du lot",
+        "lot_statuses": {
+            "released": "Libéré",
+            "on_hold": "En attente",
+            "quarantine": "Quarantaine",
+            "rejected": "Rejeté",
+        },
         "lots_reached": "Lots fabriqués avec (lui compris)",
         "customers": "Clients touchés",
         "stock_rows": "Lignes de stock encore en main",

@@ -129,11 +129,15 @@ class ProductionOrderService:
         return out
 
     def _available(self) -> dict[tuple[str, str], float]:
-        """Available stock (on hand - reserved) by product and warehouse; expired lots do not count."""
+        """Available stock (on hand - reserved) by product and warehouse; expired lots and the lots that are not
+        released (quality) do not count."""
         today = date.today().isoformat()
+        held = self.refs.get("held_lots", set)()
         out: dict[tuple[str, str], float] = {}
-        for (p, w, *_rest), b in self.refs["stock"]().balances().items():
+        for (p, w, _loc, lot, _serial), b in self.refs["stock"]().balances().items():
             if b.get("dExpiry") and str(b["dExpiry"])[:10] < today:
+                continue
+            if lot and (p, lot) in held:
                 continue
             out[(p, w)] = out.get((p, w), 0.0) + b["qty"] - b["reserved"]
         return out

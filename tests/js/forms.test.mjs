@@ -16,7 +16,7 @@ for (const f of files) vm.runInThisContext(readFileSync(join(STATIC, f), "utf-8"
 globalThis.localStorage = { getItem: () => null, setItem() {} };
 const I18N = globalThis.window.ERP_I18N;
 
-for (const f of ["erp.js", "inventory.js", "production.js", "sales.js"]) await import(pathToFileURL(join(STATIC, "js", "resources", f)).href);
+for (const f of ["erp.js", "inventory.js", "production.js", "quality.js", "sales.js"]) await import(pathToFileURL(join(STATIC, "js", "resources", f)).href);
 const { RES } = await import(pathToFileURL(join(STATIC, "js", "registry.js")).href);
 
 const fieldsOf = (R) => (R.sections || []).flatMap((s) => s.fields);

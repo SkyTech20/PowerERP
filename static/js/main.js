@@ -2,6 +2,7 @@
 import "./resources/erp.js";
 import "./resources/inventory.js";
 import "./resources/production.js";
+import "./resources/quality.js";
 import "./resources/sales.js";
 import { $, $$, api } from "./core.js";
 import { bindHelpUi } from "./helpui.js";

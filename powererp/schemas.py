@@ -709,6 +709,42 @@ SALES_INVOICE_ALLOC = {  # V4: what went out of the stock for each line (lots fi
     "dValue": "d",
 }
 
+# ---------------------------------------------------------------- quality (step 5 of the SCOR / ISO plan)
+# The status of a lot: released (may be sold and used; a lot without a status row is released), on hold (waiting
+# for a decision), quarantine (kept apart until checked), rejected (never goes out: to scrap or return).
+LOT_STATUSES = ("released", "on_hold", "quarantine", "rejected")
+LOT_STATUS = {"cProduct": "s", "cLot": "s", "cStatus": LOT_STATUSES, "cReason": "s"}
+LOT_STATUS_EXTRA = {"dChanged": "ts", "cUser": "s", "iNC": "i"}  # iNC: the nonconformance that set it
+LOT_STATUS_HISTORY = {"dAt": "ts", "cUser": "s", "cFrom": "s", "cTo": "s", "cReason": "s", "iNC": "i"}
+NC_SOURCES = ("internal", "reception", "production", "customer")
+NC_SEVERITIES = ("minor", "major", "critical")
+NC_DISPOSITIONS = ("pending", "use_as_is", "rework", "scrap", "return_supplier")
+NC_STATUSES = ("open", "closed")
+NONCONFORMANCE = {  # a product or a lot that does not meet its requirements (ISO 9001 8.7 and 10.2)
+    "dDate": "date",
+    "cSource": NC_SOURCES,
+    "cRef": "s",  # the document it comes from: reception, production order, invoice, customer complaint
+    "cProduct": "s",
+    "cLot": "s",
+    "dQty": "d",
+    "cUOM": "s",
+    "cSeverity": NC_SEVERITIES,
+    "cDescription": "s",  # what is wrong
+    "lHoldLot": "b",  # put the lot on hold while the nonconformance is open
+    "cCause": "s",  # root cause
+    "cDisposition": NC_DISPOSITIONS,  # what is done with the product
+    "cAction": "s",  # corrective action (so that it does not happen again)
+}
+NONCONFORMANCE_EXTRA = {
+    "iNo": "i",
+    "cStatus": NC_STATUSES,
+    "cUser": "s",
+    "dCreated": "ts",
+    "dClosed": "ts",
+    "cClosedBy": "s",
+}
+NC_HISTORY = {"dAt": "ts", "cUser": "s", "cAction": "s", "cComment": "s"}
+
 DEFAULTS: dict[str, dict[str, Any]] = {
     "tax_codes": {"cKind": "other", "dRecoverablePct": "100", "lActive": True},
     "tax_groups": {"cTreatment": "taxable", "lActive": True},

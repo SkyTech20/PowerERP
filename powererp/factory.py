@@ -27,6 +27,7 @@ from .modules import (
     manual,
     production,
     purchasing,
+    quality,
     sales,
     suppliers,
     system,
@@ -73,6 +74,7 @@ def _register_modules(app: Flask, c: Container, demo: DemoData) -> None:
     powerware.register(app, c)  # the web services SkyAI calls
     inventory.register(app, c, demo.inventory)
     production.register(app, c, demo.production)  # reference lists of the shop floor (M0)
+    quality.register(app, c)  # lot status and nonconformances (step 5 of the SCOR / ISO plan)
     sales.register(app, c, demo.sales)  # customers and company profile (V1)
 
 

@@ -1,6 +1,6 @@
 # Lots et traçabilité {#prod.traceability}
 
-D'où vient un lot, où il est allé, et ce qu'un rappel doit toucher. Choisissez un produit et un de ses lots : l'écran suit le lot un pas en arrière (le fournisseur et, pour un lot fabriqué ici, les lots des matières) et un pas en avant (les ordres de fabrication qui l'ont utilisé, les lots qu'ils ont fabriqués et les clients à qui ils ont été vendus), comme le demandent les règles de traçabilité des aliments (RSAC, ISO 22000). Rien n'est modifié ici : l'écran lit seulement les mouvements de stock, les réceptions, les ordres de fabrication et les factures de vente.
+D'où vient un lot, où il est allé, et ce qu'un rappel doit toucher. Choisissez un produit et un de ses lots : l'écran suit le lot un pas en arrière (le fournisseur et, pour un lot fabriqué ici, les lots des matières) et un pas en avant (les ordres de fabrication qui l'ont utilisé, les lots qu'ils ont fabriqués et les clients à qui ils ont été vendus), comme le demandent les règles de traçabilité des aliments (RSAC, ISO 22000). L'écran lit les mouvements de stock, les réceptions, les ordres de fabrication et les factures de vente ; la seule chose qu'il peut changer est le statut des lots (pour les retenir pendant un rappel).
 
 **Où :** **Production > Lots et traçabilité**.
 
@@ -22,6 +22,16 @@ Les quatre chiffres du haut comptent ce qu'un rappel de ce lot doit toucher, pou
 - **Ordres ouverts :** les ordres lancés, en cours ou terminés qui utilisent ou fabriquent un de ces lots.
 
 L'encadré jaune dit la même chose en une phrase. Un encadré vert veut dire qu'il n'y a plus rien à rappeler.
+
+## Statut du lot et retenue d'un rappel {#prod.traceability.hold}
+
+Sous le résumé du rappel : le statut de ce lot (**Libéré**, **En attente**, **Quarantaine**, **Rejeté**, voir [Statut des lots](#qa.lots)). La liste des lots touchés et le stock en main montrent aussi le statut de chaque lot.
+
+Tant que certains lots touchés sont encore libérés, les rôles qui peuvent changer le statut des lots (Qualité > Statut des lots, permission **Changer le statut**) voient le bouton **Mettre en attente les n lot(s) libéré(s)** : écrivez le motif et cliquez-le. Tous les lots touchés par le rappel encore libérés sont mis en attente d'un coup (les autres gardent leur statut), pour qu'aucun ne soit vendu ni utilisé pendant la décision. Chaque changement est gardé dans l'historique de son lot.
+
+### Motif {#prod.traceability.holdReason}
+
+Pourquoi les lots sont retenus, ex. *rappel du lot fournisseur L-2211*. Obligatoire ; il est écrit dans l'historique de chaque lot.
 
 ## Origine (un pas en arrière) {#prod.traceability.origin}
 

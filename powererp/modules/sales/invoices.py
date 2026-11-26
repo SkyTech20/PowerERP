@@ -43,7 +43,7 @@ from powererp.core.errors import AppError, NotFound
 from powererp.core.values import amount, number, quantity, text, today, unit_cost
 from powererp.modules.common.forms import RecordForm, Row
 from powererp.modules.common.registry import ReferenceRegistry
-from powererp.modules.inventory.picking import location_usable, pick_order, received_dates
+from powererp.modules.inventory.picking import location_usable, pick_order, received_dates, shortage_code
 from powererp.store import Store
 
 DRAFT_SEQUENCE = "SALES_INVOICE_DRAFT"
@@ -408,6 +408,7 @@ class SalesInvoiceService:
         allow_negative = bool(wh.get("lAllowNegative"))
         bal = {k: dict(v) for k, v in stock.balances().items()}
         received = received_dates(stock, {text(ln["cProduct"]).upper() for ln in inv["lines"]})
+        held = self.refs.get("held_lots", set)()
         allocations: Rows = []
         problems: Rows = []
 
@@ -425,7 +426,7 @@ class SalesInvoiceService:
                 continue
             need = round(number(ln["dQty"]) * factor, 6)
             lots = bool(prod.get("lLotControl") or prod.get("lSerialControl"))
-            candidates = pick_order(prod, wh.get("cCode", ""), bal, inv["dDate"], received, usable)
+            candidates = pick_order(prod, wh.get("cCode", ""), bal, inv["dDate"], received, usable, held)
             left = need
             for b, free in candidates:
                 if left <= EPS:
@@ -443,7 +444,10 @@ class SalesInvoiceService:
                 available = quantity(need - left)
                 problems.append(
                     self._line_problem(
-                        i, prod, "insufficient_stock", f"{quantity(need)} {stock_uom} > {available} {stock_uom}"
+                        i,
+                        prod,
+                        shortage_code(prod, wh.get("cCode", ""), bal, held),
+                        f"{quantity(need)} {stock_uom} > {available} {stock_uom}",
                     )
                 )
         return allocations, problems

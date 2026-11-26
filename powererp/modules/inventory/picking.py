@@ -2,12 +2,13 @@
 
 FEFO: the lots expiring first; FIFO: the stock received first; LIFO: the stock received last; a product without a
 policy is FEFO when it has an expiry date, else FIFO. An expired lot never goes out (sold or used in production),
-and neither does the stock of a blocked or inactive location. Used by the sales invoices and the production orders.
+and neither does a lot that is not released (on hold, quarantine, rejected: quality/lots.py) or the stock of a
+blocked or inactive location. Used by the sales invoices and the production orders.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from typing import Any
 
 from powererp.core.values import text
@@ -81,8 +82,10 @@ def pick_order(
     day: str,
     received: Received,
     usable: Callable[[str], bool],
+    held: Collection[tuple[str, str]] = (),
 ) -> list[tuple[Row, float]]:
-    """The balances of a product in a warehouse that can go out on `day`, first to go out first: (balance, free qty)."""
+    """The balances of a product in a warehouse that can go out on `day`, first to go out first: (balance, free qty).
+    held: the lots that may not go out, as (PRODUCT, LOT) in capitals."""
     policy = pick_policy(prod)
     candidates = []
     for key, b in bal.items():
@@ -93,6 +96,23 @@ def pick_order(
             continue
         if prod.get("lExpiryControl") and b.get("dExpiry") and str(b["dExpiry"])[:10] < day:
             continue  # expired: never goes out
+        if b["cLot"] and (key[0], b["cLot"].upper()) in held:
+            continue  # on hold, in quarantine or rejected
         candidates.append((pick_key(policy, b, received.get(key)), b, free))
     candidates.sort(key=lambda c: c[0])
     return [(b, free) for _k, b, free in candidates]
+
+
+def held_quantity(prod: Row, warehouse: str, bal: dict, held: Collection[tuple[str, str]]) -> float:
+    """The free stock of a product in a warehouse that is in lots not released (to explain a shortage)."""
+    code, wh = prod["cCode"].upper(), warehouse.upper()
+    return sum(
+        b["qty"] - b["reserved"]
+        for key, b in bal.items()
+        if key[0] == code and key[1] == wh and b["cLot"] and (code, b["cLot"].upper()) in held
+    )
+
+
+def shortage_code(prod: Row, warehouse: str, bal: dict, held: Collection[tuple[str, str]]) -> str:
+    """insufficient_stock, or insufficient_released when lots on hold (quarantine, rejected) hold stock back."""
+    return "insufficient_released" if held and held_quantity(prod, warehouse, bal, held) > EPS else "insufficient_stock"
