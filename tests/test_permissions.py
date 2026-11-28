@@ -278,3 +278,12 @@ def test_traceability_needs_its_own_view(login):
     trace = login(["prod.traceability:view"])
     assert trace.get("/api/traceability?product=X&lot=Y").status_code == 404  # allowed: an unknown lot
     assert trace.get("/api/lookups/traced_products").status_code == 200
+
+
+def test_generate_locations_needs_create(login, admin):
+    admin.post("/api/warehouses", json={"cCode": "PF", "cNameFR": "Produits finis"})
+    viewer = login(["inv.warehouses:view"])
+    assert viewer.get("/api/locations?f_cWarehouse=PF").status_code == 200
+    assert viewer.post("/api/warehouses/PF/generate-locations", json={"cAisleFrom": "A"}).status_code == 403
+    maker = login(["inv.warehouses:view", "inv.warehouses:create"])
+    assert maker.post("/api/warehouses/PF/generate-locations", json={"cAisleFrom": "A"}).status_code == 201

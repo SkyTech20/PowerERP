@@ -31,7 +31,14 @@ def test_supplier_create_update_and_lookups():
 
 def test_gl_accounts():
     gl = GLAccountService(memory([{"cCode": "1000", "cDesc": "Cash"}]))
-    assert gl.create({"cCode": "2000", "cDesc": "Payables"}) == {"cCode": "2000", "cDesc": "Payables"}
+    row = gl.create({"cCode": "2000", "cDesc": "Payables"})
+    assert (row["cCode"], row["cDesc"], row["cType"], row["lActive"], row["lRequiresCC"]) == (
+        "2000",
+        "Payables",
+        "liability",
+        True,
+        False,
+    )
     assert code_of(gl.create, {"cCode": "1000", "cDesc": "x"}) == ("duplicate", "cCode", 409)
     assert code_of(gl.update, "1000", {"cDesc": ""}) == ("required", "cDesc", 400)
     gl.delete("2000")
@@ -39,7 +46,9 @@ def test_gl_accounts():
 
 
 def test_cost_centers_have_a_two_part_key():
-    cc = CostCenterService(memory([{"cCC1": "100", "cCC2": "", "cDesc": "Admin"}], keys=("cCC1", "cCC2")))
+    cc = CostCenterService(
+        memory([{"cCC1": "100", "cCC2": "", "cDesc": "Admin", "lActive": True}], keys=("cCC1", "cCC2"))
+    )
     cc.create({"cCC1": "100", "cCC2": "01", "cDesc": "Admin, IT"})
     assert code_of(cc.create, {"cCC1": "100", "cDesc": "again"}) == ("duplicate", "cCC1", 409)
     assert code_of(cc.create, {"cCC1": "100", "cCC2": "01", "cDesc": "x"}) == ("duplicate", "cCC2", 409)

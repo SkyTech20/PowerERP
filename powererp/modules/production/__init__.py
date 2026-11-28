@@ -488,6 +488,7 @@ def _register_traceability(bp: Blueprint, c: Container) -> None:
                 "invoices": lambda: c.get("sales_invoices"),
                 "products": lambda: c.get("products").find,
                 "lot_status": lambda: c.get("lot_status"),
+                "logo": lambda: c.get("company_profile").logo_png() if "company_profile" in c else None,
             }
         ),
     )

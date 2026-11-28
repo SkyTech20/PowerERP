@@ -8,8 +8,17 @@ from typing import Any
 
 # --------------------------------------------------------------------------- general ledger and suppliers
 
-GL_ACCOUNT = {"cCode": "s", "cDesc": "s"}
-COST_CENTER = {"cCC1": "s", "cCC2": "s", "cDesc": "s"}
+GL_TYPES = ("asset", "liability", "equity", "revenue", "expense")
+GL_ACCOUNT = {
+    "cCode": "s",
+    "cDesc": "s",  # French description (the one SkyAI reads)
+    "cDescEN": "s",  # English description (empty: the French one)
+    "cType": GL_TYPES,
+    "lRequiresCC": "b",  # the purchase lines on this account need a cost center
+    "lActive": "b",  # an inactive account is no longer proposed in the lists
+}
+# A department (cCC2 empty) and its sub-departments (cCC1 + cCC2)
+COST_CENTER = {"cCC1": "s", "cCC2": "s", "cDesc": "s", "cDescEN": "s", "lActive": "b"}
 SUPPLIER = {
     "cCode": "s",
     "cName": "s",
@@ -613,6 +622,7 @@ COMPANY_PROFILE = {  # one row (cCode MAIN): the header of the invoices; the GST
     "cInvoiceNoteFR": "s",  # printed at the bottom of the invoices
     "cInvoiceNoteEN": "s",
     "iInvoiceStart": "i",  # the invoice numbers start at (V4: never below it; 0 = 1)
+    "cLogo": "s",  # the logo printed on the documents: a PNG data URL ("" = none), set by its own endpoint
 }
 CUSTOMER = {
     "cCode": "s",
@@ -810,6 +820,8 @@ DEFAULTS: dict[str, dict[str, Any]] = {
     "setup_matrices": {"cScope": "work_center", "lActive": True},
     "product_mfg": {"cMakeBuy": "make", "cTraceLevel": "lot"},
     "company_profile": {"cCode": "MAIN", "cProvince": "QC", "cCountry": "CA"},
+    "gl_accounts": {"cType": "expense", "lActive": True},
+    "cost_centers": {"lActive": True},
     "price_lists": {"lActive": True},
     "customers": {"cLang": "fr", "cProvince": "QC", "cCountry": "CA", "cTaxGroup": "QC", "lActive": True},
     "recipes": {"cRevision": "A", "cProcessType": "discrete", "dBaseQty": "1", "dYieldPct": "100", "cStatus": "draft"},

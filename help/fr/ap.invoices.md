@@ -64,11 +64,11 @@ Le compte du grand livre où la ligne est imputée.
 
 ### CC1 {#ap.invoices.lines.cCC1}
 
-Premier centre de coûts de la ligne.
+Le département (centre de coûts) de la ligne, choisi dans la liste (**Grand livre > Comptes GL / Centres de coûts**, onglet **Centres de coûts**). Obligatoire quand le compte GL de la ligne a *Exige un centre de coûts*.
 
 ### CC2 {#ap.invoices.lines.cCC2}
 
-Deuxième centre de coûts de la ligne.
+Un sous-département du département en CC1 (la liste ne montre que les siens). Vide : le département lui-même.
 
 ### Réception {#ap.invoices.lines.iNoReception}
 

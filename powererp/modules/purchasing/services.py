@@ -277,6 +277,8 @@ NEW_UNBILLED_RECEPTION = {
 class ReceptionService:
     def __init__(self, supplier_name: NameOf):
         self.supplier_name = supplier_name
+        # set by the module: the GL account and cost center of the lines typed on the screen (ledger AccountingCheck)
+        self.check_lines: Callable[[list[Row]], None] | None = None
 
     @staticmethod
     def view(no: str, records: tuple[Row | None, Row | None]) -> Row | None:
@@ -355,11 +357,15 @@ class ReceptionService:
             raise AppError("numeric", "NoReception")
         if self.find(no):
             raise AppError("duplicate", "NoReception", 409)
+        if self.check_lines:
+            self.check_lines(payload.get("lines") or [])
         return self.save(no, payload)
 
     def update(self, no: str, payload: Row) -> Row:
         self.not_posted(no)
         require(payload, "NoBonCommande", "DateReception")
+        if self.check_lines:
+            self.check_lines(payload.get("lines") or [])
         return self.save(no, payload)
 
     def delete(self, no: str) -> None:
@@ -526,6 +532,7 @@ class InvoiceService:
         self.billing = billing
         self.numbering = numbering
         self.receptions = receptions
+        self.check_lines: Callable[[list[Row]], None] | None = None  # set by the module, as for the receptions
 
     @staticmethod
     def with_count(inv: Row) -> Row:
@@ -550,6 +557,8 @@ class InvoiceService:
         for f in INVOICE_AMOUNTS:
             inv[f] = p.get(f, inv.get(f))
         inv["lines"] = p.get("lines") or []
+        if self.check_lines:
+            self.check_lines(inv["lines"])
         inv["cDevise"] = inv.get("cDevise") or "CAD"
         inv["cStatut"] = inv.get("cStatut") or "Draft"
         return compute_invoice(inv, self.supplier_name)

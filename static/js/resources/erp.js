@@ -2,6 +2,18 @@
 import { CURRENCIES, api, esc, fmtDateTime, lang, money, num, roleName, sourceBadge, statusBadge, t, yesNo } from "../core.js";
 import { RES } from "../registry.js";
 import { route } from "../router.js";
+import { setPrefill } from "../state.js";
+
+// General ledger: the type of an account, the descriptions in the language of the screen (English: else French)
+export const GL_TYPES = ["asset", "liability", "equity", "revenue", "expense"];
+const glDesc = (r) => (lang === "en" && r.cDescEN) || r.cDesc || "";
+const ccCode = (r) => `${r.cCC1}${r.cCC2 ? "-" + r.cCC2 : ""}`;
+const activeFilter = { f: "lActive", l: "opt.active", options: [["true", "common.yes"], ["false", "common.no"]] };
+// The cost center of a purchase line: the department, then one of its sub-departments
+export const CC_COLS = [
+  { f: "cCC1", l: "f.lCC1", w: "w-sm", lookup: "cc1" },
+  { f: "cCC2", l: "f.lCC2", w: "w-sm", lookup: "cc2", lookupParams: (m, ln) => ({ cc1: ln.cCC1 || "-" }) },
+];
 
 // Receptions: put into the stock (Check shows what goes in; Put in stock posts it, then the reception is locked)
 const recBadge = (posted) => `<span class="badge ${posted ? "yes" : ""}">${esc(t(posted ? "rec.badge.posted" : "rec.badge.pending"))}</span>`;
@@ -54,22 +66,50 @@ const REC_FIELD_LABEL = {
 Object.assign(RES, {
   gl: {
     api: "gl-accounts", route: "/gl/accounts", menu: "/gl", title: "gl.title", sub: "gl.subtitle", one: "gl.account", newTitle: "gl.newAccount",
-    tabset: "gl", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${r.cDesc}`, sort: "cCode",
-    columns: [{ f: "cCode", l: "f.cCode" }, { f: "cDesc", l: "f.cDesc", wrap: true }],
-    sections: [{ t: "common.general", fields: [
-      { f: "cCode", l: "f.cCode", req: true, key: true },
-      { f: "cDesc", l: "f.cDesc", req: true, span: 3 },
-    ] }],
+    tabset: "gl", id: (r) => r.cCode, label: (r) => `${r.cCode} — ${glDesc(r)}`, sort: "cCode",
+    filters: [{ f: "cType", l: "f.gl.cType", options: GL_TYPES.map((k) => [k, "o.gl." + k]) }, activeFilter],
+    columns: [
+      { f: "cCode", l: "f.cCode" }, { f: "cDesc", l: "f.cDesc", wrap: true, fmt: (v, r) => esc(glDesc(r)) },
+      { f: "cType", l: "f.gl.cType", fmt: (v) => (v ? `<span class="badge gl-${esc(v)}">${esc(t("o.gl." + v))}</span>` : "") },
+      { f: "lRequiresCC", l: "f.gl.lRequiresCC", fmt: (v) => (v ? esc(t("common.yes")) : "") },
+      { f: "lActive", l: "opt.active", fmt: yesNo },
+    ],
+    defaults: { cType: "", lActive: true },
+    sections: [
+      { t: "common.general", help: "gl.help", fields: [
+        { f: "cCode", l: "f.cCode", req: true, key: true, help: "f.gl.cCode.help" },
+        { f: "cType", l: "f.gl.cType", type: "select", options: [["", "o.gl.guess"], ...GL_TYPES.map((k) => [k, "o.gl." + k])], help: "f.gl.cType.help" },
+        { f: "lActive", l: "opt.active", type: "check" },
+        { f: "cDesc", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
+      ] },
+      { t: "gl.rules", fields: [
+        { f: "lRequiresCC", l: "f.gl.lRequiresCC", type: "check", help: "f.gl.lRequiresCC.help", span: 2 },
+      ] },
+    ],
   },
   cc: {
     api: "cost-centers", route: "/gl/cc", menu: "/gl", title: "gl.title", sub: "gl.subtitle", one: "gl.cc", newTitle: "gl.newCc",
-    tabset: "gl", id: (r) => (r.cCC2 ? r.cCC1 + "/" + r.cCC2 : r.cCC1), label: (r) => `${r.cCC1}${r.cCC2 ? "-" + r.cCC2 : ""} — ${r.cDesc}`, sort: "cCC1",
-    columns: [{ f: "cCC1", l: "f.cCC1" }, { f: "cCC2", l: "f.cCC2" }, { f: "cDesc", l: "f.cDesc", wrap: true }],
-    sections: [{ t: "common.general", fields: [
-      { f: "cCC1", l: "f.cCC1", req: true, key: true },
-      { f: "cCC2", l: "f.cCC2", key: true },
-      { f: "cDesc", l: "f.cDesc", req: true, span: 2 },
+    tabset: "gl", id: (r) => (r.cCC2 ? r.cCC1 + "/" + r.cCC2 : r.cCC1), label: (r) => `${ccCode(r)} — ${glDesc(r)}`, sort: "cCC1",
+    oneOf: (m) => (m.cCC2 ? "gl.sub" : "gl.dept"),
+    filters: [activeFilter],
+    // a department, then its sub-departments under it (the list comes in cCC1, cCC2 order)
+    columns: [
+      { f: "cCC1", l: "gl.cc", fmt: (v, r) => (r.cCC2 ? `<span class="cc-sub">↳ ${esc(ccCode(r))}</span>` : `<b>${esc(r.cCC1)}</b>`) },
+      { f: "cDesc", l: "f.cDesc", wrap: true, fmt: (v, r) => (r.cCC2 ? esc(glDesc(r)) : `<b>${esc(glDesc(r))}</b>`) },
+      { f: "cCC2", l: "gl.level", fmt: (v) => esc(t(v ? "gl.sub" : "gl.dept")) },
+      { f: "lActive", l: "opt.active", fmt: yesNo },
+    ],
+    defaults: { lActive: true },
+    sections: [{ t: "common.general", help: "gl.cc.help", fields: [
+      { f: "cCC1", l: "f.cCC1", req: true, key: true, help: "f.cCC1.help" },
+      { f: "cCC2", l: "f.cCC2", key: true, help: "f.cCC2.help" },
+      { f: "lActive", l: "opt.active", type: "check" },
+      { f: "cDesc", l: "f.cDescFR", req: true, span: 2 }, { f: "cDescEN", l: "f.cDescEN", span: 2 },
     ] }],
+    actions: [
+      { id: "addSub", l: "gl.addSub", show: (m, isNew) => !isNew && !m.cCC2,
+        run: (m) => { setPrefill({ key: "cc", values: { cCC1: m.cCC1 } }); location.hash = "#/gl/cc/new"; } },
+    ],
   },
   suppliers: {
     api: "suppliers", route: "/suppliers", title: "sup.title", sub: "sup.subtitle", one: "sup.one", newTitle: "sup.new",
@@ -130,7 +170,7 @@ Object.assign(RES, {
       cols: [
         { f: "cCodeProduit", l: "f.cCodeProduit", w: "w-md" }, { f: "cDescription", l: "f.cDescription", w: "w-lg" },
         { f: "dQuantite", l: "f.dQuantite", w: "w-xs", n: true }, { f: "dCoutUnitaire", l: "f.dCoutUnitaire", w: "w-sm", n: true },
-        { f: "cGL", l: "f.cGL", w: "w-sm", lookup: "gl" }, { f: "cCC1", l: "f.lCC1", w: "w-xs" }, { f: "cCC2", l: "f.lCC2", w: "w-xs" },
+        { f: "cGL", l: "f.cGL", w: "w-sm", lookup: "gl" }, ...CC_COLS,
         { f: "iNoReception", l: "f.iNoReception", w: "w-sm" },
       ],
       amountLabel: "f.dMontant", amount: (l) => num(l.dQuantite) * num(l.dCoutUnitaire),
@@ -223,7 +263,7 @@ Object.assign(RES, {
         { f: "dExpiry", l: "f.rec.dExpiry", w: "w-md", type: "date" },
         { f: "cLocation", l: "f.rec.cLocation", w: "w-md", lookup: "locations", lookupParams: (m) => ({ wh: m.Entrepot }) },
         { f: "cSerial", l: "f.rec.cSerial", w: "w-md" },
-        { f: "cGL", l: "f.cGL", w: "w-sm", lookup: "gl" }, { f: "cCC1", l: "f.lCC1", w: "w-xs" }, { f: "cCC2", l: "f.lCC2", w: "w-xs" },
+        { f: "cGL", l: "f.cGL", w: "w-sm", lookup: "gl" }, ...CC_COLS,
       ],
       amountLabel: "f.Montant", amount: (l) => num(l.QuantiteRecue) * num(l.PrixUnitaire),
     },

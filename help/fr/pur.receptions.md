@@ -122,11 +122,11 @@ Le compte du grand livre de la ligne, pour la facture fournisseur.
 
 ### CC1 {#pur.receptions.lines.cCC1}
 
-Premier centre de coûts de la ligne.
+Le département (centre de coûts) de la ligne, choisi dans la liste (**Grand livre > Comptes GL / Centres de coûts**, onglet **Centres de coûts**). Obligatoire quand le compte GL de la ligne a *Exige un centre de coûts*.
 
 ### CC2 {#pur.receptions.lines.cCC2}
 
-Deuxième centre de coûts de la ligne.
+Un sous-département du département en CC1 (la liste ne montre que les siens). Vide : le département lui-même.
 
 ## Totaux {#pur.receptions.totals}
 

@@ -108,7 +108,12 @@ SCREENS: tuple[Screen, ...] = (
         routes={"inventory.counts_generate": "edit", "inventory.counts_post": "post"},
     ),
     Screen("inv.valuation", "inv", actions=("view",), routes={"inventory.inventory_valuation": "view"}),
-    Screen("inv.warehouses", "inv", crud=("inventory.warehouses", "inventory.locations")),
+    Screen(
+        "inv.warehouses",
+        "inv",
+        crud=("inventory.warehouses", "inventory.locations"),
+        routes={"inventory.warehouses_generate_locations": "create"},
+    ),
     Screen("inv.params", "inv", crud=("inventory.stock_params",)),
     Screen(
         "inv.setup",
@@ -241,6 +246,7 @@ OPEN_ENDPOINTS = frozenset(
         "system.lookup",  # code + description lists of the form fields
         "system.summary",  # dashboard
         "sales.company_profile",  # header of the documents
+        "sales.company_logo",  # printed on them
         "help.help_toc",  # the help: each route answers with the items the role may see
         "help.help_page",
         "help.help_item",
@@ -273,6 +279,7 @@ ADMIN_ENDPOINTS = frozenset(
         "backup.backup_file",
         "backup.backup_run",
         "sales.company_save",
+        "sales.company_logo_save",
         "system.demo",
         "system.reset",
         "system.clear",

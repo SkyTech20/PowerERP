@@ -4,6 +4,8 @@ discounts, V3 invoices (draft), V4 posting (the stock goes out), V5 printing FR 
 V1: /api/customers (ship-to addresses and contacts as child lists), lookups customers and customer_terms;
     GET /api/company (the header of the invoices, with the GST / QST numbers of the tax codes),
     PUT /api/admin/company (administrators).
+    GET /api/company/logo (the logo as a PNG, 404 without one), PUT /api/admin/company/logo ({"cLogo": data URL};
+    the image is made a PNG fitting in 600 x 240), DELETE /api/admin/company/logo (administrators).
 V2: /api/price-lists (prices by product, unit and quantity as lines; discounts by category), lookup price_lists;
     lookup sellable_products; GET /api/pricing?customer=&product=&qty=&uom=&date=: the price, the discount and the rule that gave them.
 V3: /api/sales-invoices (drafts: GET/POST, GET/PUT/DELETE /<no>; a posted one is 409),
@@ -21,10 +23,10 @@ from __future__ import annotations
 
 from datetime import date
 
-from flask import Blueprint, Flask, jsonify, render_template, request
+from flask import Blueprint, Flask, Response, jsonify, render_template, request
 
 from powererp.container import Container
-from powererp.core.errors import AppError
+from powererp.core.errors import AppError, NotFound
 from powererp.core.http import json_payload
 from powererp.core.pagination import paginate_request
 from powererp.core.security import current_username
@@ -81,6 +83,21 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     @bp.route("/api/admin/company", methods=["PUT"])
     def company_save():
         company.save(json_payload())
+        return jsonify(company.view())
+
+    @bp.route("/api/company/logo")
+    def company_logo():
+        png = company.logo_png()
+        if png is None:
+            raise NotFound()
+        return Response(png, mimetype="image/png", headers={"Cache-Control": "no-cache"})
+
+    @bp.route("/api/admin/company/logo", methods=["PUT", "DELETE"])
+    def company_logo_save():
+        if request.method == "DELETE":
+            company.remove_logo()
+        else:
+            company.set_logo(str(json_payload().get("cLogo") or ""))
         return jsonify(company.view())
 
     _register_invoices(bp, c, customers, pricing, seed.get("sales_invoices", []))
@@ -162,7 +179,9 @@ def _register_invoices(
         ship_to = customers.ship_to(customer, inv["cShipTo"]) if customer and inv["cShipTo"] else None
         codes = {t["cCode"].upper(): t for t in c.get("tax_codes").list()}
         lang = (request.args.get("lang") or inv.get("cLang") or "fr").lower()
-        ctx = printing.context(inv, c.get("company_profile").view(), customer, ship_to, codes, lang)
+        profile = c.get("company_profile")
+        ctx = printing.context(inv, profile.view(), customer, ship_to, codes, lang)
+        ctx["logo"] = profile.logo_url()
         return render_template("sales_invoice.html", **ctx)
 
     @bp.route("/api/sales-invoices/<int:no>/check", methods=["POST"])

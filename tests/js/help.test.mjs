@@ -124,7 +124,7 @@ test("the inputs of the hand-written screens and panels are documented (data-hel
   const { COMPANY_FIELDS } = await import(pathToFileURL(join(STATIC, "js", "screens", "settings.js")).href);
   const helpF = (file) => [...readFileSync(join(STATIC, "js", file), "utf-8").matchAll(/data-help-f="([A-Za-z.]+)"/g)].map((m) => m[1]);
   const codes = [
-    ...COMPANY_FIELDS.map(([f]) => `admin.settings.${f}`), "admin.settings.scenario",
+    ...COMPANY_FIELDS.map(([f]) => `admin.settings.${f}`), "admin.settings.cLogo", "admin.settings.scenario",
     ...helpF("screens/roles.js").map((f) => `admin.roles.${f}`),
     ...helpF("resources/sales.js").map((f) => `sales.customers.${f}`),
     ...helpF("screens/backups.js").map((f) => `admin.backups.${f}`),
@@ -135,6 +135,9 @@ test("the inputs of the hand-written screens and panels are documented (data-hel
     ...helpF("screens/stockcard.js").map((f) => `inv.stock.${f}`),
     ...helpF("screens/scor.js").map((f) => `rep.scor.${f}`),
     ...helpF("resources/inventory.js").map((f) => `admin.taxes.taxgroups.${f}`), // the "Try the group" panel
+    // the Locations tab of a warehouse and Generate locations
+    ...helpF("screens/whlocations.js").map((f) => `inv.warehouses.${f}`),
+    ...["cAisle", "cRack", "cLevel", "cBin"].flatMap((p) => [`inv.warehouses.gen.${p}From`, `inv.warehouses.gen.${p}To`]),
     // the panels of Production: the week preview is on three screens, the others on one
     ...helpF("resources/production.js").flatMap((f) => PROD_PANELS[f.split(".")[0]].map((s) => `${s}.${f}`)),
   ];

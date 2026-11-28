@@ -8,6 +8,15 @@ The company profile printed on the invoices, the demo data and the maintenance o
 
 Everything here is printed at the top of the invoices and credit notes. **Save** keeps the changes; they count for the next printouts, including those of invoices already posted.
 
+### Logo {#admin.settings.cLogo}
+
+The company logo, printed at the top left of the invoices and credit notes and at the top of the *Summary* sheet of the traceability spreadsheet (**Production > Traceability > Export to Excel**).
+
+- **Choose an image…** picks a PNG, JPEG, GIF or WebP file of 5 MB at most. It is saved at once (no need to press **Save**) and shown in the box.
+- A big image or a phone photo is made smaller automatically (600 × 240 pixels at most, the proportions are kept), so the invoices stay light.
+- A wide logo on a white or transparent background prints best.
+- **Change the logo…** replaces it; **Remove the logo** prints the documents without one again.
+
 ### Name {#admin.settings.cName}
 
 The usual name of the company. Required.

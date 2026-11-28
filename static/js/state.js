@@ -11,3 +11,7 @@ export function setUser(u) { user = u; }
 export function setView(v) { view = v; }
 export function setPrefill(p) { prefill = p; }
 export function clearLookups() { Object.keys(lookupCache).forEach((k) => delete lookupCache[k]); }
+
+// The tab a form opens on (e.g. back from a location to the Locations tab of its warehouse), used once
+export let formTab = null;
+export function setFormTab(v) { formTab = v; }

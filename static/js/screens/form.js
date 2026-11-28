@@ -4,14 +4,15 @@ import { bindLookup, lookupOptions, lookupRows } from "../lookups.js";
 import { decorateHelp, helpButton } from "../helpui.js";
 import { canOn } from "../menu.js";
 import { RES } from "../registry.js";
-import { clearLookups, prefill, setPrefill } from "../state.js";
+import { clearLookups, formTab, prefill, setFormTab, setPrefill } from "../state.js";
 import { pageHead, tabLabel } from "../views.js";
 
 // ---------- Generic form
 // Field options: req, reqNew, key (read-only once saved), readonly, type (text | number | date | select | check |
 // textarea | password | email), lookup (+ fill, lookupParams(model, line), onPick), show(model, isNew), rerender (redraw on change),
 // fmt(value) (how a read-only value is shown).
-// Resource options: lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
+// Resource options: parent(model) (the route that Back / Cancel / Delete go to, e.g. a location's warehouse; else
+// R.route; parentTab: the tab of the parent's form to open, parentLabel(model): its name in the crumbs), lines, grids (other child lists: [{ key, title, help, cols, newLine, show, tab }]), totals, tax,
 // a line column's ph (placeholder text key), lines.minWidth (px: a wide grid scrolls instead of squeezing its columns), locked(model, isNew), actions (a field's readonly and a line column's show can be functions of the record), panel { html(model), bind(model, { path, reload(record), error(e) }), tab, onNew } and panels (more of them).
 // warnings(model) -> Promise of { field: message }: shown under those fields (not errors: saving still decides),
 // checked again on every change of the form (e.g. a product unit with no conversion to its stock unit).
@@ -28,7 +29,9 @@ export function formView(key, id) {
   let errors = {};
   let missing = false;
   let locked = false;
-  let activeTab = R.formTabs ? R.formTabs[0][0] : null; // R.formTabs: sections shown as tabs
+  // R.formTabs: sections shown as tabs; the screen that opened the form may ask for one (setFormTab)
+  let activeTab = R.formTabs ? (R.formTabs.some(([k]) => k === formTab) ? formTab : R.formTabs[0][0]) : null;
+  setFormTab(null);
   let refreshers = []; // lookups whose list depends on other fields
   const picked = {}; // grid with a detail -> index of the line shown in its panel
   let lineError = null; // { key, i, f, code }: the line (and its field) refused on save
@@ -37,6 +40,7 @@ export function formView(key, id) {
   let taxLive = isNew; // existing records keep their stored taxes until something is changed
 
   const cur = () => (R.currency ? R.currency(model) : "CAD");
+  const home = () => (R.parent && model && R.parent(model)) || R.route; // where Back / Cancel / Delete go
   const visible = (fd) => !fd.show || fd.show(model, isNew);
 
   // Load the supplier's TPS / TVQ numbers and recompute the taxes.
@@ -257,13 +261,15 @@ export function formView(key, id) {
     // read-only: the record says so (e.g. a posted invoice), or the role may not change it
     locked = !!(R.locked && R.locked(model, isNew)) || (!isNew && !canOn(R, "edit"));
     const title = isNew ? t(R.newTitle) : `${t(R.oneOf ? R.oneOf(model) : R.one)} ${R.label(model)}`;
-    const crumbs = `<a href="#${R.route}">${esc(t(R.title))}</a>${R.tabset ? " / " + esc(tabLabel(R)) : ""}`;
+    const crumbs = R.parent && R.parentLabel
+      ? `<a href="#${R.route}">${esc(t(R.title))}</a> / <a href="#${home()}" data-home>${esc(R.parentLabel(model))}</a>${R.tabset ? " / " + esc(tabLabel(R)) : ""}`
+      : `<a href="#${R.route}">${esc(t(R.title))}</a>${R.tabset ? " / " + esc(tabLabel(R)) : ""}`;
     // a.perm: the action of the role it needs (post, print, approve…); without it the button is not shown
     const extra = (R.actions || []).filter((a) => (!a.show || a.show(model, isNew)) && (!a.perm || canOn(R, a.perm)))
       .map((a) => `<button class="btn ${a.primary ? "primary" : ""}" data-action="${a.id}">${esc(t(a.l))}</button>`).join("");
     const actions = helpButton(R) + (locked
-      ? `<a class="btn" href="#${R.route}">← ${esc(t("common.back"))}</a>${extra}`
-      : `<a class="btn" href="#${R.route}">${esc(t("common.cancel"))}</a>
+      ? `<a class="btn" href="#${home()}" data-home>← ${esc(t("common.back"))}</a>${extra}`
+      : `<a class="btn" href="#${home()}" data-home>${esc(t("common.cancel"))}</a>
       ${isNew || R.noDelete || !canOn(R, "delete") ? "" : `<button class="btn danger" id="deleteBtn">${esc(t("common.delete"))}</button>`}
       ${extra}<button class="btn primary" id="saveBtn">${esc(t("common.save"))}</button>`);
     const badge = R.badge ? R.badge(model, isNew) : (!isNew && model.cSource ? sourceBadge(model.cSource) : "");
@@ -293,6 +299,7 @@ export function formView(key, id) {
       .map(([k, l]) => `<a href="#" role="tab" data-ftab="${k}" class="${k === activeTab ? "active" : ""}">${esc(t(l))}${tabHasError(k) ? ' <span class="req">●</span>' : ""}</a>`).join("")}</div>` : "";
     $("#view").innerHTML = pageHead(title, R.sub2 ? R.sub2(model, isNew) : "", actions, crumbs)
       + tabBar + `<form id="form" novalidate>${sections}${lines}</form>${panel}`;
+    if (R.parentTab) $$("[data-home]").forEach((a) => a.addEventListener("click", () => setFormTab(R.parentTab)));
     $$("[data-ftab]").forEach((a) => a.addEventListener("click", (e) => {
       e.preventDefault();
       activeTab = a.dataset.ftab;
@@ -524,7 +531,8 @@ export function formView(key, id) {
     try {
       await api(apiPath(), { method: "DELETE" });
       toast(t("common.deleted"), "success");
-      location.hash = "#" + R.route;
+      if (R.parentTab) setFormTab(R.parentTab);
+      location.hash = "#" + home();
     } catch (e) { showError(e); }
   }
 

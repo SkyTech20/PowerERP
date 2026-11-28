@@ -3,6 +3,7 @@ import { $, CURRENCIES, api, enc, esc, fmtDateTime, lang, money, num, numOnly, s
 import { RES } from "../registry.js";
 import { canOpen, route } from "../router.js";
 import { setPrefill } from "../state.js";
+import { warehouseLocationsPanel } from "../screens/whlocations.js";
 
 // ------------------------------------------------------------------ Products, taxes and inventory
 export const today = () => new Date().toISOString().slice(0, 10);
@@ -279,6 +280,8 @@ Object.assign(RES, {
       { f: "lUseLocations", l: "f.wh.lUseLocations", fmt: yesNo }, { f: "lActive", l: "opt.active", fmt: yesNo },
     ],
     defaults: { cType: "main", cProvince: "QC", cCountry: "CA", lUseLocations: true, lActive: true },
+    formTabs: [["general", "wh.ftab.general"], ["locations", "wh.tab.locations"]], // the locations are a tab of their warehouse
+    panel: warehouseLocationsPanel,
     sections: [
       { t: "common.general", fields: [
         { f: "cCode", l: "f.cCode", req: true, key: true },
@@ -300,6 +303,10 @@ Object.assign(RES, {
   },
   locations: {
     api: "locations", route: "/inv/locations", tabset: "wh", title: "wh.title", sub: "wh.subtitle", one: "loc.one", newTitle: "loc.new",
+    hideTab: true, // no tab of its own: Inventory > Warehouses > (a warehouse) > Locations
+    parent: (m) => (m && m.cWarehouse ? "/inv/warehouses/" + enc(m.cWarehouse) : "/inv/warehouses"),
+    parentTab: "locations",
+    parentLabel: (m) => m.cWarehouse || "",
     id: (r) => r.cWarehouse + "/" + r.cCode, label: (r) => `${r.cWarehouse} / ${r.cCode}`, sort: "iPickSeq",
     filters: [whFilter, { f: "cType", l: "f.loc.cType", options: opts("o.loc.", LOCATION_TYPES) }, { f: "lBlocked", l: "f.loc.lBlocked", options: [["true", "common.yes"], ["false", "common.no"]] }],
     columns: [
