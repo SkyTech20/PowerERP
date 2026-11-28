@@ -197,6 +197,8 @@ def register(app: Flask, c: Container, seed: dict) -> None:
     billing = c.register("billing", BillingService())
     invs = c.register("invoices", InvoiceService(supplier_name, billing, numbering, recs))
     entry = c.register("reception_stock", ReceptionStockService(recs, lambda: c.get("stock"), current_username))
+    if "accounting_check" in c:  # the GL account and cost center of the lines typed on the screens
+        recs.check_lines = invs.check_lines = c.get("accounting_check").lines
     app.register_blueprint(_blueprint(pos, recs, invs, entry))
 
     c.get("lookups").register("po", pos.lookup)

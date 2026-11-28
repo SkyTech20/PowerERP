@@ -122,11 +122,11 @@ The GL account of the line, for the supplier invoice.
 
 ### CC1 {#pur.receptions.lines.cCC1}
 
-First cost center of the line.
+The department (cost center) the line is for, picked from the list (**General Ledger > GL Accounts / Cost Centers**, tab **Cost centers**). Required when the GL account of the line has *Requires a cost center*.
 
 ### CC2 {#pur.receptions.lines.cCC2}
 
-Second cost center of the line.
+A sub-department of the department in CC1 (the list shows only its own). Empty: the department itself.
 
 ## Totals {#pur.receptions.totals}
 

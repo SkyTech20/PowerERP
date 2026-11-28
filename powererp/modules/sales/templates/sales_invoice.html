@@ -13,6 +13,7 @@
   .toolbar button { font: inherit; padding: 7px 16px; border: 0; border-radius: 6px; background: #1f5fa8; color: #fff; cursor: pointer; }
   header { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid #1d2433; padding-bottom: 14px; }
   .company h1 { font-size: 18px; margin: 0 0 4px; }
+  .company .logo { display: block; max-width: 240px; max-height: 80px; margin: 0 0 8px; }
   .muted { color: #5b6475; }
   .title { text-align: right; }
   .title h2 { font-size: 22px; margin: 0 0 6px; letter-spacing: .04em; text-transform: uppercase; }
@@ -45,6 +46,7 @@
   {% if not posted %}<div class="watermark">{{ t.draft }}</div>{% endif %}
   <header>
     <div class="company">
+      {% if logo %}<img class="logo" src="{{ logo }}" alt="{{ company.cName }}">{% endif %}
       <h1>{{ company.cLegalName or company.cName }}</h1>
       {% for l in companyAddress %}<div>{{ l }}</div>{% endfor %}
       <div class="muted">

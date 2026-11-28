@@ -548,3 +548,30 @@ tr.pv-open td { background: #f3f8fe; }
 .sc-grid td.sc-out { color: var(--danger); }
 .sc-grid tr.sc-neg td { background: #fdecea; }
 .sc-small { font-size: 11px; margin-top: 2px; }
+
+/* Administration > System settings: the company logo */
+.logo-field { margin: 4px 0 18px; }
+.logo-field > label { display: block; font-weight: 600; margin-bottom: 6px; }
+.logo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.logo-box { width: 260px; max-width: 100%; height: 96px; border: 1px dashed var(--border, #c9d0db); border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 8px; }
+.logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.logo-empty { color: var(--muted, #5b6475); font-size: 13px; }
+.logo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Inventory > Warehouses: the Locations tab and Generate locations */
+#whLoc .card-head { flex-wrap: wrap; gap: 8px; }
+.loc-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+#whLoc tr.clickable { cursor: pointer; }
+#whLoc tr.clickable:hover td { background: var(--hover, #f3f6fa); }
+.gen-result { margin: 12px 0 4px; min-height: 20px; }
+.gen-result p { margin: 4px 0; }
+.gen-codes code { display: inline-block; background: #eef2f7; border-radius: 4px; padding: 1px 6px; margin: 2px 2px 0 0; font-size: 12px; }
+.gen-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+/* General ledger: the type of an account, the sub-departments under their department */
+.badge.gl-asset { background: #e8f1fb; color: #1f5fa8; }
+.badge.gl-liability { background: #fbeee8; color: #a5481f; }
+.badge.gl-equity { background: #f1ecfa; color: #5b3ea8; }
+.badge.gl-revenue { background: #e8f6ee; color: #1f7a45; }
+.badge.gl-expense { background: #f4f4f4; color: #4b5563; }
+.cc-sub { padding-left: 18px; color: var(--muted); }

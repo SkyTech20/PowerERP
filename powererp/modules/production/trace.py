@@ -39,7 +39,7 @@ def key(product: Any, lot: Any) -> Key:
 class TraceService:
     def __init__(self, deps: dict[str, Callable[[], Any]]):
         """deps: stock, orders (ProductionOrderService), receptions (ReceptionService), invoices (sales), products (find),
-        lot_status (quality: the status of the lots)."""
+        lot_status (quality: the status of the lots); logo (optional: the company logo as PNG bytes, or None)."""
         self.deps = deps
 
     def _get(self, name: str) -> Any:
@@ -487,20 +487,37 @@ class TraceService:
         first = True
         for title, head, rows in sheets:
             ws = wb.active if first else wb.create_sheet()
+            top = self._logo_rows(ws) if first else 0  # the company logo above the summary
             first = False
             ws.title = title
             ws.append(head)
-            for cell in ws[1]:
+            for cell in ws[top + 1]:
                 cell.font = Font(bold=True)
             for r in rows:
                 ws.append(r)
             for i, h in enumerate(head, 1):
                 width = max([len(str(h))] + [len(str(r[i - 1])) for r in rows if i - 1 < len(r)])
                 ws.column_dimensions[ws.cell(1, i).column_letter].width = min(max(width + 2, 8), 50)
-            ws.freeze_panes = "A2"
+            ws.freeze_panes = f"A{top + 2}"
         buf = io.BytesIO()
         wb.save(buf)
         return buf.getvalue()
+
+    def _logo_rows(self, ws: Any) -> int:
+        """Put the company logo at the top of the sheet; the number of rows it takes (0 without a logo)."""
+        png = self.deps["logo"]() if "logo" in self.deps else None
+        if not png:
+            return 0
+        from openpyxl.drawing.image import Image as XlImage
+
+        img = XlImage(io.BytesIO(png))
+        scale = min(1.0, 60 / img.height, 240 / img.width)  # 60 px high at most on the sheet
+        img.width, img.height = round(img.width * scale), round(img.height * scale)
+        rows = img.height // 20 + 2  # a row is 20 px high
+        for _ in range(rows):
+            ws.append([])
+        ws.add_image(img, "A1")
+        return rows
 
 
 LABELS: dict[str, dict[str, Any]] = {

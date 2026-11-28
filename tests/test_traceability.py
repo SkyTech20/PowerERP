@@ -126,3 +126,20 @@ def test_export_is_a_spreadsheet(client, made):
     en = client.get("/api/traceability/export?product=FARINE-T55&lot=F-REC")
     assert load_workbook(io.BytesIO(en.data)).sheetnames[0] == "Summary"
     assert client.get("/api/traceability/export?product=FARINE-T55&lot=X").status_code == 404
+
+
+def test_export_has_the_company_logo_above_the_summary(client, made):
+    from openpyxl import load_workbook
+
+    from tests.test_company_logo import data_url
+
+    assert client.put("/api/admin/company/logo", json={"cLogo": data_url(size=(600, 150))}).status_code == 200
+    r = client.get("/api/traceability/export?product=FARINE-T55&lot=F-REC&lang=en")
+    wb = load_workbook(io.BytesIO(r.data))
+    ws = wb["Summary"]
+    assert len(ws._images) == 1 and len(wb["Origin"]._images) == 0
+    rows = list(ws.iter_rows(values_only=True))
+    top = next(i for i, row in enumerate(rows) if row[0] == "Field")  # the table starts under the logo
+    assert top >= 2 and all(v is None for row in rows[:top] for v in row)
+    assert {row[0]: row[1] for row in rows[top + 1 :]}["Lot"] == "F-REC"
+    assert ws.freeze_panes == f"A{top + 2}"

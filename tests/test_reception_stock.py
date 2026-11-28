@@ -120,3 +120,21 @@ def test_currency_other_than_cad_is_a_warning(client):
     _rec(client, Devise="USD")
     res = client.post("/api/receptions/990201/check").get_json()
     assert res["ok"] is True and [w["code"] for w in res["warnings"]] == ["currency_not_cad"]
+
+
+def test_two_lines_of_the_same_product_keep_the_average(client):
+    """Each line is costed with the average left by the line before (not the average before the reception)."""
+    prod = client.get("/api/products/MON-27Q").get_json()
+    qty = sum(float(x["dQtyOnHand"]) for x in _stock(client, "MON-27Q"))
+    avg = float(prod.get("dAvgCost") or 0)
+    lines = [
+        {"CodeArticle": "MON-27Q", "QuantiteRecue": "2", "PrixUnitaire": "100.00"},
+        {"CodeArticle": "MON-27Q", "QuantiteRecue": "2", "PrixUnitaire": "300.00"},
+    ]
+    _rec(client, lines=lines)
+    moves = client.post("/api/receptions/990201/post").get_json()["movements"]
+    first = (qty * avg + 200) / (qty + 2) if qty > 0 else 100
+    second = ((qty + 2) * first + 600) / (qty + 4)
+    assert abs(float(moves[0]["dAvgCostAfter"]) - first) < 0.01
+    assert abs(float(moves[1]["dAvgCostAfter"]) - second) < 0.01
+    assert abs(float(client.get("/api/products/MON-27Q").get_json()["dAvgCost"]) - second) < 0.01

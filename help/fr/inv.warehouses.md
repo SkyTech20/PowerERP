@@ -2,7 +2,7 @@
 
 Les entrepôts, et les emplacements à l'intérieur (zone > allée > rangée > niveau > case). Le stock est tenu par entrepôt, et par emplacement dans les entrepôts qui gèrent les emplacements.
 
-**Où :** **Inventaire > Entrepôts / emplacements**, onglets **Entrepôts** et **Emplacements**.
+**Où :** **Inventaire > Entrepôts / emplacements**. Les emplacements sont un onglet dans chaque entrepôt (ouvrir l'entrepôt, onglet **Emplacements**).
 
 ## Entrepôts {#inv.warehouses.list}
 
@@ -76,9 +76,67 @@ L'emplacement où arrivent les marchandises. Ce doit être un emplacement de cet
 
 L'emplacement d'où partent les marchandises. Ce doit être un emplacement de cet entrepôt. À titre d'information, prêt pour l'expédition par emplacement.
 
+## Onglet Emplacements {#inv.warehouses.locationsTab}
+
+Chaque entrepôt a un onglet **Emplacements** (à côté de **Entrepôt**) avec ses propres emplacements, dans l'ordre de préparation. Cliquez sur une ligne pour ouvrir l'emplacement ; **Retour** ou **Annuler** y ramène à cet onglet. **Nouvel emplacement** ouvre un emplacement vide déjà rattaché à cet entrepôt. Un nouvel entrepôt doit d'abord être enregistré.
+
+### Chercher un emplacement {#inv.warehouses.locFind}
+
+Affiché à partir de 10 emplacements : ne garde que les lignes dont le code, la zone, l'allée, la rangée, le niveau, la case ou la description contient ce qui est tapé.
+
+## Générer des emplacements {#inv.warehouses.gen}
+
+Crée d'un coup toute une zone de stockage : chaque allée × rangée × niveau (× case) des plages tapées. Le code est zone-allée-rangée-niveau-case, par exemple `R-A-01-1` pour la zone R, l'allée A, la rangée 01, le niveau 1. **Aperçu** montre combien d'emplacements seront créés et leurs premiers et derniers codes ; **Créer** les enregistre. Les emplacements qui existent déjà sont sautés : on peut relancer les mêmes plages après avoir ajouté une allée. 2 000 emplacements au plus d'un coup.
+
+Exemple pour des palettiers : zone `R`, allées `A` à `C`, rangées `01` à `05`, niveaux `1` à `4` = 60 emplacements, de `R-A-01-1` à `R-C-05-4`.
+
+### Zone {#inv.warehouses.gen.cZone}
+
+Préfixe facultatif des codes (par exemple `R` pour les palettiers, `MP` pour les matières premières). Laissez vide si l'entrepôt n'a qu'une zone.
+
+### Type {#inv.warehouses.gen.cType}
+
+Le type de chaque emplacement créé (souvent *Réserve* pour les palettiers, *Préparation* pour la face de préparation).
+
+### Plusieurs produits {#inv.warehouses.gen.lMixProducts}
+
+Coché : plusieurs produits peuvent partager chaque emplacement créé. La règle des lots s'applique toujours (un lot par produit par emplacement).
+
+### Allée — de {#inv.warehouses.gen.cAisleFrom}
+
+Première allée, une lettre (`A`) ou un nombre (`1`). Obligatoire.
+
+### Allée — à {#inv.warehouses.gen.cAisleTo}
+
+Dernière allée (`C` donne A, B, C). Vide : seulement la première allée.
+
+### Rangée — de {#inv.warehouses.gen.cRackFrom}
+
+Première rangée (la colonne du palettier le long de l'allée). Avec des zéros (`01`), les codes les gardent : 01, 02 … 10.
+
+### Rangée — à {#inv.warehouses.gen.cRackTo}
+
+Dernière rangée. Vide : seulement la première ; les deux vides : pas de rangée dans le code.
+
+### Niveau — de {#inv.warehouses.gen.cLevelFrom}
+
+Premier niveau (l'étage du palettier, 1 = au sol).
+
+### Niveau — à {#inv.warehouses.gen.cLevelTo}
+
+Dernier niveau. Vide : seulement le premier ; les deux vides : pas de niveau dans le code.
+
+### Case — de {#inv.warehouses.gen.cBinFrom}
+
+Première case dans un niveau, quand les niveaux sont divisés (le plus souvent vide).
+
+### Case — à {#inv.warehouses.gen.cBinTo}
+
+Dernière case.
+
 ## Emplacements {#inv.warehouses.locations}
 
-Colonnes : Entrepôt, Emplacement, Zone, Allée, Rangée, Niveau, Case, Type, Description, Ordre de préparation et Bloqué. Filtres : Entrepôt, Type et Bloqué. Un emplacement qui a ou a eu du stock ne peut pas être supprimé : décochez *Actif* ou cochez *Bloqué* à la place.
+La fiche d'un emplacement (ouverte depuis l'onglet **Emplacements** de son entrepôt). Un emplacement qui a ou a eu du stock ne peut pas être supprimé : décochez *Actif* ou cochez *Bloqué* à la place.
 
 ### Entrepôt {#inv.warehouses.locations.cWarehouse}
 

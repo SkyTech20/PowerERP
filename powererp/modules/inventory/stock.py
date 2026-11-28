@@ -199,7 +199,11 @@ class StockService:
         return prod
 
     def post(self, m: Row, prod: Row) -> Row:
-        """Cost the movement (the product's costing) and add it to the ledger."""
+        """Cost the movement (the product's costing) and add it to the ledger.
+
+        The product is read again: a document checks all its lines first, so two lines of the same product would
+        otherwise cost the second one with the average before the first."""
+        prod = self.products_repo.get(prod["cCode"]) or prod
         q = number(m["dQty"])
         qty_before = self.product_totals(prod["cCode"])[0]
         costing = costing_of(prod)

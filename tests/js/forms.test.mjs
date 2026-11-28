@@ -175,3 +175,24 @@ test("Stock on hand: a line opens its stock card, which names each movement and 
   assert.equal(docOf(m({ cDocType: "CNT", cDocNo: "3" })).path, "/inv/counts/3");
   assert.equal(docOf(m({})).label, "");
 });
+
+test("the locations are a tab inside their warehouse; Generate locations counts its ranges", async () => {
+  const { rangeCount, locationLink, warehouseLocationsPanel } = await import(pathToFileURL(join(STATIC, "js", "screens", "whlocations.js")).href);
+  const { tabsHtml } = await import(pathToFileURL(join(STATIC, "js", "views.js")).href);
+  assert.equal(RES.warehouses.panel, warehouseLocationsPanel);
+  assert.deepEqual(RES.warehouses.formTabs.map(([k]) => k), ["general", "locations"]);
+  assert.equal(warehouseLocationsPanel.tab, "locations");
+  assert.equal(tabsHtml(RES.warehouses), ""); // the Locations tab of the list is gone: no tab bar with one tab
+  assert.equal(RES.locations.parent({ cWarehouse: "MP 1" }), "/inv/warehouses/MP%201");
+  assert.equal(RES.locations.parentTab, "locations");
+  assert.equal(locationLink({ cWarehouse: "MP", cCode: "R-A-01-1" }), "/inv/locations/MP/R-A-01-1");
+  assert.equal(rangeCount("A", "C"), 3);
+  assert.equal(rangeCount("01", "12"), 12);
+  assert.equal(rangeCount("1", ""), 1);
+  assert.equal(rangeCount("", ""), 1);
+  assert.equal(rangeCount("C", "A"), 0);
+  assert.equal(rangeCount("A", "5"), 0);
+  for (const k of ["wh.ftab.general", "wh.gen.title", "wh.gen.help", "wh.loc.none", "wh.loc.find", "err.bad_range", "err.too_many_locations"]) {
+    assert.ok(I18N.en[k] && I18N.fr[k], k);
+  }
+});

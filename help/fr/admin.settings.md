@@ -8,6 +8,15 @@ Le profil de l'entreprise imprimé sur les factures, les données de démonstrat
 
 Tout ce qui est ici est imprimé en haut des factures et des notes de crédit. **Enregistrer** garde les changements ; ils comptent pour les prochaines impressions, y compris celles des factures déjà comptabilisées.
 
+### Logo {#admin.settings.cLogo}
+
+Le logo de l'entreprise, imprimé en haut à gauche des factures et des notes de crédit et en haut de la feuille *Résumé* du chiffrier de traçabilité (**Production > Traçabilité > Exporter vers Excel**).
+
+- **Choisir une image…** prend un fichier PNG, JPEG, GIF ou WebP de 5 Mo au plus. Il est enregistré tout de suite (pas besoin d'appuyer sur **Enregistrer**) et montré dans le cadre.
+- Une grande image ou une photo de téléphone est réduite automatiquement (600 × 240 pixels au plus, les proportions sont gardées), pour que les factures restent légères.
+- Un logo large sur fond blanc ou transparent s'imprime le mieux.
+- **Changer le logo…** le remplace ; **Retirer le logo** imprime de nouveau les documents sans logo.
+
 ### Nom {#admin.settings.cName}
 
 Le nom usuel de l'entreprise. Obligatoire.

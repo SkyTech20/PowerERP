@@ -6,7 +6,7 @@ from collections.abc import Callable
 from typing import Any
 
 from powererp import schemas as S
-from powererp.core.errors import AppError
+from powererp.core.errors import AppError, NotFound
 from powererp.core.http import require
 from powererp.core.values import number, quantity, text
 from powererp.modules.common.crud import CrudService
@@ -29,6 +29,28 @@ def must_exist(finder, row: Row, field: str, required: bool = False) -> Row | No
 def in_use(used: bool) -> None:
     if used:
         raise AppError("in_use", status=409)
+
+
+GENERATE_MAX = 2000  # locations made by one Generate locations
+
+
+def expand_range(first: str, last: str, field: str) -> list[str]:
+    """The values from `first` to `last`: numbers (01 to 12 keeps the zeros: 01, 02 … 12) or letters (A to D).
+    Only `first`: that value alone. Both empty: [""] (the level is not used)."""
+    first, last = text(first).upper(), text(last).upper()
+    if not first and not last:
+        return [""]
+    if not first or not last or first == last:
+        return [first or last]
+    if first.isdigit() and last.isdigit():
+        a, b = int(first), int(last)
+        width = max(len(first), len(last)) if first.startswith("0") or last.startswith("0") else 0
+        if a > b or b - a >= GENERATE_MAX:
+            raise AppError("bad_range", field)
+        return [str(n).zfill(width) for n in range(a, b + 1)]
+    if len(first) == 1 and len(last) == 1 and first.isalpha() and last.isalpha() and first <= last:
+        return [chr(c) for c in range(ord(first), ord(last) + 1)]
+    raise AppError("bad_range", field)
 
 
 class LocationService(CrudService):
@@ -68,6 +90,65 @@ class LocationService(CrudService):
 
     def before_delete(self, row: Row) -> None:
         in_use(self.stock is not None and self.stock.location_used(row["cWarehouse"], row["cCode"]))
+
+    def generate(self, warehouse: str, p: Row, preview: bool = False) -> Row:
+        """Generate locations: every aisle x rack x level (x bin) of the ranges, coded zone-aisle-rack-level-bin.
+        The ones that already exist are skipped. preview: what would be created, nothing is saved."""
+        wh = self.warehouses_repo.get(text(warehouse))
+        if wh is None:
+            raise NotFound()
+        zone = text(p.get("cZone")).upper()
+        parts = [
+            expand_range(p.get(f"{f}From", ""), p.get(f"{f}To", ""), f"{f}From")
+            for f in ("cAisle", "cRack", "cLevel", "cBin")
+        ]
+        if parts[0] == [""]:
+            raise AppError("required", "cAisleFrom")
+        total = len(parts[0]) * len(parts[1]) * len(parts[2]) * len(parts[3])
+        if total > GENERATE_MAX:
+            raise AppError("too_many_locations", "cAisleFrom", detail=str(GENERATE_MAX))
+        kind = text(p.get("cType")) or "picking"
+        if kind not in S.LOCATION_TYPES:
+            raise AppError("invalid_choice", "cType")
+        mine = [loc for loc in self.repo.all(lines=False) if loc["cWarehouse"].upper() == wh["cCode"].upper()]
+        existing = {loc["cCode"].upper() for loc in mine}
+        seq = max([int(loc.get("iPickSeq") or 0) for loc in mine] + [0])
+        rows: list[Row] = []
+        skipped: list[str] = []
+        for aisle in parts[0]:
+            for rack in parts[1]:
+                for level in parts[2]:
+                    for bin_ in parts[3]:
+                        code = "-".join(x for x in (zone, aisle, rack, level, bin_) if x)
+                        if code in existing:
+                            skipped.append(code)
+                            continue
+                        seq += 10
+                        rows.append(
+                            {
+                                "cWarehouse": wh["cCode"],
+                                "cCode": code,
+                                "cZone": zone,
+                                "cAisle": aisle,
+                                "cRack": rack,
+                                "cLevel": level,
+                                "cBin": bin_,
+                                "cType": kind,
+                                "iPickSeq": seq,
+                                "lMixProducts": bool(p.get("lMixProducts", True)),
+                                "lActive": True,
+                            }
+                        )
+        if not preview:
+            for r in rows:
+                self.create(r)
+        return {
+            "iCreated": 0 if preview else len(rows),
+            "iToCreate": len(rows),
+            "iSkipped": len(skipped),
+            "codes": [r["cCode"] for r in rows],
+            "skipped": skipped,
+        }
 
 
 class WarehouseService(CrudService):

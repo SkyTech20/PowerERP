@@ -4,3 +4,4 @@ psycopg[binary]==3.2.3
 alembic==1.14.0
 markdown-it-py==3.0.0
 openpyxl==3.1.5
+Pillow==11.3.0  # the company logo (resized to a PNG; openpyxl needs it to put images in a spreadsheet)

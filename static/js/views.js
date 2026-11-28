@@ -19,7 +19,11 @@ export const TABSETS = {
   mfgcal: [["calendars", "mfg.tab.cal"], ["calexceptions", "mfg.tab.exc"]],
   mfgsetup: [["capabilities", "mfg.tab.cap"], ["setupfamilies", "mfg.tab.fam"], ["downtimereasons", "mfg.tab.down"], ["scrapreasons", "mfg.tab.scrap"]],
 };
+// A resource with hideTab is still part of its tab set (its help codes, its title) but has no tab of its own
+// (e.g. the locations: a tab inside each warehouse); a tab set left with one tab shows no tab bar.
 export function tabsHtml(R) {
-  return `<div class="tabs">${TABSETS[R.tabset].map(([k, l]) => `<a href="#${RES[k].route}" class="${RES[k] === R ? "active" : ""}">${esc(t(l))}</a>`).join("")}</div>`;
+  const tabs = TABSETS[R.tabset].filter(([k]) => !RES[k].hideTab || RES[k] === R);
+  if (tabs.length < 2) return "";
+  return `<div class="tabs">${tabs.map(([k, l]) => `<a href="#${RES[k].route}" class="${RES[k] === R ? "active" : ""}">${esc(t(l))}</a>`).join("")}</div>`;
 }
 export const tabLabel = (R) => { const tab = TABSETS[R.tabset].find(([k]) => RES[k] === R); return tab ? t(tab[1]) : ""; };

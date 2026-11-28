@@ -65,4 +65,4 @@ Every stock movement of the lot, oldest first: number (the link opens the moveme
 
 ## Export to Excel {#prod.traceability.export}
 
-Downloads the trace as a spreadsheet (.xlsx), in the language of the screen, with one sheet each: *Summary*, *Origin* (one line per entry, with its level), *Uses*, *Customers*, *Stock* and *Movements*. This is the file to send to the CFIA or to a customer during a recall, or to keep for a mock recall exercise.
+Downloads the trace as a spreadsheet (.xlsx), in the language of the screen, with one sheet each: *Summary*, *Origin* (one line per entry, with its level), *Uses*, *Customers*, *Stock* and *Movements*. This is the file to send to the CFIA or to a customer during a recall, or to keep for a mock recall exercise. The company logo (**Administration > System settings**) is at the top of the *Summary* sheet.

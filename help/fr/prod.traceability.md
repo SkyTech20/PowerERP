@@ -65,4 +65,4 @@ Tous les mouvements de stock du lot, du plus ancien au plus récent : numéro (l
 
 ## Exporter vers Excel {#prod.traceability.export}
 
-Télécharge la traçabilité en chiffrier (.xlsx), dans la langue de l'écran, avec une feuille pour chaque partie : *Résumé*, *Origine* (une ligne par entrée, avec son niveau), *Utilisations*, *Clients*, *Stock* et *Mouvements*. C'est le fichier à envoyer à l'ACIA ou à un client lors d'un rappel, ou à garder pour un exercice de rappel simulé.
+Télécharge la traçabilité en chiffrier (.xlsx), dans la langue de l'écran, avec une feuille pour chaque partie : *Résumé*, *Origine* (une ligne par entrée, avec son niveau), *Utilisations*, *Clients*, *Stock* et *Mouvements*. C'est le fichier à envoyer à l'ACIA ou à un client lors d'un rappel, ou à garder pour un exercice de rappel simulé. Le logo de l'entreprise (**Administration > Paramètres système**) est en haut de la feuille *Résumé*.

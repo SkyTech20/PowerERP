@@ -99,6 +99,13 @@ def _blueprint(s: dict, counts: CountService, replenishment: ReplenishmentServic
     register_crud_routes(
         bp, "locations", "locations", s["locations"], ("cWarehouse", "cCode", "cZone", "cDescription", "cType")
     )
+
+    @bp.route("/api/warehouses/<code>/generate-locations", methods=["POST"])
+    def warehouses_generate_locations(code):
+        """Generate locations (aisle x rack x level x bin); ?preview=1 only says what would be created."""
+        preview = request.args.get("preview") in ("1", "true")
+        return jsonify(s["locations"].generate(code, json_payload(), preview=preview)), 200 if preview else 201
+
     register_crud_routes(
         bp, "stock-params", "stock_params", s["params"], ("cProduct", "cWarehouse", "cDescFR", "cDescEN")
     )
